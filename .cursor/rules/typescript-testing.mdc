@@ -6,7 +6,7 @@ alwaysApply: false
 
 # TypeScript and tests
 
-- Strict TypeScript. The catalog compiler is TypeScript 7.0.2. `apps/studio` and `apps/api` pin TypeScript 6.0.3.
+- Strict TypeScript. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
 - Libraries are built with `vp pack`. Apps keep their own CLIs.
 - Unit tests use Vitest through `vp test`, except `apps/studio`, which uses `ng test` (Angular's Vitest builder).
 - Import test helpers from `vite-plus/test`, not from `vitest`.

@@ -5,9 +5,6 @@ const builtLibraries = {
 };
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   test: {
     include: ["src/**/*.spec.ts"],
     environment: "node",

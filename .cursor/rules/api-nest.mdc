@@ -7,6 +7,6 @@ alwaysApply: false
 # NestJS API
 
 - NestJS CLI builds the API (`nest build`). Vite+ runs that command with `vp run` from the repository root.
-- This package pins TypeScript 6.0.3. The Nest CLI needs TypeScript's programmatic API, which TypeScript 7.0 does not ship yet.
+- Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`. Do not point this package at the catalog compiler.
 - Unit tests are Vitest, run with `vp test`. Test files import `vite-plus/test` or use `vite-plus/test/globals`.
 - Do not add a package-local formatter or linter config. Lint and format come from the root `vite.config.ts`.

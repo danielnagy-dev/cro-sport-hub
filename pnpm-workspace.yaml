@@ -13,12 +13,17 @@ overrides:
   vite@*: "catalog:"
   vitest@*: "catalog:"
 
+# Vitest peers on vite ^6, ^7, or ^8. The override above is
+# @voidzero-dev/vite-plus-core, and that package's version is 1.4.0.
+# Allow that exact version. Change this when the override's version changes.
 peerDependencyRules:
-  allowAny:
-    - vite
   allowedVersions:
-    vite: "*"
+    vite: "1.4.0"
 
+# Temporary. pnpm 12 blocks packages published inside its minimum release age.
+# These are the Vite+ 1.4.0 packages and Next.js 16.4.3, which were inside that
+# window when the lockfile was created (23 Oct 2026). Remove a pin once that
+# version is older than the age gate.
 minimumReleaseAgeExclude:
   - "@voidzero-dev/vite-plus-core@1.4.0"
   - "@voidzero-dev/vite-plus-darwin-arm64@1.4.0"

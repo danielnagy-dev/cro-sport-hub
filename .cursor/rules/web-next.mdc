@@ -7,6 +7,6 @@ alwaysApply: false
 # Next.js web
 
 - App Router under `app/`. Build and dev use the Next.js CLI (`next build`, `next dev`), run from the repo root with `vp run`.
-- This package uses TypeScript 7.0.2 from the pnpm catalog.
-- Workspace packages are dependencies with the `workspace:*` protocol. Next transpiles `@cro-sport-hub/shared-types` and `@cro-sport-hub/ui`.
+- Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
+- Workspace packages are dependencies with the `workspace:*` protocol. They publish built JavaScript, so Next does not transpile them.
 - Do not add a package-local ESLint, Biome, or Prettier config. Lint and format come from the root `vite.config.ts`.

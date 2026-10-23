@@ -38,6 +38,3 @@ out-tsc/
 coverage/
 *.tsbuildinfo
 test-results/
-
-# AI agent worktrees
-.claude/worktrees/

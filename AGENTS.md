@@ -9,7 +9,7 @@ pnpm workspace run by Vite+ (`vp` 1.4.0). Node.js is pinned in `.node-version` (
 - `apps/api` — NestJS (`nest build`)
 - `libs/shared-types`, `libs/ui`, `libs/slide-generator` — empty workspace packages. Domain code is a later change.
 
-Run task commands from the repository root. `apps/studio` and `apps/api` pin TypeScript 6. The web app, the libraries, and the root package use TypeScript 7 from the pnpm catalog. Library builds emit declarations with TypeScript 7's native compiler. That compiler is not resolved correctly if the task runner is started inside `apps/studio` or `apps/api`.
+Run task commands from the repository root. Library declaration emit uses the catalog compiler, and that compiler is not resolved correctly if the task runner is started inside `apps/studio` or `apps/api`. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
 
 ## Before opening a pull request
 
@@ -22,7 +22,7 @@ vp run test
 vp run build
 ```
 
-`vp run typecheck` includes `ngc --noEmit` for `apps/studio`. `vp check` does not typecheck Angular templates.
+`vp run typecheck` runs each package typecheck, including `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
 
 ## Pull requests
 

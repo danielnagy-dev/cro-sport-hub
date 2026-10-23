@@ -5,16 +5,18 @@ import { defineConfig } from "vite-plus";
  * Per-package tasks live in each package's vite.config.ts so Vite Task can cache them.
  * `vp run -r` from here is inlined, and the root task is pruned so it does not recurse.
  *
- * TypeScript 7 is the workspace compiler (catalog). apps/studio pins TypeScript 6.
- * Run these tasks from the repository root so `vp pack` resolves TypeScript 7 for tsgo.
- * See docs/adr/001-vite-plus-vs-nx.md.
+ * Compiler versions, and why these tasks run from the repository root, are in
+ * docs/adr/001-vite-plus-vs-nx.md.
+ *
+ * `typeCheck` is off. Package `typecheck` tasks already run `tsc --noEmit` or
+ * `ngc --noEmit`. `typeAware` stays on so lint rules can use types.
  */
 export default defineConfig({
   fmt: {},
   lint: {
     jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
     rules: { "vite-plus/prefer-vite-plus-imports": "error" },
-    options: { typeAware: true, typeCheck: true },
+    options: { typeAware: true, typeCheck: false },
     ignorePatterns: [
       "**/dist/**",
       "**/coverage/**",
@@ -36,7 +38,7 @@ export default defineConfig({
         ],
       },
       typecheck: {
-        command: "vp check --no-fmt --no-lint && vp run -r typecheck",
+        command: "vp run -r typecheck",
         dependsOn: [
           "@cro-sport-hub/shared-types#build",
           "@cro-sport-hub/ui#build",

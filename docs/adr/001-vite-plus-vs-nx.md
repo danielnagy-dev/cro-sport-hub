@@ -12,9 +12,9 @@ The repo is a pnpm workspace with a Next.js app, an Angular app, and a NestJS AP
 
 Use the `vp` CLI for install, format, lint, TypeScript checks, tests, production builds, and cached task running. Configuration lives in the root `vite.config.ts`, with package tasks beside each app or library.
 
-`apps/studio` keeps the Angular CLI (`ng build`, `ng test`, `ngc --noEmit`). Vite+ only orchestrates those commands with `vp run`. That is the supported Angular path. `vp check` lints and typechecks `.ts` files and does not typecheck Angular templates, so the studio `typecheck` task runs `ngc --noEmit`.
+`apps/studio` keeps the Angular CLI (`ng build`, `ng test`, `ngc --noEmit`). Vite+ only orchestrates those commands with `vp run`. That is the supported Angular path. The studio `typecheck` task runs `ngc --noEmit` because the shared linter does not typecheck Angular templates. Other packages typecheck with `tsc --noEmit`. The root `typecheck` task runs those package tasks only. Lint stays type-aware, and `typeCheck` is off, so `vp lint` and `vp check` do not typecheck again.
 
-Studio task cache inputs and outputs ignore `.angular/**`. `ng build` and `ng test` write `.angular/cache`. If Vite Task fingerprints those files, the task misses the cache on every run. Build tasks also ignore their own output directories (`dist/**`, `.next/**`) as inputs, because the tools read the previous output before writing it. `apps/web` and `apps/api` set `incremental` to false so `tsc --noEmit` does not write a `tsbuildinfo` that changes the `vp check` fingerprint.
+Studio task cache inputs and outputs ignore `.angular/**`. `ng build` and `ng test` write `.angular/cache`. If Vite Task fingerprints those files, the task misses the cache on every run. Build tasks also ignore their own output directories (`dist/**`, `.next/**`) as inputs, because the tools read the previous output before writing it. `apps/web` and `apps/api` set `incremental` to false so `tsc --noEmit` does not write a `tsbuildinfo` that changes the task fingerprint.
 
 TypeScript is split on purpose:
 
@@ -24,7 +24,7 @@ TypeScript is split on purpose:
 - The root `package.json` depends on TypeScript 7 so the root `vp` process can resolve that compiler. Run `vp run` from the repository root. Starting it inside `apps/studio` or `apps/api` can resolve TypeScript 6, and library declaration emit then fails.
 - `catalogMode: prefer` from the Vite+ monorepo template is not used. That mode can replace an explicit dependency with the catalog entry, which would put TypeScript 7 on the Angular and Nest packages.
 
-The workspace overrides `vite` to `@voidzero-dev/vite-plus-core` 1.4.0, the same override the Vite+ template writes. Angular's builder therefore runs on that Vite. It is not an Angular-supported pairing. A local spike on 23 Oct 2026 built, served, and tested the Angular CLI app with this override, so the scaffold keeps it.
+The workspace overrides `vite` to `@voidzero-dev/vite-plus-core` 1.4.0, the same override the Vite+ template writes. Angular's builder therefore runs on that Vite. It is not an Angular-supported pairing. A local spike on 23 Oct 2026 built, served, and tested the Angular CLI app with this override, so the scaffold keeps it. Vitest's peer range is `vite` ^6, ^7, or ^8. The overridden package version is 1.4.0, so `peerDependencyRules.allowedVersions` allows `vite` 1.4.0 only.
 
 pnpm 12 refuses packages published inside its minimum release age. `minimumReleaseAgeExclude` lists the Vite+ 1.4.0 packages and Next.js 16.4.3, which were inside that window when the lockfile was created. `allowBuilds` enables the install scripts Angular's builder needs (`esbuild`, `lmdb`, `@parcel/watcher`, `msgpackr-extract`).
 

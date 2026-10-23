@@ -8,8 +8,8 @@ alwaysApply: false
 
 - Standalone components and signals. This app is built and tested with the Angular CLI (`ng build`, `ng test`).
 - Vite+ only runs those commands through `vp run`. Do not move the app onto a Vite Angular plugin.
-- This package pins TypeScript 6.0.3. Angular 22 requires `>=6.0 <6.1`. Do not point it at the TypeScript 7 catalog.
-- `vp check` does not typecheck templates. Template typecheck is the `typecheck` task (`ngc --noEmit`).
+- Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`. Do not point this package at the catalog compiler.
+- Template typecheck is the `typecheck` task (`ngc --noEmit`). The shared linter does not typecheck Angular templates.
 - Task caching ignores `.angular/**`. Keep that exclusion on studio tasks.
 - Do not add a package-local formatter config. Formatting comes from the root `vite.config.ts`.
 - Run `vp run` from the repository root.
