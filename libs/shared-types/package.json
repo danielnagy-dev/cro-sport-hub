@@ -10,6 +10,9 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
+  "dependencies": {
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "vite-plus": "catalog:"
