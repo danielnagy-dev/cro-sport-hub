@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema } from "./common.ts";
+import { type FieldIssue, idSchema } from "./common.ts";
 
 /**
  * Raw counts for one player in one tennis match. Percentages are not
@@ -34,8 +34,8 @@ export const tennisMatchStatsSchema = z
     totalPointsWon: countSchema,
   })
   .superRefine((stats, ctx) => {
-    for (const message of tennisStatIssues(stats)) {
-      ctx.addIssue({ code: "custom", message });
+    for (const issue of tennisStatIssues(stats)) {
+      ctx.addIssue({ code: "custom", path: [...issue.path], message: issue.message });
     }
   });
 
@@ -56,52 +56,77 @@ export type TennisStatCounts = {
   totalPointsWon: number;
 };
 
-export function tennisStatIssues(stats: TennisStatCounts): readonly string[] {
-  const issues: string[] = [];
+export function tennisStatIssues(stats: TennisStatCounts): readonly FieldIssue[] {
+  const issues: FieldIssue[] = [];
 
   if (stats.firstServeIn > stats.firstServeTotal) {
-    issues.push("First serves in cannot exceed first serves played");
+    issues.push({
+      path: ["firstServeIn"],
+      message: "First serves in cannot exceed first serves played",
+    });
   }
 
   if (stats.firstServePointsWon > stats.firstServeIn) {
-    issues.push("First-serve points won cannot exceed first serves in");
+    issues.push({
+      path: ["firstServePointsWon"],
+      message: "First-serve points won cannot exceed first serves in",
+    });
   }
 
   if (stats.secondServeTotal !== stats.firstServeTotal - stats.firstServeIn) {
-    issues.push("Second serves played must equal the first serves that missed");
+    issues.push({
+      path: ["secondServeTotal"],
+      message: "Second serves played must equal the first serves that missed",
+    });
   }
 
   if (stats.secondServePointsWon > stats.secondServeTotal) {
-    issues.push("Second-serve points won cannot exceed second serves played");
+    issues.push({
+      path: ["secondServePointsWon"],
+      message: "Second-serve points won cannot exceed second serves played",
+    });
   }
 
-  if (stats.doubleFaults > stats.secondServeTotal) {
-    issues.push("Double faults cannot exceed second serves played");
-  }
-
+  // secondServePointsWon is non-negative, so this also implies
+  // doubleFaults <= secondServeTotal. That check is not repeated.
   if (stats.secondServePointsWon + stats.doubleFaults > stats.secondServeTotal) {
-    issues.push("Second-serve points won cannot exceed second serves that landed in");
+    issues.push({
+      path: ["doubleFaults"],
+      message: "Second-serve points won cannot exceed second serves that landed in",
+    });
   }
 
   const servePointsWon = stats.firstServePointsWon + stats.secondServePointsWon;
   if (stats.aces > servePointsWon) {
-    issues.push("Aces cannot exceed serve points won");
+    issues.push({ path: ["aces"], message: "Aces cannot exceed serve points won" });
   }
 
   if (servePointsWon > stats.totalPointsWon) {
-    issues.push("Total points won cannot be lower than serve points won");
+    issues.push({
+      path: ["totalPointsWon"],
+      message: "Total points won cannot be lower than serve points won",
+    });
   }
 
   if (stats.breakPointsSaved > stats.breakPointsFaced) {
-    issues.push("Break points saved cannot exceed break points faced");
+    issues.push({
+      path: ["breakPointsSaved"],
+      message: "Break points saved cannot exceed break points faced",
+    });
   }
 
   if (stats.breakPointsFaced > stats.firstServeTotal) {
-    issues.push("Break points faced cannot exceed service points played");
+    issues.push({
+      path: ["breakPointsFaced"],
+      message: "Break points faced cannot exceed service points played",
+    });
   }
 
   if (stats.breakPointsWon > stats.breakPointsTotal) {
-    issues.push("Break points won cannot exceed break points played");
+    issues.push({
+      path: ["breakPointsWon"],
+      message: "Break points won cannot exceed break points played",
+    });
   }
 
   return issues;

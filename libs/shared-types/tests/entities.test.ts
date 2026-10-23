@@ -214,18 +214,64 @@ test("parses football scores and appearance rules", () => {
   expect(substitute.started).toBe(false);
   expect(appearanceIssues({ ...substitute, minutes: 0, goals: 0, yellowCards: 0 })).toEqual([]);
   expect(
+    appearanceSchema.parse({
+      matchId: "match-1",
+      athleteId: "player-one",
+      teamId: "club-north",
+      started: false,
+      minutes: 0,
+      goals: 0,
+      assists: 0,
+      yellowCards: 1,
+      redCard: false,
+    }).minutes,
+  ).toBe(0);
+  expect(
     appearanceIssues({
       started: true,
       minutes: 0,
       goals: 1,
       assists: 0,
-      yellowCards: 0,
+      yellowCards: 1,
       redCard: false,
     }),
   ).toEqual([
-    "A player who started played at least one minute",
-    "A player with no minutes cannot have goals",
+    { path: ["started"], message: "A player who started played at least one minute" },
+    { path: ["goals"], message: "A player with no minutes cannot have goals" },
   ]);
+  const twoYellows = appearanceSchema.safeParse({
+    matchId: "match-1",
+    athleteId: "player-one",
+    teamId: "club-north",
+    started: true,
+    minutes: 70,
+    goals: 0,
+    assists: 0,
+    yellowCards: 2,
+    redCard: false,
+  });
+  expect(twoYellows.success).toBe(false);
+  if (!twoYellows.success) {
+    expect(twoYellows.error.issues).toContainEqual(
+      expect.objectContaining({
+        path: ["redCard"],
+        message: "A second yellow card is a sending-off",
+      }),
+    );
+  }
+  expect(
+    appearanceSchema.safeParse({
+      matchId: "match-1",
+      athleteId: "player-one",
+      teamId: "club-north",
+      started: true,
+      minutes: 70,
+      goals: 0,
+      assists: 0,
+      yellowCards: 2,
+      redCard: true,
+    }).success,
+  ).toBe(true);
   expect(
     appearanceSchema.safeParse({
       matchId: "match-1",

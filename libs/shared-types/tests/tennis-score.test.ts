@@ -109,7 +109,7 @@ function invalidScore(
 
 test("rejects sets that are not finished, not a tiebreak, or played too late", () => {
   expect(invalidScore([[6, 5]], 3)).toBe(
-    "An unfinished set is only allowed when the match is retired",
+    "An unfinished set is only allowed as the last set of a retirement",
   );
   expect(invalidScore([[7, 6]], 3)).toBe(
     "A 7-6 set needs the tiebreak points scored by the player who lost the set",
@@ -186,8 +186,33 @@ test("allows a retirement in an unfinished set and rejects a finished one", () =
     ),
   ).toBe("A finished match cannot be marked retired");
   expect(invalidScore([[3, 2]], 3)).toBe(
-    "An unfinished set is only allowed when the match is retired",
+    "An unfinished set is only allowed as the last set of a retirement",
   );
+  expect(
+    invalidScore(
+      [
+        [6, 5],
+        [6, 4],
+      ],
+      3,
+      true,
+    ),
+  ).toBe("An unfinished set is only allowed as the last set of a retirement");
+  expect(
+    evaluateTennisScore(
+      [
+        [6, 4],
+        [6, 4],
+        [4, 6],
+      ],
+      5,
+      true,
+    ),
+  ).toMatchObject({
+    ok: true,
+    setsWonByA: 2,
+    setsWonByB: 1,
+  });
 });
 
 test("checks the winner, the two players, and best of", () => {
@@ -223,4 +248,27 @@ test("checks the winner, the two players, and best of", () => {
     ],
   });
   expect(retired.success).toBe(true);
+  expect(
+    tennisMatchSchema.safeParse({
+      ...base,
+      retired: true,
+      score: [
+        [6, 5],
+        [6, 4],
+      ],
+    }).success,
+  ).toBe(false);
+  expect(
+    tennisMatchSchema.safeParse({
+      ...base,
+      bestOf: 5,
+      retired: true,
+      winnerId: "player-b",
+      score: [
+        [6, 4],
+        [6, 4],
+        [4, 6],
+      ],
+    }).success,
+  ).toBe(true);
 });

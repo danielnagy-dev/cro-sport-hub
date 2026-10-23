@@ -6,17 +6,18 @@ import { idSchema } from "./common.ts";
  * `[gamesA, gamesB, tiebreakPointsLost]`.
  *
  * The third number is only present on a 7-6 set. It is the loser's
- * tiebreak total. The winner's total is not stored: it is 7 when the
- * loser has 0–5, and two more than the loser after that. Every total
- * from 0 to 99 is therefore a legal tiebreak.
+ * tiebreak total. The winner's tiebreak total is not stored. A 7-point
+ * tiebreak and a 10-point final-set tiebreak both end 7-6 in games, so
+ * the same number covers both.
  *
  * v1 accepts standard sets only: 6-0 through 6-4, 7-5, or 7-6 with a
- * tiebreak. Advantage sets and match tiebreaks are out.
+ * tiebreak.
  *
  * `bestOf` is not on the spec's field list. It is required here because
  * a 2-0 score is a finished best-of-3, while a 3-0 score is a finished
  * best-of-5, and a 2-1 score is not finished in a best-of-5.
  */
+/** Games in a standard set. Match tiebreaks (for example 10-8) and advantage final sets are intentionally out of scope for v1. */
 const MAX_GAMES = 7;
 const MAX_TIEBREAK_POINTS = 99;
 
@@ -155,7 +156,7 @@ export function evaluateTennisScore(
     if (kind === "in-progress") {
       return {
         ok: false,
-        message: "An unfinished set is only allowed when the match is retired",
+        message: "An unfinished set is only allowed as the last set of a retirement",
       };
     }
 

@@ -10,6 +10,7 @@ export {
   textSchema,
   timestampSchema,
 } from "./common.ts";
+export type { FieldIssue } from "./common.ts";
 
 export {
   cardTypeSchema,

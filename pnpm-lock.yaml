@@ -179,6 +179,9 @@ catalogs:
     vitest:
       specifier: 5.0.5
       version: 5.0.5
+    zod:
+      specifier: 4.6.7
+      version: 4.6.7
 
 overrides:
   vite@*: npm:@voidzero-dev/vite-plus-core@1.4.0
@@ -336,7 +339,7 @@ importers:
   libs/shared-types:
     dependencies:
       zod:
-        specifier: 4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       typescript:

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+/** A cross-field failure. `path` is the form field to highlight. */
+export type FieldIssue = {
+  path: readonly string[];
+  message: string;
+};
+
 /** 1–64 characters. UUIDs fit; so do short seed ids such as `player-one`. */
 export const idSchema = z
   .string()
