@@ -1,0 +1,53 @@
+packages:
+  - apps/*
+  - libs/*
+
+catalog:
+  "@types/node": ^24
+  typescript: 7.0.2
+  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vite-plus: 1.4.0
+  vitest: 5.0.5
+
+overrides:
+  vite@*: "catalog:"
+  vitest@*: "catalog:"
+
+# Vitest peers on vite ^6, ^7, or ^8. The override above is
+# @voidzero-dev/vite-plus-core, and that package's version is 1.4.0.
+# Allow that exact version. Change this when the override's version changes.
+peerDependencyRules:
+  allowedVersions:
+    vite: "1.4.0"
+
+# Temporary. pnpm 12 blocks packages published inside its minimum release age.
+# These are the Vite+ 1.4.0 packages and Next.js 16.4.3, which were inside that
+# window when the lockfile was created (23 Oct 2026). Remove a pin once that
+# version is older than the age gate.
+minimumReleaseAgeExclude:
+  - "@voidzero-dev/vite-plus-core@1.4.0"
+  - "@voidzero-dev/vite-plus-darwin-arm64@1.4.0"
+  - "@voidzero-dev/vite-plus-darwin-x64@1.4.0"
+  - "@voidzero-dev/vite-plus-linux-arm64-gnu@1.4.0"
+  - "@voidzero-dev/vite-plus-linux-arm64-musl@1.4.0"
+  - "@voidzero-dev/vite-plus-linux-x64-gnu@1.4.0"
+  - "@voidzero-dev/vite-plus-linux-x64-musl@1.4.0"
+  - "@voidzero-dev/vite-plus-win32-arm64-msvc@1.4.0"
+  - "@voidzero-dev/vite-plus-win32-x64-msvc@1.4.0"
+  - vite-plus@1.4.0
+  - "@next/env@16.4.3"
+  - "@next/swc-darwin-arm64@16.4.3"
+  - "@next/swc-darwin-x64@16.4.3"
+  - "@next/swc-linux-arm64-gnu@16.4.3"
+  - "@next/swc-linux-arm64-musl@16.4.3"
+  - "@next/swc-linux-x64-gnu@16.4.3"
+  - "@next/swc-linux-x64-musl@16.4.3"
+  - "@next/swc-win32-arm64-msvc@16.4.3"
+  - "@next/swc-win32-x64-msvc@16.4.3"
+  - next@16.4.3
+
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true

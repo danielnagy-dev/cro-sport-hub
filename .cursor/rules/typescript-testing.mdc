@@ -1,0 +1,15 @@
+---
+description: Shared TypeScript and tests
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript and tests
+
+- Strict TypeScript. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
+- Libraries are built with `vp pack`. Apps keep their own CLIs.
+- Unit tests use Vitest through `vp test`, except `apps/studio`, which uses `ng test` (Angular's Vitest builder).
+- Import test helpers from `vite-plus/test`, not from `vitest`.
+- Depend on workspace packages with the `workspace:*` protocol.
+- Repository language is English.
+- Do not commit secrets or real personal data. Version 1 uses seed and test data only.
