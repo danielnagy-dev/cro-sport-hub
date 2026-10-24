@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["es2023"],
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "moduleDetection": "force",
@@ -15,5 +16,5 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", ".storybook"]
 }

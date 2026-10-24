@@ -1,0 +1,79 @@
+.csh-badge,
+.csh-sport-tabs,
+.csh-athlete-header {
+  color: var(--csh-color-text);
+  font-family: var(--csh-font-sans);
+}
+
+.csh-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--csh-radius);
+  background: var(--csh-color-neutral-bg);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.csh-badge--tennis,
+.csh-badge--football {
+  color: var(--csh-color-on-accent);
+}
+
+.csh-badge--tennis {
+  background: var(--csh-color-tennis);
+}
+
+.csh-badge--football {
+  background: var(--csh-color-football);
+}
+
+.csh-sport-tabs {
+  background: var(--csh-color-surface);
+}
+
+.csh-sport-tabs__list {
+  display: flex;
+  border-bottom: 1px solid var(--csh-color-border);
+}
+
+.csh-sport-tabs__tab {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: var(--csh-space-2) var(--csh-space-4);
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--csh-color-muted);
+  font: inherit;
+  font-weight: 600;
+}
+
+.csh-sport-tabs__tab[aria-selected="true"] {
+  border-bottom-color: var(--csh-color-text);
+  color: var(--csh-color-text);
+}
+
+.csh-sport-tabs__tab:focus-visible,
+.csh-sport-tabs__panel:focus-visible {
+  outline: 2px solid var(--csh-color-focus);
+  outline-offset: 2px;
+}
+
+.csh-athlete-header__name {
+  margin: var(--csh-space-2) 0 0;
+  font-size: 1.5rem;
+}
+
+.csh-athlete-header__facts {
+  margin: var(--csh-space-2) 0 0;
+}
+
+.csh-athlete-header__facts dt {
+  margin: 0;
+  color: var(--csh-color-muted);
+  font-size: 0.75rem;
+}
+
+.csh-athlete-header__facts dd {
+  margin: 0;
+}
