@@ -140,6 +140,10 @@ main h2 {
   padding: var(--space-4);
 }
 
+.match-list li.match-empty {
+  grid-template-columns: 1fr;
+}
+
 .match-status {
   color: var(--color-muted);
   font-size: 0.875rem;
