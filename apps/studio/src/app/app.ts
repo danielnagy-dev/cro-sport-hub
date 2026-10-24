@@ -1,11 +1,10 @@
-import { Component, signal } from "@angular/core";
-import { packageId } from "@cro-sport-hub/shared-types";
+import { Component, inject } from "@angular/core";
+import { EditorStore } from "./editor.store";
 
 @Component({
   selector: "app-root",
   templateUrl: "./app.html",
 })
 export class App {
-  protected readonly title = signal("Cro Sport Hub");
-  protected readonly sharedTypes = packageId;
+  protected readonly editor = inject(EditorStore);
 }
