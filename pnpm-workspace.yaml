@@ -49,6 +49,8 @@ minimumReleaseAgeExclude:
 
 allowBuilds:
   "@parcel/watcher": true
+  # swagger-ui-dist depends on Scarf. Leave its install script off; it only phones home.
+  "@scarf/scarf": false
   esbuild: true
   lmdb: true
   msgpackr-extract: true

@@ -1,0 +1,32 @@
+# Local Postgres and Redis. The API runs on the host with `vp run api#dev`.
+# User, password, and database match `localDevDefaults` in apps/api/src/api-config.ts.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: cro_sport
+      POSTGRES_PASSWORD: cro_sport
+      POSTGRES_DB: cro_sport
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18 keeps the cluster in a versioned directory under this path.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cro_sport -d cro_sport"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:

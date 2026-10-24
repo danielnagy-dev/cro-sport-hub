@@ -36,3 +36,18 @@ vp run web#dev      # http://localhost:3000
 vp run studio#dev   # http://localhost:4200
 vp run api#dev      # http://localhost:3001
 ```
+
+## Local Postgres and Redis
+
+`docker compose up` starts Postgres 18 and Redis 8. The API stays on the host so Vite+ can run it:
+
+```bash
+docker compose up
+vp run api#dev
+```
+
+`GET http://localhost:3001/health` checks both services and returns 503 when either is down. OpenAPI is at http://localhost:3001/docs (JSON at `/docs-json`).
+
+Defaults live in `apps/api/src/api-config.ts` and match `.env.example` and `docker-compose.yml`. Copy `.env.example` to `.env` to override them. The database password is only for that local Compose file.
+
+Build the API image from the repository root with `docker build -f apps/api/Dockerfile .`.
