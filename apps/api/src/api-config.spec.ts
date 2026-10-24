@@ -14,12 +14,12 @@ describe("readApiConfig", () => {
     expect(
       readApiConfig({
         PORT: " 4000 ",
-        DATABASE_URL: "postgres://cro_sport:cro_sport@127.0.0.1:5433/cro_sport",
+        DATABASE_URL: "postgres://cro_sport:from-the-env@127.0.0.1:5433/cro_sport",
         REDIS_URL: "redis://127.0.0.1:6380",
       }),
     ).toEqual({
       port: 4000,
-      databaseUrl: "postgres://cro_sport:cro_sport@127.0.0.1:5433/cro_sport",
+      databaseUrl: "postgres://cro_sport:from-the-env@127.0.0.1:5433/cro_sport",
       redisUrl: "redis://127.0.0.1:6380",
     });
   });

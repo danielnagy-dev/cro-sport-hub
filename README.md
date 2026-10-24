@@ -48,6 +48,8 @@ vp run api#dev
 
 `GET http://localhost:3001/health` checks both services and returns 503 when either is down. OpenAPI is at http://localhost:3001/docs (JSON at `/docs-json`).
 
-Defaults live in `apps/api/src/api-config.ts` and match `.env.example` and `docker-compose.yml`. Copy `.env.example` to `.env` to override them. The database password is only for that local Compose file.
+Copy `.env.example` to `.env` in the repository root. `vp run api#dev` loads that file before it listens, so `PORT` and `DATABASE_URL` there replace the defaults in `apps/api/src/api-config.ts`. A variable already set in the shell is left as it is.
+
+The Compose database password is only `POSTGRES_PASSWORD` in `docker-compose.yml`. Put that value in the root `.env`. The example file uses a different password.
 
 Build the API image from the repository root with `docker build -f apps/api/Dockerfile .`.

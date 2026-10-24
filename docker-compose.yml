@@ -1,11 +1,12 @@
 # Local Postgres and Redis. The API runs on the host with `vp run api#dev`.
-# User, password, and database match `localDevDefaults` in apps/api/src/api-config.ts.
+# POSTGRES_PASSWORD is a dev-only placeholder and appears only in this file.
+# The user and database name match the API default URL.
 services:
   postgres:
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: cro_sport
-      POSTGRES_PASSWORD: cro_sport
+      POSTGRES_PASSWORD: dev-only-placeholder
       POSTGRES_DB: cro_sport
     ports:
       - "5432:5432"

@@ -1,10 +1,10 @@
 /**
- * Local defaults match `.env.example` and `docker-compose.yml`.
- * The database password is for that Compose file only.
+ * Host, user, and database for local Postgres. The Compose password is not here.
+ * Set DATABASE_URL in the repository-root `.env` to connect.
  */
 export const localDevDefaults = {
   port: 3001,
-  databaseUrl: "postgresql://cro_sport:cro_sport@127.0.0.1:5432/cro_sport",
+  databaseUrl: "postgresql://cro_sport@127.0.0.1:5432/cro_sport",
   redisUrl: "redis://127.0.0.1:6379",
 } as const;
 

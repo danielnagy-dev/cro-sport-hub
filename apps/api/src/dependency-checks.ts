@@ -2,14 +2,22 @@ import { Client } from "pg";
 import { createClient } from "redis";
 import { type DependencyStatus } from "./health-response.js";
 
-const probeTimeoutMs = 500;
+export const dependencyProbeTimeoutMs = 500;
 
-export async function checkPostgres(databaseUrl: string): Promise<DependencyStatus> {
+export function createPostgresProbe(databaseUrl: string): Client {
   const client = new Client({
     connectionString: databaseUrl,
-    connectionTimeoutMillis: probeTimeoutMs,
+    connectionTimeoutMillis: dependencyProbeTimeoutMs,
+    query_timeout: dependencyProbeTimeoutMs,
   });
+  client.on("error", () => {
+    // A drop after connect emits error. With no listener, Node exits.
+  });
+  return client;
+}
 
+export async function checkPostgres(databaseUrl: string): Promise<DependencyStatus> {
+  const client = createPostgresProbe(databaseUrl);
   try {
     await client.connect();
     await client.query("SELECT 1");
@@ -18,24 +26,29 @@ export async function checkPostgres(databaseUrl: string): Promise<DependencyStat
     return "down";
   } finally {
     await client.end().catch(() => {
-      // A refused connection never opened a socket worth closing.
+      // The client may never have connected.
     });
   }
 }
 
-export async function checkRedis(redisUrl: string): Promise<DependencyStatus> {
+function createRedisProbe(redisUrl: string) {
   const client = createClient({
     url: redisUrl,
     disableOfflineQueue: true,
     socket: {
-      connectTimeout: probeTimeoutMs,
+      connectTimeout: dependencyProbeTimeoutMs,
+      socketTimeout: dependencyProbeTimeoutMs,
       reconnectStrategy: false,
     },
   });
   client.on("error", () => {
     // The probe reports "down" instead of crashing on a socket error.
   });
+  return client;
+}
 
+export async function checkRedis(redisUrl: string): Promise<DependencyStatus> {
+  const client = createRedisProbe(redisUrl);
   try {
     await client.connect();
     const reply = await client.ping();
@@ -43,10 +56,10 @@ export async function checkRedis(redisUrl: string): Promise<DependencyStatus> {
   } catch {
     return "down";
   } finally {
-    if (client.isOpen) {
-      await client.quit().catch(() => {
-        // Closing a broken socket should not change the probe result.
-      });
+    try {
+      client.destroy();
+    } catch {
+      // Destroy throws when the client never opened.
     }
   }
 }
