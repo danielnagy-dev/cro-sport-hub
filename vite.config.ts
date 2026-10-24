@@ -23,6 +23,7 @@ export default defineConfig({
       "**/.angular/**",
       "**/.next/**",
       "**/node_modules/**",
+      "**/storybook-static/**",
     ],
   },
   run: {

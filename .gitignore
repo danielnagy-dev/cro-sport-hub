@@ -36,5 +36,6 @@ next-env.d.ts
 out/
 out-tsc/
 coverage/
+storybook-static/
 *.tsbuildinfo
 test-results/

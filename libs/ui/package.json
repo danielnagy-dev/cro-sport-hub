@@ -8,10 +8,26 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./tokens.css": "./dist/tokens.css",
+    "./components.css": "./dist/components.css"
+  },
+  "dependencies": {
+    "@cro-sport-hub/shared-types": "workspace:*"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "10.6.3",
+    "@storybook/react-vite": "10.6.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "storybook": "10.6.3",
     "typescript": "catalog:",
     "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
