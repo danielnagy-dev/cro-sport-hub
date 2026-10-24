@@ -4,10 +4,9 @@ const builtLibraries = {
   dependsOn: [{ task: "build", from: "dependencies" as const }],
 };
 
-const sourceCache = {
-  input: [{ auto: true }, "!dist/**", "!storybook-static/**"],
-  output: ["dist/**", "storybook-static/**"],
-};
+// storybook-static is a directory entry, not only its children. `/**` does not
+// cover that entry, so a later build treated it as a new pack input.
+const ignoreGenerated = ["!dist/**", "!storybook-static", "!storybook-static/**"];
 
 export default defineConfig({
   pack: {
@@ -28,11 +27,30 @@ export default defineConfig({
   },
   run: {
     tasks: {
-      build: {
-        command:
-          "vp pack && cp src/tokens.css src/components.css dist/ && STORYBOOK_DISABLE_TELEMETRY=1 storybook build --output-dir storybook-static",
+      pack: {
+        command: "vp pack",
         ...builtLibraries,
-        cache: sourceCache,
+        cache: {
+          input: [{ auto: true }, ...ignoreGenerated],
+          // The stylesheet copy restores its own files. Pack must not snapshot them.
+          output: ["dist/**", "!dist/tokens.css", "!dist/components.css"],
+        },
+      },
+      "copy-styles": {
+        command: "cp src/tokens.css src/components.css dist/",
+        dependsOn: ["pack"],
+        cache: {
+          input: ["src/tokens.css", "src/components.css"],
+          output: ["dist/tokens.css", "dist/components.css"],
+        },
+      },
+      build: {
+        command: "STORYBOOK_DISABLE_TELEMETRY=1 storybook build --output-dir storybook-static",
+        dependsOn: ["copy-styles"],
+        cache: {
+          input: [{ auto: true }, ...ignoreGenerated],
+          output: ["storybook-static/**"],
+        },
       },
       storybook: {
         command: "STORYBOOK_DISABLE_TELEMETRY=1 storybook dev --port 6006 --no-open",
