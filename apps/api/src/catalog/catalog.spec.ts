@@ -82,7 +82,7 @@ const published = {
   reviewedBy: reviewer.id,
   publishedAt: "2026-10-23T18:04:00+02:00",
 };
-const sets = {
+const tennisDetail = {
   matchId: published.id,
   playerAId: playerA.id,
   playerBId: playerB.id,
@@ -95,7 +95,7 @@ const sets = {
   ],
   retired: false,
 };
-const counts = {
+const rawCounts = {
   matchId: published.id,
   athleteId: playerA.id,
   aces: 3,
@@ -112,6 +112,49 @@ const counts = {
   winners: 8,
   unforcedErrors: 5,
   totalPointsWon: 20,
+};
+const away = {
+  id: "club-south",
+  sportId: "sport-football",
+  slug: "club-south",
+  name: "Club South",
+  shortName: "CS",
+  country: "HR",
+};
+const otherClub = {
+  ...away,
+  id: "club-east",
+  slug: "club-east",
+  name: "Club East",
+  shortName: "CE",
+};
+const leagueMatch = {
+  id: "match-league",
+  sportId: "sport-football",
+  competitionId: league.id,
+  date: "2026-10-18",
+  round: "Round 6",
+  status: "draft" as const,
+  source: "manual" as const,
+  createdBy: editor.id,
+};
+const scoreline = {
+  matchId: leagueMatch.id,
+  homeTeamId: club.id,
+  awayTeamId: away.id,
+  homeGoals: 2,
+  awayGoals: 1,
+};
+const appearance = {
+  matchId: leagueMatch.id,
+  athleteId: player.id,
+  teamId: club.id,
+  started: true,
+  minutes: 78,
+  goals: 1,
+  assists: 0,
+  yellowCards: 1,
+  redCard: false,
 };
 
 function openMemory(client: PGlite, owner = true) {
@@ -294,8 +337,8 @@ describe("v1 catalog", () => {
         sportId: "sport-football",
         competitionId: league.id,
       });
-      await first.write("tennisMatch", sets);
-      await first.write("tennisMatchStats", counts);
+      await first.write("tennisMatch", tennisDetail);
+      await first.write("tennisMatchStats", rawCounts);
       const cases: [CatalogWriteKind, unknown, string, string][] = [
         [
           "match",
@@ -306,19 +349,19 @@ describe("v1 catalog", () => {
         ["match", { ...published, id: "match-copy" }, "conflict", "That record is already stored"],
         [
           "tennisMatch",
-          { ...sets, matchId: "match-foot" },
+          { ...tennisDetail, matchId: "match-foot" },
           "invalid",
           "A tennis match needs a tennis match",
         ],
         [
           "tennisMatch",
-          { ...sets, playerBId: player.id },
+          { ...tennisDetail, playerBId: player.id },
           "invalid",
           "Tennis matches are for tennis athletes",
         ],
         [
           "tennisMatchStats",
-          { ...counts, athleteId: player.id },
+          { ...rawCounts, athleteId: player.id },
           "invalid",
           "Stats belong to one of the two players",
         ],
@@ -345,12 +388,114 @@ describe("v1 catalog", () => {
         round: "Quarter-final",
       });
       expect(await second.read("match", published.id)).toEqual(published);
-      expect(await second.read("tennisMatch", published.id)).toEqual(sets);
+      expect(await second.read("tennisMatch", published.id)).toEqual(tennisDetail);
       expect(
         await second.read("tennisMatchStats", { matchId: published.id, athleteId: playerA.id }),
-      ).toEqual(counts);
+      ).toEqual(rawCounts);
       expect(
         await second.read("tennisMatchStats", { matchId: published.id, athleteId: playerB.id }),
+      ).toBeUndefined();
+      await second.close();
+    } finally {
+      await first.close();
+    }
+  });
+
+  it("round-trips a football match and an appearance, and rejects a bad club or schema", async () => {
+    const client = new PGlite();
+    const first = await openMemory(client);
+    try {
+      await first.write("user", editor);
+      await first.write("competition", competition);
+      await first.write("competition", league);
+      await first.write("team", club);
+      await first.write("team", away);
+      await first.write("team", otherClub);
+      await first.write("athlete", player);
+      await first.write("athlete", playerA);
+      await first.write("match", draft);
+      await first.write("match", leagueMatch);
+      await first.write("match", { ...leagueMatch, id: "match-away-day", round: "Round 7" });
+      await first.write("footballMatch", scoreline);
+      await first.write("appearance", appearance);
+      const cases: [CatalogWriteKind, unknown, string, string][] = [
+        [
+          "footballMatch",
+          { ...scoreline, matchId: draft.id },
+          "invalid",
+          "A football match needs a football match",
+        ],
+        [
+          "footballMatch",
+          { ...scoreline, matchId: "match-away-day", homeTeamId: "club-missing" },
+          "unknown-ref",
+          "Unknown row",
+        ],
+        ["footballMatch", scoreline, "conflict", "That record is already stored"],
+        [
+          "appearance",
+          { ...appearance, matchId: draft.id },
+          "invalid",
+          "An appearance needs a football match",
+        ],
+        [
+          "appearance",
+          { ...appearance, athleteId: playerA.id },
+          "invalid",
+          "Appearances are for football athletes",
+        ],
+        [
+          "appearance",
+          { ...appearance, matchId: "match-away-day" },
+          "unknown-ref",
+          "The football match is not in the catalog",
+        ],
+        [
+          "appearance",
+          { ...appearance, teamId: otherClub.id },
+          "invalid",
+          "The appearance club is one of the two sides",
+        ],
+        ["appearance", appearance, "conflict", "That record is already stored"],
+      ];
+      for (const [kind, value, code, message] of cases) {
+        await expect(first.write(kind, value)).rejects.toMatchObject({ code, message });
+      }
+      const sameClub = first.write("footballMatch", {
+        ...scoreline,
+        matchId: "match-away-day",
+        awayTeamId: club.id,
+      });
+      await expect(sameClub).rejects.toMatchObject({
+        code: "invalid",
+        message: "The record does not match the shared schema",
+        issues: [{ path: ["awayTeamId"], message: "Home and away clubs must be different" }],
+      });
+      expect(zodCause(await rejected(sameClub)).issues[0]?.message).toBe(
+        "Home and away clubs must be different",
+      );
+      const benchGoal = first.write("appearance", {
+        ...appearance,
+        athleteId: "player-bench",
+        started: false,
+        minutes: 0,
+        goals: 1,
+      });
+      await expect(benchGoal).rejects.toMatchObject({
+        code: "invalid",
+        message: "The record does not match the shared schema",
+        issues: [{ path: ["goals"], message: "A player with no minutes cannot have goals" }],
+      });
+      expect(zodCause(await rejected(benchGoal)).issues[0]?.message).toBe(
+        "A player with no minutes cannot have goals",
+      );
+      const second = await openMemory(client, false);
+      expect(await second.read("footballMatch", leagueMatch.id)).toEqual(scoreline);
+      expect(
+        await second.read("appearance", { matchId: leagueMatch.id, athleteId: player.id }),
+      ).toEqual(appearance);
+      expect(
+        await second.read("appearance", { matchId: leagueMatch.id, athleteId: playerA.id }),
       ).toBeUndefined();
       await second.close();
     } finally {

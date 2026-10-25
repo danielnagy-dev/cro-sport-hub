@@ -105,3 +105,30 @@ export const tennisMatchStats = pgTable(
   },
   (table) => [primaryKey({ columns: [table.matchId, table.athleteId] })],
 );
+
+export const footballMatches = pgTable("football_matches", {
+  matchId: text("match_id").primaryKey(),
+  sportSlug: text("sport_slug").notNull(),
+  homeTeamId: text("home_team_id").notNull(),
+  awayTeamId: text("away_team_id").notNull(),
+  homeGoals: integer("home_goals").notNull(),
+  awayGoals: integer("away_goals").notNull(),
+});
+
+export const appearances = pgTable(
+  "appearances",
+  {
+    matchId: text("match_id").notNull(),
+    matchSport: text("match_sport").notNull(),
+    athleteId: text("athlete_id").notNull(),
+    athleteSport: text("athlete_sport").notNull(),
+    teamId: text("team_id").notNull(),
+    started: boolean("started").notNull(),
+    minutes: integer("minutes").notNull(),
+    goals: integer("goals").notNull(),
+    assists: integer("assists").notNull(),
+    yellowCards: integer("yellow_cards").notNull(),
+    redCard: boolean("red_card").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.matchId, table.athleteId] })],
+);

@@ -2,9 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  appearanceSchema,
   athleteSchema,
   athleteTeamSchema,
   competitionSchema,
+  footballMatchSchema,
   idSchema,
   matchSchema,
   roleSchema,
@@ -25,9 +27,11 @@ import { z } from "zod";
 import * as schema from "./schema.js";
 
 const {
+  appearances,
   athleteTeams,
   athletes,
   competitions,
+  footballMatches,
   matches,
   sports,
   teams,
@@ -46,7 +50,9 @@ export type CatalogWriteKind =
   | "user"
   | "match"
   | "tennisMatch"
-  | "tennisMatchStats";
+  | "tennisMatchStats"
+  | "footballMatch"
+  | "appearance";
 export type CatalogKind = "sport" | CatalogWriteKind;
 export type AthleteTeamKey = Pick<AthleteTeam, "athleteId" | "teamId" | "from">;
 export type CatalogParticipantKey = { matchId: string; athleteId: string };
@@ -79,6 +85,8 @@ type Stored =
   | z.output<typeof matchSchema>
   | z.output<typeof tennisMatchSchema>
   | z.output<typeof tennisMatchStatsSchema>
+  | z.output<typeof footballMatchSchema>
+  | z.output<typeof appearanceSchema>
   | CatalogUser;
 
 export type Catalog = {
@@ -95,7 +103,7 @@ type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 const migrationDir = dirname(fileURLToPath(import.meta.url));
 
 function migrationStatements(): string[] {
-  return ["0001_v1_catalog.sql", "0002_v1_matches.sql"].flatMap((name) =>
+  return ["0001_v1_catalog.sql", "0002_v1_matches.sql", "0003_v1_football.sql"].flatMap((name) =>
     readFileSync(join(migrationDir, name), "utf8")
       .replaceAll(/--.*$/gm, "")
       .split(";")
@@ -257,6 +265,38 @@ async function writeRecord(db: CatalogDb, kind: CatalogWriteKind, value: unknown
         db.insert(tennisMatchStats).values({ ...stats, athleteSport: "tennis" }),
       );
     }
+    case "footballMatch": {
+      const detail = parseRecord(footballMatchSchema, value);
+      if ((await matchSlug(db, detail.matchId)) !== "football") {
+        throw new CatalogError("invalid", "A football match needs a football match");
+      }
+      return insertRow(() =>
+        db.insert(footballMatches).values({ ...detail, sportSlug: "football" }),
+      );
+    }
+    case "appearance": {
+      const row = parseRecord(appearanceSchema, value);
+      if ((await matchSlug(db, row.matchId)) !== "football") {
+        throw new CatalogError("invalid", "An appearance needs a football match");
+      }
+      if ((await athleteSlug(db, row.athleteId)) !== "football") {
+        throw new CatalogError("invalid", "Appearances are for football athletes");
+      }
+      const sides = await db
+        .select({ homeTeamId: footballMatches.homeTeamId, awayTeamId: footballMatches.awayTeamId })
+        .from(footballMatches)
+        .where(eq(footballMatches.matchId, row.matchId));
+      const pair = sides[0];
+      if (pair === undefined) {
+        throw new CatalogError("unknown-ref", "The football match is not in the catalog");
+      }
+      if (row.teamId !== pair.homeTeamId && row.teamId !== pair.awayTeamId) {
+        throw new CatalogError("invalid", "The appearance club is one of the two sides");
+      }
+      return insertRow(() =>
+        db.insert(appearances).values({ ...row, matchSport: "football", athleteSport: "football" }),
+      );
+    }
     default: {
       const unexpected: never = kind;
       return unexpected;
@@ -281,12 +321,27 @@ const idParsers = {
 
 async function readMatchRow(
   db: CatalogDb,
-  kind: "match" | "tennisMatch" | "tennisMatchStats",
+  kind: "match" | "tennisMatch" | "tennisMatchStats" | "footballMatch" | "appearance",
   key: string | AthleteTeamKey | CatalogParticipantKey,
 ): Promise<Stored | undefined> {
-  if (kind === "tennisMatchStats") {
+  if (kind === "tennisMatchStats" || kind === "appearance") {
     if (typeof key === "string" || !("matchId" in key)) {
-      throw new CatalogError("invalid", "Tennis stats are read by match and athlete");
+      throw new CatalogError(
+        "invalid",
+        kind === "appearance"
+          ? "An appearance is read by match and athlete"
+          : "Tennis stats are read by match and athlete",
+      );
+    }
+    if (kind === "appearance") {
+      const rows = await db
+        .select()
+        .from(appearances)
+        .where(and(eq(appearances.matchId, key.matchId), eq(appearances.athleteId, key.athleteId)));
+      const row = rows[0];
+      return row === undefined
+        ? undefined
+        : parseRecord(appearanceSchema, publicRow(row, ["matchSport", "athleteSport"]));
     }
     const rows = await db
       .select()
@@ -308,6 +363,13 @@ async function readMatchRow(
     const row = rows[0];
     return row === undefined ? undefined : parseRecord(matchSchema, publicRow(row, ["sportSlug"]));
   }
+  if (kind === "footballMatch") {
+    const rows = await db.select().from(footballMatches).where(eq(footballMatches.matchId, key));
+    const row = rows[0];
+    return row === undefined
+      ? undefined
+      : parseRecord(footballMatchSchema, publicRow(row, ["sportSlug"]));
+  }
   const rows = await db.select().from(tennisMatches).where(eq(tennisMatches.matchId, key));
   const row = rows[0];
   return row === undefined
@@ -320,7 +382,13 @@ async function readRecord(
   kind: CatalogKind,
   key: string | AthleteTeamKey | CatalogParticipantKey,
 ): Promise<Stored | undefined> {
-  if (kind === "match" || kind === "tennisMatch" || kind === "tennisMatchStats") {
+  if (
+    kind === "match" ||
+    kind === "tennisMatch" ||
+    kind === "tennisMatchStats" ||
+    kind === "footballMatch" ||
+    kind === "appearance"
+  ) {
     return readMatchRow(db, kind, key);
   }
   if (kind === "athleteTeam") {
