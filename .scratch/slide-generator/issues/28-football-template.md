@@ -4,17 +4,17 @@
 
 **Blocked by:** none. Plan #2 left the package in place. The round-13 handoff is vendored in this change.
 
-**Status:** claimed
+**Status:** resolved
 
 ## Scope
 
-In: the renderer ADR, the player slide, hero-size options, and the round-13 design files. The stylesheet includes the list selectors so the stacked change does not rewrite it.
+In: the renderer ADR, the player slide, the list slide, hero-size options, and the round-13 design files. The list stylesheet was already on the player slice. This slice fills it in.
 
-Out: the list slide (stacked, same plan item), splitting matches onto slides, PNG output, a cover slide, and `apps/api` (plan #5 is in progress there). `docs/feature-map.md` stays as it is. Nothing a user can open changes.
+Out: splitting matches onto slides, PNG output, a cover slide, and `apps/api`. `docs/feature-map.md` stays as it is. Nothing a user can open changes. A browser pixel diff waits for the PNG item: CI does not install Chromium (ADR-003).
 
 ## Order
 
-Plan, then architect (ADR-003, new renderer), then develop. A separate review follows because this is an ADR. This run does not launch it. Daniel squash-merges.
+Plan, then architect (ADR-003, new renderer), then develop. The ADR review was the player slice. This list slice adds no schema, dependency, or ADR, so pre-launch is a self-review. Daniel squash-merges.
 
 ## Acceptance
 
@@ -24,7 +24,19 @@ Plan, then architect (ADR-003, new renderer), then develop. A separate review fo
 - [x] Navy is the default. Red and light are optional
 - [x] A cover kind throws. No cover layout is invented
 - [x] Sample names stay the fictional handoff data
-- [ ] List zoom, the mini donut, and the text passes option wait for the stacked change
+- [x] A four-row list reports zoom 1.15, text passes (`84%` and `38/45`), and the round-13 hero sizes
+- [x] Two rows zoom to 1.5 and three rows zoom to 1.3. More than six players throws
+- [x] List values paint at 34px on a 1.0 line, not 0.82× the size
+
+## Part 2 decisions (25 Oct 2026)
+
+List passes are text only. The percent is the 34px value and the fraction sits under it at 12px. There is no list donut, and no `donut` option. The player donut stays.
+
+Hero size stays the round-13 measurement. A plain second row is about 123.5px. A text pass in the first row adds the 16px fraction stack (4px gap + 12px line), which is Filip's 143.2px hero. The sizes are not shrunk.
+
+The donut-only row-2 fallback (114px) is not needed. That path used the cell's content bottom when the second row had no value baseline. Text passes have a percent baseline, so the plain rule covers them. Bruno's second row is only `80%` / `16/20` and measures 123.5px on the no-donut handoff, the same as a plain value. The fallback is not implemented.
+
+The visual guard is a unit test, not a screenshot. It reads the painted font shorthand and the list value, fraction, and gap out of the document, and it checks the hero sizes against the Chrome 156 numbers from `02-list_alt-no-donut.html` (tolerance half a pixel, the same rounding the player hero already uses). A pixel compare needs Chromium in CI, which this pull request does not install.
 
 ## Verification
 
@@ -36,8 +48,10 @@ Yes. New renderer, and the template is the first behaviour in `libs/slide-genera
 
 ## Seams
 
-- `footballTemplate(slide, options)` — one player slide in, one document out. Catches size, hero size, colourway, and the missing cover. It does not catch pixel match against the reference PNG. That waits for the PNG item. The list slide joins this seam in the stacked change.
+- `footballTemplate(slide, options)` — one player or list slide in, one document out. Catches size, hero size, list zoom, text passes, colourway, and the missing cover. It does not catch a pixel match against the reference PNG. That waits for the PNG item.
 
 ## Comments
 
 Player slice: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/13
+
+List slice: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/16

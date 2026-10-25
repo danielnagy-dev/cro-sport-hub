@@ -1,6 +1,7 @@
 /**
  * Round 13 interim football template. There is no cover slide.
- * Hero size is computed here. See ADR-003. The list slide is the stacked change.
+ * Hero size is computed here. See ADR-003.
+ * List passes are text ("84%" over "38/45"). There is no list donut.
  */
 export const slideWidth = 1080;
 export const slideHeight = 1350;
@@ -37,27 +38,26 @@ export type FootballPerson = {
   hero?: string;
   lineup?: "start" | "sub";
 };
-export type FootballSlide = {
-  kind: "player";
-  competition: string;
-  round: string;
-  date: string;
-  player: FootballPerson;
-};
+type SlideMeta = { competition: string; round: string; date: string };
+export type FootballSlide =
+  | (SlideMeta & { kind: "player"; player: FootballPerson })
+  | (SlideMeta & { kind: "list"; players: readonly FootballPerson[] });
 export type FootballOptions = {
   colourway?: Colourway;
   hero?: "measured" | "off";
-  /** Replaces the measured hero size. The round-13 size question is still open. */
+  /** Replaces the measured hero size. The round-13 size stays the handoff value. */
   heroFontPx?: number;
   brand?: string;
 };
 export type FootballDocument = {
   width: typeof slideWidth;
   height: typeof slideHeight;
-  kind: "player";
+  kind: FootballSlide["kind"];
   colourway: Colourway;
   designRound: typeof designRound;
   heroes: readonly { key: string; fontPx: number }[];
+  /** 1 on a player slide. List zoom is the round-13 row table. */
+  zoom: number;
   html: string;
 };
 
@@ -74,9 +74,15 @@ export function footballTemplate(
   slide: FootballSlide,
   options: FootballOptions = {},
 ): FootballDocument {
-  if (slide.kind !== "player") throw new Error("Round 13 has no cover slide");
+  const kind: string = slide.kind;
+  if (kind !== "player" && kind !== "list") throw new Error("Round 13 has no cover slide");
   const colourway = options.colourway ?? "navy";
   const heroes: Hero[] = [];
+  const zoom = slide.kind === "list" ? listZoom(slide.players.length) : 1;
+  const body =
+    slide.kind === "player"
+      ? playerBody(slide, options, heroes)
+      : listBody(slide, options, heroes, zoom);
   return {
     width: slideWidth,
     height: slideHeight,
@@ -84,8 +90,16 @@ export function footballTemplate(
     colourway,
     designRound,
     heroes,
-    html: page(colourway, options.brand ?? "HRVATSKI SPORT", playerBody(slide, options, heroes)),
+    zoom,
+    html: page(colourway, options.brand ?? "HRVATSKI SPORT", body, slide.kind),
   };
+}
+
+function listZoom(count: number): number {
+  if (count > 6) throw new Error("A list slide holds at most 6 players");
+  if (count < 1) throw new Error("A list needs a player");
+  if (count >= 4) return 1.15;
+  return count === 3 ? 1.3 : 1.5;
 }
 
 function prepare(input: readonly FootballStatInput[]): Stat[] {
@@ -159,7 +173,11 @@ function noHero(count: number): { cols: number; value: number } {
   return { cols: Number(row[0]), value: Number(row[1]) };
 }
 
-function playerBody(slide: FootballSlide, options: FootballOptions, heroes: Hero[]): string {
+function playerBody(
+  slide: Extract<FootballSlide, { kind: "player" }>,
+  options: FootballOptions,
+  heroes: Hero[],
+): string {
   const person = slide.player;
   if (person.name.trim() === "") throw new Error("A player needs a name");
   const stats = prepare(person.stats);
@@ -179,7 +197,7 @@ function playerGrid(
     const spec = noHero(stats.length);
     const tiles = stats.map((stat, index) => {
       const edge = `${index % spec.cols === 0 ? " c0" : ""}${index < spec.cols ? " r0" : ""}`;
-      return `<div class="tile${edge}" style="font-size:${spec.value}px">${lab(stat)}${val(stat, person, true)}</div>`;
+      return `<div class="tile${edge}" style="font-size:${spec.value}px">${lab(stat.label)}${val(stat, person, true)}</div>`;
     });
     return `<div class="grid" style="grid-template-columns:repeat(${spec.cols},1fr)">${tiles.join("")}</div>`;
   }
@@ -190,12 +208,95 @@ function playerGrid(
   const fontPx =
     options.heroFontPx ?? (rows === 2 ? twoRow(value, 0.82, 16, 1.1, 18, 20, 12) : value * 1.4);
   heroes.push({ key: hero.key, fontPx });
-  const heroTile = `<div class="tile hero c0 r0" style="grid-row:1 / span ${rows};grid-column:1">${lab(hero)}${val(hero, person, true, fontPx)}</div>`;
+  const heroTile = `<div class="tile hero c0 r0" style="grid-row:1 / span ${rows};grid-column:1">${lab(hero.label)}${val(hero, person, true, fontPx)}</div>`;
   const tiles = rest.map((stat, index) => {
     const row = Math.floor(index / cols) + 1;
-    return `<div class="tile${row === 1 ? " r0" : ""}" style="grid-row:${row};grid-column:${(index % cols) + 2};font-size:${value}px">${lab(stat)}${val(stat, person, true)}</div>`;
+    return `<div class="tile${row === 1 ? " r0" : ""}" style="grid-row:${row};grid-column:${(index % cols) + 2};font-size:${value}px">${lab(stat.label)}${val(stat, person, true)}</div>`;
   });
   return `<div class="grid" style="grid-template-columns:1.3fr repeat(${cols},1fr)">${heroTile}${tiles.join("")}</div>`;
+}
+
+/** Plain second-row baseline. A text pass in row 1 adds the 16px fraction stack.
+ * The donut-only content-bottom fallback (114px) does not apply: the percent has a baseline. */
+function listHeroPx(row1Pass: boolean): number {
+  const plain = twoRow(34, 1, 12, 1.1, 7, 9, 8);
+  return row1Pass ? plain + 16 / CAP : plain;
+}
+
+function rowWidth(count: number, hero: boolean): number {
+  if (hero) return 1 + Math.min(3, Math.ceil((count - 1) / 2));
+  return count > 4 ? Math.min(4, Math.ceil(count / 2)) : Math.max(1, count);
+}
+
+function listLabel(stat: Stat): string {
+  if (stat.onTarget) return "Udarci (okv.)";
+  if (stat.key === "assists") return "Asist.";
+  if (stat.key === "key_passes") return "Klj. dod.";
+  if (stat.key === "yellow") return "Žuti";
+  return stat.label;
+}
+
+type RowPlan = {
+  person: FootballPerson;
+  stats: Stat[];
+  heroIndex: number | null;
+  width: number;
+};
+
+function listBody(
+  slide: Extract<FootballSlide, { kind: "list" }>,
+  options: FootballOptions,
+  heroes: Hero[],
+  zoom: number,
+): string {
+  const plans: RowPlan[] = slide.players.map((person) => {
+    if (person.name.trim() === "") throw new Error("A player needs a name");
+    const stats = prepare(person.stats);
+    const heroIndex = pickHero(person, stats, (options.hero ?? "measured") === "measured", 4);
+    return { person, stats, heroIndex, width: rowWidth(stats.length, heroIndex !== null) };
+  });
+  const cols = Math.max(1, ...plans.map((plan) => plan.width));
+  const heroSlide = plans.some((plan) => plan.heroIndex !== null);
+  const template = heroSlide ? `128px repeat(${cols - 1},104px)` : `repeat(${cols},104px)`;
+  const rows = plans.map((plan) => listRow(plan, template, options, heroes)).join("");
+  return `<div class="block" style="--list-zoom:${zoom}">${meta(slide.competition, slide.round, slide.date)}${rows}</div>`;
+}
+
+function listRow(
+  plan: RowPlan,
+  template: string,
+  options: FootballOptions,
+  heroes: Hero[],
+): string {
+  const { person, stats, heroIndex, width } = plan;
+  const hero = heroIndex === null ? undefined : stats[heroIndex];
+  const rest = stats.filter((_, index) => index !== heroIndex);
+  const across = hero ? width - 1 : width;
+  const row1Pass = rest.slice(0, across).some((stat) => stat.percent !== undefined);
+  const fontPx = hero === undefined ? undefined : (options.heroFontPx ?? listHeroPx(row1Pass));
+  if (hero !== undefined && fontPx !== undefined) heroes.push({ key: hero.key, fontPx });
+  const heroCell =
+    hero === undefined
+      ? ""
+      : kvCell(hero, person, " hero c0 r0", "grid-row:1 / span 2;grid-column:1", fontPx);
+  const cells = rest.map((stat, index) => {
+    const row = Math.floor(index / across) + 1;
+    const col = (index % across) + (hero === undefined ? 1 : 2);
+    const edge = `${col === 1 ? " c0" : ""}${row === 1 ? " r0" : ""}`;
+    return kvCell(stat, person, edge, `grid-row:${row};grid-column:${col}`);
+  });
+  return `<div class="row"><div>${who(person)}${matchLine(person, false)}</div><div class="sg" style="grid-template-columns:${template}">${heroCell}${cells.join("")}</div></div>`;
+}
+
+function kvCell(
+  stat: Stat,
+  person: FootballPerson,
+  edge: string,
+  place: string,
+  fontPx?: number,
+): string {
+  const label = listLabel(stat);
+  return `<div class="kv${edge}" style="${place}">${lab(label, label.length > 10)}${val(stat, person, false, fontPx)}</div>`;
 }
 
 function who(person: FootballPerson): string {
@@ -216,8 +317,8 @@ function matchLine(person: FootballPerson, player: boolean): string {
   return `<p class="match${player ? " player" : ""}"><b class="${draw ? "d" : won ? "w" : "l"}">${fixture.homeScore}–${fixture.awayScore}</b><span class="vs">vs</span><span class="opp">${mark}${esc(opponent)}</span></p>`;
 }
 
-function lab(stat: Stat): string {
-  return `<div class="lab"><i></i><span>${esc(stat.label)}</span></div>`;
+function lab(label: string, tight = false): string {
+  return `<div class="lab${tight ? " tight" : ""}"><i></i><span>${esc(label)}</span></div>`;
 }
 
 function val(stat: Stat, person: FootballPerson, donut: boolean, fontPx?: number): string {
@@ -226,7 +327,7 @@ function val(stat: Stat, person: FootballPerson, donut: boolean, fontPx?: number
     const fraction = `${stat.accurate}/${stat.total}`;
     if (donut)
       return `<span class="pass"${size}><span class="frac">${fraction}</span><span class="ring">${ring(stat.percent)}<span class="pct">${esc(stat.value)}</span></span></span>`;
-    return `<span class="pass text"${size}><span class="pct">${esc(stat.value)}</span><span class="frac">${fraction}</span></span>`;
+    return `<span class="pass text"${size}><span>${esc(stat.value)}</span><span class="frac">${fraction}</span></span>`;
   }
   const extra = stat.onTarget ? `<span class="ot">(${esc(stat.onTarget)})</span>` : "";
   const lineup = stat.key === "minutes" ? lineupIcon(person.lineup) : "";
@@ -254,9 +355,14 @@ function meta(lead: string, round: string, date: string): string {
   return `<header class="meta"><span>${esc(lead)}</span><i></i><span class="dim">${esc(round)}</span><i></i><span class="dim">${esc(date)}</span></header>`;
 }
 
-function page(colourway: Colourway, brand: string, body: string): string {
+function page(
+  colourway: Colourway,
+  brand: string,
+  body: string,
+  kind: FootballSlide["kind"],
+): string {
   const note = colourway === "navy" ? "" : "<!-- colourway not re-reviewed since v1 -->";
-  return `<!doctype html><html lang="hr"><head><meta charset="utf-8"><style>${CSS}</style></head><body><article class="s player" data-design="${designRound}" data-kind="player" data-colourway="${colourway}" style="${COLOURS[colourway]};width:${slideWidth}px;height:${slideHeight}px">${note}<div class="tex"></div><div class="content">${body}</div><footer class="brand"><span class="mk"></span><b>${esc(brand)}</b></footer></article></body></html>`;
+  return `<!doctype html><html lang="hr"><head><meta charset="utf-8"><style>${CSS}</style></head><body><article class="s ${kind}" data-design="${designRound}" data-kind="${kind}" data-colourway="${colourway}" style="${COLOURS[colourway]};width:${slideWidth}px;height:${slideHeight}px">${note}<div class="tex"></div><div class="content">${body}</div><footer class="brand"><span class="mk"></span><b>${esc(brand)}</b></footer></article></body></html>`;
 }
 
 function esc(value: string): string {
@@ -276,5 +382,5 @@ const CSS =
   ".name{font-family:BS;text-transform:uppercase;font-size:192px}.player .fn,.list .fn{display:block;font-weight:700;color:var(--fnc)}.player .fn{font-size:.58em;line-height:.92}.list .name{font-size:56px;font-weight:800}.list .fn{font-size:.5em}.ln{display:block;font-weight:900;line-height:.9}.list .ln{font-weight:800;line-height:1}.acc .fn{margin-bottom:.2em}" +
   ".id{display:flex;align-items:center;gap:14px;color:var(--dim);font:700 28px/1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;margin-top:24px}.id i{width:6px;height:6px;background:var(--mute)}.list .id{font-size:22px;margin-top:12px}.match{display:flex;align-items:baseline;gap:14px;margin-top:48px;font:500 25px/1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.list .match{margin-top:12px;font-size:20px}.match b{font:900 1.45em/1 BS}.list .match b{font-size:1.02em}.w{color:var(--win)}.l{color:var(--loss)}.d{color:var(--fg)}.vs{font-size:.8em}.opp{display:inline-flex;align-items:center;gap:6px}.vi{width:1em;height:1em}" +
   ".grid{display:grid;margin-top:40px}.tile,.kv{border-left:1px solid var(--rule);border-top:1px solid var(--rule);padding:18px 28px 20px;display:flex;flex-direction:column;gap:12px}.kv{padding:7px 14px 9px;gap:8px}.c0{border-left:0;padding-left:0}.r0{border-top:0}.lab{display:flex;align-items:center;gap:8px;color:var(--dim);font:700 16px/1.1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase}.kv .lab{font-size:12px}.lab i{width:6px;height:6px;background:var(--mark)}.kv .lab i{width:5px;height:5px}.tight{letter-spacing:.01em}" +
-  ".num,.pass{font:800 1em/.82 BS;color:var(--fg)}.kv .num,.kv .pass{font-size:34px;line-height:1}.hero .num{line-height:1}.ot{font-size:.56em;color:var(--dim)}.pass{display:flex;align-items:center;justify-content:space-between}.pass.text{flex-direction:column;align-items:flex-start}.frac{font-size:.36em;color:var(--dim)}.kv .frac{font-size:22px}.ring{position:relative;width:.8em;height:.8em}.kv .ring{width:64px;height:64px}.rg{width:100%;height:100%}.pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.24em}.kv .pct{font-size:21px}" +
-  ".block .meta{zoom:calc(1 / var(--list-zoom))}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:36px;align-items:start;padding:16px 0;border-bottom:1px solid var(--rule)}.sg{display:grid}";
+  ".num,.pass{font:800 1em/.82 BS;color:var(--fg)}.kv .num,.kv .pass{font-size:34px;line-height:1}.hero .num{line-height:1}.ot{font-size:.56em;color:var(--dim)}.pass{display:flex;align-items:center;justify-content:space-between}.pass.text{flex-direction:column;align-items:flex-start}.frac{font-size:.36em;color:var(--dim)}.kv .frac{font:700 12px/1 AR}.kv .pass.text{gap:4px}.ring{position:relative;width:.8em;height:.8em}.rg{width:100%;height:100%}.pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.24em}" +
+  ".block{zoom:var(--list-zoom)}.block .meta{zoom:calc(1 / var(--list-zoom))}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:36px;align-items:start;padding:16px 0;border-bottom:1px solid var(--rule)}.sg{display:grid}";
