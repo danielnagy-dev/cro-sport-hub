@@ -16,7 +16,7 @@ Use Drizzle ORM 0.45 (`drizzle-orm`) in `apps/api`. Docs: https://orm.drizzle.te
 
 Prisma is rejected. The current client (`@prisma/client` 7.10) needs a schema DSL, `prisma generate`, and a driver adapter before `nest build`. That is a second compile step beside the TypeScript split in ADR-001, and a second set of row types beside the Zod schemas. Prisma's engine install scripts would also extend `allowBuilds`. Drizzle's schema is TypeScript compiled by the existing Nest build, and it uses the `pg` driver the health check already uses. It has no install script.
 
-The module interface is `openCatalog`, `write`, and `read`, exported from `apps/api/src/catalog/catalog.ts`. A batch writer that returns a full snapshot was rejected: the only caller is a test that writes one record and reads it back. A filterable catalogue (actors, pages, extension kinds) was rejected: that interface is as large as the tables, and nothing in this change queries it.
+The module interface is `openCatalog`, `write`, `read`, and `close`, exported from `apps/api/src/catalog/catalog.ts`. `close` ends the `pg` pool, or the PGLite instance when the opener owns one. A batch writer that returns a full snapshot was rejected: the only caller is a test that writes one record and reads it back. A filterable catalogue (actors, pages, extension kinds) was rejected: that interface is as large as the tables, and nothing in this change queries it.
 
 `apps/api` owns these types. Studio, web, and `libs/ui` do not import them. `libs/shared-types` keeps the Zod entities. The user row (`id`, `role`) stays in `apps/api` until authentication shares it. `roleSchema` is reused.
 
@@ -28,4 +28,4 @@ The migration seeds `sport-tennis` / Tennis and `sport-football` / Football. Cal
 
 ## Consequences
 
-Callers parse through the shared Zod schemas, then `write` / `read`. The football-club rule and the football-only club spell are enforced here, not in `libs/shared-types`. A later route that returns these records maps them at the controller and adds any new shared schema in that change. Revisit Prisma only if Drizzle cannot express a later migration on Postgres 18.
+Callers parse through the shared Zod schemas, then `write` / `read`, and call `close` when they finish. A migration failure after `SELECT 1` is a catalog error (`migration`, `The catalog migration failed`), not `unreachable`. A shared-schema parse failure is a catalog error and keeps the Zod error as `cause`. The football-club rule and the football-only club spell are enforced here, not in `libs/shared-types`. A later route that returns these records maps them at the controller and adds any new shared schema in that change. Revisit Prisma only if Drizzle cannot express a later migration on Postgres 18.

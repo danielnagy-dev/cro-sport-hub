@@ -33,15 +33,17 @@ export type CatalogErrorCode =
   | "not-football"
   | "unknown-ref"
   | "conflict"
-  | "unreachable";
+  | "unreachable"
+  | "migration";
 
 export class CatalogError extends Error {
   constructor(
     readonly code: CatalogErrorCode,
     message: string,
     readonly issues?: readonly FieldIssue[],
+    options?: ErrorOptions,
   ) {
-    super(message);
+    super(message, options);
     this.name = "CatalogError";
   }
 }
@@ -57,6 +59,7 @@ type Stored =
 export type Catalog = {
   write(kind: CatalogWriteKind, value: unknown): Promise<void>;
   read(kind: CatalogKind, key: string | AthleteTeamKey): Promise<Stored | undefined>;
+  close(): Promise<void>;
 };
 
 type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
@@ -85,17 +88,22 @@ function publicRow(row: Record<string, unknown>, hidden: readonly string[]) {
   );
 }
 
+function invalidRecord(error: z.ZodError): never {
+  throw new CatalogError(
+    "invalid",
+    "The record does not match the shared schema",
+    error.issues.map((issue) => ({ path: issue.path.map(String), message: issue.message })),
+    { cause: error },
+  );
+}
+
 function parseRecord<T>(
   parser: { safeParse: (value: unknown) => z.ZodSafeParseResult<T> },
   value: unknown,
 ): T {
   const result = parser.safeParse(value);
   if (result.success) return result.data;
-  throw new CatalogError(
-    "invalid",
-    "The record does not match the shared schema",
-    result.error.issues.map((issue) => ({ path: issue.path.map(String), message: issue.message })),
-  );
+  return invalidRecord(result.error);
 }
 
 async function insertRow(run: () => Promise<unknown>): Promise<void> {
@@ -194,7 +202,7 @@ async function readRecord(
     const row = rows[0];
     return row === undefined
       ? undefined
-      : athleteTeamSchema.parse(publicRow(row, ["athleteSport"]));
+      : parseRecord(athleteTeamSchema, publicRow(row, ["athleteSport"]));
   }
   if (typeof key !== "string") throw new CatalogError("invalid", "That record is read by id");
   const table = idTables[kind];
@@ -202,14 +210,44 @@ async function readRecord(
   const row = rows[0];
   if (row === undefined) return undefined;
   const hidden = kind === "team" || kind === "athlete" ? ["sportSlug"] : [];
-  return idParsers[kind].parse(publicRow(row, hidden));
+  const parsed = idParsers[kind].safeParse(publicRow(row, hidden));
+  if (!parsed.success) return invalidRecord(parsed.error);
+  return parsed.data;
 }
 
-export async function openCatalog(db: CatalogDb): Promise<Catalog> {
-  for (const statement of migrationStatements()) await db.execute(sql.raw(statement));
+async function release(close: (() => Promise<void>) | undefined): Promise<void> {
+  await close?.().catch(() => undefined);
+}
+
+function failed(code: CatalogErrorCode, message: string, cause: unknown): CatalogError {
+  return new CatalogError(code, message, undefined, { cause });
+}
+
+export async function openCatalog(
+  db: CatalogDb,
+  options?: { close?: () => Promise<void> },
+): Promise<Catalog> {
+  try {
+    await db.execute(sql.raw("SELECT 1"));
+  } catch (error) {
+    await release(options?.close);
+    throw failed("unreachable", "Postgres is unreachable", error);
+  }
+  try {
+    for (const statement of migrationStatements()) await db.execute(sql.raw(statement));
+  } catch (error) {
+    await release(options?.close);
+    if (error instanceof CatalogError) throw error;
+    throw failed("migration", "The catalog migration failed", error);
+  }
+  let closing: Promise<void> | undefined;
   return {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
+    close: () => {
+      closing ??= options?.close?.() ?? Promise.resolve();
+      return closing;
+    },
   };
 }
 
@@ -223,10 +261,9 @@ export async function openPostgresCatalog(databaseUrl: string): Promise<Catalog>
   pool.on("error", () => undefined);
   try {
     await pool.query("SELECT 1");
-    return await openCatalog(drizzlePg(pool, { schema }));
   } catch (error) {
     await pool.end().catch(() => undefined);
-    if (error instanceof CatalogError) throw error;
-    throw new CatalogError("unreachable", "Postgres is unreachable");
+    throw failed("unreachable", "Postgres is unreachable", error);
   }
+  return openCatalog(drizzlePg(pool, { schema }), { close: () => pool.end() });
 }
