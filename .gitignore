@@ -39,3 +39,6 @@ coverage/
 storybook-static/
 *.tsbuildinfo
 test-results/
+
+# Verification evidence (screenshots, reports, server logs)
+artifacts/

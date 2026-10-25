@@ -14,9 +14,41 @@ import { defineConfig } from "vite-plus";
 export default defineConfig({
   fmt: {},
   lint: {
+    // correctness is already Oxlint's default error category. Set it here so the
+    // severity stays visible next to the stricter rules below.
+    categories: { correctness: "error" },
+    // @angular-eslint/eslint-plugin 22.6.0 does not load: ts-api-utils reads
+    // TypeScript 7 and crashes on `ts.Intrinsic`. Studio templates stay on
+    // `ngc --noEmit`. Do not re-add the plugin until that load path works.
     jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
-    rules: { "vite-plus/prefer-vite-plus-imports": "error" },
+    rules: {
+      "vite-plus/prefer-vite-plus-imports": "error",
+      "typescript/no-explicit-any": "error",
+      "typescript/ban-ts-comment": "error",
+      "typescript/no-non-null-assertion": "error",
+      "typescript/no-floating-promises": "error",
+      "typescript/no-misused-promises": "error",
+      "typescript/await-thenable": "error",
+      "typescript/no-unsafe-argument": "error",
+      "typescript/no-unsafe-assignment": "error",
+      "typescript/no-unsafe-member-access": "error",
+      "typescript/no-unsafe-return": "error",
+      "typescript/switch-exhaustiveness-check": "error",
+      "typescript/no-unnecessary-type-assertion": "error",
+      "no-console": ["error", { allow: ["warn", "error"] }],
+    },
     options: { typeAware: true, typeCheck: false },
+    overrides: [
+      {
+        files: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**"],
+        rules: {
+          "typescript/no-unsafe-assignment": "off",
+          "typescript/no-unsafe-member-access": "off",
+          "typescript/no-non-null-assertion": "off",
+        },
+      },
+      { files: ["tools/**"], rules: { "no-console": "off" } },
+    ],
     ignorePatterns: [
       "**/dist/**",
       "**/coverage/**",
@@ -39,7 +71,7 @@ export default defineConfig({
         ],
       },
       typecheck: {
-        command: "vp run -r typecheck",
+        command: "vp run -r typecheck && tsc --noEmit -p tools/verify/tsconfig.json",
         dependsOn: [
           "@cro-sport-hub/shared-types#build",
           "@cro-sport-hub/ui#build",
@@ -48,6 +80,11 @@ export default defineConfig({
       },
       test: "vp run -r test",
       build: "vp run -r build",
+      "verify:doctor": { command: "vpx tools/verify/verify.ts doctor", cache: false },
+      "verify:api": { command: "vpx tools/verify/verify.ts api", cache: false },
+      "verify:studio": { command: "vpx tools/verify/verify.ts studio", cache: false },
+      "verify:web": { command: "vpx tools/verify/verify.ts web", cache: false },
+      "verify:ui": { command: "vpx tools/verify/verify.ts ui", cache: false },
     },
   },
 });
