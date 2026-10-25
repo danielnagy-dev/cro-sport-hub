@@ -5,11 +5,12 @@ description: Implementer's checklist for this monorepo. Use when writing a scope
 
 # Develop
 
-Implement the scoped PR. Do not widen it. Do not merge. Run the checks once. The coordinator applies the phase in `docs/team.md`. When no separate review agent will run, self-review at the end of this run against `.cursor/skills/review/SKILL.md` and write `## Review` (self-review, findings, fixes). When one will run, leave `## Review` empty.
+Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and again only when the final-push merge changes the tree. The coordinator applies the phase in `docs/team.md`. When no separate review agent will run, self-review at the end of this run against `.cursor/skills/review/SKILL.md` and write `## Review` (self-review, findings, fixes). When one will run, leave `## Review` empty.
 
 ## Before editing
 
-- Read the plan: scope, acceptance, verification, and the size target in `.cursor/skills/plan/SKILL.md` (300 lines, split before 500).
+- Read the plan: scope, acceptance, verification, and the size target in `.cursor/skills/plan/SKILL.md` (300 lines, split before 500). The ticket file is `.scratch/<feature-slug>/issues/<NN>-<slug>.md` (`docs/agents/issue-tracker.md`).
+- When the pull request has a plan id, update only that file. Set `**Status:**` as the index describes, and append the pull request link under `## Comments`. Leave every other ticket file, and the index, unchanged. With no plan id, add no ticket file.
 - Read the rule for the files you touch: `.cursor/rules/api-nest.mdc`, `studio-angular.mdc`, `angular-best-practices.mdc`, `web-next.mdc`, and `typescript-testing.mdc` for TypeScript.
 - If the plan says a sketch or an ADR is required, do not start without it.
 - Run `vp` from the repository root. See `docs/adr/001-vite-plus-vs-nx.md`.
@@ -49,4 +50,15 @@ The title is a Conventional Commits subject. It becomes the squash subject.
 
 Commit messages and the description must not contain a `Co-authored-by` line with an email. Check the description with `vpx tools/guards/check.ts --pr-body <file>`.
 
-Never merge. Daniel squash-merges. That merge is the final gate.
+## Final push
+
+Before the final push, fetch and merge the latest `origin/main`. This is the rule in `AGENTS.md`.
+
+```bash
+git fetch origin main
+git merge origin/main
+```
+
+No rebase. No force-push. When the merge changes the tree, rerun the checks this pull request requires and update the results table. When `origin/main` is already an ancestor of `HEAD`, the recorded results stand. Under the results table, record one line: `final push: origin/main already contained` or `final push: merged origin/main and reran the checks`. Done when `git merge-base --is-ancestor origin/main HEAD` exits 0.
+
+Never merge the pull request. Daniel squash-merges. That merge is the final gate.

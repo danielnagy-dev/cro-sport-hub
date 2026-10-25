@@ -1,6 +1,6 @@
 # Team
 
-Who does what in this repo. The coordinator is the agent that received the request. It splits the work, asks the next role, and tracks status. It decides whether a separate review agent runs (Phase, below). It does not review the diff and it does not merge.
+Who does what in this repo. The coordinator is the agent that received the request. It splits the work, asks the next role, and tracks status on the `**Status:**` line of `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. It decides whether a separate review agent runs (Phase, below). It does not review the diff and it does not merge.
 
 UI and UX visual design stays with a designer outside the repo. DevOps joins at deploy time. Neither has a skill here.
 
@@ -65,13 +65,13 @@ A separate agent starts with `custom_mode: "review"` and does not share the impl
 
 ## Flow
 
-1. Plan turns one plan item into a scope. The size target lives in the plan skill.
+1. Plan turns one plan item into a scope and writes it to `.scratch/<feature-slug>/issues/<NN>-<slug>.md` only. The size target lives in the plan skill. The file shape is in `docs/agents/issue-tracker.md`.
 2. Architect runs when that scope changes structure, shared types, or dependencies. Otherwise skip this step.
-3. Develop implements that scope, runs the checks once, and opens the PR. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`.
+3. Develop implements that scope, runs the checks once, and opens the PR. It updates only that same ticket file. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`. Before the final push, it merges the latest `origin/main` as `AGENTS.md` says (no rebase, no force-push) and reruns the checks when that merge changes the tree.
 4. The coordinator applies the active phase. When it does not call a separate agent, the author writes `## Review` (self-review, findings, fixes).
 5. Daniel squash-merges. That merge is the final gate. Agents never merge.
 
-The reviewer reads the diff and the results table. It does not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards stay in `lint`. One targeted command, only when the diff looks suspicious or a reported result is missing.
+The reviewer reads the diff and the results table. It does not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards stay in `lint`. One targeted command, only when the diff looks suspicious or a reported result is missing. It also confirms `origin/main` is an ancestor of `HEAD`.
 
 No majors means **ready**, with the nits listed. Nits never block. The author may fix nits in this PR without another review. **small fixes** is a local major, and the next review covers only the changed lines. **rework** is a redesign or a failed acceptance check.
 

@@ -84,6 +84,14 @@ Guard: written rule in `docs/team.md`, `.cursor/skills/develop/SKILL.md`, `.curs
 
 No new check: the gate is the phase heading plus a path list. A script would restate the coordinator's job.
 
+## 2026-10-25 — plan files stopped sharing one status table
+
+PRs #8 and #9 both conflicted on `docs/agents/issue-tracker.md` after #7 merged. Cause: the status table and the plan notes lived in one file, so every pull request edited it.
+
+Guard: one ticket file per item at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. That is the local-markdown layout from mattpocock/skills `skills/engineering/setup-matt-pocock-skills/issue-tracker-local.md` at `5beb35b040e3de97e54fa9e386d7e42d15c295c2`, copied into `docs/agents/issue-tracker.md`. `**Status:**` is `ready-for-agent`, `claimed`, or `resolved`. The index does not list items. A pull request edits only its own ticket file. Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push) and rerun the checks when that merge changes the tree. A merge that does not change the tree leaves the recorded results in place, so checks still run once. Where: `docs/agents/issue-tracker.md`, `.cursor/skills/plan`, `.cursor/skills/develop`, `.cursor/skills/review`, `AGENTS.md`, `docs/team.md`, and the short form in `.cursor/rules/lessons.mdc`.
+
+No guard in `tools/guards/check.ts`, and no `plan:list` script. A script would restate the directory and need a task plus a typecheck entry. A guard that a branch edited only its own ticket file needs the plan id, and the diff does not carry one. A ban on tables in the index misses a bullet list and rejects a legitimate table. Structure removes the shared list, so there is nothing left for a check to police. `.scratch/` is not gitignored, so the upstream path is committed as-is.
+
 ## 2026-10-25 — empty `toThrow`
 
 A failure proof with no expected error showed up a third time. The first was a short substring in the plan-item 21a review. The second was the vendored-skill guard self-test, fixed by comparing the full line. This time `rejects.toThrow()` took no argument, so any throw would pass. Cause: the matcher was used as a boolean. Guard: Oxlint `vitest/require-to-throw-message` in the root `vite.config.ts` (plugin `vitest`, Oxlint 1.89.0). It errors when `toThrow` or `rejects.toThrow` has no argument, including imports from `vite-plus/test`. `apps/studio/src/app/studio-api.spec.ts` now expects the Zod message. Origin PR #4 still has a bare `rejects.toThrow()` in `apps/web/tests/api-client.test.ts` and is not on `main`; that file needs an expected error once both pull requests merge.

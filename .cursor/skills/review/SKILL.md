@@ -20,11 +20,11 @@ Who reviews is the phase in `docs/team.md`. This file is the checklist either wa
 
 ## Checklist
 
-Read the diff, the plan item or spec, `AGENTS.md`, `docs/team.md`, `docs/lessons.md`, the `.cursor/rules/` that match the files, and `docs/feature-map.md` when behaviour changes. Judge the diff against that plan and those rules. Standards sources are `AGENTS.md`, the matching `.cursor/rules/`, and `docs/lessons.md`. The spec is the plan note or the PR `## Summary` (`docs/agents/issue-tracker.md`).
+Read the diff, the plan item or spec, `AGENTS.md`, `docs/team.md`, `docs/lessons.md`, the `.cursor/rules/` that match the files, and `docs/feature-map.md` when behaviour changes. Judge the diff against that plan and those rules. Standards sources are `AGENTS.md`, the matching `.cursor/rules/`, and `docs/lessons.md`. The spec is `.scratch/<feature-slug>/issues/<NN>-<slug>.md` when the pull request names an id, or the PR `## Summary` when that file is not in the branch (`docs/agents/issue-tracker.md`). Fetch it the way that tracker doc says.
 
 ## Commands
 
-The author already ran the checks and recorded the results table under `## Verification` (`.cursor/skills/develop/SKILL.md`). Read the diff and that table. Do not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards already ran inside `lint`. Run one targeted command only when something in the diff looks suspicious or a reported result is missing. Then stop.
+The author already ran the checks and recorded the results table under `## Verification` (`.cursor/skills/develop/SKILL.md`). Read the diff and that table. Do not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards already ran inside `lint`. Also fetch `origin/main` and confirm it is an ancestor of `HEAD` (`git merge-base --is-ancestor origin/main HEAD`). That git command is not a suite rerun. Run one further command only when something in the diff looks suspicious or a reported result is missing. Then stop.
 
 A missing `## Verification` section is a major. One missing row is that one command. A failed reported result is a major. Quote the command and the first error. A docs-only diff says `not applicable (no runtime change)` for `verify`.
 
@@ -47,5 +47,7 @@ Two lists. Each item is `path:line` — one-off or recurring — what is wrong.
 For a recurring major, name the guard, in this order: lint rule, type, test, verify check, written rule. Point at `docs/lessons.md`. A separate agent does not add the guard. A self-review may fix it in this PR when the fix stays in scope.
 
 Also check the size against the plan skill (300, split before 500), that `## Changes` lists every top-level path in `git diff --stat`, that `## Verification` matches the results table, and that no `Co-authored-by` line contains an email.
+
+A pull request that edits another ticket file, or that adds a per-item status list to `docs/agents/issue-tracker.md`, is a major. The results table needs the final-push line from `.cursor/skills/develop/SKILL.md`. `final push: merged origin/main and reran the checks` has to match a results table from after that merge. A table from before a merge that changed the tree is a major.
 
 Put the verdict and the findings in the chat and in the PR `## Review` section. A self-review labels itself self-review and lists findings and fixes. A separate agent touches nothing else. Daniel squash-merges. That merge is the final gate.

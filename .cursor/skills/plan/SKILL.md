@@ -22,7 +22,11 @@ For one plan item, write:
 5. **Architect.** Yes or no, and why.
 6. **Seams.** Each public boundary the tests will use, and one line on what it catches. `tdd` tests only these seams.
 
-Hand that note to the implementer. It becomes the PR Summary. The develop PR updates `docs/feature-map.md` when a route, endpoint, story, or user action changes; call that out here.
+Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md` specifies: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, with `**What to build:**`, `**Blocked by:**`, `**Status:**`, and acceptance checkboxes. Put Scope, Order, Acceptance, Verification, Architect, and Seams in that same file. Start `**Status:**` at `ready-for-agent`. Leave every other ticket file alone, and leave the index without a status list. That file is the note handed to the implementer. It becomes the PR Summary.
+
+Before the final push, develop fetches and merges the latest `origin/main`, as `AGENTS.md` says. No rebase. No force-push.
+
+The develop PR updates `docs/feature-map.md` when a route, endpoint, story, or user action changes; call that out here.
 
 When a decision is still open, follow `grilling`: ask Daniel in rounds, then write the settled answer into the note.
 
