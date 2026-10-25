@@ -16,6 +16,7 @@ import {
   tennisMatchStatsSchema,
   type AthleteTeam,
   type FieldIssue,
+  type PublishedMatchPage,
   type Role,
   type SportSlug,
 } from "@cro-sport-hub/shared-types";
@@ -24,6 +25,7 @@ import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
 import { z } from "zod";
+import { listPublishedMatches, type PublishedMatchQuery } from "./published-matches.js";
 import * as schema from "./schema.js";
 
 const {
@@ -95,6 +97,7 @@ export type Catalog = {
     kind: CatalogKind,
     key: string | AthleteTeamKey | CatalogParticipantKey,
   ): Promise<Stored | undefined>;
+  listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>;
   close(): Promise<void>;
 };
 
@@ -450,6 +453,14 @@ export async function openCatalog(
   return {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
+    listPublishedMatches: async (query) => {
+      try {
+        return await listPublishedMatches(db, query);
+      } catch (error) {
+        if (error instanceof z.ZodError) return invalidRecord(error);
+        throw error;
+      }
+    },
     close: () => {
       closing ??= options?.close?.() ?? Promise.resolve();
       return closing;

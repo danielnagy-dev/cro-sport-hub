@@ -38,6 +38,13 @@ export { matchSchema, roundSchema } from "./match.ts";
 export type { Match } from "./match.ts";
 
 export {
+  matchListQuerySchema,
+  publishedMatchPageSchema,
+  publishedMatchSchema,
+} from "./published-match.ts";
+export type { PublishedMatch, PublishedMatchPage } from "./published-match.ts";
+
+export {
   evaluateTennisScore,
   tennisBestOfSchema,
   tennisMatchSchema,
