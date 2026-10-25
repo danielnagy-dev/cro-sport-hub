@@ -25,7 +25,7 @@ Match the commands to the diff. Do not add a task this skill does not name unles
 
 Write the PR body to a file first (`origin pr view` prints it). A shallow clone may only see `HEAD`. If `origin/main` is missing, fetch it and rerun `vp run guards` so every commit on the branch is checked.
 
-When the diff touches only docs, rules, skills, templates, or guards, run:
+Baseline checks always run: `format-check`, `lint`, `guards`, and `--pr-body`.
 
 ```bash
 vp run format-check
@@ -36,7 +36,7 @@ vpx tools/guards/check.ts --pr-body <pr-body.md>
 
 Read the diff. A `tools/guards` change also runs `vp run typecheck`.
 
-When the diff changes app, lib, or tool runtime code, or a dependency, also run `vp run typecheck`, `vp run test`, `vp run build`, and the verify targets the plan named (`vp run verify:api|studio|web|ui`, plus `--route`). A docs-only diff does not get a verify run. Confirm the PR says `not applicable (no runtime change)`.
+When the diff changes app, lib, or tool runtime code, or a dependency, the baseline checks still run (`format-check`, `lint`, `guards`, and `--pr-body`), and also run `vp run typecheck`, `vp run test`, `vp run build`, and the verify targets the plan named (`vp run verify:api|studio|web|ui`, plus `--route`). A docs-only diff does not get a verify run. Confirm the PR says `not applicable (no runtime change)`.
 
 A failed command at this depth is a major. Quote the command and the first error.
 

@@ -31,7 +31,7 @@ vp run guards
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
 - The description says what changed, why, and how to test it. The description becomes the squash commit body.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
-- No `Co-authored-by` line with an email in a commit message or the PR description.
+- No `Co-authored-by` line with an email in a commit message or the PR description. If a hook adds one, strip it before pushing.
 - Agents do not merge. Roles and the order of work are in `docs/team.md`.
 
 ## Verification (required for every PR that changes behaviour)
@@ -80,7 +80,7 @@ The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `g
 - NestJS: https://docs.nestjs.com/llms.txt (append `.md` to a chapter URL)
 - Vite+: https://viteplus.dev/llms.txt
 - Vitest: https://vitest.dev/llms.txt · Zod: https://zod.dev/llms.txt · Storybook: https://storybook.js.org/llms.txt
-- ORM: add the chosen ORM's llms.txt in ADR-002 when that decision lands
+- ORM: Drizzle. Decision and the llms.txt link: `docs/adr/002-drizzle-vs-prisma.md`
 
 ## Next.js agent block
 

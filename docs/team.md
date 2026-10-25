@@ -36,7 +36,7 @@ General technique is in `.agents/skills/` (read-only). On conflict, `AGENTS.md`,
 4. A separate agent reviews. Start it with `custom_mode: "review"` on the PR branch. When custom modes are unavailable, launch a separate agent and tell it to read and follow `.cursor/skills/review/SKILL.md` for the whole run. It does not share the implementer's chat. Cursor's built-in `/review` skill is not this role.
 5. Daniel squash-merges when the verdict is ready. Agents never merge.
 
-Review depth follows the diff. Docs, rules, skills, templates, and guards get `format-check`, `lint`, `guards`, and a reading of the diff. `tools/guards` also gets `typecheck`. App, lib, or tool runtime code, and dependency changes, also get `typecheck`, `test`, `build`, and the named `verify:*` runs. The reviewer adds nothing else unless the coordinator names a risk.
+Baseline checks always run: `format-check`, `lint`, `guards`, and `--pr-body`. Review depth then follows the diff. Docs, rules, skills, templates, and guards get those baseline checks and a reading of the diff. `tools/guards` also gets `typecheck`. App, lib, or tool runtime code, and dependency changes, also get `typecheck`, `test`, `build`, and the named `verify:*` runs. The reviewer adds nothing else unless the coordinator names a risk.
 
 No majors means **ready**, with the nits listed. The author may fix nits in this PR without another review. **small fixes** is a local major, and the next review covers only the changed lines. **rework** is a redesign or a failed acceptance check.
 

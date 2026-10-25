@@ -1,6 +1,7 @@
 import { HttpClient, provideHttpClient, withInterceptors } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
+import { expect } from "vite-plus/test";
 import { firstValueFrom } from "rxjs";
 import { stubApiInterceptor, stubMatches, stubSports } from "./stub-api";
 import { matchesPath, sportsPath, StudioApi } from "./studio-api";
@@ -35,7 +36,9 @@ describe("StudioApi", () => {
     const matches = firstValueFrom(api.matches());
     http.expectOne(matchesPath).flush([{ id: "bad" }]);
 
-    await expect(matches).rejects.toThrow();
+    await expect(matches).rejects.toThrow(
+      '[\n  {\n    "expected": "string",\n    "code": "invalid_type",\n    "path": [\n      0,\n      "sportId"\n    ],\n    "message": "Invalid input: expected string, received undefined"\n  },\n  {\n    "expected": "string",\n    "code": "invalid_type",\n    "path": [\n      0,\n      "competitionId"\n    ],\n    "message": "Invalid input: expected string, received undefined"\n  },\n  {\n    "expected": "string",\n    "code": "invalid_type",\n    "path": [\n      0,\n      "date"\n    ],\n    "message": "Invalid input: expected string, received undefined"\n  },\n  {\n    "expected": "string",\n    "code": "invalid_type",\n    "path": [\n      0,\n      "round"\n    ],\n    "message": "Invalid input: expected string, received undefined"\n  },\n  {\n    "code": "invalid_value",\n    "values": [\n      "draft",\n      "review",\n      "published"\n    ],\n    "path": [\n      0,\n      "status"\n    ],\n    "message": "Invalid option: expected one of \\"draft\\"|\\"review\\"|\\"published\\""\n  },\n  {\n    "code": "invalid_value",\n    "values": [\n      "manual",\n      "import"\n    ],\n    "path": [\n      0,\n      "source"\n    ],\n    "message": "Invalid option: expected one of \\"manual\\"|\\"import\\""\n  },\n  {\n    "expected": "string",\n    "code": "invalid_type",\n    "path": [\n      0,\n      "createdBy"\n    ],\n    "message": "Invalid input: expected string, received undefined"\n  }\n]',
+    );
   });
 });
 

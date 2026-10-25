@@ -32,6 +32,8 @@ export default defineConfig({
     // TypeScript 7 and crashes on `ts.Intrinsic`. Studio templates stay on
     // `ngc --noEmit`. Do not re-add the plugin until that load path works.
     jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
+    // `plugins` replaces Oxlint's default set. Keep unicorn, typescript, and oxc.
+    plugins: ["unicorn", "typescript", "oxc", "vitest"],
     rules: {
       "vite-plus/prefer-vite-plus-imports": "error",
       "typescript/no-explicit-any": "error",
@@ -46,6 +48,10 @@ export default defineConfig({
       "typescript/no-unsafe-return": "error",
       "typescript/switch-exhaustiveness-check": "error",
       "typescript/no-unnecessary-type-assertion": "error",
+      "vitest/require-to-throw-message": "error",
+      // expect-expect misses HttpTestingController. no-conditional-expect flags shared-schema `if (!success) expect(...)`.
+      "vitest/expect-expect": "off",
+      "vitest/no-conditional-expect": "off",
       "no-console": ["error", { allow: ["warn", "error"] }],
     },
     options: { typeAware: true, typeCheck: false },
