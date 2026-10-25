@@ -25,7 +25,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | api.health           | Health check                                       | api    | live    | `GET /health`                            | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | api.openapi          | OpenAPI docs                                       | api    | live    | `http://localhost:3001/docs`             | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
-| ui.results           | Tennis and football match scores                   | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
+| ui.results           | Scores, stats, and appearances                     | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
 | studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/`                 | `vp run verify:studio` | plan items for the studio skeleton (formerly GH #34) |
 | web.home-placeholder | Web layout shell                                   | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | plan item 17                                         |
 | web.home             | Latest results home                                | web    | planned | `/`                                      | -                      | later plan                                           |
@@ -122,32 +122,35 @@ Preconditions: port 6006 is free. Playwright Chromium is installed.
 - The story list comes from `/index.json` (`type: "story"`, at most 10). Adding a story does not require a code change in the driver; the new story is included on the next run. A story whose id is `library--base` must still show `Sample Athlete`.
 - Do not point this check at a production build of Storybook unless you pass `--url`.
 
-### ui.results: Tennis and football match scores
+### ui.results: Match scores, tennis stats, and appearances
 
-Storybook shows a tennis set scoreboard, a retirement, and a football score. Names are samples. `Library/Base` is unchanged. Tennis percentages and the appearances table are a later change.
+Storybook shows a tennis set scoreboard, a retirement, a football score, serve and return percentages, and an appearances table. Names are samples. `Library/Base` is unchanged. The web home does not render these components.
 
 #### Sub-features
 
 - `ui.results-tennis` shows Sample Player A, set columns, Winner, and the loser's tiebreak on the 7-6 set.
 - `ui.results-retired` shows Retired and does not show Winner.
 - `ui.results-football` shows Sample Home, Sample Away, and the goals. It does not name a winner.
+- `ui.results-tennis-stats` shows Sample Player, 60% and 66.7% from the counts, and No attempts when a denominator is zero. A real zero rate stays 0%.
+- `ui.results-appearances` shows Sample Cup, the match date and round, minutes, goals, assists, and cards, including Second yellow.
 
 #### How to get to it (user POV)
 
-- Open Storybook at `http://localhost:6006` and choose Results / Tennis Score, Retired, or Football Score.
-- Direct iframes: `results--tennis-score`, `results--retired`, `results--football-score`.
+- Open Storybook at `http://localhost:6006` and choose a Results story.
+- Direct iframes: `results--tennis-score`, `results--retired`, `results--football-score`, `results-tennis-stats--percentages`, `results-appearances--table`.
 
 #### Driving it with verify
 
 Preconditions: same as `ui.library`.
 
-- **Stories.** Run `vp run verify:ui`. The Results rows are `pass` with proof text `Sample Player A`, `Retired`, and `Sample Home`.
+- **Stories.** Run `vp run verify:ui`. The score rows stay `pass` with `Sample Player A`, `Retired`, and `Sample Home`. Tennis stats is `pass` with `66.7%`. Appearances is `pass` with `Second yellow`.
 
 #### Gotchas
 
 - The tiebreak figure is the loser's points. It is announced with that player. The superscript is hidden from assistive tech so the number is not read twice.
 - Football scores do not name a winner, including a 2-0.
-- These stories are not on the web or studio pages yet.
+- A tennis percentage is No attempts when its denominator is 0. That is a different cell from 0%.
+- These stories are not on the web or studio pages. The home page does not render `MatchCard`, so the stats view and the appearances table stay in the library.
 
 ### studio.shell: Studio layout shell
 

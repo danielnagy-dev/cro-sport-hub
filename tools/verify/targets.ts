@@ -1,7 +1,7 @@
 /**
  * What `vp run verify:<target>` drives. Routes and handles match the apps on main.
  * Studio and web are one screen each. UI stories are Library/Base plus the
- * Results tennis and football score stories.
+ * Results score, tennis stats, and appearances stories.
  */
 
 export const ports = {
@@ -109,4 +109,6 @@ export const storyProof: Record<string, string> = {
   "results--tennis-score": "Sample Player A",
   "results--retired": "Retired",
   "results--football-score": "Sample Home",
+  "results-tennis-stats--percentages": "66.7%",
+  "results-appearances--table": "Second yellow",
 };

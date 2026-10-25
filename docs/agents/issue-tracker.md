@@ -17,3 +17,11 @@ Write `.scratch/<feature>/issues/<NN>-<slug>.md` only when Daniel asks.
 ## Pull requests
 
 PRs live on Cursor Origin. Agents never merge.
+
+## Status
+
+Origin still has no issues. This table is plan-item status, not an issue.
+
+| Plan             | Status                                                                                                                                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 16 match results | PR #5 merged the match card. PR #7 adds the tennis stats view and the appearances table in `libs/ui`. Web does not render `MatchCard`, so both stay in the library. See `ui.results` in `docs/feature-map.md`. |

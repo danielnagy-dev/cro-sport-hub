@@ -78,23 +78,33 @@
   margin: 0;
 }
 
-.csh-match-card {
+.csh-match-card,
+.csh-tennis-stats,
+.csh-appearances {
   color: var(--csh-color-text);
   font-family: var(--csh-font-sans);
 }
 
-.csh-match-card table {
+.csh-match-card table,
+.csh-tennis-stats table,
+.csh-appearances table {
   border-collapse: collapse;
 }
 
-.csh-match-card caption {
+.csh-match-card caption,
+.csh-tennis-stats caption,
+.csh-appearances caption {
   padding-bottom: var(--csh-space-2);
   font-weight: 600;
   text-align: start;
 }
 
 .csh-match-card th,
-.csh-match-card td {
+.csh-match-card td,
+.csh-tennis-stats th,
+.csh-tennis-stats td,
+.csh-appearances th,
+.csh-appearances td {
   padding: var(--csh-space-2) var(--csh-space-3);
   border-bottom: 1px solid var(--csh-color-border);
   text-align: start;
