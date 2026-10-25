@@ -1,0 +1,12 @@
+---
+description: A repeated mistake becomes a check. Tools run on Linux and macOS.
+alwaysApply: true
+---
+
+# Lessons and platforms
+
+- A mistake seen a second time becomes an automatic check before the next PR repeats it. Log it in `docs/lessons.md` (date, mistake, root cause, guard, where). Prefer a lint rule, then a type that rules it out, then a test, then a `vp run verify:*` check, then a written rule. A written rule must say why no check was added. The corrections ladder in `AGENTS.md` still comes first: if a code change removes the mistake, do that instead of adding a check.
+- Tools and scripts run on Linux and on macOS. Do not read the Linux proc filesystem or any other Linux-only API. Daniel runs macOS. Port checks bind a socket or call `lsof`.
+- No `Co-authored-by` line that contains an email in a commit message or a PR description. `vp run guards` fails on one.
+- Agents do not merge. Daniel squash-merges.
+- Review runs as a separate agent. Prefer `custom_mode: "review"`. When custom modes are unavailable, launch a separate agent and tell it to read and follow `.cursor/skills/review/SKILL.md` for the whole run. This is a written rule: custom modes are an account setting, so the repo cannot lint them.

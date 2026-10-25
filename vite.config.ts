@@ -62,8 +62,9 @@ export default defineConfig({
     cache: true,
     tasks: {
       "format-check": "vp fmt --check",
+      // guards also runs uncached as `vp run guards` so a lint cache hit cannot hide a trailer.
       lint: {
-        command: "vp lint",
+        command: "vp lint && vpx tools/guards/check.ts",
         dependsOn: [
           "@cro-sport-hub/shared-types#build",
           "@cro-sport-hub/ui#build",
@@ -71,7 +72,8 @@ export default defineConfig({
         ],
       },
       typecheck: {
-        command: "vp run -r typecheck && tsc --noEmit -p tools/verify/tsconfig.json",
+        command:
+          "vp run -r typecheck && tsc --noEmit -p tools/verify/tsconfig.json && tsc --noEmit -p tools/guards/tsconfig.json",
         dependsOn: [
           "@cro-sport-hub/shared-types#build",
           "@cro-sport-hub/ui#build",
@@ -80,6 +82,7 @@ export default defineConfig({
       },
       test: "vp run -r test",
       build: "vp run -r build",
+      guards: { command: "vpx tools/guards/check.ts", cache: false },
       "verify:doctor": { command: "vpx tools/verify/verify.ts doctor", cache: false },
       "verify:api": { command: "vpx tools/verify/verify.ts api", cache: false },
       "verify:studio": { command: "vpx tools/verify/verify.ts studio", cache: false },

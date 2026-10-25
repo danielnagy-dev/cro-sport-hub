@@ -20,6 +20,7 @@ vp run lint
 vp run typecheck
 vp run test
 vp run build
+vp run guards
 ```
 
 `vp run typecheck` runs each package typecheck, including `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
@@ -30,6 +31,8 @@ vp run build
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
 - The description says what changed, why, and how to test it. The description becomes the squash commit body.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
+- No `Co-authored-by` line with an email in a commit message or the PR description.
+- Agents do not merge. Roles and the order of work are in `docs/team.md`.
 
 ## Verification (required for every PR that changes behaviour)
 
@@ -53,6 +56,10 @@ When a reviewer finds a mistake that could happen again, fix it at the highest l
 4. A skill in `.cursor/skills/`.
 
 Never only a comment or a human-only style guide. Delete hacks and workarounds once the real fix lands; agents copy what they see.
+
+## Lessons
+
+A mistake that shows up a second time becomes an automatic check before another PR repeats it. Prefer a lint rule, then a type, then a test, then a `vp run verify:*` check, then a written rule. The log is `docs/lessons.md`. The short form agents always see is `.cursor/rules/lessons.mdc`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off.
 
 ## Docs to read before writing framework code
 
