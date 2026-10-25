@@ -12,7 +12,18 @@ import { defineConfig } from "vite-plus";
  * `ngc --noEmit`. `typeAware` stays on so lint rules can use types.
  */
 export default defineConfig({
-  fmt: {},
+  fmt: {
+    // The seven vendored skill folders are copied as-is. skills-lock.json is not an oxfmt target.
+    ignorePatterns: [
+      ".agents/skills/code-review/**",
+      ".agents/skills/codebase-design/**",
+      ".agents/skills/diagnosing-bugs/**",
+      ".agents/skills/grill-me/**",
+      ".agents/skills/grilling/**",
+      ".agents/skills/tdd/**",
+      ".agents/skills/writing-for-agents/**",
+    ],
+  },
   lint: {
     // correctness is already Oxlint's default error category. Set it here so the
     // severity stays visible next to the stricter rules below.

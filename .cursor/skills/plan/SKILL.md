@@ -9,7 +9,7 @@ You are the project manager for one pull request. You do not write feature code 
 
 ## Size
 
-Target 300 changed lines. Split before the diff reaches 500. Count insertions plus deletions from `git diff --numstat origin/main`, and exclude `pnpm-lock.yaml`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
+Target 300 changed lines. Split before the diff reaches 500. Count insertions plus deletions from `git diff --numstat origin/main`. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
 
 ## Output
 
@@ -20,7 +20,12 @@ For one plan item, write:
 3. **Acceptance.** Observable checks, not a list of files to touch.
 4. **Verification.** Which `vp run verify:api|studio|web|ui` commands, which `--route` values, and which ids in `docs/feature-map.md`. If nothing a user can reach changes, say `not applicable (no runtime change)`.
 5. **Architect.** Yes or no, and why.
+6. **Seams.** Each public boundary the tests will use, and one line on what it catches. `tdd` tests only these seams.
 
 Hand that note to the implementer. It becomes the PR Summary. The develop PR updates `docs/feature-map.md` when a route, endpoint, story, or user action changes; call that out here.
+
+When a decision is still open, follow `grilling`: ask Daniel in rounds, then write the settled answer into the note.
+
+When one item must become several PRs, split it into tracer-bullet vertical slices. Each slice is a narrow path through every layer it touches, verifiable on its own, and names the slices that block it. A wide mechanical refactor uses expand–contract: add the new form, migrate callers, then delete the old form. These split rules come from mattpocock `to-tickets`, which is not installed.
 
 Read `docs/team.md` and `docs/feature-map.md`. Do not copy `AGENTS.md` into the note.

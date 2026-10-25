@@ -61,6 +61,18 @@ Never only a comment or a human-only style guide. Delete hacks and workarounds o
 
 A mistake that shows up a second time becomes an automatic check before another PR repeats it. Prefer a lint rule, then a type, then a test, then a `vp run verify:*` check, then a written rule. The log is `docs/lessons.md`. The short form agents always see is `.cursor/rules/lessons.mdc`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off.
 
+## Agent skills
+
+Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win. Role skills keep the repo rules and delegate general technique to those copies. Provenance and the update steps are in `.agents/skills/THIRD_PARTY.md`.
+
+Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. That covers `grill-me` (X is `grilling`) and `tdd` (X is `codebase-design`).
+
+Issue tracker: none. A plan item, or the PR `## Summary`, is the spec. See `docs/agents/issue-tracker.md`.
+
+Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents/domain.md`.
+
+The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `grill-me`, `writing-for-agents`, and `code-review`. Do not run `setup-matt-pocock-skills`. Do not install `implement`, `implement-spec`, `triage`, `to-spec`, `wayfinder`, `wizard`, or `pr`.
+
 ## Docs to read before writing framework code
 
 - Angular: https://angular.dev/llms.txt and `.cursor/rules/angular-best-practices.mdc`

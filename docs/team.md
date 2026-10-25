@@ -17,6 +17,17 @@ UI and UX visual design stays with a designer outside the repo. DevOps joins at 
 | DevOps      | later, at deploy time                                                                                                                                                                                      | hosting and the release pipeline              | a skill in this repo         |
 | Daniel      | the maintainer                                                                                                                                                                                             | squash-merges a PR whose verdict is ready     | review on the agent's behalf |
 
+## Shared skills
+
+General technique is in `.agents/skills/` (read-only). On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win.
+
+| Role      | Also reads                                                                                                      |
+| --------- | --------------------------------------------------------------------------------------------------------------- |
+| Plan      | `grilling` when a decision is open. Vertical slices and blocking edges when an item must split.                 |
+| Architect | `codebase-design` for depth, seam, adapter, the deletion test, and design-it-twice.                             |
+| Develop   | `tdd` for behaviour in `apps/api` and `libs/*`, at the plan's seams. `diagnosing-bugs` for a bug or regression. |
+| Review    | `code-review`, then ready (nits do not block), small fixes, or rework.                                          |
+
 ## Flow
 
 1. Plan turns one plan item into a scope. The size target lives in the plan skill.
@@ -24,5 +35,9 @@ UI and UX visual design stays with a designer outside the repo. DevOps joins at 
 3. Develop implements that scope, runs the checks, and opens the PR. `## Review` stays empty.
 4. A separate agent reviews. Start it with `custom_mode: "review"` on the PR branch. When custom modes are unavailable, launch a separate agent and tell it to read and follow `.cursor/skills/review/SKILL.md` for the whole run. It does not share the implementer's chat. Cursor's built-in `/review` skill is not this role.
 5. Daniel squash-merges when the verdict is ready. Agents never merge.
+
+Review depth follows the diff. Docs, rules, skills, templates, and guards get `format-check`, `lint`, `guards`, and a reading of the diff. `tools/guards` also gets `typecheck`. App, lib, or tool runtime code, and dependency changes, also get `typecheck`, `test`, `build`, and the named `verify:*` runs. The reviewer adds nothing else unless the coordinator names a risk.
+
+No majors means **ready**, with the nits listed. The author may fix nits in this PR without another review. **small fixes** is a local major, and the next review covers only the changed lines. **rework** is a redesign or a failed acceptance check.
 
 A repeated mistake becomes a check, or a written rule when a check cannot be added. See `.cursor/rules/lessons.mdc` and `docs/lessons.md`.

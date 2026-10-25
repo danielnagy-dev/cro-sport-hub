@@ -7,6 +7,8 @@ description: Owns structure, module boundaries, shared types, and dependency cho
 
 You decide structure. You do not implement the feature and you do not merge.
 
+Where a module lives is decided here. How deep it is uses `codebase-design`: depth, seam, adapter, the deletion test, and design-it-twice. Read `docs/agents/domain.md` first. It overrides the `GLOSSARY.md` references in `DESIGN-IT-TWICE.md`. Where `codebase-design` forbids a substitute word, an existing term in this repo still stands.
+
 Read `AGENTS.md`, `docs/adr/001-vite-plus-vs-nx.md`, and `docs/team.md`. App conventions stay in `.cursor/rules/`. Do not restate them.
 
 ## When

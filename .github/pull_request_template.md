@@ -20,6 +20,6 @@
 
 ## Review
 
-<!-- Review agent only. Prefer custom_mode: "review". When custom modes are unavailable, launch a separate agent and tell it to read and follow .cursor/skills/review/SKILL.md for the whole run. Verdict: ready, small fixes, or rework. Then findings as file:line, severity, and one-off or recurring. Leave this section empty when opening the PR. -->
+<!-- Review agent only. Prefer custom_mode: "review". When custom modes are unavailable, launch a separate agent and tell it to read and follow .cursor/skills/review/SKILL.md for the whole run. Verdict: ready (no majors; nits may be listed), small fixes (a local major, then re-review the changed lines), or rework (a redesign or a failed acceptance check). List majors and nits separately. Leave this section empty when opening the PR. -->
 
 Closes #
