@@ -26,7 +26,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | api.openapi          | OpenAPI docs                                       | api    | live    | `http://localhost:3001/docs`             | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
 | studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/`                 | `vp run verify:studio` | plan items for the studio skeleton (formerly GH #34) |
-| web.home-placeholder | Web placeholder page                               | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | scaffold                                             |
+| web.home-placeholder | Web layout shell                                   | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | plan item 17                                         |
 | web.home             | Latest results home                                | web    | planned | `/`                                      | -                      | later plan                                           |
 | web.sport            | Sport pages (tennis, football)                     | web    | planned | `/[sport]`                               | -                      | later plan                                           |
 | web.athlete          | Athlete page with club history and stats           | web    | planned | `/athletes/[slug]`                       | -                      | later plan                                           |
@@ -149,25 +149,29 @@ Preconditions: port 4200 is free. Playwright Chromium is installed. No Docker.
 - Match rows come from the in-app stub (`apps/studio/src/app/stub-api.ts`), not from `GET /health` or the API. A green studio run does not prove the API.
 - `QF` is seed data, not a person's name. When the seed round changes, update this entry and `tools/verify/targets.ts` together.
 
-### web.home-placeholder: Web placeholder page
+### web.home-placeholder: Web layout shell
 
-The web home page is a scaffold. It shows one heading, `Cro Sport Hub`, inside `main`. It links the shared-types and UI packages by id and does not list results yet.
+The public home page is a layout shell. It shows a skip link, a header link back to `/`, and the heading `Cro Sport Hub` inside `main`. Colors and type come from the shared UI tokens. It does not list results. A typed read client for `/api/sports` and `/api/matches` lives in the app and is not called from this page.
 
 #### Sub-features
 
 - `web.home-heading` renders the heading inside `main`.
+- `web.home-skip` offers a skip link to `#content`. The verify check still proves the heading.
 
 #### How to get to it (user POV)
 
 - Open `http://localhost:3000/`.
+- The header link returns to this page. There is no other route yet.
 
 #### Driving it with verify
 
 Preconditions: port 3000 is free. Playwright Chromium is installed.
 
-- **Open home.** Run `vp run verify:web`. The `Home` row is `pass`, the `main` landmark is visible, and the heading text `Cro Sport Hub` is visible.
+- **Open home.** Run `vp run verify:web`. The `Home` row is `pass`, the `main` landmark is visible, and the text `Cro Sport Hub` is visible inside it.
 
 #### Gotchas
 
 - `next dev` may write `apps/web/AGENTS.md`. Commit that file unchanged.
-- Later plan items replace this placeholder. Update this entry in that PR rather than claiming the results home is live.
+- The read client is not called from this page. The API does not serve `/api/sports` or `/api/matches` yet, and a failed request would fail the verify run.
+- The skip link stays off-screen until it receives focus, so the screenshot shows the header and the heading.
+- Later plan items replace this shell with the results home. Update this entry in that PR rather than claiming the results home is live.
