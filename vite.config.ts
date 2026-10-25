@@ -22,6 +22,8 @@ export default defineConfig({
       ".agents/skills/grilling/**",
       ".agents/skills/tdd/**",
       ".agents/skills/writing-for-agents/**",
+      // Round-13 handoff, kept as the designer delivered it.
+      "libs/slide-generator/design/**",
     ],
   },
   lint: {

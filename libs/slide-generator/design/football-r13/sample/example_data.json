@@ -1,0 +1,244 @@
+{
+ "_note": "EXAMPLE DATA – fictional players, invented numbers (shirt numbers, positions, stats). For layout demonstration only; do not publish. Club/league names appear as plain text only (no logos, no photos).",
+ "brand": "HRVATSKI SPORT",
+ "merge_lone_rows": false,
+ "slides": [
+  {
+   "type": "player",
+   "player": "Karlo Brkić",
+   "club": "GNK Dinamo",
+   "match": {
+    "home": "Slaven Belupo",
+    "away": "Dinamo",
+    "home_score": 1,
+    "away_score": 5,
+    "highlight": "away"
+   },
+   "stats": [
+    {
+     "label": "Golovi",
+     "value": "2",
+     "key": "goals"
+    },
+    {
+     "label": "Asistencije",
+     "value": "1",
+     "key": "assists"
+    },
+    {
+     "label": "Minute",
+     "value": "90’",
+     "key": "minutes"
+    },
+    {
+     "label": "Udarci",
+     "value": "5",
+     "key": "shots",
+     "on_target": "3"
+    },
+    {
+     "label": "Ključna dodavanja",
+     "value": "2",
+     "key": "key_passes"
+    },
+    {
+     "label": "Dodavanja",
+     "key": "passes",
+     "accurate": 25,
+     "total": 32
+    },
+    {
+     "label": "Žuti karton",
+     "value": "1",
+     "key": "yellow"
+    }
+   ],
+   "competition": "SuperSport HNL",
+   "round": "10. kolo",
+   "date": "18. 10.",
+   "lineup": "start",
+   "number": 9,
+   "position": "napadač"
+  },
+  {
+   "type": "list",
+   "groups": [
+    {
+     "league": "Serie A",
+     "players": [
+      {
+       "player": "Filip Šarić",
+       "match": {
+        "home": "Fiorentina",
+        "away": "Como",
+        "home_score": 1,
+        "away_score": 3,
+        "highlight": "away"
+       },
+       "stats": [
+        {
+         "label": "Minute",
+         "value": "90’",
+         "key": "minutes"
+        },
+        {
+         "label": "Asistencije",
+         "value": "1",
+         "key": "assists"
+        },
+        {
+         "label": "Ključna dodavanja",
+         "value": "3",
+         "key": "key_passes"
+        },
+        {
+         "label": "Dodavanja",
+         "key": "passes",
+         "accurate": 38,
+         "total": 45
+        },
+        {
+         "label": "Udarci",
+         "value": "1",
+         "key": "shots"
+        },
+        {
+         "label": "Žuti karton",
+         "value": "1",
+         "key": "yellow"
+        }
+       ],
+       "lineup": "start",
+       "number": 17,
+       "position": "desni bek"
+      },
+      {
+       "player": "Mateo Jurčić",
+       "match": {
+        "home": "Juventus",
+        "away": "Lazio",
+        "home_score": 1,
+        "away_score": 1,
+        "highlight": "away"
+       },
+       "stats": [
+        {
+         "label": "Minute",
+         "value": "90’",
+         "key": "minutes"
+        },
+        {
+         "label": "Dodavanja",
+         "key": "passes",
+         "accurate": 46,
+         "total": 50
+        },
+        {
+         "label": "Žuti karton",
+         "value": "1",
+         "key": "yellow"
+        }
+       ],
+       "lineup": "start",
+       "number": 6,
+       "position": "branič"
+      },
+      {
+       "player": "Leon Vuković",
+       "match": {
+        "home": "Milan",
+        "away": "Atalanta",
+        "home_score": 3,
+        "away_score": 2,
+        "highlight": "home"
+       },
+       "stats": [
+        {
+         "label": "Minute",
+         "value": "90’",
+         "key": "minutes"
+        },
+        {
+         "label": "Golovi",
+         "value": "1",
+         "key": "goals"
+        },
+        {
+         "label": "Asistencije",
+         "value": "1",
+         "key": "assists"
+        },
+        {
+         "label": "Udarci",
+         "value": "3",
+         "key": "shots",
+         "on_target": "2"
+        },
+        {
+         "label": "Ključna dodavanja",
+         "value": "4",
+         "key": "key_passes"
+        },
+        {
+         "label": "Dodavanja",
+         "key": "passes",
+         "accurate": 67,
+         "total": 72
+        },
+        {
+         "label": "Žuti karton",
+         "value": "1",
+         "key": "yellow"
+        }
+       ],
+       "lineup": "start",
+       "number": 14,
+       "position": "vezni"
+      },
+      {
+       "player": "Bruno Perić",
+       "match": {
+        "home": "Milan",
+        "away": "Atalanta",
+        "home_score": 3,
+        "away_score": 2,
+        "highlight": "away"
+       },
+       "stats": [
+        {
+         "label": "Minute",
+         "value": "32’",
+         "key": "minutes"
+        },
+        {
+         "label": "Golovi",
+         "value": "1",
+         "key": "goals"
+        },
+        {
+         "label": "Udarci",
+         "value": "2",
+         "key": "shots"
+        },
+        {
+         "label": "Dodavanja",
+         "key": "passes",
+         "accurate": 16,
+         "total": 20
+        }
+       ],
+       "lineup": "sub",
+       "number": 8,
+       "position": "vezni",
+       "sub_in": "58’"
+      }
+     ],
+     "round": "9. kolo",
+     "date": "18. 10."
+    }
+   ]
+  }
+ ],
+ "pack_list_slides": false,
+ "colorway": "navy"
+}

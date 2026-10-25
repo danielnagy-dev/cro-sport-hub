@@ -7,7 +7,7 @@ Public monorepo for a tennis and football results portal and an editorial studio
 - `apps/web` — Next.js App Router
 - `apps/studio` — Angular, standalone components and signals, built with the Angular CLI
 - `apps/api` — NestJS
-- `libs/shared-types`, `libs/ui`, `libs/slide-generator` — empty packages wired into the workspace
+- `libs/shared-types`, `libs/ui` — workspace packages. `libs/slide-generator` renders the round-13 football template (ADR-003)
 
 ## Requirements
 

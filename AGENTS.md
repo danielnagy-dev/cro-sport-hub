@@ -7,7 +7,7 @@ pnpm workspace run by Vite+ (`vp` 1.4.0). Node.js is pinned in `.node-version` (
 - `apps/web` — Next.js App Router (`next build`, `next dev`)
 - `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands.
 - `apps/api` — NestJS (`nest build`)
-- `libs/shared-types`, `libs/ui`, `libs/slide-generator` — empty workspace packages. Domain code is a later change.
+- `libs/shared-types`, `libs/ui` — workspace packages. `libs/slide-generator` renders the round-13 football template (ADR-003).
 
 Run task commands from the repository root. Library declaration emit uses the catalog compiler, and that compiler is not resolved correctly if the task runner is started inside `apps/studio` or `apps/api`. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
 

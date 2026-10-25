@@ -1,0 +1,241 @@
+<!-- Hrvatski sport football slide – ROUND 13, PENDING DANIEL'S FINAL APPROVAL. EXAMPLE DATA (fictional players). -->
+<!doctype html><html lang='hr'><head><meta charset='utf-8'><style>
+@font-face{font-family:'BS';src:url('../fonts/BigShouldersDisplay.ttf');font-weight:100 900}
+@font-face{font-family:'AR';src:url('../fonts/Archivo.ttf');font-weight:100 900;font-stretch:62% 125%}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1350px;overflow:hidden}
+.s{position:relative;width:1080px;height:1350px;overflow:hidden;color:var(--fg);font-family:'AR';
+   background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 35%,var(--bg2) 100%)}
+.tex,.fld{position:absolute;left:0;right:0;pointer-events:none}
+.tex{top:0;bottom:0;background:var(--tex)}
+.fld{top:0;height:700px;background:var(--field) no-repeat}
+.content{position:absolute;left:72px;right:72px;top:72px;bottom:184px;display:flex;flex-direction:column}
+.inner{display:flex;flex-direction:column;flex:1 0 auto}
+.p .inner{justify-content:flex-start}
+.p .who{margin-top:48px} .p .match{margin-top:var(--g1,48px)} .p .bottom{margin-top:var(--g2,40px)}
+.p .sline{border-top:0;padding-top:0}   /* runda 3: tanka linija je ispod zajedničkog naslova na vrhu */
+.measure{flex:none!important;justify-content:flex-start!important}
+.fit{white-space:nowrap}
+.chk{background:repeating-conic-gradient(var(--red) 0 25%,var(--hrw) 0 50%)}
+.brand{position:absolute;left:72px;bottom:72px;display:flex;align-items:center;gap:16px}
+.brand .mk{width:40px;height:40px;background-size:20px 20px;flex:none}
+.brand b{font:800 32px/1 'BS';letter-spacing:.04em;text-transform:uppercase}
+.cnt{position:absolute;right:72px;bottom:80px;font:700 20px/1 'AR';color:var(--mute)}
+.hint{position:absolute;right:72px;bottom:72px;font:400 40px/1 'AR';color:var(--mute)}
+.lab{font:700 20px/1.1 'AR';font-stretch:88%;letter-spacing:.06em;text-transform:uppercase}
+.ic{width:1.25em;height:1.25em;flex:none;display:block}
+/* zaglavlje i ime */
+.meta{display:flex;align-items:center;gap:16px}
+.meta i{width:8px;height:8px;background:var(--red);flex:none}
+.meta .d{color:var(--dim)}
+.name{font-family:'BS';text-transform:uppercase;white-space:nowrap;font-size:192px}
+.name .fn{display:block;font-weight:700;font-size:.58em;line-height:.92;letter-spacing:.01em}
+.name .ln{display:block;font-weight:900;font-size:1em;line-height:.9;letter-spacing:.005em;margin-top:.06em}
+.name .ln.acc{margin-top:.24em}
+/* identitet: klub · #broj – vlastiti redak, prigušena boja (bez crvene), uvijek poravnat lijevo */
+.idl{display:flex;align-items:center;gap:14px;font-size:24px;color:var(--dim);white-space:nowrap}
+.idl.below{margin-top:24px} .idl.above{margin-bottom:28px}
+.idl i,.idt i{width:6px;height:6px;background:var(--mute);flex:none}
+/* utakmica: natjecanje/datum + rezultat u jednom retku, neutralno (obje momčadi iste težine) */
+.match{display:flex;flex-direction:column;gap:16px}
+.sline{display:flex;align-items:baseline;gap:20px;border-top:1px solid var(--rule2);padding-top:24px;white-space:nowrap;
+   font:800 48px/1 'BS';text-transform:uppercase;letter-spacing:.01em}
+.sline .tn{color:var(--dim)}
+.sline b{font-weight:800;font-size:1em;letter-spacing:.02em}
+/* runda 2: [ikona domaćin/gost] vs PROTIVNIK ……… rezultat (desno, ista os za sve) */
+.da{display:inline-block;margin:0 .16em;transform:scaleX(1.25)}
+.vsl .vs{font:700 .42em/1 'AR';font-stretch:88%;letter-spacing:.06em;color:var(--mute);text-transform:lowercase;flex:none}
+.vsl .opp{color:var(--dim);flex:none}
+/* runda 3: kuća/avion odmah ispred protivnika, visina ≈ verzalna visina imena, ista boja */
+.vsl .opp .vi{display:inline-block;width:auto;height:.74em;aspect-ratio:1;vertical-align:baseline;margin-right:.28em;color:currentColor;stroke-width:2}
+.vsl.trunc .opp{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.vsl{justify-content:flex-start}
+/* runda 4: rezultat ispred "vs", veličine imena protivnika; ishod iz perspektive igračeve momčadi bojom (bez slova) */
+/* runda 6: bez pozadinske pločice – samo boja teksta rezultata */
+.vsl b{flex:none;color:var(--fg);line-height:1;font-weight:900}
+.vsl b.w{color:var(--win)} .vsl b.l{color:var(--loss)}
+.vsl b.n{background:none;padding:0}
+.ms.vsl .vs{font-size:.85em;color:var(--mute)} .ms.vsl .opp{color:var(--dim)}
+/* runda 7: popis – rezultat, ikona i protivnik iste verzalne visine (--capr/--capa iz JS mjerenja fonta) */
+.ms.vsl b{font-size:var(--capr,1.02em);font-weight:900;letter-spacing:.03em}
+.ms.vsl .opp .vi{height:var(--capa,.72em);margin-right:.32em}
+/* runda 8: hijerarhija ime > identitet > utakmica. Identitet: klub u boji teksta, #broj/pozicija prigušeni.
+   Utakmica = kontekst: protivnik tanji i prigušen (ispod identiteta), "vs" malen, rezultat u boji ishoda. */
+/* runda 9: klub bez isticanja (ista boja/težina kao #broj · pozicija); hijerarhija veličinom: identitet > utakmica */
+.idl{font-size:28px} .idt{font-size:22px}
+.ms{font-size:20px}  /* identitet 22 px > utakmica 20 px */ .ms.vsl .opp{color:var(--mute);font-weight:500} .ms.vsl .vs{font-size:.8em;color:var(--mute);opacity:.8}
+.sline.vsl{font:500 25px/1 'AR';font-stretch:88%;letter-spacing:.06em;gap:14px}
+.sline.vsl .opp{color:var(--mute)} .sline.vsl .vs{font-size:.8em;opacity:.8}
+.sline.vsl b{font:900 calc(var(--capr,1em) * 1.45)/1 'BS';letter-spacing:.03em}
+.sline.vsl .opp .vi{height:var(--capa,.72em);margin-right:.32em}
+/* statistika – jedna mirna vrsta pločice, crvena samo kao mala oznaka */
+.grid{display:grid;gap:0}
+/* runda 5: statistika bez pločica – urednička mreža s tankim UNUTARNJIM razdjelnicima (bez okvira, bez razmaka) */
+.tile{position:relative;background:none;color:var(--fg);padding:18px 28px 20px;display:flex;flex-direction:column;justify-content:flex-start;gap:12px;min-width:0;
+   border-left:1px solid var(--rule);border-top:1px solid var(--rule)}
+.tile.c0,.kv.c0{border-left:0;padding-left:0} .tile.r0,.kv.r0{border-top:0}
+.tile .tl,.kv .tl{color:var(--dim)}
+/* runda 3: ikona sastava (teren/klupa) uz vrijednost minuta, čitljiva */
+.tile .v{display:flex;align-items:flex-end;gap:.16em} .tile .v .lu{width:.46em;height:.46em;flex:none;color:var(--fg);margin-bottom:.02em;stroke-width:1.6}
+.kv b{display:flex;align-items:flex-end;gap:5px} .kv b .lu{width:26px;height:26px;flex:none;color:var(--fg);margin-bottom:1px}
+.tr .lu{width:28px;height:28px;margin-left:12px;color:var(--fg);opacity:.85;vertical-align:middle}
+.tl{display:flex;align-items:center;gap:8px;font:700 16px/1.1 'AR';font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--stiledim)}
+.tl.txt:before{content:'';width:6px;height:6px;background:var(--statmark);flex:none}  /* runda 7: neutralna oznaka */
+.tl .ic{width:24px;height:24px;color:var(--stilefg)}
+.lab-icon .tile .tl .ic{width:32px;height:32px} .lab-icon .tr .tl .ic{width:30px;height:30px} .lab-icon .kv .tl .ic{width:20px;height:20px}
+.tile .v{font:800 1em/.82 'BS';letter-spacing:-.005em;white-space:nowrap}
+.one{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.one .side{display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 16px 24px;gap:16px}
+.foot{display:flex;flex-wrap:wrap;gap:16px 32px;margin-top:24px}
+.one .foot{flex-direction:column;margin:0}
+.fi{display:flex;align-items:center;gap:8px;font:700 18px/1 'AR';font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.fi .ic{width:22px;height:22px;color:var(--fg)}
+.fi.n:before{content:'';width:6px;height:6px;background:var(--red);flex:none}
+.fi .in{color:var(--rt)}
+/* R2 tablica statistike */
+.tbl{display:grid;column-gap:48px;border-top:1px solid var(--rule2)}
+.tr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);padding:0}
+.tr .tl{color:var(--dim);font-size:18px} .tr .tl .ic{color:var(--fg)}
+.tr .v{font:800 1em/1 'BS';white-space:nowrap}
+/* list */
+.grp+.grp{margin-top:40px}
+/* runda 2: naslov lige = isti stil kao redak natjecanja na player slajdu (.meta.lab), + tanka linija kao iznad rezultata */
+.gh{padding-bottom:16px;border-bottom:1px solid var(--rule2)}
+.gh .mk{width:24px;height:24px;background-size:12px 12px;flex:none}
+.row{display:flex;align-items:center;gap:24px;padding:calc(16px + var(--xp,0px)) 0;border-bottom:1px solid var(--rule)}
+.row.wide{flex-direction:column;align-items:stretch;gap:16px}
+/* runda V – red popisa u dva stupca (Danielova skica): LIJEVO ime / identitet / sastav, DESNO rezultat / statistika */
+/* runda 3: LIJEVO ime / identitet / redak utakmice (rezultat desno u stupcu); DESNO samo mreža statistike.
+   Mreža je fiksna (4 stupca × 100 px) u svakom redu, pa se stupci ćelija i rezultati poravnavaju kroz sve redove. */
+.row.split{display:grid;grid-template-columns:minmax(0,1fr) var(--gw);column-gap:36px;align-items:start;--gw:424px}
+.row.split .L{min-width:0;display:flex;flex-direction:column;gap:12px}
+.row.split .ms{margin:0} .row.split .lf{margin:0}
+.sg{display:grid;grid-template-columns:repeat(var(--gc,4),104px);gap:0;justify-content:start;margin-top:var(--cap,0px)}
+.sg .kv{width:auto;height:auto}
+/* R1b (list_layout "stack"): lijevo ime / identitet / rezultat / sastav, desno statistika */
+.row.stack .idt.below{margin-top:8px}
+.idt.trunc .cl,.idl.trunc .cl{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.idt.trunc,.idl.trunc{overflow:hidden}
+.who2{flex:1;min-width:0}
+.pn{font:800 56px/1 'BS';text-transform:uppercase;letter-spacing:.005em}
+.idt{display:flex;align-items:center;gap:10px;font:700 17px/1 'AR';font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.idt.above{margin-bottom:10px} .idt.below{margin-top:10px;margin-bottom:-2px}
+.ms{margin-top:12px;display:flex;align-items:baseline;gap:12px;font:700 18px/1 'AR';font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.ms b{font:800 1.3em/1 'BS';letter-spacing:.02em}
+.lf{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:12px}
+.lf .fi{font-size:15px} .lf .fi .ic{width:18px;height:18px}
+.vals{display:flex;gap:8px;flex:none}
+.kv{width:104px;padding:7px 14px 9px;background:none;color:var(--fg);display:flex;flex-direction:column;justify-content:flex-start;gap:8px;border-left:1px solid var(--rule);border-top:1px solid var(--rule)}
+.kv b{font:800 34px/1 'BS';white-space:nowrap}
+/* runda 10: udarci "5 (3)" – zagrada manja i prigušena; hero ćelija (2 retka, velik broj, oznaka gore) */
+.ot{font-size:.56em;color:var(--dim);margin-left:.14em;letter-spacing:.01em;align-self:flex-end;line-height:1;margin-bottom:.02em}
+.tile .v .ot{margin-bottom:0}
+.tile.hero{justify-content:flex-start;gap:.1em}   /* runda 11: broj odmah ispod oznake, višak visine ispod broja */ .tile.hero .v{line-height:.78}
+.kv.hero{justify-content:space-between} .kv.hero b{font-size:60px;line-height:.8}  /* ≈ verzalna visina imena, ne veća */
+.sg .kv.hero{align-self:stretch}
+.kv .tl.tight{letter-spacing:.01em;gap:5px}
+/* runda 12: hero broj apsolutno, veličina iz JS (od vrha brojeva 1. retka do osnovne linije 2. retka) */
+.tile.hero,.kv.hero{position:relative} .tile.hero .v,.kv.hero b{position:absolute;left:0;top:0;line-height:1}
+/* runda 12: dodavanja – prsten (player), mini prsten (popis), tekstna inačica */
+/* (runda 12 prsten – zamijenjen u rundi 13) */ .v.dn{display:flex}
+.v.dn .rw{position:relative;width:1.12em;height:1.12em;flex:none;color:var(--fg)} .v.dn .rg{width:100%;height:100%;display:block}
+.v.dn .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 .3em/1 'BS';letter-spacing:.01em;padding-top:.04em}
+.v.dn .pf{font:700 .25em/1 'AR';font-stretch:88%;letter-spacing:.04em;color:var(--dim)}
+.kv b.dnl{flex-direction:column;align-items:flex-start;gap:4px} .kv b.dnl .mr{display:flex;align-items:center;gap:5px}
+.kv b.dnl .rg{width:26px;height:26px;flex:none;color:var(--fg)}
+.kv b .pf{font:700 12px/1 'AR';font-stretch:88%;letter-spacing:.04em;color:var(--dim)}
+.kv b.pt{flex-direction:column;align-items:flex-start;gap:4px}
+/* runda 13: dodavanja – oznaka, ispod točna/ukupno; prsten s % unutra desno, okomito centriran u ćeliji */
+.tile.ps,.kv.ps{position:relative}
+.tile.ps .v.dn{position:static;display:block;line-height:0} .tile.ps .v.dn .pf{display:inline-block;font:800 .36em/1 'BS';letter-spacing:.02em;color:var(--dim)}
+.tile.ps .rw{position:absolute;right:20px;top:50%;transform:translateY(-50%);width:.8em;height:.8em;color:var(--fg)}
+.tile.ps .rw .rg{width:100%;height:100%;display:block}
+.tile.ps .rw .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 .24em/1 'BS';letter-spacing:.01em;padding-top:.04em}
+.kv.ps b.dnl{display:block;position:static;line-height:0} .kv.ps b.dnl .pf{display:inline-block;font:800 22px/1 'BS';letter-spacing:.02em;color:var(--dim)}
+.kv.ps .rw{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:64px;height:64px;color:var(--fg)}
+.kv.ps .rw .rg{width:100%;height:100%;display:block}
+.kv.ps .rw .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 21px/1 'BS';letter-spacing:.01em;padding-top:2px}
+/* runda 13: ime – ime (first name) manje i prigušeno */
+.name .fn{color:var(--fnc)}
+.pn .pf1{display:block;font-weight:700;font-size:.5em;line-height:1;color:var(--fnc);letter-spacing:.01em;margin-bottom:.08em}
+.pn .pl1{display:block} .pn.acc .pf1{margin-bottom:.2em}   /* kvačica na verzalu (Š, Č…) treba više mjesta */
+.kv .tl{font-size:12px;gap:6px;white-space:nowrap} .kv .tl.txt:before{width:5px;height:5px} .kv .tl .ic{width:18px;height:18px}
+</style></head><body>
+<div class='s l R1 navy lab-text' style="--bg:#0E1431;--bg2:#0A0F25;--fg:#F3EEE3;--dim:rgba(243,238,227,0.7);--mute:rgba(243,238,227,0.5);--rule:rgba(243,238,227,0.16);--rule2:rgba(243,238,227,0.3);--red:#E5263A;--rt:#F2475A;--win:#5BC490;--loss:#F2475A;--winbg:rgba(91,196,144,0.16);--lossbg:rgba(242,71,90,0.16);--drawbg:rgba(243,238,227,0.1);--tile:#1F243E;--tilefg:#F3EEE3;--tiledim:rgba(243,238,227,0.66);--stile:#1F243E;--stilefg:#F3EEE3;--stiledim:rgba(243,238,227,0.66);--statmark:rgba(243,238,227,0.42);--fnc:rgba(243,238,227,0.6);--hrw:#FFFFFF;--tex:repeating-conic-gradient(rgba(243,238,227,0.02) 0 25%,transparent 0 50%) 0 0/24px 24px;--field:url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%271080%27%20height%3D%27700%27%3E%3Cg%20fill%3D%27%234A63C8%27%3E%3Crect%20x%3D%270%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.138%27/%3E%3Crect%20x%3D%27108%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.201%27/%3E%3Crect%20x%3D%27216%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.163%27/%3E%3Crect%20x%3D%27324%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.131%27/%3E%3Crect%20x%3D%27432%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.200%27/%3E%3Crect%20x%3D%27540%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.133%27/%3E%3Crect%20x%3D%27648%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.140%27/%3E%3Crect%20x%3D%27864%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.297%27/%3E%3Crect%20x%3D%27972%27%20y%3D%270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.243%27/%3E%3Crect%20x%3D%27162%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.103%27/%3E%3Crect%20x%3D%27270%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.092%27/%3E%3Crect%20x%3D%27378%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.146%27/%3E%3Crect%20x%3D%27486%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.165%27/%3E%3Crect%20x%3D%27594%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.173%27/%3E%3Crect%20x%3D%27702%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.177%27/%3E%3Crect%20x%3D%27810%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.266%27/%3E%3Crect%20x%3D%27918%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.256%27/%3E%3Crect%20x%3D%271026%27%20y%3D%2754%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.184%27/%3E%3Crect%20x%3D%27108%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.130%27/%3E%3Crect%20x%3D%27216%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.147%27/%3E%3Crect%20x%3D%27324%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.169%27/%3E%3Crect%20x%3D%27432%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.084%27/%3E%3Crect%20x%3D%27540%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.189%27/%3E%3Crect%20x%3D%27648%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.210%27/%3E%3Crect%20x%3D%27756%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.111%27/%3E%3Crect%20x%3D%27864%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.210%27/%3E%3Crect%20x%3D%27972%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.126%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27108%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.262%27/%3E%3Crect%20x%3D%2754%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.059%27/%3E%3Crect%20x%3D%27270%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.123%27/%3E%3Crect%20x%3D%27378%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.113%27/%3E%3Crect%20x%3D%27486%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.090%27/%3E%3Crect%20x%3D%27594%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.091%27/%3E%3Crect%20x%3D%27702%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.096%27/%3E%3Crect%20x%3D%27810%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.113%27/%3E%3Crect%20x%3D%27918%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.210%27/%3E%3Crect%20x%3D%271026%27%20y%3D%27162%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.140%27/%3E%3Crect%20x%3D%270%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.048%27/%3E%3Crect%20x%3D%27108%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.088%27/%3E%3Crect%20x%3D%27216%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.053%27/%3E%3Crect%20x%3D%27324%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.066%27/%3E%3Crect%20x%3D%27432%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.112%27/%3E%3Crect%20x%3D%27648%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.075%27/%3E%3Crect%20x%3D%27756%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.095%27/%3E%3Crect%20x%3D%27864%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.115%27/%3E%3Crect%20x%3D%27972%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.184%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27216%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.154%27/%3E%3Crect%20x%3D%2754%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.037%27/%3E%3Crect%20x%3D%27162%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.072%27/%3E%3Crect%20x%3D%27270%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.050%27/%3E%3Crect%20x%3D%27378%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.082%27/%3E%3Crect%20x%3D%27486%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.059%27/%3E%3Crect%20x%3D%27594%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.110%27/%3E%3Crect%20x%3D%27810%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.066%27/%3E%3Crect%20x%3D%27918%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.088%27/%3E%3Crect%20x%3D%271026%27%20y%3D%27270%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.097%27/%3E%3Crect%20x%3D%270%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.033%27/%3E%3Crect%20x%3D%27108%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.027%27/%3E%3Crect%20x%3D%27216%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.029%27/%3E%3Crect%20x%3D%27324%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.051%27/%3E%3Crect%20x%3D%27432%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.061%27/%3E%3Crect%20x%3D%27540%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.083%27/%3E%3Crect%20x%3D%27648%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.044%27/%3E%3Crect%20x%3D%27864%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.065%27/%3E%3Crect%20x%3D%27972%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.099%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27324%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.091%27/%3E%3Crect%20x%3D%2754%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.028%27/%3E%3Crect%20x%3D%27162%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.029%27/%3E%3Crect%20x%3D%27378%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.023%27/%3E%3Crect%20x%3D%27486%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.050%27/%3E%3Crect%20x%3D%27594%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.032%27/%3E%3Crect%20x%3D%27702%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.056%27/%3E%3Crect%20x%3D%27810%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.055%27/%3E%3Crect%20x%3D%27918%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.048%27/%3E%3Crect%20x%3D%271026%27%20y%3D%27378%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.092%27/%3E%3Crect%20x%3D%270%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.009%27/%3E%3Crect%20x%3D%27108%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.014%27/%3E%3Crect%20x%3D%27216%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.014%27/%3E%3Crect%20x%3D%27324%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.027%27/%3E%3Crect%20x%3D%27432%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.024%27/%3E%3Crect%20x%3D%27540%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.040%27/%3E%3Crect%20x%3D%27648%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.041%27/%3E%3Crect%20x%3D%27756%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.046%27/%3E%3Crect%20x%3D%27864%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.034%27/%3E%3Crect%20x%3D%27972%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.078%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27432%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.075%27/%3E%3Crect%20x%3D%27594%27%20y%3D%27486%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.023%27/%3E%3Crect%20x%3D%27702%27%20y%3D%27486%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.021%27/%3E%3Crect%20x%3D%27810%27%20y%3D%27486%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.032%27/%3E%3Crect%20x%3D%27918%27%20y%3D%27486%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.050%27/%3E%3Crect%20x%3D%271026%27%20y%3D%27486%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.028%27/%3E%3Crect%20x%3D%27540%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.008%27/%3E%3Crect%20x%3D%27648%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.011%27/%3E%3Crect%20x%3D%27756%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.013%27/%3E%3Crect%20x%3D%27864%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.027%27/%3E%3Crect%20x%3D%27972%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.034%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27540%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.034%27/%3E%3Crect%20x%3D%27918%27%20y%3D%27594%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.012%27/%3E%3Crect%20x%3D%271026%27%20y%3D%27594%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.013%27/%3E%3Crect%20x%3D%271080%27%20y%3D%27648%27%20width%3D%2754%27%20height%3D%2754%27%20fill-opacity%3D%270.010%27/%3E%3C/g%3E%3C/svg%3E')"><div class='tex'></div><div class='fld'></div>
+<div class='content'><div class='inner'><div class='grp'><div class='gh meta lab'><span>Serie A</span><i></i><span class='d'>9. kolo</span><i></i><span class='d'>18. 10.</span></div><div class='row split' style='--gw:448px'><div class='L'><div class='pn fit acc'><span class='pf1'>Filip</span><span class='pl1'>Šarić</span></div><div class='idt fit'><span class='cl'>Como</span><i></i><span class='no'>#17</span><i></i><span class='po'>desni bek</span></div><div class='ms vsl fit'><b class='w'>1<span class='da'>–</span>3</b><span class='vs'>vs</span><span class='opp'><svg class='vi' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2.8c.9 0 1.5.9 1.5 2.2v4.6l7 4.1v2.1l-7-2.1v4.1l2.2 1.7v1.7L12 20.2l-3.7 1v-1.7l2.2-1.7v-4.1l-7 2.1v-2.1l7-4.1V5c0-1.3.6-2.2 1.5-2.2z'/></svg>Fiorentina</span></div></div><div class='sg' style='--gc:4;grid-template-columns:128px repeat(3,104px)'><span class='kv hero c0 r0' style='grid-row:1 / span 2;grid-column:1 / span 1'><div class='tl txt'><span>Asist.</span></div><b class=''><span>1</span></b></span><span class='kv r0' style='grid-row:1;grid-column:2 / span 1'><div class='tl txt'><span>Minute</span></div><b class=''><span>90’</span><svg class='lu' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><rect x='2.5' y='5' width='19' height='14' rx='1.5'/><path d='M12 5v14'/><circle cx='12' cy='12' r='2.6'/><path d='M2.5 9.2h2.8v5.6H2.5M21.5 9.2h-2.8v5.6h2.8'/></svg></b></span><span class='kv r0' style='grid-row:1;grid-column:3 / span 1'><div class='tl txt'><span>Klj. dod.</span></div><b class=''><span>3</span></b></span><span class='kv r0' style='grid-row:1;grid-column:4 / span 1'><div class='tl txt'><span>Dodavanja</span></div><b class=' pt'><span>84%</span><span class='pf'>38/45</span></b></span><span class='kv' style='grid-row:2;grid-column:2 / span 1'><div class='tl txt'><span>Udarci</span></div><b class=''><span>1</span></b></span><span class='kv' style='grid-row:2;grid-column:3 / span 1'><div class='tl txt'><span>Žuti</span></div><b class=''><span>1</span></b></span></div></div><div class='row split' style='--gw:448px'><div class='L'><div class='pn fit acc'><span class='pf1'>Mateo</span><span class='pl1'>Jurčić</span></div><div class='idt fit'><span class='cl'>Lazio</span><i></i><span class='no'>#6</span><i></i><span class='po'>branič</span></div><div class='ms vsl fit'><b class='d'>1<span class='da'>–</span>1</b><span class='vs'>vs</span><span class='opp'><svg class='vi' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2.8c.9 0 1.5.9 1.5 2.2v4.6l7 4.1v2.1l-7-2.1v4.1l2.2 1.7v1.7L12 20.2l-3.7 1v-1.7l2.2-1.7v-4.1l-7 2.1v-2.1l7-4.1V5c0-1.3.6-2.2 1.5-2.2z'/></svg>Juventus</span></div></div><div class='sg' style='--gc:4;grid-template-columns:128px repeat(3,104px)'><span class='kv c0 r0' style='grid-row:1;grid-column:1 / span 1'><div class='tl txt'><span>Minute</span></div><b class=''><span>90’</span><svg class='lu' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><rect x='2.5' y='5' width='19' height='14' rx='1.5'/><path d='M12 5v14'/><circle cx='12' cy='12' r='2.6'/><path d='M2.5 9.2h2.8v5.6H2.5M21.5 9.2h-2.8v5.6h2.8'/></svg></b></span><span class='kv r0' style='grid-row:1;grid-column:2 / span 1'><div class='tl txt'><span>Dodavanja</span></div><b class=' pt'><span>92%</span><span class='pf'>46/50</span></b></span><span class='kv r0' style='grid-row:1;grid-column:3 / span 1'><div class='tl txt'><span>Žuti</span></div><b class=''><span>1</span></b></span></div></div><div class='row split' style='--gw:448px'><div class='L'><div class='pn fit acc'><span class='pf1'>Leon</span><span class='pl1'>Vuković</span></div><div class='idt fit'><span class='cl'>Milan</span><i></i><span class='no'>#14</span><i></i><span class='po'>vezni</span></div><div class='ms vsl fit'><b class='w'>3<span class='da'>–</span>2</b><span class='vs'>vs</span><span class='opp'><svg class='vi' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 11.5L12 4.5l8.5 7'/><path d='M6 9.8V19.5h12V9.8'/><path d='M10 19.5v-5h4v5'/></svg>Atalanta</span></div></div><div class='sg' style='--gc:4;grid-template-columns:128px repeat(3,104px)'><span class='kv hero c0 r0' style='grid-row:1 / span 2;grid-column:1 / span 1'><div class='tl txt'><span>Golovi</span></div><b class=''><span>1</span></b></span><span class='kv r0' style='grid-row:1;grid-column:2 / span 1'><div class='tl txt'><span>Minute</span></div><b class=''><span>90’</span><svg class='lu' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><rect x='2.5' y='5' width='19' height='14' rx='1.5'/><path d='M12 5v14'/><circle cx='12' cy='12' r='2.6'/><path d='M2.5 9.2h2.8v5.6H2.5M21.5 9.2h-2.8v5.6h2.8'/></svg></b></span><span class='kv r0' style='grid-row:1;grid-column:3 / span 1'><div class='tl txt'><span>Asist.</span></div><b class=''><span>1</span></b></span><span class='kv r0' style='grid-row:1;grid-column:4 / span 1'><div class='tl txt tight'><span>Udarci (okv.)</span></div><b class=''><span>3</span><span class='ot'>(2)</span></b></span><span class='kv' style='grid-row:2;grid-column:2 / span 1'><div class='tl txt'><span>Klj. dod.</span></div><b class=''><span>4</span></b></span><span class='kv' style='grid-row:2;grid-column:3 / span 1'><div class='tl txt'><span>Dodavanja</span></div><b class=' pt'><span>93%</span><span class='pf'>67/72</span></b></span><span class='kv' style='grid-row:2;grid-column:4 / span 1'><div class='tl txt'><span>Žuti</span></div><b class=''><span>1</span></b></span></div></div><div class='row split' style='--gw:448px'><div class='L'><div class='pn fit acc'><span class='pf1'>Bruno</span><span class='pl1'>Perić</span></div><div class='idt fit'><span class='cl'>Atalanta</span><i></i><span class='no'>#8</span><i></i><span class='po'>vezni</span></div><div class='ms vsl fit'><b class='l'>3<span class='da'>–</span>2</b><span class='vs'>vs</span><span class='opp'><svg class='vi' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2.8c.9 0 1.5.9 1.5 2.2v4.6l7 4.1v2.1l-7-2.1v4.1l2.2 1.7v1.7L12 20.2l-3.7 1v-1.7l2.2-1.7v-4.1l-7 2.1v-2.1l7-4.1V5c0-1.3.6-2.2 1.5-2.2z'/></svg>Milan</span></div></div><div class='sg' style='--gc:4;grid-template-columns:128px repeat(3,104px)'><span class='kv hero c0 r0' style='grid-row:1 / span 2;grid-column:1 / span 1'><div class='tl txt'><span>Golovi</span></div><b class=''><span>1</span></b></span><span class='kv r0' style='grid-row:1;grid-column:2 / span 1'><div class='tl txt'><span>Minute</span></div><b class=''><span>32’</span><svg class='lu' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='5.5' width='16' height='4.5' rx='1'/><path d='M3 14h18'/><path d='M6.5 10v4M17.5 10v4'/><path d='M5.5 14v5M18.5 14v5'/></svg></b></span><span class='kv r0' style='grid-row:1;grid-column:3 / span 1'><div class='tl txt'><span>Udarci</span></div><b class=''><span>2</span></b></span><span class='kv' style='grid-row:2;grid-column:2 / span 1'><div class='tl txt'><span>Dodavanja</span></div><b class=' pt'><span>80%</span><span class='pf'>16/20</span></b></span></div></div></div></div></div>
+<div class='brand'><span class='mk chk'></span><b>HRVATSKI SPORT</b></div></div><script>/* FIT_JS from generate_slides.py (round 13) */
+document.fonts.ready.then(() => ((grow) => {
+  const shrink = () => document.querySelectorAll('.fit').forEach(el => {
+    let fs = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 1 && fs > MINF(el)) { fs -= 1; el.style.fontSize = fs + 'px';
+      el.querySelectorAll('*').forEach(k => { if (k.dataset.f === undefined) k.dataset.f = 1; }); }
+  });
+  const MINF = el => el.classList.contains('idt') || el.classList.contains('idl') ? 13 : el.classList.contains('sline') ? 18 : el.classList.contains('ms') ? 16 : 14;
+  // runda 7: popis – rezultat (BS), ikona i protivnik (AR) iste verzalne visine; mjeri se iz fonta
+  { const cv = document.createElement('canvas').getContext('2d'), CH = f => { cv.font = f; return cv.measureText('H').actualBoundingBoxAscent / 100; };
+    const ar = CH("500 100px AR"), bs = CH("900 100px BS");
+    if (ar > 0 && bs > 0) document.querySelectorAll('.ms.vsl,.sline.vsl').forEach(el => { el.style.setProperty('--capr', (ar / bs) + 'em'); el.style.setProperty('--capa', ar + 'em'); }); }
+  shrink();
+  const trunc = () => document.querySelectorAll('.idt.fit,.idl.fit,.vsl.fit').forEach(el => { if (el.scrollWidth > el.clientWidth + 1) el.classList.add('trunc'); });
+  const c = document.querySelector('.content'), inn = document.querySelector('.inner');
+  inn.classList.add('measure');
+  const H = () => inn.getBoundingClientRect().height;
+  const setz = z => { inn.style.zoom = z; inn.style.width = (c.clientWidth / z) + 'px'; };
+  let z = 1;
+  while (H() > c.clientHeight + 1 && z > 0.5) { z -= 0.02; setz(z); shrink(); }
+  if (grow && z === 1) {               // list: povećaj sadržaj da ispuni plohu (najviše 1.3)
+    const nr = inn.querySelectorAll('.row').length, cap = nr >= 4 ? 1.15 : nr === 3 ? 1.3 : 1.5;
+    const h0 = H(); let t = Math.min(cap, (c.clientHeight * 0.9) / h0);
+    while (t > 1.0) { setz(t); shrink(); if (H() <= c.clientHeight * 0.92) break; t -= 0.02; }
+    z = t > 1.0 ? t : 1; if (z === 1) setz(1);
+  }
+  if (grow) {                         // preostali prostor raspodijeli kao razmak redaka (tablica ispuni plohu)
+    const rows = inn.querySelectorAll('.row').length || 1; let xp = 0;
+    const free = c.clientHeight / z - H() / z;
+    if (free > 0) { xp = Math.min(rows <= 2 ? 96 : rows === 3 ? 56 : 36, free / (rows * 2.1)); inn.style.setProperty('--xp', xp + 'px');
+      while (H() > c.clientHeight + 1 && xp > 0) { xp -= 1; inn.style.setProperty('--xp', xp + 'px'); } }
+  }
+  // runda 2: player – pločice kompaktne, višak visine ostaje na dnu (nema rasta pločica)
+  trunc();
+  inn.classList.remove('measure');
+  if (z !== 1) inn.style.minHeight = (c.clientHeight / z) + 'px';
+  if (z !== 1) inn.querySelectorAll('.gh').forEach(g => g.style.zoom = 1 / z);   // naslov lige iste veličine kao na player slajdu
+  // runda 6: vrh verzala imena = vrh verzala OZNAKE u prvom redu statistike (mjeri se po redu)
+  const capTop = el => {   // y vrha verzala prvog retka teksta u elementu (px prikaza)
+    const cs = getComputedStyle(el), cv = document.createElement('canvas').getContext('2d');
+    cv.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const mk = document.createElement('span'); mk.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+    el.appendChild(mk); const base = mk.getBoundingClientRect().top; mk.remove();
+    return base - cv.measureText('H').actualBoundingBoxAscent * (parseFloat(getComputedStyle(inn).zoom) || 1);
+  };
+  inn.querySelectorAll('.row.split').forEach(r => {
+    const pn0 = r.querySelector('.pn'), sg = r.querySelector('.sg'); if (!pn0 || !sg) return;
+    const pn = pn0.querySelector('.pf1') || pn0;   // runda 13: vrh prvog vidljivog retka imena
+    const lab = sg.querySelector('.kv .tl span') || sg.querySelector('.kv .tl'); if (!lab) return;
+    sg.style.setProperty('--cap', '0px');
+    const zz = parseFloat(getComputedStyle(inn).zoom) || 1;
+    sg.style.setProperty('--cap', ((capTop(pn) - capTop(lab)) / zz) + 'px');
+  });
+  // runda 12: hero broj od vrha verzala vrijednosti 1. retka do osnovne linije vrijednosti 2. retka
+  const zz = parseFloat(getComputedStyle(inn).zoom) || 1;
+  const base = el => { const mk = document.createElement('span'); mk.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+    el.appendChild(mk); const b = mk.getBoundingClientRect().top; mk.remove(); return b; };
+  const cvx = document.createElement('canvas').getContext('2d'); cvx.font = "800 100px BS"; const capR = cvx.measureText('H').actualBoundingBoxAscent / 100;
+  document.querySelectorAll('.tile.hero,.kv.hero').forEach(h => {
+    const g = h.parentElement, v = h.querySelector('.v,b'), vs = v && v.querySelector('span'); if (!vs) return;
+    const pick = r0 => [...g.children].filter(x => x !== h && x.classList.contains('r0') === r0 && !x.classList.contains('e') && !x.classList.contains('ps'))
+                        .map(x => x.querySelector('.v > span, b > span, b .mr > span')).find(Boolean);
+    const a = pick(true), b = pick(false); if (!a) return;
+    // bez vrijednosti u 2. retku (npr. samo dodavanja s prstenom): osnovna linija = dno ćelije 2. retka − donji odmak
+    const row2 = [...g.children].find(x => x !== h && !x.classList.contains('r0') && !x.classList.contains('e'));
+    if (!b && !row2) return;
+    const lab = h.querySelector('.tl'); v.style.top = (lab.offsetHeight + 4) + 'px';
+    const top1 = capTop(a), base2 = b ? base(b) : row2.getBoundingClientRect().bottom - parseFloat(getComputedStyle(row2).paddingBottom) * zz;
+    let fs = (base2 - top1) / zz / capR; v.style.fontSize = fs + 'px';
+    const maxW = h.clientWidth - 6; if (v.scrollWidth > maxW) { fs *= maxW / v.scrollWidth; v.style.fontSize = fs + 'px'; }
+    const dy = (base2 - base(vs)) / zz; v.style.top = (parseFloat(v.style.top) + dy) + 'px';
+  });
+  return z;
+})(true));
+</script>
+</body></html>
