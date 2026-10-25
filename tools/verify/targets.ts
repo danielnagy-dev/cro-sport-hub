@@ -1,7 +1,7 @@
 /**
  * What `vp run verify:<target>` drives. Routes and handles match the apps on main.
- * Studio and web are one screen each. The UI library is one Storybook story that
- * renders Badge, SportTabs, and AthleteHeader together.
+ * Studio and web are one screen each. UI stories are Library/Base plus the
+ * Results tennis and football score stories.
  */
 
 export const ports = {
@@ -106,4 +106,7 @@ export const targets: Record<TargetName, TargetSpec> = {
 /** Proof text for stories we know. Other stories are still screenshotted. */
 export const storyProof: Record<string, string> = {
   "library--base": "Sample Athlete",
+  "results--tennis-score": "Sample Player A",
+  "results--retired": "Retired",
+  "results--football-score": "Sample Home",
 };
