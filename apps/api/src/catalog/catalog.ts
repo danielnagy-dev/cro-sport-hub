@@ -6,9 +6,12 @@ import {
   athleteTeamSchema,
   competitionSchema,
   idSchema,
+  matchSchema,
   roleSchema,
   sportSchema,
   teamSchema,
+  tennisMatchSchema,
+  tennisMatchStatsSchema,
   type AthleteTeam,
   type FieldIssue,
   type Role,
@@ -21,13 +24,32 @@ import { Pool } from "pg";
 import { z } from "zod";
 import * as schema from "./schema.js";
 
-const { athleteTeams, athletes, competitions, sports, teams, users } = schema;
+const {
+  athleteTeams,
+  athletes,
+  competitions,
+  matches,
+  sports,
+  teams,
+  tennisMatchStats,
+  tennisMatches,
+  users,
+} = schema;
 const userSchema = z.strictObject({ id: idSchema, role: roleSchema });
 
 export type CatalogUser = { id: string; role: Role };
-export type CatalogWriteKind = "competition" | "team" | "athlete" | "athleteTeam" | "user";
+export type CatalogWriteKind =
+  | "competition"
+  | "team"
+  | "athlete"
+  | "athleteTeam"
+  | "user"
+  | "match"
+  | "tennisMatch"
+  | "tennisMatchStats";
 export type CatalogKind = "sport" | CatalogWriteKind;
 export type AthleteTeamKey = Pick<AthleteTeam, "athleteId" | "teamId" | "from">;
+export type CatalogParticipantKey = { matchId: string; athleteId: string };
 export type CatalogErrorCode =
   | "invalid"
   | "not-football"
@@ -54,24 +76,32 @@ type Stored =
   | z.output<typeof teamSchema>
   | z.output<typeof athleteSchema>
   | z.output<typeof athleteTeamSchema>
+  | z.output<typeof matchSchema>
+  | z.output<typeof tennisMatchSchema>
+  | z.output<typeof tennisMatchStatsSchema>
   | CatalogUser;
 
 export type Catalog = {
   write(kind: CatalogWriteKind, value: unknown): Promise<void>;
-  read(kind: CatalogKind, key: string | AthleteTeamKey): Promise<Stored | undefined>;
+  read(
+    kind: CatalogKind,
+    key: string | AthleteTeamKey | CatalogParticipantKey,
+  ): Promise<Stored | undefined>;
   close(): Promise<void>;
 };
 
 type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-const migrationPath = join(dirname(fileURLToPath(import.meta.url)), "0001_v1_catalog.sql");
+const migrationDir = dirname(fileURLToPath(import.meta.url));
 
 function migrationStatements(): string[] {
-  return readFileSync(migrationPath, "utf8")
-    .replaceAll(/--.*$/gm, "")
-    .split(";")
-    .map((statement) => statement.trim())
-    .filter((statement) => statement.length > 0);
+  return ["0001_v1_catalog.sql", "0002_v1_matches.sql"].flatMap((name) =>
+    readFileSync(join(migrationDir, name), "utf8")
+      .replaceAll(/--.*$/gm, "")
+      .split(";")
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0),
+  );
 }
 
 function sqlState(error: unknown): string | undefined {
@@ -118,11 +148,42 @@ async function insertRow(run: () => Promise<unknown>): Promise<void> {
   }
 }
 
+function knownSlug(slug: string | undefined, missing: string): SportSlug {
+  if (slug === "tennis" || slug === "football") return slug;
+  throw new CatalogError("unknown-ref", missing);
+}
+
 async function sportSlug(db: CatalogDb, sportId: string): Promise<SportSlug> {
   const rows = await db.select({ slug: sports.slug }).from(sports).where(eq(sports.id, sportId));
-  const slug = rows[0]?.slug;
-  if (slug === "tennis" || slug === "football") return slug;
-  throw new CatalogError("unknown-ref", "The sport is not in the catalog");
+  return knownSlug(rows[0]?.slug, "The sport is not in the catalog");
+}
+
+async function competitionSport(db: CatalogDb, competitionId: string): Promise<SportSlug> {
+  const rows = await db
+    .select({ sportId: competitions.sportId })
+    .from(competitions)
+    .where(eq(competitions.id, competitionId));
+  const sportId = rows[0]?.sportId;
+  if (sportId === undefined) {
+    throw new CatalogError("unknown-ref", "The competition is not in the catalog");
+  }
+  return sportSlug(db, sportId);
+}
+
+async function matchSlug(db: CatalogDb, matchId: string): Promise<SportSlug> {
+  const rows = await db
+    .select({ sportSlug: matches.sportSlug })
+    .from(matches)
+    .where(eq(matches.id, matchId));
+  return knownSlug(rows[0]?.sportSlug, "The match is not in the catalog");
+}
+
+async function athleteSlug(db: CatalogDb, athleteId: string): Promise<SportSlug> {
+  const rows = await db
+    .select({ sportSlug: athletes.sportSlug })
+    .from(athletes)
+    .where(eq(athletes.id, athleteId));
+  return knownSlug(rows[0]?.sportSlug, "The athlete is not in the catalog");
 }
 
 async function writeRecord(db: CatalogDb, kind: CatalogWriteKind, value: unknown): Promise<void> {
@@ -143,14 +204,7 @@ async function writeRecord(db: CatalogDb, kind: CatalogWriteKind, value: unknown
     }
     case "athleteTeam": {
       const period = parseRecord(athleteTeamSchema, value);
-      const athleteRows = await db
-        .select({ sportSlug: athletes.sportSlug })
-        .from(athletes)
-        .where(eq(athletes.id, period.athleteId));
-      const athleteSport = athleteRows[0]?.sportSlug;
-      if (athleteSport === undefined) {
-        throw new CatalogError("unknown-ref", "The athlete is not in the catalog");
-      }
+      const athleteSport = await athleteSlug(db, period.athleteId);
       if (athleteSport !== "football") {
         throw new CatalogError("not-football", "Club spells are for football athletes");
       }
@@ -158,6 +212,51 @@ async function writeRecord(db: CatalogDb, kind: CatalogWriteKind, value: unknown
     }
     case "user":
       return insertRow(() => db.insert(users).values(parseRecord(userSchema, value)));
+    case "match": {
+      const match = parseRecord(matchSchema, value);
+      const sport = await sportSlug(db, match.sportId);
+      if ((await competitionSport(db, match.competitionId)) !== sport) {
+        throw new CatalogError("invalid", "The match sport does not match the competition");
+      }
+      return insertRow(() => db.insert(matches).values({ ...match, sportSlug: sport }));
+    }
+    case "tennisMatch": {
+      const detail = parseRecord(tennisMatchSchema, value);
+      if ((await matchSlug(db, detail.matchId)) !== "tennis") {
+        throw new CatalogError("invalid", "A tennis match needs a tennis match");
+      }
+      if (
+        (await athleteSlug(db, detail.playerAId)) !== "tennis" ||
+        (await athleteSlug(db, detail.playerBId)) !== "tennis"
+      ) {
+        throw new CatalogError("invalid", "Tennis matches are for tennis athletes");
+      }
+      return insertRow(() =>
+        db.insert(tennisMatches).values({
+          ...detail,
+          sportSlug: "tennis",
+          playerASport: "tennis",
+          playerBSport: "tennis",
+        }),
+      );
+    }
+    case "tennisMatchStats": {
+      const stats = parseRecord(tennisMatchStatsSchema, value);
+      const players = await db
+        .select({ playerAId: tennisMatches.playerAId, playerBId: tennisMatches.playerBId })
+        .from(tennisMatches)
+        .where(eq(tennisMatches.matchId, stats.matchId));
+      const pair = players[0];
+      if (pair === undefined) {
+        throw new CatalogError("unknown-ref", "The tennis match is not in the catalog");
+      }
+      if (stats.athleteId !== pair.playerAId && stats.athleteId !== pair.playerBId) {
+        throw new CatalogError("invalid", "Stats belong to one of the two players");
+      }
+      return insertRow(() =>
+        db.insert(tennisMatchStats).values({ ...stats, athleteSport: "tennis" }),
+      );
+    }
     default: {
       const unexpected: never = kind;
       return unexpected;
@@ -180,13 +279,52 @@ const idParsers = {
   user: userSchema,
 };
 
+async function readMatchRow(
+  db: CatalogDb,
+  kind: "match" | "tennisMatch" | "tennisMatchStats",
+  key: string | AthleteTeamKey | CatalogParticipantKey,
+): Promise<Stored | undefined> {
+  if (kind === "tennisMatchStats") {
+    if (typeof key === "string" || !("matchId" in key)) {
+      throw new CatalogError("invalid", "Tennis stats are read by match and athlete");
+    }
+    const rows = await db
+      .select()
+      .from(tennisMatchStats)
+      .where(
+        and(
+          eq(tennisMatchStats.matchId, key.matchId),
+          eq(tennisMatchStats.athleteId, key.athleteId),
+        ),
+      );
+    const row = rows[0];
+    return row === undefined
+      ? undefined
+      : parseRecord(tennisMatchStatsSchema, publicRow(row, ["athleteSport"]));
+  }
+  if (typeof key !== "string") throw new CatalogError("invalid", "That record is read by id");
+  if (kind === "match") {
+    const rows = await db.select().from(matches).where(eq(matches.id, key));
+    const row = rows[0];
+    return row === undefined ? undefined : parseRecord(matchSchema, publicRow(row, ["sportSlug"]));
+  }
+  const rows = await db.select().from(tennisMatches).where(eq(tennisMatches.matchId, key));
+  const row = rows[0];
+  return row === undefined
+    ? undefined
+    : parseRecord(tennisMatchSchema, publicRow(row, ["sportSlug", "playerASport", "playerBSport"]));
+}
+
 async function readRecord(
   db: CatalogDb,
   kind: CatalogKind,
-  key: string | AthleteTeamKey,
+  key: string | AthleteTeamKey | CatalogParticipantKey,
 ): Promise<Stored | undefined> {
+  if (kind === "match" || kind === "tennisMatch" || kind === "tennisMatchStats") {
+    return readMatchRow(db, kind, key);
+  }
   if (kind === "athleteTeam") {
-    if (typeof key === "string") {
+    if (typeof key === "string" || !("teamId" in key)) {
       throw new CatalogError("invalid", "A club spell is read by athlete, club, and start date");
     }
     const rows = await db

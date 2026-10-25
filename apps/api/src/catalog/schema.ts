@@ -1,4 +1,4 @@
-import { date, integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { boolean, date, integer, jsonb, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 
 export const sports = pgTable("sports", {
   id: text("id").primaryKey(),
@@ -53,3 +53,55 @@ export const users = pgTable("users", {
   id: text("id").primaryKey(),
   role: text("role").notNull(),
 });
+
+export const matches = pgTable("matches", {
+  id: text("id").primaryKey(),
+  sportId: text("sport_id").notNull(),
+  sportSlug: text("sport_slug").notNull(),
+  competitionId: text("competition_id").notNull(),
+  date: date("match_date", { mode: "string" }).notNull(),
+  round: text("round").notNull(),
+  status: text("status").notNull(),
+  source: text("source").notNull(),
+  sourceRef: text("source_ref"),
+  createdBy: text("created_by").notNull(),
+  reviewedBy: text("reviewed_by"),
+  publishedAt: text("published_at"),
+});
+
+export const tennisMatches = pgTable("tennis_matches", {
+  matchId: text("match_id").primaryKey(),
+  sportSlug: text("sport_slug").notNull(),
+  playerAId: text("player_a_id").notNull(),
+  playerASport: text("player_a_sport").notNull(),
+  playerBId: text("player_b_id").notNull(),
+  playerBSport: text("player_b_sport").notNull(),
+  winnerId: text("winner_id").notNull(),
+  bestOf: integer("best_of").notNull(),
+  score: jsonb("score").notNull(),
+  retired: boolean("retired"),
+});
+
+export const tennisMatchStats = pgTable(
+  "tennis_match_stats",
+  {
+    matchId: text("match_id").notNull(),
+    athleteId: text("athlete_id").notNull(),
+    athleteSport: text("athlete_sport").notNull(),
+    aces: integer("aces").notNull(),
+    doubleFaults: integer("double_faults").notNull(),
+    firstServeIn: integer("first_serve_in").notNull(),
+    firstServeTotal: integer("first_serve_total").notNull(),
+    firstServePointsWon: integer("first_serve_points_won").notNull(),
+    secondServePointsWon: integer("second_serve_points_won").notNull(),
+    secondServeTotal: integer("second_serve_total").notNull(),
+    breakPointsSaved: integer("break_points_saved").notNull(),
+    breakPointsFaced: integer("break_points_faced").notNull(),
+    breakPointsWon: integer("break_points_won").notNull(),
+    breakPointsTotal: integer("break_points_total").notNull(),
+    winners: integer("winners"),
+    unforcedErrors: integer("unforced_errors"),
+    totalPointsWon: integer("total_points_won").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.matchId, table.athleteId] })],
+);

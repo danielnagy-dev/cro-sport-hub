@@ -43,6 +43,76 @@ const spell = {
   to: "2025-06-30",
 };
 const editor = { id: "editor-1", role: "editor" as const };
+const reviewer = { id: "editor-2", role: "admin" as const };
+const playerA = {
+  id: "player-a",
+  slug: "player-a",
+  name: "Player A",
+  sportId: "sport-tennis",
+  country: "HR",
+};
+const playerB = { ...playerA, id: "player-b", slug: "player-b", name: "Player B" };
+const league = {
+  id: "comp-league",
+  sportId: "sport-football",
+  name: "City League 2026",
+  season: "2026/27",
+  level: "domestic" as const,
+};
+const draft = {
+  id: "match-draft",
+  sportId: "sport-tennis",
+  competitionId: competition.id,
+  date: "2026-10-24",
+  round: "Semi-final",
+  status: "draft" as const,
+  source: "manual" as const,
+  createdBy: editor.id,
+};
+const published = {
+  id: "match-open",
+  sportId: "sport-tennis",
+  competitionId: competition.id,
+  date: "2026-10-23",
+  round: "Final",
+  status: "published" as const,
+  source: "import" as const,
+  sourceRef: "feed-open",
+  createdBy: editor.id,
+  reviewedBy: reviewer.id,
+  publishedAt: "2026-10-23T18:04:00+02:00",
+};
+const sets = {
+  matchId: published.id,
+  playerAId: playerA.id,
+  playerBId: playerB.id,
+  winnerId: playerA.id,
+  bestOf: 3 as const,
+  score: [
+    [6, 4],
+    [3, 6],
+    [7, 6, 5],
+  ],
+  retired: false,
+};
+const counts = {
+  matchId: published.id,
+  athleteId: playerA.id,
+  aces: 3,
+  doubleFaults: 1,
+  firstServeIn: 6,
+  firstServeTotal: 10,
+  firstServePointsWon: 4,
+  secondServePointsWon: 2,
+  secondServeTotal: 4,
+  breakPointsSaved: 1,
+  breakPointsFaced: 2,
+  breakPointsWon: 2,
+  breakPointsTotal: 4,
+  winners: 8,
+  unforcedErrors: 5,
+  totalPointsWon: 20,
+};
 
 function openMemory(client: PGlite, owner = true) {
   return openCatalog(
@@ -201,6 +271,90 @@ describe("v1 catalog", () => {
       expect(written.issues[0]?.message).toBe("Expected a season like 2026 or 2026/27");
     } finally {
       await catalog.close();
+    }
+  });
+
+  it("round-trips a match and rejects a bad sport, a repeated import, or a bad schema", async () => {
+    const client = new PGlite();
+    const first = await openMemory(client);
+    try {
+      await first.write("user", editor);
+      await first.write("user", reviewer);
+      await first.write("competition", competition);
+      await first.write("competition", league);
+      await first.write("athlete", playerA);
+      await first.write("athlete", playerB);
+      await first.write("athlete", player);
+      await first.write("match", draft);
+      await first.write("match", { ...draft, id: "match-manual-2", round: "Quarter-final" });
+      await first.write("match", published);
+      await first.write("match", {
+        ...draft,
+        id: "match-foot",
+        sportId: "sport-football",
+        competitionId: league.id,
+      });
+      await first.write("tennisMatch", sets);
+      await first.write("tennisMatchStats", counts);
+      const cases: [CatalogWriteKind, unknown, string, string][] = [
+        [
+          "match",
+          { ...draft, sportId: "sport-football" },
+          "invalid",
+          "The match sport does not match the competition",
+        ],
+        ["match", { ...published, id: "match-copy" }, "conflict", "That record is already stored"],
+        [
+          "tennisMatch",
+          { ...sets, matchId: "match-foot" },
+          "invalid",
+          "A tennis match needs a tennis match",
+        ],
+        [
+          "tennisMatch",
+          { ...sets, playerBId: player.id },
+          "invalid",
+          "Tennis matches are for tennis athletes",
+        ],
+        [
+          "tennisMatchStats",
+          { ...counts, athleteId: player.id },
+          "invalid",
+          "Stats belong to one of the two players",
+        ],
+      ];
+      for (const [kind, value, code, message] of cases) {
+        await expect(first.write(kind, value)).rejects.toMatchObject({ code, message });
+      }
+      const draftReview = first.write("match", { ...draft, reviewedBy: reviewer.id });
+      await expect(draftReview).rejects.toMatchObject({
+        code: "invalid",
+        message: "The record does not match the shared schema",
+        issues: [
+          { path: ["status"], message: "A draft match has no reviewer and no publish time" },
+        ],
+      });
+      expect(zodCause(await rejected(draftReview)).issues[0]?.message).toBe(
+        "A draft match has no reviewer and no publish time",
+      );
+      const second = await openMemory(client, false);
+      expect(await second.read("match", draft.id)).toEqual(draft);
+      expect(await second.read("match", "match-manual-2")).toEqual({
+        ...draft,
+        id: "match-manual-2",
+        round: "Quarter-final",
+      });
+      expect(await second.read("match", published.id)).toEqual(published);
+      expect(await second.read("tennisMatch", published.id)).toEqual(sets);
+      expect(
+        await second.read("tennisMatchStats", { matchId: published.id, athleteId: playerA.id }),
+      ).toEqual(counts);
+      expect(
+        await second.read("tennisMatchStats", { matchId: published.id, athleteId: playerB.id }),
+      ).toBeUndefined();
+      await second.close();
+    } finally {
+      await first.close();
     }
   });
 
