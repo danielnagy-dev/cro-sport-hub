@@ -35,6 +35,11 @@ export default defineConfig({
           output: [{ auto: true }, "!*.tsbuildinfo"],
         },
       },
+      seed: {
+        command: "vpx src/catalog/seed-cli.ts",
+        cache: false,
+        ...builtLibraries,
+      },
     },
   },
 });
