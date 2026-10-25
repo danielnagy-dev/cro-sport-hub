@@ -5,7 +5,7 @@ description: Implementer's checklist for this monorepo. Use when writing a scope
 
 # Develop
 
-Implement the scoped PR. Do not widen it. Do not merge. Do not review your own PR. A separate agent runs `custom_mode: "review"`. When custom modes are unavailable, launch a separate agent and tell it to read and follow `.cursor/skills/review/SKILL.md` for the whole run.
+Implement the scoped PR. Do not widen it. Do not merge. Run the checks once. The coordinator applies the phase in `docs/team.md`. When no separate review agent will run, self-review at the end of this run against `.cursor/skills/review/SKILL.md` and write `## Review` (self-review, findings, fixes). When one will run, leave `## Review` empty.
 
 ## Before editing
 
@@ -24,29 +24,29 @@ Implement the scoped PR. Do not widen it. Do not merge. Do not review your own P
 
 ## Proof
 
-Behaviour changes use the `verify` skill: `vp run verify:<target>` for each app or library you touched, plus `--route` for routes you changed. Paste `summary.md` under `## Verification`.
+Run each check once, from the root, and put a results table under `## Verification`. Columns are Check and Result (`pass`, `fail`, or `not run`, with the reason). Rows: `format-check`, `lint`, `guards`, `pr-body`, `typecheck`, `test`, `build`, `verify`.
 
-Docs or config only: `not applicable (no runtime change)`.
-
-From the root, before the PR:
+Every pull request:
 
 ```bash
 vp run format-check
 vp run lint
-vp run typecheck
-vp run test
-vp run build
 vp run guards
+vpx tools/guards/check.ts --pr-body <file>
 ```
 
-`vp run lint` also runs the guards script. `vp run guards` is uncached, so it still sees the commit messages when lint hits a cache.
+`vp run lint` also runs the guards script. `vp run guards` is uncached, so it still sees the commit messages when lint hits a cache. A shallow clone may only see `HEAD`. If `origin/main` is missing, fetch it before `guards`.
+
+Also run `vp run typecheck` when the diff touches `tools/guards`. Also run `vp run typecheck`, `vp run test`, `vp run build`, and the plan's `vp run verify:<target>` commands, plus `--route`, when the diff changes app, lib, or tool runtime code, or a dependency. Docs, rules, skills, and templates skip those. For them, `verify` is `not applicable (no runtime change)`.
+
+Behaviour changes also paste `summary.md` in `## Verification`.
 
 ## Pull request
 
-Fill `.github/pull_request_template.md`: plan item, size, every top-level path under Changes, how to test, and verification. Leave `## Review` empty.
+Fill `.github/pull_request_template.md`: plan item, size, every top-level path under Changes, how to test, the results table, and verification. Write `## Review` in this run when you are self-reviewing. Leave it empty when a separate agent will run.
 
 The title is a Conventional Commits subject. It becomes the squash subject.
 
 Commit messages and the description must not contain a `Co-authored-by` line with an email. Check the description with `vpx tools/guards/check.ts --pr-body <file>`.
 
-Never merge. Daniel squash-merges after the verdict is ready.
+Never merge. Daniel squash-merges. That merge is the final gate.

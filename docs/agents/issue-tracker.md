@@ -16,7 +16,7 @@ Write `.scratch/<feature>/issues/<NN>-<slug>.md` only when Daniel asks.
 
 ## Pull requests
 
-PRs live on Cursor Origin. Agents never merge.
+PRs live on Cursor Origin. Who reviews is the phase in `docs/team.md`. Agents never merge. Daniel squash-merges. That merge is the final gate.
 
 ## Status
 

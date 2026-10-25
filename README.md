@@ -27,7 +27,7 @@ vp run test
 vp run build
 ```
 
-Run those commands from the repository root before opening a pull request. Conventions are in `AGENTS.md`. Toolchain decisions are in `docs/adr/001-vite-plus-vs-nx.md`.
+Run them from the repository root. A pull request runs the set named in `AGENTS.md`. Toolchain decisions are in `docs/adr/001-vite-plus-vs-nx.md`.
 
 ## Dev servers
 

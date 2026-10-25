@@ -4,7 +4,7 @@
 
 ## Size
 
-<!-- Insertions plus deletions from `git diff --numstat origin/main`, excluding pnpm-lock.yaml. Target 300. Split before 500. -->
+<!-- Insertions plus deletions from `git diff --numstat origin/main`, with the exclusions in the plan skill. Target 300. Split before 500. -->
 
 ## Summary
 
@@ -16,10 +16,10 @@
 
 ## Verification
 
-<!-- Paste artifacts/verify/<target>/<ts>/summary.md for each target, attach screenshots, and list what was not verified and why. Docs or config only: "not applicable (no runtime change)". -->
+<!-- Results table from the develop skill (Check, Result). Then summary.md for each verify target, screenshots, and anything not verified, with the reason. Docs or config only: "not applicable (no runtime change)" plus the table. -->
 
 ## Review
 
-<!-- Review agent only. Prefer custom_mode: "review". When custom modes are unavailable, launch a separate agent and tell it to read and follow .cursor/skills/review/SKILL.md for the whole run. Verdict: ready (no majors; nits may be listed), small fixes (a local major, then re-review the changed lines), or rework (a redesign or a failed acceptance check). List majors and nits separately. Leave this section empty when opening the PR. -->
+<!-- Author self-review (self-review, findings, fixes) unless docs/team.md sends a separate agent, in which case leave this empty for that agent. Verdict: ready (no majors; nits may be listed), small fixes (a local major, then re-review only the changed lines), or rework. Nits never block. Daniel squash-merges. -->
 
 Closes #

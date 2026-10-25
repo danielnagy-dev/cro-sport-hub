@@ -52,7 +52,7 @@ Docs disagreed about a path, a fallback was redundant, timestamps did not say UT
 
 Guards that landed here:
 
-- Trailers: the script fails when a commit on this branch (not already on `main`) or a body passed with `--pr-body` has a `Co-authored-by` line containing an email. `main` already has agent trailers, so the scan is `origin/main..HEAD`. CI's checkout is shallow and may only see `HEAD`. Review fetches `main` and runs `vp run guards` (cache off) plus `--pr-body`.
+- Trailers: the script fails when a commit on this branch (not already on `main`) or a body passed with `--pr-body` has a `Co-authored-by` line containing an email. `main` already has agent trailers, so the scan is `origin/main..HEAD`. CI's checkout is shallow and may only see `HEAD`. The author fetches `main` when `origin/main` is missing and runs `vp run guards` (cache off) plus `--pr-body`. The reviewer does not rerun them.
 - Size: the plan skill states the target (300 lines, split before 500). The template has a Size field. Review compares it to `git diff --numstat`. A hard cap also fails lockfile and ADR diffs, so it is not a script.
 - Paths and prose: the develop skill requires every top-level path under Changes. Review compares `git diff --stat`. UTC is stated in the verify skill. Loose proofs and doc drift are review findings. A timestamp unit test would import a CLI that runs on load.
 
@@ -68,11 +68,21 @@ Those rounds re-ran the full suite for docs and treated nits as another review. 
 
 ### Review depth follows the diff
 
-Baseline checks always run: `format-check`, `lint`, `guards`, and `--pr-body`. That `--pr-body` scan is the trailer guard above: review fetches `main` and runs `vp run guards` (cache off) plus `--pr-body`. A pull request that only touches docs, rules, skills, templates, or guards stops after those baseline checks and a reading of the diff. A `tools/guards` change also runs `typecheck`. `typecheck`, `test`, `build`, and the relevant `verify:*` runs are added for app, lib, or tool runtime code, or for a dependency change. The reviewer does not add a task the skill does not name unless the coordinator names a specific risk. Guard: written rule in `.cursor/skills/review/SKILL.md` and `docs/team.md`. No new check: which paths count is a judgement, and a script misfires on a mixed diff.
+The author runs this depth once (`.cursor/skills/develop/SKILL.md`). Baseline is `format-check`, `lint`, `guards`, and `--pr-body`. The author fetches `main` when `origin/main` is missing so uncached `guards` and `--pr-body` see every commit. Docs, rules, skills, and templates stop there. A `tools/guards` change also runs `typecheck`. App, lib, or tool runtime code, or a dependency change, also runs `typecheck`, `test`, `build`, and the named `verify:*` runs. The reviewer does not rerun them. Who reviews is **lighter review** below. No new check: command depth is a diff reading, and a script misfires on a mixed diff. The review gate is the phase and path list in `docs/team.md`.
 
 ### Nits do not block
 
 Majors and nits are separate lists. No majors means the verdict is ready, with the nit list attached. The author may fix nits in the same pull request without another review, or leave them for the next one. A re-review happens only after a major, and only on the changed lines. **small fixes** is a local major. **rework** is a redesign or a failed acceptance check. Guard: the review skill, `docs/team.md`, and `.github/pull_request_template.md`. No new check: a verdict is a judgement, not a string a script can prove.
+
+## 2026-10-25 — lighter review
+
+Separate review agents re-ran the suite on a fresh VM. That second run was the main cost. Cause: the review skill treated the author's checks as its own baseline.
+
+The same day Daniel added a phase. Pre-launch the app is not deployed and has no users, so a mistake is cheap. Foundations are the exception: a database schema or migration, a new technology or dependency family, or an ADR. Daniel can also ask for a separate review. Every other PR is the author's checks once, plus a self-review, then Daniel's squash merge. Post-launch, from the first public deploy, the risk-path rule in `docs/team.md` applies (database or catalog, API, auth or security, dependencies or lockfile, CI or guards tooling, or more than 300 counted lines). The coordinator flips the phase heading there at deploy time.
+
+Guard: written rule in `docs/team.md`, `.cursor/skills/develop/SKILL.md`, `.cursor/skills/review/SKILL.md`, and `.cursor/rules/lessons.mdc`. The author records a results table under `## Verification`. The reviewer reads the diff and that table and does not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards stay in `lint`. One targeted command only when the diff looks suspicious or a reported result is missing. Nits do not block. Re-review only after a major, and only the changed lines. Daniel's squash merge is the final gate.
+
+No new check: the gate is the phase heading plus a path list. A script would restate the coordinator's job.
 
 ## 2026-10-25 — empty `toThrow`
 

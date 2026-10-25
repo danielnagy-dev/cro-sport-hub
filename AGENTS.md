@@ -13,17 +13,7 @@ Run task commands from the repository root. Library declaration emit uses the ca
 
 ## Before opening a pull request
 
-```bash
-vp install
-vp run format-check
-vp run lint
-vp run typecheck
-vp run test
-vp run build
-vp run guards
-```
-
-`vp run typecheck` runs each package typecheck, including `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
+The author runs each required check once, from the repository root, and records a results table under `## Verification`. The commands are in `.cursor/skills/develop/SKILL.md`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off. `vp run typecheck` includes `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
 
 ## Pull requests
 
@@ -32,15 +22,16 @@ vp run guards
 - The description says what changed, why, and how to test it. The description becomes the squash commit body.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
 - No `Co-authored-by` line with an email in a commit message or the PR description. If a hook adds one, strip it before pushing.
-- Agents do not merge. Roles and the order of work are in `docs/team.md`.
+- Agents do not merge. Daniel squash-merges. That merge is the final gate. Who reviews is the phase in `docs/team.md`.
 
-## Verification (required for every PR that changes behaviour)
+## Verification
 
 - Use the `verify` skill (`.cursor/skills/verify/SKILL.md`). Run `vp run verify:<target>` for each app or library the PR touches (`api`, `studio`, `web`, `ui`), plus `--route` for the routes you changed.
 - First run on a new machine: `vp exec playwright install chromium`.
-- The PR description must have a `## Verification` section with the pasted `summary.md`, the screenshots (cloud agents: attach as artifacts), and anything you could not verify, with the reason. "Tests pass" alone is not verification.
-- Pure docs/config PRs may write `Verification: not applicable (no runtime change)`.
-- Reviewers (human or agent) treat a missing or mismatched Verification section as a blocking comment.
+- The PR description must have a `## Verification` section with the results table, the pasted `summary.md`, the screenshots (cloud agents: attach as artifacts), and anything you could not verify, with the reason. "Tests pass" alone is not verification.
+- A missing `## Verification` section is blocking. One missing row is a missing result: the reviewer runs that command (`.cursor/skills/review/SKILL.md`).
+- Pure docs or config PRs still include the results table. The `verify` row is `not applicable (no runtime change)`.
+- Reviewers (human or agent) treat a missing Verification section as a blocking comment.
 
 ## Feature map
 
