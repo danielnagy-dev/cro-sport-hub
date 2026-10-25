@@ -5,7 +5,7 @@ description: Implementer's checklist for this monorepo. Use when writing a scope
 
 # Develop
 
-Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and again only when the final-push merge changes the tree. The coordinator applies the phase in `docs/team.md`. When no separate review agent will run, self-review at the end of this run against `.cursor/skills/review/SKILL.md` and write `## Review` (self-review, findings, fixes). When one will run, leave `## Review` empty.
+Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and again only when the final-push merge changes the tree. The author self-reviews by default. At the end of this run, follow `.cursor/skills/review/SKILL.md` and fill `## Review` in that skill's report shape. Leave `## Review` empty only when Daniel has asked for a separate review or, after the first public deploy, when the phase in `docs/team.md` sends a separate agent.
 
 ## Before editing
 
@@ -44,7 +44,7 @@ Behaviour changes also paste `summary.md` in `## Verification`.
 
 ## Pull request
 
-Fill `.github/pull_request_template.md`: plan item, size, every top-level path under Changes, how to test, the results table, and verification. Write `## Review` in this run when you are self-reviewing. Leave it empty when a separate agent will run.
+Fill `.github/pull_request_template.md`: plan item, size, every top-level path under Changes, how to test, the results table, and verification. Fill `## Review` in this run, in the shape `.cursor/skills/review/SKILL.md` specifies. Leave it empty only when a separate agent will run.
 
 The title is a Conventional Commits subject. It becomes the squash subject.
 

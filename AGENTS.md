@@ -58,6 +58,8 @@ A mistake that shows up a second time becomes an automatic check before another 
 
 Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win. Role skills keep the repo rules and delegate general technique to those copies. Provenance and the update steps are in `.agents/skills/THIRD_PARTY.md`.
 
+A review follows `.cursor/skills/review`: one pass, no sub-agents. The vendored `code-review` sub-agents run only when that file calls the review deep.
+
 Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. That covers `grill-me` (X is `grilling`) and `tdd` (X is `codebase-design`).
 
 Issue tracker: local markdown, one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. See `docs/agents/issue-tracker.md`. A ticket file, or the PR `## Summary`, is the spec.

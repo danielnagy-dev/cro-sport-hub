@@ -1,10 +1,10 @@
 ---
 name: review
 description: >
-  Checklist for a pull request in this Vite+ monorepo. A separate agent uses it
-  with custom_mode: "review" only when docs/team.md says so. Otherwise the author
-  self-reviews against this checklist at the end of the develop run. Use when
-  reviewing a PR or when asked for a ready, small-fixes, or rework verdict.
+  Checklist for a pull request in this Vite+ monorepo. The author self-reviews
+  against it at the end of the develop run and fills ## Review. A separate agent
+  uses it with custom_mode: "review" only when docs/team.md says so. Use when
+  reviewing a PR or when asked for a ready or changes-needed verdict.
 disable-model-invocation: true
 icon: shield
 color: orange
@@ -12,42 +12,83 @@ color: orange
 
 # Review
 
-Who reviews is the phase in `docs/team.md`. This file is the checklist either way.
+This file is the pass, and it wins over the vendored `code-review` skill. The pass below is the whole review. Deep review is the only time that skill's two sub-agents run. The same pass is the author self-review, a review Daniel asks for, and a review after launch.
 
-**Separate agent.** Only when that phase says so. Prefer `custom_mode: "review"`. When custom modes are unavailable, launch a separate agent and tell it to read and follow this file for the whole run. Do not write feature code, do not push fixes, and do not merge. The coordinator does not review the diff. Cursor's built-in `/review` skill is not this role. Follow `code-review` for the analysis. It reports `## Standards` and `## Spec` and does not pick a verdict, edit the tree, push, or merge.
+**Self-review.** The default. At the end of the develop run, the author does this pass and fills `## Review`. Fix what you find in this run.
 
-**Self-review.** Every other PR. At the end of the develop run, the author reads the diff against the checklist below and writes `## Review` (self-review, findings, fixes). Do not start `code-review` sub-agents. Fix what you find in this run and list the fixes.
+**Separate agent.** Only when `docs/team.md` says so. During pre-launch that is only when Daniel explicitly asks. After launch, the post-launch list applies, and Daniel asking still counts. Prefer `custom_mode: "review"`. When custom modes are unavailable, launch a separate agent and tell it to read and follow this file for the whole run. Do not write feature code, do not push fixes, and do not merge. The coordinator does not review the diff. Cursor's built-in `/review` skill is not this role. The author leaves `## Review` empty for this agent.
 
-## Checklist
+## Read
 
-Read the diff, the plan item or spec, `AGENTS.md`, `docs/team.md`, `docs/lessons.md`, the `.cursor/rules/` that match the files, and `docs/feature-map.md` when behaviour changes. Judge the diff against that plan and those rules. Standards sources are `AGENTS.md`, the matching `.cursor/rules/`, and `docs/lessons.md`. The spec is `.scratch/<feature-slug>/issues/<NN>-<slug>.md` when the pull request names an id, or the PR `## Summary` when that file is not in the branch (`docs/agents/issue-tracker.md`). Fetch it the way that tracker doc says.
+Read this file, the PR body, and the ticket `.scratch/<feature-slug>/issues/<NN>-<slug>.md` when the PR names an id. When that file is not on the branch, the spec is the PR `## Summary` (`docs/agents/issue-tracker.md`). Then:
 
-## Commands
+```bash
+git diff --numstat origin/main...HEAD
+git diff --stat origin/main...HEAD
+git log origin/main..HEAD --oneline
+```
 
-The author already ran the checks and recorded the results table under `## Verification` (`.cursor/skills/develop/SKILL.md`). Read the diff and that table. Do not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards already ran inside `lint`. Also fetch `origin/main` and confirm it is an ancestor of `HEAD` (`git merge-base --is-ancestor origin/main HEAD`). That git command is not a suite rerun. Run one further command only when something in the diff looks suspicious or a reported result is missing. Then stop.
+Counted lines are insertions plus deletions in that numstat. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`.
 
-A missing `## Verification` section is a major. One missing row is that one command. A failed reported result is a major. Quote the command and the first error. A docs-only diff says `not applicable (no runtime change)` for `verify`.
+When the count is greater than 400, or Daniel asks for a deep review, go to **Deep review** and skip **Pass**. Otherwise read `git diff origin/main...HEAD` once.
 
-## Verdict
+Open another file only to answer a question a hunk already raised: the rule it may break, `docs/feature-map.md` when a route, endpoint, story, or user action changes, or `docs/lessons.md` when the diff repeats a logged mistake. On the single pass, done when the ticket, the PR body, and the diff are read, and every other file was opened from a hunk.
 
-Map the standards reading and the spec reading onto one verdict. Majors block. Nits do not.
+## Pass
 
-- **ready** — no majors. The reported results pass, or the one targeted command passed, and acceptance is met. List nits under Nits. Nits never block. The author may fix them in this PR with no new review, or leave them for the next PR.
-- **small fixes** — a major that is a local fix inside the PR's scope. After it is fixed, review again, and only the changed lines. The coordinator applies the active phase to that re-review.
-- **rework** — a missing or wrong requirement that needs a redesign, or a failed acceptance check. Back to develop. Back to architect if the boundary was wrong.
+Skip this heading on a deep review.
 
-## Findings
+One pass, in this chat. Standards and the ticket together: a rule the hunk breaks, a requirement missing or wrong, or behaviour the ticket did not ask for. No sub-agents. No smell baseline. No separate Standards and Spec write-up. Then apply **Gates**.
 
-Two lists. Each item is `path:line` — one-off or recurring — what is wrong.
+## Deep review
 
-**Majors.** These block.
+Only when **Read** sent you here. Otherwise skip to **Gates**.
 
-**Nits.** These do not block.
+This replaces **Pass**. Follow `.agents/skills/code-review/SKILL.md` (two parallel sub-agents, the smell baseline, `## Standards` and `## Spec`). Do not also read the diff yourself. Do not edit that vendored file. The vendored skill does not pick the verdict. This file does. Then apply **Gates**, and write the report from the two axis reports plus those majors.
 
-For a recurring major, name the guard, in this order: lint rule, type, test, verify check, written rule. Point at `docs/lessons.md`. A separate agent does not add the guard. A self-review may fix it in this PR when the fix stays in scope.
+## Gates
 
-Also check the size against the plan skill (300, split before 500), that `## Changes` lists every top-level path in `git diff --stat`, that `## Verification` matches the results table, and that no `Co-authored-by` line contains an email.
+The author already ran the checks. Read the `## Verification` table. Do not rerun `format-check`, `lint`, `typecheck`, `test`, `build`, or `verify`. Guards already ran inside `lint`.
 
-A pull request that edits another ticket file, or that adds a per-item status list to `docs/agents/issue-tracker.md`, is a major. The results table needs the final-push line from `.cursor/skills/develop/SKILL.md`. `final push: merged origin/main and reran the checks` has to match a results table from after that merge. A table from before a merge that changed the tree is a major.
+Fetch `origin/main` and confirm it is an ancestor of `HEAD`:
 
-Put the verdict and the findings in the chat and in the PR `## Review` section. A self-review labels itself self-review and lists findings and fixes. A separate agent touches nothing else. Daniel squash-merges. That merge is the final gate.
+```bash
+git merge-base --is-ancestor origin/main HEAD
+```
+
+That git command is not a suite rerun. Run one further command only when a hunk looks suspicious or a reported result is missing. Then stop.
+
+Majors:
+
+- A missing `## Verification` section. A failed reported result. Quote the command and the first error.
+- Counted size past the split line at 500. Over the 300 target, and at or under 500, is a nit.
+- `## Changes` misses a top-level path from `git diff --stat origin/main...HEAD`.
+- A `Co-authored-by` line in the PR body or in `git log origin/main..HEAD` contains an email.
+- The PR edits a ticket file that is not its own, or adds a per-item status list to `docs/agents/issue-tracker.md`.
+- The final-push line is missing, or `final push: merged origin/main and reran the checks` sits on a table recorded before that merge changed the tree. The other line is `final push: origin/main already contained`.
+
+A missing verification row is the one extra command, not a major, unless you run it and it fails. A docs-only diff says `not applicable (no runtime change)` for `verify`.
+
+For a recurring major, name the guard, in this order: lint rule, type, test, verify check, written rule. A separate agent does not add the guard. A self-review may fix it in this PR when the fix stays in scope.
+
+## Report
+
+The report is only this. The first line is `ready` or `changes needed`. Then the lists. Each finding is one line: `path:line` — what is wrong.
+
+`ready` means no majors. `changes needed` means one or more. Nits do not block. List at most 5 nits. When more exist, the last nit line ends with the number omitted.
+
+Tag a major `local fix` when the fix stays inside the PR. Tag it `rework` when acceptance fails or the design has to change. After a local fix, the next review covers the changed lines only. The coordinator applies the active phase to that re-review. Rework goes back to develop, and to architect when the boundary was wrong.
+
+A self-review that edited the tree adds `**Fixes**`, one line per edit. Omit it when nothing changed.
+
+```
+ready
+
+**Majors**
+None
+
+**Nits**
+- path:line — note
+```
+
+Put the report in the chat and in `## Review`. A separate agent touches nothing else. Daniel squash-merges. That merge is the final gate.

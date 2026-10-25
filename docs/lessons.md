@@ -84,6 +84,8 @@ Guard: written rule in `docs/team.md`, `.cursor/skills/develop/SKILL.md`, `.curs
 
 No new check: the gate is the phase heading plus a path list. A script would restate the coordinator's job.
 
+The pre-launch foundation exception in this note was retired later the same day. A schema, a new dependency family, or an ADR no longer gets a separate agent before the first public deploy. The post-launch path list still stands. See **no separate review before launch** below.
+
 ## 2026-10-25 — plan files stopped sharing one status table
 
 PRs #8 and #9 both conflicted on `docs/agents/issue-tracker.md` after #7 merged. Cause: the status table and the plan notes lived in one file, so every pull request edited it.
@@ -95,3 +97,23 @@ No guard in `tools/guards/check.ts`, and no `plan:list` script. A script would r
 ## 2026-10-25 — empty `toThrow`
 
 A failure proof with no expected error showed up a third time. The first was a short substring in the plan-item 21a review. The second was the vendored-skill guard self-test, fixed by comparing the full line. This time `rejects.toThrow()` took no argument, so any throw would pass. Cause: the matcher was used as a boolean. Guard: Oxlint `vitest/require-to-throw-message` in the root `vite.config.ts` (plugin `vitest`, Oxlint 1.89.0). It errors when `toThrow` or `rejects.toThrow` has no argument, including imports from `vite-plus/test`. `apps/studio/src/app/studio-api.spec.ts` now expects the Zod message. Origin PR #4 still has a bare `rejects.toThrow()` in `apps/web/tests/api-client.test.ts` and is not on `main`; that file needs an expected error once both pull requests merge.
+
+## 2026-10-25 — the PR #11 review was slow
+
+Daniel asked for a separate review of PR #11. Wall time was about 13 minutes. File reads and git commands together took about 16 seconds. Cause: the review skill told that agent to follow the vendored `code-review` skill, which spawns two sub-agents (Standards and Spec) that each re-read the same diff and carry a Fowler smell baseline. The reviewer also opened a pile of docs before the diff, and the write-up recapped both axes. Daniel approved a faster default the same day. The vendored skill stays pinned. Our skill and docs override it.
+
+Guard: `.cursor/skills/review/SKILL.md` is one pass. Read that skill, the ticket, the PR body, and `git diff origin/main...HEAD`. Judge standards and the ticket in that read. Open another file only when a hunk raises a concrete question. Do not rerun the author's checks. At most one targeted command when something looks suspicious. The report's first line is `ready` or `changes needed`, then majors, then at most five nits, one line each. The vendored two-subagent review runs only when counted lines are greater than 400, or Daniel asks for a deep review. `docs/team.md` and `AGENTS.md` point at that rule so a model-invoked `code-review` does not win. The short form is in `.cursor/rules/lessons.mdc`.
+
+No new check: a script cannot see a spawned sub-agent or how long the reviewer thought. The written rule is the guard.
+
+## 2026-10-25 — no separate review before launch
+
+Daniel retired the pre-launch foundation exception the same day. Until the first public deploy, no separate review agent runs. That includes a database schema or migration, a new technology or dependency family, and an ADR. Every pull request is the author's checks, run once, and the author's self-review against `.cursor/skills/review/SKILL.md`. The author fills `## Review`. Daniel squash-merges. A separate review runs only when Daniel explicitly asks for one.
+
+Separate reviews of #11 and #12 found no majors and took about 13 minutes each. Cause: the review step was doing work the source should already have done. Quality comes from a clear ticket before coding, the author's checks, and the automated guards. A mistake that repeats becomes an automatic check — lint, type, test, guard, or visual comparison — not another review step. The corrections ladder is unchanged: a written rule is last, and only when a check cannot be added.
+
+The post-launch risk-path rule in `docs/team.md` stays as written for after deploy. When a review does run (Daniel asked, or the phase is post-launch), it is the single pass in `.cursor/skills/review/SKILL.md`, including the deep-review option in that file.
+
+Guard: `docs/team.md`, `.cursor/skills/develop/SKILL.md`, `.cursor/skills/review/SKILL.md`, and `.cursor/rules/lessons.mdc`. Where the lighter-review note above still names a foundation exception, this note wins.
+
+No new check: the gate is the phase heading. A script would restate the coordinator's job. Pre-launch that job is "only when Daniel asks."

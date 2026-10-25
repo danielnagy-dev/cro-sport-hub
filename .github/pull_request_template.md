@@ -20,6 +20,6 @@
 
 ## Review
 
-<!-- Author self-review (self-review, findings, fixes) unless docs/team.md sends a separate agent, in which case leave this empty for that agent. Verdict: ready (no majors; nits may be listed), small fixes (a local major, then re-review only the changed lines), or rework. Nits never block. Daniel squash-merges. -->
+<!-- The author fills this. Report from `.cursor/skills/review`: first line `ready` or `changes needed`, then Majors, then at most five nits, and Fixes when the self-review edited the tree. Leave this empty only when a separate agent will run. Nits never block. Daniel squash-merges. -->
 
 Closes #
