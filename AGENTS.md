@@ -37,7 +37,7 @@ The author runs each required check once, from the repository root, and records 
 
 ## Feature map
 
-`docs/feature-map.md` lists every user-reachable feature and how to reach it. Update it in the same PR that adds or changes a route, endpoint, story or user action.
+`docs/feature-map.md` is the index. Area files under `docs/feature-map/` list every user-reachable feature and how to reach it. Update the area file in the same PR that adds or changes a route, endpoint, story or user action. A PR adds its entry to the area file it touches, not the index.
 
 ## Corrections ladder
 

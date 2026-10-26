@@ -24,7 +24,7 @@ Children (`next-server`, `ng serve`, `nest`) survived. Cause: the signal went to
 
 ### Unknown Storybook stories waited for `main`
 
-A story with no proof-map entry waited for a landmark stories do not render. Cause: the extra-route browser check was reused. Guard: verify skill and `docs/feature-map.md` — an unknown story waits for `#storybook-root`. The CLI already branches. No new check: it needs a Storybook fixture.
+A story with no proof-map entry waited for a landmark stories do not render. Cause: the extra-route browser check was reused. Guard: verify skill and `docs/feature-map/ui.md` — an unknown story waits for `#storybook-root`. The CLI already branches. No new check: it needs a Storybook fixture.
 
 ### `verify:api --route` opened JSON as a page
 

@@ -5,13 +5,13 @@ description: Prove a change works by running the real app and capturing evidence
 
 # Verify a change on the real app
 
-Compiling and unit tests are not proof. Proof is the real app, started from this checkout, reached the way a user reaches it, with the evidence saved. One CLI covers all four targets. The map of those targets is `docs/feature-map.md`.
+Compiling and unit tests are not proof. Proof is the real app, started from this checkout, reached the way a user reaches it, with the evidence saved. One CLI covers all four targets. The map of those targets is the index `docs/feature-map.md` and the area files under `docs/feature-map/`.
 
 ## 1. Pick targets
 
 - Changed `apps/api/**` -> `api`. Changed `apps/studio/**` -> `studio`. Changed `apps/web/**` -> `web`. Changed `libs/ui/**` -> `ui` (and `web` once web uses the component).
 - Changed `libs/shared-types/**` -> every target that imports the changed schema.
-- Open `docs/feature-map.md`. Find each feature the diff touches and note its entry points.
+- Open `docs/feature-map.md`, then the area file for each feature the diff touches, and note its entry points.
 
 ## 2. Doctor (read-only, run first and whenever something looks off)
 
@@ -59,7 +59,7 @@ Readiness timeout is 120 seconds, and 180 seconds for studio. Three HTTP 503s fr
 - Exercise the real user path (a route or a public endpoint), not internal setters or test-only endpoints.
 - For a change in behaviour, capture the action and the resulting state (before and after screenshots, or the request and the response body), not only the final screen.
 - A console error, a page error, a failed same-origin request, or a 5xx is a failure, even if the screenshot looks fine. A document status of 400 or above fails that check too.
-- If a precondition is missing (no Docker, no seed data yet), the run fails with the reason. Do not weaken the check to make it pass. Write the reason in the PR and in the feature's Gotchas in `docs/feature-map.md`.
+- If a precondition is missing (no Docker, no seed data yet), the run fails with the reason. Do not weaken the check to make it pass. Write the reason in the PR and in the feature's Gotchas in its area file under `docs/feature-map/`.
 
 ## 5. Report in the PR
 
@@ -67,7 +67,7 @@ Paste `summary.md` into the PR description under `## Verification`, and attach t
 
 ## 6. Keep the map honest
 
-If the PR adds or changes something a user can reach (a route, an endpoint, a story, a button), update `docs/feature-map.md` and, if needed, the target's default routes in `tools/verify/targets.ts`, in the same PR.
+If the PR adds or changes something a user can reach (a route, an endpoint, a story, a button), update that feature's area file under `docs/feature-map/` and, if needed, the target's default routes in `tools/verify/targets.ts`, in the same PR. A PR adds its entry to the area file it touches, not the index.
 
 ## Cleanup
 
@@ -97,4 +97,4 @@ vpx tools/verify/verify.ts <api|studio|web|ui|doctor> [api|studio|web|ui] [--rou
 
 ## Maintenance
 
-When a feature changes, update `docs/feature-map.md` in the same PR. pstack's `/maintain-verification-skill` is the upkeep loop: the map it should keep honest is `docs/feature-map.md`, and the harness is `tools/verify/`, not a second copy under this skill.
+When a feature changes, update its area file under `docs/feature-map/` in the same PR. pstack's `/maintain-verification-skill` is the upkeep loop: the map it should keep honest is `docs/feature-map.md` and the area files under `docs/feature-map/`, and the harness is `tools/verify/`, not a second copy under this skill.

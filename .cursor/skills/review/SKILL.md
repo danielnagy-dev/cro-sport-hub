@@ -32,7 +32,7 @@ Counted lines are insertions plus deletions in that numstat. Exclude `pnpm-lock.
 
 When the count is greater than 400, or Daniel asks for a deep review, go to **Deep review** and skip **Pass**. Otherwise read `git diff origin/main...HEAD` once.
 
-Open another file only to answer a question a hunk already raised: the rule it may break, `docs/feature-map.md` when a route, endpoint, story, or user action changes, or `docs/lessons.md` when the diff repeats a logged mistake. On the single pass, done when the ticket, the PR body, and the diff are read, and every other file was opened from a hunk.
+Open another file only to answer a question a hunk already raised: the rule it may break, the area file under `docs/feature-map/` when a route, endpoint, story, or user action changes, or `docs/lessons.md` when the diff repeats a logged mistake. On the single pass, done when the ticket, the PR body, and the diff are read, and every other file was opened from a hunk.
 
 ## Pass
 

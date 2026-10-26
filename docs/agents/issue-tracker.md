@@ -39,7 +39,7 @@ Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
 
 ## This repo
 
-Daniel's plan id is the ticket's `NN`, including a letter suffix such as `4b`. Do not renumber an existing plan id from `01`. Those ids are already cited (for example plan item 16 in `docs/feature-map.md`). A new split that has no plan id yet is numbered from `01` inside its feature directory, as above.
+Daniel's plan id is the ticket's `NN`, including a letter suffix such as `4b`. Do not renumber an existing plan id from `01`. Those ids are already cited (for example plan item 16 in `docs/feature-map/ui.md`). A new split that has no plan id yet is numbered from `01` inside its feature directory, as above.
 
 A feature with no separate spec keeps that text in the ticket file. Do not copy it into an empty `spec.md`.
 

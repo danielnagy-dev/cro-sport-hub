@@ -1,0 +1,129 @@
+# API
+
+Entries for the API. Shared preconditions and driving conventions are in `docs/feature-map.md`.
+
+## Index
+
+| ID               | Feature                                | App | Status | Entry point (user POV)                   | Verify              | Since                                             |
+| ---------------- | -------------------------------------- | --- | ------ | ---------------------------------------- | ------------------- | ------------------------------------------------- |
+| api.health       | Health check                           | api | live   | `GET /health`                            | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.openapi      | OpenAPI docs                           | api | live   | `http://localhost:3001/docs`             | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.matches      | Published matches, latest and by sport | api | live   | `GET /api/matches` and `/{sport}`        | `vp run verify:api` | plan items 7 and 7b                               |
+| api.athletes     | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
+| api.login        | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
+| api.match-drafts | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
+
+Planned paths are estimates. The change that builds each feature updates its row.
+
+## Feature entries
+
+### api.health: Health check
+
+`GET /health` reports whether the API process can reach local Postgres and Redis. The body has `status` (`ok` or `error`), `postgres`, `redis`, and the linked package ids. HTTP 200 means both dependencies are up. HTTP 503 means the process is up and a dependency is not.
+
+#### Sub-features
+
+- `api.health-ok` returns HTTP 200 and `"status": "ok"` when Compose is up.
+- `api.health-down` returns HTTP 503 when Postgres or Redis is down. That is a failed verify run, not a pass.
+
+#### How to get to it (user POV)
+
+- Request `GET http://localhost:3001/health`.
+
+#### Driving it with verify
+
+Preconditions:
+
+- `vp run verify:doctor` reports Docker running.
+- Compose services `postgres` and `redis` are healthy, or the run may start them and must stop them afterwards.
+- No root `.env`, or `.env` matches the Compose user, database, and password.
+
+- **Read health.** Run `vp run verify:api`. The `GET /health` row is `pass`, and `health.json` has `"status": "ok"`.
+
+#### Gotchas
+
+- A root `.env` whose `DATABASE_URL` password does not match `POSTGRES_PASSWORD` in `docker-compose.yml` makes `/health` return 503. The run fails on purpose. Do not skip the status check.
+- The CLI stops only the Compose services it started.
+
+### api.openapi: OpenAPI docs
+
+Swagger UI at `/docs` describes the API. The machine-readable document is `/docs-json` and includes a top-level `openapi` field. The title in the UI is `Cro Sport Hub API`.
+
+#### Sub-features
+
+- `api.openapi-json` serves the document at `GET /docs-json`.
+- `api.openapi-ui` renders Swagger UI at `/docs`.
+
+#### How to get to it (user POV)
+
+- Open `http://localhost:3001/docs`.
+- Request `GET http://localhost:3001/docs-json`.
+
+#### Driving it with verify
+
+Preconditions: same as `api.health`.
+
+- **Document.** Run `vp run verify:api`. `GET /docs-json` is `pass` and `openapi.json` contains `"openapi"`.
+- **UI.** The same run screenshots `/docs` and requires the text `Cro Sport Hub API`.
+
+#### Gotchas
+
+- There is no global prefix. The paths are `/docs` and `/docs-json`, not `/api/docs`.
+
+### api.matches: Published matches
+
+`GET /api/matches` lists published matches, newest date first. `GET /api/matches/{sport}` lists the same page for one sport slug (`tennis` or `football`). Draft and review rows are omitted. The body is a page: `items`, `limit` (default 20, max 50), `offset` (default 0), and `total`. A football item names the two clubs (`homeTeam`, `awayTeam`) and does not include a club id, slug, country, or crest. A tennis item names the two players. There is no team endpoint and no club page. A slug that is not a sports row is HTTP 404 with message `Unknown sport`. A known sport with no published rows is an empty page.
+
+#### How to get to it (user POV)
+
+- Request `GET http://localhost:3001/api/matches`.
+- Request `GET http://localhost:3001/api/matches/football` or `/api/matches/tennis`.
+- Shapes are on `GET /docs-json`. Swagger UI is `/docs`. `limit=0` is HTTP 400. `/api/matches/curling` is HTTP 404.
+
+#### Driving it with verify
+
+Preconditions: same as `api.health`. Migrations run on the first request. No seeded matches still returns HTTP 200 and an empty page. Football is seeded as a sport, so the by-sport route is empty rather than 404.
+
+- **List.** `vpx tools/verify/verify.ts api --route /api/matches --route /api/matches/football` returns HTTP 200. Seeded rows are proved by the PGLite suite.
+- **Document.** `vp run verify:api` saves `openapi.json`. The PGLite suite asserts `/api/matches` and `/api/matches/{sport}` are in that document.
+
+#### Gotchas
+
+- The seeded quarterfinal is a draft and is not listed. A newer unpublished football match is not on `/api/matches/football`.
+- Club names are strings on the football item. v1 has no `/api/teams` route.
+- `verify:api` does not load the sample seed. Do not point it at an unknown slug: HTTP 404 fails the run.
+
+### api.athletes: Athlete profile and club history
+
+`GET /api/athletes/{slug}` returns `slug`, `name`, `sport`, `country`, optional `birthYear` and `position`, and `clubs` (`{ name, from, to? }`, current spell first, names only). `GET /api/athletes?sport=` returns `{ slug, name }[]` sorted by name. Unknown athlete is HTTP 404 `Unknown athlete`. An unknown sport is HTTP 404 `Unknown sport`. No `results` field. The PGLite suite is the proof; `verify:api` needs Docker and does not load the seed.
+
+### api.login: JWT login
+
+`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is attached to the draft save routes only. `GET /api/matches` stays public.
+
+`EDITOR_DEMO_PASSWORD`, `ADMIN_DEMO_PASSWORD`, and `JWT_SECRET` (at least 32 characters) come from the environment. Placeholders are in `.env.example`. Boot does not require `JWT_SECRET`.
+
+#### How to get to it (user POV)
+
+- `POST http://localhost:3001/api/login`. The shape is on `GET /docs-json`.
+
+#### Driving it with verify
+
+The verify CLI only sends GET, so it cannot log in. `vp run verify:api` and `vpx tools/verify/verify.ts api --route /api/matches` stay HTTP 200 with no bearer token. The API unit tests cover a signed token, HTTP 401, a bad body, and both guards. The handler sets HTTP 200 because Nest's POST default is 201.
+
+### api.match-drafts: Draft match saves
+
+`POST /api/matches/tennis` and `POST /api/matches/football` create a match. `PUT` on that path plus an id replaces one. Both force `status: draft`. An editor or admin sends `Authorization: Bearer`. No token is 401. Any other signed role is 403. The public `GET` routes stay open. Tennis takes a set score and optional raw stat counts. Football takes a score and optional appearances. Percentage fields are rejected. The response is `{ id, status: "draft", sport }`.
+
+#### How to get to it (user POV)
+
+- `POST http://localhost:3001/api/matches/tennis` or `/api/matches/football` with a bearer token. `PUT` adds the match id. Shapes are on `GET /docs-json`.
+
+#### Driving it with verify
+
+The verify CLI only sends GET, so `vp run verify:api` proves the public reads and `/docs`. Validation and draft status are the catalog suite. The role check is the HTTP suite.
+
+#### Gotchas
+
+- A new draft is not on the public list. Editing a published match returns it to draft and removes it from that list.
+- `JWT_SECRET` is read on the draft route, not at boot. An edit replaces stats and appearances.
