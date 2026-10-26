@@ -54,7 +54,7 @@ Load the fictional catalog (competitions, clubs, athletes, matches) into that da
 vp run api#seed
 ```
 
-The command reads the root `.env` the same way as `vp run api#dev`. It writes through the catalog and skips rows that are already stored, so running it again does not duplicate them. Sample names only: no photos and no account passwords.
+The command reads the root `.env` the same way as `vp run api#dev`. It writes through the catalog and skips rows that are already stored, so running it again does not duplicate them. Sample names only: no photos and no crests. `EDITOR_DEMO_PASSWORD` and `ADMIN_DEMO_PASSWORD` are hashed onto `editor-demo` and `admin-demo`. `JWT_SECRET` signs `POST /api/login`. Placeholders live in `.env.example`.
 
 Copy `.env.example` to `.env` in the repository root. `vp run api#dev` loads that file before it listens, so `PORT` and `DATABASE_URL` there replace the defaults in `apps/api/src/api-config.ts`. A variable already set in the shell is left as it is.
 

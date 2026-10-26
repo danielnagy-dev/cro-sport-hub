@@ -111,6 +111,7 @@ function migrationStatements(): string[] {
     "0002_v1_matches.sql",
     "0003_v1_football.sql",
     "0004_v1_match_sport_index.sql",
+    "0005_v1_credentials.sql",
   ].flatMap((name) =>
     readFileSync(join(migrationDir, name), "utf8")
       .replaceAll(/--.*$/gm, "")
