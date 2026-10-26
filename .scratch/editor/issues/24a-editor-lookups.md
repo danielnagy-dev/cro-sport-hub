@@ -4,7 +4,7 @@
 
 **Blocked by:** None. `EditorGuard` and the catalog rows are on main. The forms that consume the lists are 24b and 25a.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 260 counted lines. Three small selects and the guard tests. No new validation beyond the sport query.
 
@@ -20,10 +20,10 @@ Plan is this note. Architect sketches the three lookup schemas in `libs/shared-t
 
 ## Acceptance
 
-- [ ] An editor token on `?sport=tennis` returns Sample Cup and the four Sample Players, and returns no football club and no footballer.
-- [ ] `?sport=football` returns Sample League and the five footballers. `GET /api/editor/teams` returns Sample Home, Sample Away, and Sample Town.
-- [ ] `?sport=curling` is HTTP 400 `Unknown sport`. No token is HTTP 401.
-- [ ] `/docs-json` documents the three paths as secured, and documents no public `/api/teams`.
+- [x] An editor token on `?sport=tennis` returns Sample Cup and the four Sample Players, and returns no football club and no footballer.
+- [x] `?sport=football` returns Sample League and the five footballers. `GET /api/editor/teams` returns Sample Home, Sample Away, and Sample Town.
+- [x] `?sport=curling` is HTTP 400 `Unknown sport`. No token is HTTP 401.
+- [x] `/docs-json` documents the three paths as secured, and documents no public `/api/teams`.
 
 ## Verification
 
@@ -37,3 +37,7 @@ Yes, for the three lookup schemas in `libs/shared-types`. No ADR. They are id-an
 
 - The three `GET /api/editor/...` routes on the seeded catalog. Catches a footballer on the tennis list, and a list that omits the id the form must post.
 - `GET /docs-json`. Catches an unsecured lookup.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/29

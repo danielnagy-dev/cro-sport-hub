@@ -34,6 +34,9 @@ export type { Team } from "./team.ts";
 export { competitionSchema } from "./competition.ts";
 export type { Competition } from "./competition.ts";
 
+export { athleteLookupSchema, competitionLookupSchema, teamLookupSchema } from "./editor-lookup.ts";
+export type { AthleteLookup, CompetitionLookup, TeamLookup } from "./editor-lookup.ts";
+
 export { matchSchema, roundSchema } from "./match.ts";
 export type { Match } from "./match.ts";
 

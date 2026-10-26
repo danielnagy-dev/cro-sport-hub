@@ -8,6 +8,7 @@ import { openCredentialStore } from "./auth/auth.js";
 import { CREDENTIAL_STORE, LoginController } from "./auth/login.controller.js";
 import { AdminAuthGuard, EditorAuthGuard } from "./auth/role.guard.js";
 import { openPostgresCatalog } from "./catalog/catalog.js";
+import { EditorLookupsController } from "./editor-lookups.controller.js";
 import { MatchDraftsController } from "./match-drafts.controller.js";
 import { MatchWorkflowController } from "./match-workflow.controller.js";
 import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
@@ -21,6 +22,7 @@ import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
     LoginController,
     MatchDraftsController,
     MatchWorkflowController,
+    EditorLookupsController,
     AdminTeamsController,
   ],
   providers: [

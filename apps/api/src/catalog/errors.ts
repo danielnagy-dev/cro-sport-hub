@@ -9,13 +9,17 @@ import {
   teamSchema,
   tennisMatchSchema,
   tennisMatchStatsSchema,
+  type AthleteLookup,
   type AthleteName,
   type AthleteTeam,
+  type CompetitionLookup,
   type FieldIssue,
   type PublicAthlete,
   type PublishedMatchPage,
   type Role,
+  type SportSlug,
   type Team,
+  type TeamLookup,
 } from "@cro-sport-hub/shared-types";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
@@ -79,6 +83,9 @@ export type Catalog = {
   listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>;
   readPublicAthlete(slug: string): Promise<PublicAthlete>;
   listPublicAthletes(sport: string): Promise<AthleteName[]>;
+  listCompetitions(sport: SportSlug): Promise<CompetitionLookup[]>;
+  listAthletes(sport: SportSlug): Promise<AthleteLookup[]>;
+  listTeamLookups(): Promise<TeamLookup[]>;
   saveDraft(
     sport: "tennis" | "football",
     body: unknown,
