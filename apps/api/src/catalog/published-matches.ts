@@ -36,7 +36,7 @@ export async function listPublishedMatches(
   const filter = publishedFilter(sportId);
   const [counted, rows] = await Promise.all([
     db.select({ total: count() }).from(matches).where(filter),
-    selectPublished(db, filter, query.limit, query.offset),
+    selectListedMatches(db, filter, query.limit, query.offset),
   ]);
   return publishedMatchPageSchema.parse({
     items: rows.map((row) => toPublished(row)),
@@ -64,7 +64,13 @@ function publishedFilter(sportId: string | undefined): SQL {
   return filtered;
 }
 
-function selectPublished(db: CatalogDb, filter: SQL, limit: number, offset: number) {
+/** The public list's joins, plus workflow columns for the editorial list. */
+export function selectListedMatches(
+  db: CatalogDb,
+  filter: SQL | undefined,
+  limit: number,
+  offset: number,
+) {
   const playerA = alias(athletes, "player_a");
   const playerB = alias(athletes, "player_b");
   const homeSide = alias(teams, "home_side");
@@ -74,6 +80,8 @@ function selectPublished(db: CatalogDb, filter: SQL, limit: number, offset: numb
       id: matches.id,
       date: matches.date,
       round: matches.round,
+      status: matches.status,
+      source: matches.source,
       sportSlug: matches.sportSlug,
       competition: competitions.name,
       playerAId: tennisMatches.playerAId,
@@ -102,7 +110,7 @@ function selectPublished(db: CatalogDb, filter: SQL, limit: number, offset: numb
     .offset(offset);
 }
 
-type PublishedRow = Awaited<ReturnType<typeof selectPublished>>[number];
+type PublishedRow = Awaited<ReturnType<typeof selectListedMatches>>[number];
 
 function winnerSide(winnerId: string | null, playerAId: string | null): "a" | "b" | null {
   if (winnerId === null) return null;

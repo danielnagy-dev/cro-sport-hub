@@ -7,6 +7,7 @@ import { Pool } from "pg";
 import { z } from "zod";
 import { saveDraft } from "./drafts.js";
 import { selectAthletes, selectCompetitions, selectTeams } from "./editor-lookups.js";
+import { listEditorMatches as readEditorMatches } from "./editor-matches.js";
 import { rejectMatch, submitMatch } from "./workflow.js";
 import {
   CatalogError,
@@ -79,6 +80,7 @@ export async function openCatalog(
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
     listPublishedMatches: (query) => readParsed(() => listPublishedMatches(db, query)),
+    listEditorMatches: (query) => readParsed(() => readEditorMatches(db, query)),
     readPublicAthlete: (slug) => readParsed(() => queryAthlete(db, slug)),
     listPublicAthletes: (sport) => readParsed(() => queryAthletes(db, sport)),
     listCompetitions: (sport) => readParsed(() => selectCompetitions(db, sport)),

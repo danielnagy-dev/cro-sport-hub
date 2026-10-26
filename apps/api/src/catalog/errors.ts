@@ -13,6 +13,8 @@ import {
   type AthleteName,
   type AthleteTeam,
   type CompetitionLookup,
+  type EditorMatchListQuery,
+  type EditorMatchPage,
   type FieldIssue,
   type PublicAthlete,
   type PublishedMatchPage,
@@ -81,6 +83,7 @@ export type Catalog = {
     key: string | AthleteTeamKey | CatalogParticipantKey,
   ): Promise<Stored | undefined>;
   listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>;
+  listEditorMatches(query: EditorMatchListQuery): Promise<EditorMatchPage>;
   readPublicAthlete(slug: string): Promise<PublicAthlete>;
   listPublicAthletes(sport: string): Promise<AthleteName[]>;
   listCompetitions(sport: SportSlug): Promise<CompetitionLookup[]>;

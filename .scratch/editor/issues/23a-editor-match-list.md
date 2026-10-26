@@ -4,7 +4,7 @@
 
 **Blocked by:** None. Plan item 11b is on main (PR #24), so the editorial read follows the draft writes. `EditorGuard` is on main.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 300 counted lines. One guarded list. The public list's joins already know how to name the two sides; this query is that select plus the workflow columns.
 
@@ -20,11 +20,11 @@ Plan is this note. Architect sketches `editorMatchPageSchema` in `libs/shared-ty
 
 ## Acceptance
 
-- [ ] An editor token and no filters returns the seeded published final, the seeded published league match, and the draft quarterfinal. A newer unpublished football row is included when the test inserts one.
-- [ ] `status=draft` returns the quarterfinal and omits the final. `sport=football` omits every tennis row. `source=import` is an empty page on the seed.
-- [ ] The tennis label is `Sample Player A vs Sample Player B`. The football label is `Sample Home vs Sample Away`. The JSON has no club id.
-- [ ] `limit=0` is HTTP 400. No token is HTTP 401. `GET /api/matches` with no token stays HTTP 200 and still omits the draft.
-- [ ] `/docs-json` documents `/api/editor/matches` with bearer security.
+- [x] An editor token and no filters returns the seeded published final, the seeded published league match, and the draft quarterfinal. A newer unpublished football row is included when the test inserts one.
+- [x] `status=draft` returns the quarterfinal and omits the final. `sport=football` omits every tennis row. `source=import` is an empty page on the seed.
+- [x] The tennis label is `Sample Player A vs Sample Player B`. The football label is `Sample Home vs Sample Away`. The JSON has no club id.
+- [x] `limit=0` is HTTP 400. No token is HTTP 401. `GET /api/matches` with no token stays HTTP 200 and still omits the draft.
+- [x] `/docs-json` documents `/api/editor/matches` with bearer security.
 
 ## Verification
 
@@ -38,3 +38,7 @@ Yes, for `editorMatchPageSchema` in `libs/shared-types`. No ADR. It is a read mo
 
 - `GET /api/editor/matches` on the seeded catalog. Catches a draft dropped from an unfiltered list, a filter that leaks the other sport, and a public list that starts returning drafts.
 - `GET /docs-json`. Catches the editor path with no bearer scheme.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/33

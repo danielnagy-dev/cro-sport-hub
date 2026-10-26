@@ -48,6 +48,13 @@ export {
 export type { PublishedMatch, PublishedMatchPage } from "./published-match.ts";
 
 export {
+  editorMatchListQuerySchema,
+  editorMatchPageSchema,
+  editorMatchSchema,
+} from "./editor-match.ts";
+export type { EditorMatch, EditorMatchListQuery, EditorMatchPage } from "./editor-match.ts";
+
+export {
   athleteNameListSchema,
   athleteNameSchema,
   publicAthleteSchema,
