@@ -4,7 +4,7 @@
 
 **Blocked by:** None. `competitionSchema`, catalog `write` / `read`, and `AdminGuard` are on main (plan items 4 and 10).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 320 counted lines. Four routes on a catalog kind that already validates. Plan 11b was about 410 lines because the draft body was new; this one reuses `competitionSchema`.
 
@@ -20,11 +20,11 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] An admin creates a competition, reads it back from the list, and updates the name. The stored row parses with `competitionSchema`.
-- [ ] Delete of `comp-sample-cup` is HTTP 409 `Competition is in use` and the Sample Cup row remains.
-- [ ] Delete of a competition with no matches is HTTP 204 and a later read misses it.
-- [ ] An editor token is HTTP 403 on all four routes. A missing token is HTTP 401.
-- [ ] `/docs-json` documents the four paths and no public `/api/competitions`.
+- [x] An admin creates a competition, reads it back from the list, and updates the name. The stored row parses with `competitionSchema`.
+- [x] Delete of `comp-sample-cup` is HTTP 409 `Competition is in use` and the Sample Cup row remains.
+- [x] Delete of a competition with no matches is HTTP 204 and a later read misses it.
+- [x] An editor token is HTTP 403 on all four routes. A missing token is HTTP 401.
+- [x] `/docs-json` documents the four paths and no public `/api/competitions`.
 
 ## Verification
 
@@ -38,3 +38,7 @@ No. `competitionSchema` and the catalog seam already own the shape. `AdminGuard`
 
 - The four `/api/admin/competitions` routes on PGLite. Catches an editor who writes, a delete that orphans a match, and a body the shared schema would reject.
 - `GET /docs-json`. Catches a public competitions path, or an admin path with no bearer scheme.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/32

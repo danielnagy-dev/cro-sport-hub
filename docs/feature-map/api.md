@@ -4,17 +4,18 @@ Entries for the API. Shared preconditions and driving conventions are in `docs/f
 
 ## Index
 
-| ID                 | Feature                                | App | Status | Entry point (user POV)                   | Verify              | Since                                             |
-| ------------------ | -------------------------------------- | --- | ------ | ---------------------------------------- | ------------------- | ------------------------------------------------- |
-| api.health         | Health check                           | api | live   | `GET /health`                            | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
-| api.openapi        | OpenAPI docs                           | api | live   | `http://localhost:3001/docs`             | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
-| api.matches        | Published matches, latest and by sport | api | live   | `GET /api/matches` and `/{sport}`        | `vp run verify:api` | plan items 7 and 7b                               |
-| api.athletes       | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
-| api.login          | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
-| api.match-drafts   | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
-| api.match-workflow | Submit a draft and reject a review     | api | live   | `POST /api/matches/{id}/submit,/reject`  | `vp run api#test`   | plan item 12a                                     |
-| api.admin-teams    | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
-| api.editor-lookups | Editor lookups for the match forms     | api | live   | `GET /api/editor/competitions`           | `vp run api#test`   | plan item 24a                                     |
+| ID                     | Feature                                | App | Status | Entry point (user POV)                   | Verify              | Since                                             |
+| ---------------------- | -------------------------------------- | --- | ------ | ---------------------------------------- | ------------------- | ------------------------------------------------- |
+| api.health             | Health check                           | api | live   | `GET /health`                            | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.openapi            | OpenAPI docs                           | api | live   | `http://localhost:3001/docs`             | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.matches            | Published matches, latest and by sport | api | live   | `GET /api/matches` and `/{sport}`        | `vp run verify:api` | plan items 7 and 7b                               |
+| api.athletes           | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
+| api.login              | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
+| api.match-drafts       | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
+| api.match-workflow     | Submit a draft and reject a review     | api | live   | `POST /api/matches/{id}/submit,/reject`  | `vp run api#test`   | plan item 12a                                     |
+| api.admin-competitions | Admin competitions                     | api | live   | `/api/admin/competitions`                | `vp run api#test`   | plan item 13a                                     |
+| api.admin-teams        | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
+| api.editor-lookups     | Editor lookups for the match forms     | api | live   | `GET /api/editor/competitions`           | `vp run api#test`   | plan item 24a                                     |
 
 Planned paths are estimates. The change that builds each feature updates its row.
 
@@ -102,7 +103,7 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 
 ### api.login: JWT login
 
-`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is attached to the draft save routes, submit, and the editor lookups. `AdminGuard` is on reject and on `/api/admin/teams`. `GET /api/matches` stays public.
+`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is attached to the draft save routes, submit, and the editor lookups. `AdminGuard` is on reject, `/api/admin/teams`, and `/api/admin/competitions`. `GET /api/matches` stays public.
 
 `EDITOR_DEMO_PASSWORD`, `ADMIN_DEMO_PASSWORD`, and `JWT_SECRET` (at least 32 characters) come from the environment. Placeholders are in `.env.example`. Boot does not require `JWT_SECRET`.
 
@@ -148,6 +149,18 @@ The verify CLI only sends GET, so the transitions are the PGLite HTTP suite (`vp
 - Submit does not record who sent it. Reject clears a reviewer. Publish, which records one, is a later route.
 - Reject of a draft or a published row is HTTP 409. It does not clear those rows.
 - Nest's POST default is 201. These two routes set HTTP 200.
+
+### api.admin-competitions: Admin competitions
+
+An admin lists, creates, updates, and deletes competitions at `/api/admin/competitions`. The list is every competition, name order. Create and update return the stored row (`id`, `sportId`, `name`, `season`, `level`). Delete of an unused competition is HTTP 204. A competition that still has a match, including seeded `comp-sample-cup`, is HTTP 409 `Competition is in use` and the row stays. A repeated id is HTTP 409 `That record is already stored`. A sport id that is not a sports row is HTTP 400 `Unknown row`. An unknown id is HTTP 404 `Unknown competition`. A missing token is HTTP 401 `Invalid token`. An editor token is HTTP 403 `Forbidden`. There is no `/api/competitions` route. Editor form lists are `GET /api/editor/competitions`.
+
+#### How to get to it (user POV)
+
+- `GET`, `POST`, `PUT`, or `DELETE` `http://localhost:3001/api/admin/competitions` with an admin bearer token. `PUT` and `DELETE` add the id. Shapes are on `GET /docs-json`.
+
+#### Driving it with verify
+
+`vp run verify:api` does not send an admin token, so it cannot call these routes. The PGLite suite in `apps/api/src/admin-competitions.controller.spec.ts` covers the four routes, the role checks, and `/docs-json`.
 
 ### api.admin-teams: Admin football clubs
 
