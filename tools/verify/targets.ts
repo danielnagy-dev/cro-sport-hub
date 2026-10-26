@@ -1,6 +1,6 @@
 /**
  * What `vp run verify:<target>` drives. Routes and handles match the apps on main.
- * Studio and web are one screen each. UI stories are Library/Base plus the
+ * Studio's anonymous screen is login. Web is one screen. UI stories are Library/Base plus the
  * Results score, tennis stats, and appearances stories.
  */
 
@@ -70,11 +70,10 @@ export const targets: Record<TargetName, TargetSpec> = {
     timeoutSeconds: 180,
     routes: [
       {
-        name: "Studio shell",
-        path: "/",
+        name: "Login",
+        path: "/login",
         handle: { kind: "main" },
-        proof: "QF",
-        proofRole: "listitem",
+        proof: "Log in",
       },
     ],
   },

@@ -8,7 +8,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 
 - Run from the repo root on Node 24.22.1. `vp install`, then `vp exec playwright install chromium` once.
 - API needs Docker Compose services `postgres` and `redis` (`docker-compose.yml`).
-- Data: seed and test data only. No real people. Studio reads an in-app stub, not the API.
+- Data: seed and test data only. No real people. The studio match list is an in-app stub. Login calls `POST /api/login`.
 
 ## Driving conventions
 
@@ -28,12 +28,12 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | api.login            | JWT login for seeded studio users                  | api    | live    | `POST /api/login`                        | `vp run api#test`      | plan item 10                                         |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
 | ui.results           | Scores, stats, and appearances                     | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
-| studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/`                 | `vp run verify:studio` | plan items for the studio skeleton (formerly GH #34) |
+| studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/` after login     | `vp run studio#test`   | plan items for the studio skeleton (formerly GH #34) |
 | web.home-placeholder | Web layout shell                                   | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | plan item 17                                         |
 | web.home             | Latest results home                                | web    | planned | `/`                                      | -                      | later plan                                           |
 | web.sport            | Sport pages (tennis, football)                     | web    | planned | `/[sport]`                               | -                      | later plan                                           |
 | web.athlete          | Athlete page with club history and stats           | web    | planned | `/athletes/[slug]`                       | -                      | later plan                                           |
-| studio.login         | Login and auth guard                               | studio | planned | `/login`                                 | -                      | later plan                                           |
+| studio.login         | Login and auth guard                               | studio | live    | `http://localhost:4200/login`            | `vp run verify:studio` | plan item 22                                         |
 | studio.matches       | Matches list with filters                          | studio | planned | `/matches`                               | -                      | later plan                                           |
 | studio.tennis-form   | Tennis match form with stats                       | studio | planned | -                                        | -                      | later plan                                           |
 | studio.football-form | Football match form with appearances               | studio | planned | -                                        | -                      | later plan                                           |
@@ -203,21 +203,41 @@ The studio home page is the editor shell. The header says `Studio`, the sport na
 
 #### How to get to it (user POV)
 
-- Open `http://localhost:4200/`.
-- There is no other route yet. The sport buttons switch the list on this page.
+- Log in at `http://localhost:4200/login`, then stay on `http://localhost:4200/`.
+- The sport buttons switch the list on this page. Log out returns to `/login`.
 
 #### Driving it with verify
 
 Preconditions: port 4200 is free. Playwright Chromium is installed. No Docker.
 
-- **Open the shell.** Run `vp run verify:studio`. The page URL is `http://localhost:4200/`.
-- **Proof.** The check `Studio shell` is `pass`. The `main` landmark is visible, and a list item inside it contains `QF`. The screenshot shows the Studio heading and the match list. An alert (`The match list could not be loaded.`) is a failure.
+- **Anonymous run.** `vp run verify:studio` opens `/login` and does not show this list. The CLI has no session.
+- **Proof.** `vp run studio#test` renders the shell. A list item contains `QF`. An alert (`The match list could not be loaded.`) is a failure.
 
 #### Gotchas
 
 - The first Angular dev build is slow. Readiness waits up to 180 seconds.
 - Match rows come from the in-app stub (`apps/studio/src/app/stub-api.ts`), not from `GET /health` or the API. A green studio run does not prove the API.
-- `QF` is seed data, not a person's name. When the seed round changes, update this entry and `tools/verify/targets.ts` together.
+- `QF` is seed data, not a person's name. When the seed round changes, update this entry and the shell unit test together.
+- `/` is behind `editorGuard`. An editor and an admin may enter. A guest is sent to `/login`.
+
+### studio.login: Login and auth guard
+
+`/login` posts `{ id, password }` to `POST /api/login` and stores the JWT for the browser tab. Log out is in the studio header. An editor or an admin can open `/`. `adminGuard` allows only an admin and is not attached to a page yet. A guest or an expired token lands on `/login`. The form labels User id and Password and announces errors. The studio reads `sub`, `role`, and `exp` and does not check the signature.
+
+#### How to get to it (user POV)
+
+- Open `http://localhost:4200/login`, or open `/` with no session.
+- Dev `ng serve` proxies `/api` to `http://localhost:3001`. The match list is still the stub.
+
+#### Driving it with verify
+
+Preconditions: port 4200 is free. Playwright Chromium is installed. No Docker. The API is not required to render the form.
+
+- **Open login.** `vp run verify:studio`. The check `Login` is `pass`. `main` contains `Log in`. A 401, a bad id, and a stored session are the studio unit tests.
+
+#### Gotchas
+
+- Demo passwords and `JWT_SECRET` stay in the environment. The page does not display them.
 
 ### web.home-placeholder: Web layout shell
 

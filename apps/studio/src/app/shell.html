@@ -3,6 +3,12 @@
     <a class="skip-link" href="#content">Skip to matches</a>
     <p class="shell-mark">Cro Sport Hub</p>
     <h1>Studio</h1>
+    @if (auth.session(); as session) {
+    <div class="shell-session">
+      <span>{{ session.id }}</span>
+      <button type="button" (click)="logOut()">Log out</button>
+    </div>
+    }
   </header>
 
   <div class="shell-body">

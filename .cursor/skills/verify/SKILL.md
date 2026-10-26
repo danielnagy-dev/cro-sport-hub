@@ -45,7 +45,7 @@ Exit code 0 means every check passed. Anything else is a failure; read `report.j
 | Target | Start command                        | Port | Ready when                     | Default checks                                                                                            |
 | ------ | ------------------------------------ | ---- | ------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | api    | `vp run api#dev`                     | 3001 | `GET /health` is below 500     | `GET /health` is 200, `GET /docs-json` is 200 with an `openapi` field, screenshot of `/docs`              |
-| studio | `vp run studio#dev`                  | 4200 | `GET /` is below 500           | `/` shows the `main` landmark and a list item containing `QF`                                             |
+| studio | `vp run studio#dev`                  | 4200 | `GET /` is below 500           | `/login` shows the `main` landmark and the text `Log in`                                                  |
 | web    | `vp run web#dev`                     | 3000 | `GET /` is below 500           | `/` shows the `main` landmark and heading `Cro Sport Hub`                                                 |
 | ui     | `vp run @cro-sport-hub/ui#storybook` | 6006 | `GET /index.json` is below 500 | up to 10 `type: "story"` entries; today that is `Library/Base` (`library--base`) showing `Sample Athlete` |
 

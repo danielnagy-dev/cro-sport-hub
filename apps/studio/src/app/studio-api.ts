@@ -8,7 +8,7 @@ export const matchesPath = "/api/matches";
 
 /**
  * Read-only client for sports and matches.
- * Auth and write calls are a later change.
+ * Writes are a later change. Login lives on the auth store.
  */
 @Injectable({ providedIn: "root" })
 export class StudioApi {
