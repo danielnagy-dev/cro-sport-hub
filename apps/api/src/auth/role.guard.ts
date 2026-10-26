@@ -66,3 +66,13 @@ export class EditorAuthGuard implements CanActivate {
     return new EditorGuard(this.secret ?? readJwtSecret(process.env)).canActivate(context);
   }
 }
+
+/** Attaches `AdminGuard` using `JWT_SECRET` when the route is called. */
+@Injectable()
+export class AdminAuthGuard implements CanActivate {
+  constructor(@Optional() @Inject(JWT_SECRET) private readonly secret?: string) {}
+
+  canActivate(context: ExecutionContext): Promise<boolean> {
+    return new AdminGuard(this.secret ?? readJwtSecret(process.env)).canActivate(context);
+  }
+}

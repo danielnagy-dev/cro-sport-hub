@@ -20,6 +20,7 @@ import {
 import { listPublishedMatches } from "./published-matches.js";
 import { readRecord, writeRecord } from "./records.js";
 import * as schema from "./schema.js";
+import { deleteTeam, listTeams, replaceTeam } from "./teams.js";
 
 const migrationDir = dirname(fileURLToPath(import.meta.url));
 
@@ -79,6 +80,9 @@ export async function openCatalog(
     readPublicAthlete: (slug) => readParsed(() => queryAthlete(db, slug)),
     listPublicAthletes: (sport) => readParsed(() => queryAthletes(db, sport)),
     saveDraft: (sport, body, actorId, mode) => saveDraft(db, sport, body, actorId, mode),
+    listTeams: () => listTeams(db),
+    replaceTeam: (value) => replaceTeam(db, value),
+    deleteTeam: (id) => deleteTeam(db, id),
     close: () => {
       closing ??= options?.close?.() ?? Promise.resolve();
       return closing;

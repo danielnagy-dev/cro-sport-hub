@@ -15,6 +15,7 @@ import {
   type PublicAthlete,
   type PublishedMatchPage,
   type Role,
+  type Team,
 } from "@cro-sport-hub/shared-types";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
@@ -84,6 +85,9 @@ export type Catalog = {
     actorId: string,
     mode: "create" | "update",
   ): Promise<{ id: string; status: "draft"; sport: "tennis" | "football" }>;
+  listTeams(): Promise<readonly Team[]>;
+  replaceTeam(value: unknown): Promise<Team>;
+  deleteTeam(id: string): Promise<void>;
   close(): Promise<void>;
 };
 

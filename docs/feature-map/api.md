@@ -12,6 +12,7 @@ Entries for the API. Shared preconditions and driving conventions are in `docs/f
 | api.athletes     | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
 | api.login        | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
 | api.match-drafts | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
+| api.admin-teams  | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
 
 Planned paths are estimates. The change that builds each feature updates its row.
 
@@ -127,3 +128,19 @@ The verify CLI only sends GET, so `vp run verify:api` proves the public reads an
 
 - A new draft is not on the public list. Editing a published match returns it to draft and removes it from that list.
 - `JWT_SECRET` is read on the draft route, not at boot. An edit replaces stats and appearances.
+
+### api.admin-teams: Admin football clubs
+
+`GET /api/admin/teams` lists football clubs in name order. `POST /api/admin/teams` and `PUT /api/admin/teams/{id}` store a `teamSchema` club. `DELETE /api/admin/teams/{id}` removes a club that is not a match side and has no club spell. An admin sends `Authorization: Bearer`. No token is 401 `Invalid token`. An editor is 403 `Forbidden`. A tennis `sportId` is 400 `Teams are football clubs` and nothing is stored. A duplicate id is 409 `That record is already stored`. An unknown id is 404 `Unknown team`. A club that is still a match side, or that still has an `athlete_teams` row, is 409 `Team is in use`. An unused club deletes with 204. There is no public `/api/teams` and no club page.
+
+#### How to get to it (user POV)
+
+- `GET http://localhost:3001/api/admin/teams` with an admin bearer token. `POST` and `PUT` send the club. `DELETE` uses the club id. Shapes are on `GET /docs-json`.
+
+#### Driving it with verify
+
+`vp run verify:api` stays on the public GETs and does not send an admin token. The PGLite HTTP suite covers the four routes, the football-club rejection, delete conflicts, and `/docs-json`.
+
+#### Gotchas
+
+- The seed clubs `club-sample-home`, `club-sample-away`, and `club-sample-town` are in use. The seed has no crests.

@@ -4,7 +4,7 @@
 
 **Blocked by:** None. `teamSchema` and the football-club rule are on main (ADR-002). Can land beside 13a.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 300 counted lines. The same four routes as 13a, on `teamSchema`, without a second error style.
 
@@ -20,10 +20,10 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] An admin creates a club, sees it on the list, and updates `shortName`. The row parses with `teamSchema`.
-- [ ] A tennis `sportId` is HTTP 400 and the message is the catalog's football-club message. Nothing is stored.
-- [ ] Delete of `club-sample-home` is HTTP 409 `Team is in use`. Delete of a club with no match and no spell is HTTP 204.
-- [ ] An editor token is HTTP 403. `/docs-json` has the four admin paths and no `/api/teams`.
+- [x] An admin creates a club, sees it on the list, and updates `shortName`. The row parses with `teamSchema`.
+- [x] A tennis `sportId` is HTTP 400 and the message is the catalog's football-club message. Nothing is stored.
+- [x] Delete of `club-sample-home` is HTTP 409 `Team is in use`. Delete of a club with no match and no spell is HTTP 204.
+- [x] An editor token is HTTP 403. `/docs-json` has the four admin paths and no `/api/teams`.
 
 ## Verification
 
@@ -37,3 +37,7 @@ No. ADR-002 already places teams in the catalog and keeps them off the public si
 
 - The four `/api/admin/teams` routes. Catches a tennis club that gets stored, a delete that breaks a match, and a public team route.
 - `GET /docs-json`. Catches `/api/teams` or an unsecured admin path.
+
+## Comments
+
+- 2026-10-26: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/31
