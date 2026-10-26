@@ -106,7 +106,12 @@ type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 const migrationDir = dirname(fileURLToPath(import.meta.url));
 
 function migrationStatements(): string[] {
-  return ["0001_v1_catalog.sql", "0002_v1_matches.sql", "0003_v1_football.sql"].flatMap((name) =>
+  return [
+    "0001_v1_catalog.sql",
+    "0002_v1_matches.sql",
+    "0003_v1_football.sql",
+    "0004_v1_match_sport_index.sql",
+  ].flatMap((name) =>
     readFileSync(join(migrationDir, name), "utf8")
       .replaceAll(/--.*$/gm, "")
       .split(";")

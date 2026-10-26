@@ -24,7 +24,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | -------------------- | -------------------------------------------------- | ------ | ------- | ---------------------------------------- | ---------------------- | ---------------------------------------------------- |
 | api.health           | Health check                                       | api    | live    | `GET /health`                            | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | api.openapi          | OpenAPI docs                                       | api    | live    | `http://localhost:3001/docs`             | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
-| api.matches          | Latest published matches                           | api    | live    | `GET /api/matches`                       | `vp run verify:api`    | plan item 7                                          |
+| api.matches          | Published matches, latest and by sport             | api    | live    | `GET /api/matches` and `/{sport}`        | `vp run verify:api`    | plan items 7 and 7b                                  |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
 | ui.results           | Scores, stats, and appearances                     | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
 | studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/`                 | `vp run verify:studio` | plan items for the studio skeleton (formerly GH #34) |
@@ -97,27 +97,28 @@ Preconditions: same as `api.health`.
 
 - There is no global prefix. The paths are `/docs` and `/docs-json`, not `/api/docs`.
 
-### api.matches: Latest published matches
+### api.matches: Published matches
 
-`GET /api/matches` lists published matches, newest date first. Draft and review rows are omitted. The body is a page: `items`, `limit` (default 20, max 50), `offset` (default 0), and `total`. A football item names the two clubs (`homeTeam`, `awayTeam`) and does not include a club id, slug, country, or crest. A tennis item names the two players. There is no team endpoint and no club page. A list for one sport is the follow-up.
+`GET /api/matches` lists published matches, newest date first. `GET /api/matches/{sport}` lists the same page for one sport slug (`tennis` or `football`). Draft and review rows are omitted. The body is a page: `items`, `limit` (default 20, max 50), `offset` (default 0), and `total`. A football item names the two clubs (`homeTeam`, `awayTeam`) and does not include a club id, slug, country, or crest. A tennis item names the two players. There is no team endpoint and no club page. A slug that is not a sports row is HTTP 404 with message `Unknown sport`. A known sport with no published rows is an empty page.
 
 #### How to get to it (user POV)
 
 - Request `GET http://localhost:3001/api/matches`.
-- Shapes are on `GET /docs-json`. Swagger UI is `/docs`. `limit=0` is HTTP 400.
+- Request `GET http://localhost:3001/api/matches/football` or `/api/matches/tennis`.
+- Shapes are on `GET /docs-json`. Swagger UI is `/docs`. `limit=0` is HTTP 400. `/api/matches/curling` is HTTP 404.
 
 #### Driving it with verify
 
-Preconditions: same as `api.health`. Migrations run on the first request. No seeded matches still returns HTTP 200 and an empty page.
+Preconditions: same as `api.health`. Migrations run on the first request. No seeded matches still returns HTTP 200 and an empty page. Football is seeded as a sport, so the by-sport route is empty rather than 404.
 
-- **List.** `vpx tools/verify/verify.ts api --route /api/matches` returns HTTP 200. Seeded rows are proved by the PGLite suite.
-- **Document.** `vp run verify:api` saves `openapi.json`. The PGLite suite asserts `/api/matches` is in that document.
+- **List.** `vpx tools/verify/verify.ts api --route /api/matches --route /api/matches/football` returns HTTP 200. Seeded rows are proved by the PGLite suite.
+- **Document.** `vp run verify:api` saves `openapi.json`. The PGLite suite asserts `/api/matches` and `/api/matches/{sport}` are in that document.
 
 #### Gotchas
 
-- The seeded quarterfinal is a draft and is not listed.
+- The seeded quarterfinal is a draft and is not listed. A newer unpublished football match is not on `/api/matches/football`.
 - Club names are strings on the football item. v1 has no `/api/teams` route.
-- `verify:api` does not load the sample seed.
+- `verify:api` does not load the sample seed. Do not point it at an unknown slug: HTTP 404 fails the run.
 
 ### ui.library: Component stories
 

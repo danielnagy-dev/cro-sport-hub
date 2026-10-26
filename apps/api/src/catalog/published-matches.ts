@@ -4,22 +4,36 @@ import {
   type PublishedMatch,
   type PublishedMatchPage,
 } from "@cro-sport-hub/shared-types";
-import { count, desc, eq, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, type SQL } from "drizzle-orm";
 import { alias, type PgDatabase, type PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import * as schema from "./schema.js";
 
-const { athletes, competitions, footballMatches, matches, teams, tennisMatches } = schema;
+const { athletes, competitions, footballMatches, matches, sports, teams, tennisMatches } = schema;
 type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-export type PublishedMatchQuery = { limit: number; offset: number };
+export const unknownSportMessage = "Unknown sport";
 
-/** Orders by `match_date`, which `matches_date_sport` supports. Status is a filter. */
+/** A slug that is not a row in `sports`. The handler maps this to HTTP 404. */
+export class UnknownSportError extends Error {
+  constructor() {
+    super(unknownSportMessage);
+    this.name = "UnknownSportError";
+  }
+}
+
+export type PublishedMatchQuery = { limit: number; offset: number; sport?: string };
+
+/**
+ * Without `sport`, orders by `match_date` (`matches_date_sport`).
+ * With `sport`, filters `sport_id` and `status` (`matches_sport_status_date`).
+ */
 export async function listPublishedMatches(
   db: CatalogDb,
   query: PublishedMatchQuery,
 ): Promise<PublishedMatchPage> {
-  const filter = eq(matches.status, "published");
+  const sportId = query.sport === undefined ? undefined : await sportIdForSlug(db, query.sport);
+  const filter = publishedFilter(sportId);
   const [counted, rows] = await Promise.all([
     db.select({ total: count() }).from(matches).where(filter),
     selectPublished(db, filter, query.limit, query.offset),
@@ -33,6 +47,21 @@ export async function listPublishedMatches(
       .nonnegative()
       .parse(Number(counted[0]?.total ?? 0)),
   });
+}
+
+async function sportIdForSlug(db: CatalogDb, slug: string): Promise<string> {
+  const rows = await db.select({ id: sports.id }).from(sports).where(eq(sports.slug, slug));
+  const row = rows[0];
+  if (row === undefined) throw new UnknownSportError();
+  return row.id;
+}
+
+function publishedFilter(sportId: string | undefined): SQL {
+  const published = eq(matches.status, "published");
+  if (sportId === undefined) return published;
+  const filtered = and(eq(matches.sportId, sportId), published);
+  if (filtered === undefined) throw new Error("The sport filter is missing");
+  return filtered;
 }
 
 function selectPublished(db: CatalogDb, filter: SQL, limit: number, offset: number) {

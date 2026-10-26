@@ -4,12 +4,16 @@ import {
   Controller,
   Get,
   Inject,
+  NotFoundException,
+  Param,
   Query,
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
@@ -19,6 +23,11 @@ import {
   type PublishedMatchPage,
 } from "@cro-sport-hub/shared-types";
 import { type Catalog } from "./catalog/catalog.js";
+import {
+  UnknownSportError,
+  unknownSportMessage,
+  type PublishedMatchQuery,
+} from "./catalog/published-matches.js";
 
 export type CatalogOpener = () => Promise<Catalog>;
 
@@ -48,6 +57,18 @@ function pageDocs(summary: string) {
   );
 }
 
+function sportDocs() {
+  return applyDecorators(
+    pageDocs("Published matches for one sport"),
+    ApiParam({
+      name: "sport",
+      description: "Sport slug.",
+      schema: { type: "string", enum: ["tennis", "football"] },
+    }),
+    ApiNotFoundResponse({ description: unknownSportMessage }),
+  );
+}
+
 @ApiTags("matches")
 @Controller("api")
 export class MatchesController {
@@ -55,11 +76,28 @@ export class MatchesController {
 
   @Get("matches")
   @pageDocs("Latest published matches")
-  async latest(@Query() query: Record<string, unknown>): Promise<PublishedMatchPage> {
-    const page = readPage(query);
+  latest(@Query() query: Record<string, unknown>): Promise<PublishedMatchPage> {
+    return this.readPublished(readPage(query));
+  }
+
+  @Get("matches/:sport")
+  @sportDocs()
+  async bySport(
+    @Param("sport") sport: string,
+    @Query() query: Record<string, unknown>,
+  ): Promise<PublishedMatchPage> {
+    try {
+      return await this.readPublished({ ...readPage(query), sport });
+    } catch (error) {
+      if (error instanceof UnknownSportError) throw new NotFoundException(error.message);
+      throw error;
+    }
+  }
+
+  private async readPublished(query: PublishedMatchQuery): Promise<PublishedMatchPage> {
     const catalog = await this.openCatalog();
     try {
-      return await catalog.listPublishedMatches(page);
+      return await catalog.listPublishedMatches(query);
     } finally {
       await catalog.close();
     }
