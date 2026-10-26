@@ -1,0 +1,11 @@
+#!/bin/sh
+# Staged files only. CI runs the same script with no flag from `vp run lint`.
+# Enable once per clone: git config core.hooksPath .githooks
+# The root prepare script sets that on install.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if command -v vpx >/dev/null 2>&1; then
+  exec vpx tools/guards/file-size.ts --staged
+fi
+exec "$root/node_modules/.bin/vpx" tools/guards/file-size.ts --staged

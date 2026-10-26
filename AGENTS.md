@@ -54,6 +54,8 @@ Never only a comment or a human-only style guide. Delete hacks and workarounds o
 
 A mistake that shows up a second time becomes an automatic check before another PR repeats it. Prefer a lint rule, then a type, then a test, then a `vp run verify:*` check, then a written rule. The log is `docs/lessons.md`. The short form agents always see is `.cursor/rules/lessons.mdc`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off.
 
+A file fails when bytes/4 is over 5,000 estimated tokens. The ignore list and the temporary baseline are at the top of `tools/guards/file-size.ts`. A repeated mistake becomes this automatic check (`vp run lint`, `vp run guards`, and `.githooks/pre-commit`; the root `prepare` script sets `core.hooksPath`).
+
 ## Agent skills
 
 Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win. Role skills keep the repo rules and delegate general technique to those copies. Provenance and the update steps are in `.agents/skills/THIRD_PARTY.md`.

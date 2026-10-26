@@ -2,6 +2,10 @@
 
 Dated log. The second time a mistake appears, it becomes a check. The order is in `.cursor/rules/lessons.mdc`: lint rule, type, test, verify check, written rule.
 
+## 2026-10-26 — file size
+
+Agents read whole files, so a file over 5,000 estimated tokens (bytes/4) costs tokens on every later task. Cause: nothing stopped a file from growing. Guard: `tools/guards/file-size.ts` (ignore list and temporary baseline at the top of that file) in `vp run lint`, `vp run guards`, and `.githooks/pre-commit`. A repeated mistake becomes this automatic check.
+
 ## 2026-10-25 — review of plan item 21a
 
 Fixed before that PR merged.

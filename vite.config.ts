@@ -83,7 +83,7 @@ export default defineConfig({
       "format-check": "vp fmt --check",
       // guards also runs uncached as `vp run guards` so a lint cache hit cannot hide a trailer.
       lint: {
-        command: "vp lint && vpx tools/guards/check.ts",
+        command: "vp lint && vpx tools/guards/check.ts && vpx tools/guards/file-size.ts",
         dependsOn: [
           "@cro-sport-hub/shared-types#build",
           "@cro-sport-hub/ui#build",
@@ -101,7 +101,10 @@ export default defineConfig({
       },
       test: "vp run -r test",
       build: "vp run -r build",
-      guards: { command: "vpx tools/guards/check.ts", cache: false },
+      guards: {
+        command: "vpx tools/guards/check.ts && vpx tools/guards/file-size.ts",
+        cache: false,
+      },
       "verify:doctor": { command: "vpx tools/verify/verify.ts doctor", cache: false },
       "verify:api": { command: "vpx tools/verify/verify.ts api", cache: false },
       "verify:studio": { command: "vpx tools/verify/verify.ts studio", cache: false },

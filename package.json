@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks"
+  },
   "devDependencies": {
     "@playwright/test": "catalog:",
     "@types/node": "catalog:",
