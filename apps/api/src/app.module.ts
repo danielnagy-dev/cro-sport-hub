@@ -15,6 +15,7 @@ import { openPostgresCatalog } from "./catalog/catalog.js";
 import { openCompetitionSession } from "./competition-admin.js";
 import { EditorLookupsController } from "./editor-lookups.controller.js";
 import { EditorMatchesController } from "./editor-matches.controller.js";
+import { ImportController } from "./import.controller.js";
 import { MatchDraftsController } from "./match-drafts.controller.js";
 import { MatchWorkflowController } from "./match-workflow.controller.js";
 import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
@@ -32,6 +33,7 @@ import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
     EditorMatchesController,
     AdminTeamsController,
     AdminCompetitionsController,
+    ImportController,
   ],
   providers: [
     EditorAuthGuard,

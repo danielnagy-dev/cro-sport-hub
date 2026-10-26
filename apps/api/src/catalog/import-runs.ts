@@ -10,7 +10,7 @@ import {
   tennisMatchSchema,
   textSchema,
 } from "@cro-sport-hub/shared-types";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
   CatalogError,
@@ -239,4 +239,11 @@ export async function runImport(
   };
   await db.insert(importRuns).values(run);
   return run;
+}
+
+export async function listImportRuns(catalog: Catalog): Promise<ImportRun[]> {
+  return database(catalog)
+    .select()
+    .from(importRuns)
+    .orderBy(desc(importRuns.startedAt), desc(importRuns.id));
 }

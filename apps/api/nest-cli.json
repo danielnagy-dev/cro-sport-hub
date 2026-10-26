@@ -8,6 +8,10 @@
       {
         "include": "catalog/**/*.sql",
         "watchAssets": true
+      },
+      {
+        "include": "catalog/**/*.json",
+        "watchAssets": true
       }
     ]
   }

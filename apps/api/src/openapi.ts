@@ -14,6 +14,7 @@ export function openApiConfig() {
     .addTag("athletes", "Public athlete profiles and club history")
     .addTag("editor", "Competition, athlete, and club lists for match forms")
     .addTag("admin", "Admin catalog")
+    .addTag("import", "Fixture import of draft matches")
     .addBearerAuth()
     .build();
 }

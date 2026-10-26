@@ -4,7 +4,7 @@
 
 **Blocked by:** None. `saveDraft` is on main (plan 11a, PR #22) and stays the manual writer. This slice does not grow a second manual path. The `(source, source_ref)` unique key is already on main (plan 5).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 340 counted lines. One migration, one adapter, two admin routes, and the fixture cases. The hourly timer is 14b, not this slice.
 
@@ -24,12 +24,12 @@ Plan is this note. Architect sketches `runImport` and the run row below; no ADR.
 
 ## Acceptance
 
-- [ ] The first admin run returns created 2, updated 0, skipped 0, and both rows are `draft` with `source: import` and a `sourceRef`. `GET /api/matches` does not list them.
-- [ ] The second run, same fixture, returns skipped 2. The ids are unchanged.
-- [ ] A changed score on a draft `sourceRef` returns updated 1 and the stored score changes. Status stays `draft`.
-- [ ] A published row with that `sourceRef` is skipped. It stays `published` and the score stays.
-- [ ] A fixture row the shared schema rejects sets `error` on the run and does not store that row. The other fixture row still stores.
-- [ ] An editor token is HTTP 403. `/docs-json` documents both paths.
+- [x] The first admin run returns created 2, updated 0, skipped 0, and both rows are `draft` with `source: import` and a `sourceRef`. `GET /api/matches` does not list them.
+- [x] The second run, same fixture, returns skipped 2. The ids are unchanged.
+- [x] A changed score on a draft `sourceRef` returns updated 1 and the stored score changes. Status stays `draft`.
+- [x] A published row with that `sourceRef` is skipped. It stays `published` and the score stays.
+- [x] A fixture row the shared schema rejects sets `error` on the run and does not store that row. The other fixture row still stores.
+- [x] An editor token is HTTP 403. `/docs-json` documents both paths.
 
 ## Verification
 
@@ -45,3 +45,8 @@ Yes. New table and a new function. No ADR and no new dependency: the catalog sea
 
 - `runImport` on PGLite. Catches a second insert with the same `sourceRef`, an update that publishes, and a published row whose score moved.
 - `POST /api/admin/import` and `GET /api/admin/import/runs`. Catches an editor who can run it, and a run that is missing from the list.
+
+## Comments
+
+- Import core: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/35. Merge that first.
+- Admin routes, this ticket: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/36.

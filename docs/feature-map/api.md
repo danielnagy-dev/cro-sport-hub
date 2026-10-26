@@ -17,6 +17,7 @@ Entries for the API. Shared preconditions and driving conventions are in `docs/f
 | api.admin-teams        | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
 | api.editor-lookups     | Editor lookups for the match forms     | api | live   | `GET /api/editor/competitions`           | `vp run api#test`   | plan item 24a                                     |
 | api.editor-matches     | Editorial match list across sports     | api | live   | `GET /api/editor/matches`                | `vp run api#test`   | plan item 23a                                     |
+| api.import             | Import drafts from the shipped fixture | api | live   | `POST /api/admin/import`                 | `vp run api#test`   | plan item 14a                                     |
 
 Planned paths are estimates. The change that builds each feature updates its row.
 
