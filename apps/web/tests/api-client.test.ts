@@ -16,6 +16,25 @@ const match = {
   publishedAt: "2026-10-18T18:00:00+00:00",
 };
 
+const publishedPage = {
+  items: [
+    {
+      id: "match-sample-league",
+      sport: "football",
+      competition: "Sample League",
+      date: "2026-10-19",
+      round: "Matchday 8",
+      homeTeam: "Sample Home",
+      awayTeam: "Sample Away",
+      homeGoals: 2,
+      awayGoals: 1,
+    },
+  ],
+  limit: 20,
+  offset: 0,
+  total: 1,
+};
+
 function routes(bodies: Record<string, { status?: number; body: unknown }>) {
   const calls: { url: string; accept: string | null }[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {
@@ -28,15 +47,15 @@ function routes(bodies: Record<string, { status?: number; body: unknown }>) {
   return { fetchImpl, calls };
 }
 
-test("parses sports and matches from the read paths", async () => {
+test("parses sports and a published match page from the read paths", async () => {
   const { fetchImpl, calls } = routes({
     [sportsPath]: { body: [sport] },
-    [matchesPath]: { body: [match] },
+    [matchesPath]: { body: publishedPage },
   });
   const api = createApiClient({ fetch: fetchImpl, baseUrl: "http://localhost:3001" });
 
   await expect(api.sports()).resolves.toEqual([sport]);
-  await expect(api.matches()).resolves.toEqual([match]);
+  await expect(api.matches()).resolves.toEqual(publishedPage);
   expect(calls).toEqual([
     { url: "http://localhost:3001/api/sports", accept: "application/json" },
     { url: "http://localhost:3001/api/matches", accept: "application/json" },
@@ -58,9 +77,9 @@ test("rejects a failed response before parsing the body", async () => {
   await expect(api.sports()).rejects.toThrow("GET /api/sports returned HTTP 503");
 });
 
-test("rejects a match list that fails the schema", async () => {
-  const { fetchImpl } = routes({ [matchesPath]: { body: [{ id: "bad" }] } });
+test("rejects a bare Match array", async () => {
+  const { fetchImpl } = routes({ [matchesPath]: { body: [match] } });
   const api = createApiClient({ fetch: fetchImpl });
 
-  await expect(api.matches()).rejects.toThrow(/sportId/);
+  await expect(api.matches()).rejects.toThrow(/expected object, received array/);
 });

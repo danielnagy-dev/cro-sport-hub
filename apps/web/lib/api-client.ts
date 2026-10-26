@@ -1,6 +1,11 @@
-import { matchSchema, sportSchema, type Match, type Sport } from "@cro-sport-hub/shared-types";
+import {
+  publishedMatchPageSchema,
+  sportSchema,
+  type PublishedMatchPage,
+  type Sport,
+} from "@cro-sport-hub/shared-types";
 
-/** Read paths shared with the studio client. The API does not serve them yet. */
+/** `GET /api/sports` is not served. `GET /api/matches` returns a published page. */
 export const sportsPath = "/api/sports";
 export const matchesPath = "/api/matches";
 
@@ -17,7 +22,7 @@ export class ApiClientError extends Error {
 
 export type ApiClient = {
   sports: () => Promise<Sport[]>;
-  matches: () => Promise<Match[]>;
+  matches: () => Promise<PublishedMatchPage>;
 };
 
 type ApiClientOptions = {
@@ -49,7 +54,7 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       return sportSchema.array().parse(await read(sportsPath));
     },
     async matches() {
-      return matchSchema.array().parse(await read(matchesPath));
+      return publishedMatchPageSchema.parse(await read(matchesPath));
     },
   };
 }

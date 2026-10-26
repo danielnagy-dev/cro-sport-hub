@@ -5,15 +5,22 @@ import { expect, test } from "vite-plus/test";
 import HomePage from "../app/page";
 import { SiteShell } from "../app/shell";
 
-test("home shell skips to the heading", () => {
-  const html = renderToStaticMarkup(createElement(SiteShell, null, createElement(HomePage)));
+test("home shell skips to the heading", async () => {
+  const previous = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ items: [], limit: 20, offset: 0, total: 0 }), { status: 200 });
+  try {
+    const html = renderToStaticMarkup(createElement(SiteShell, null, await HomePage()));
 
-  expect(html).toContain('class="skip-link" href="#content"');
-  expect(html).toContain("Skip to content");
-  expect(html).toContain('class="shell-home" href="/"');
-  expect(html).toContain('<main id="content" tabindex="-1"');
-  expect(html).toContain("<h1>Cro Sport Hub</h1>");
-  expect(html).toContain("Published results will be listed here.");
+    expect(html).toContain('class="skip-link" href="#content"');
+    expect(html).toContain("Skip to content");
+    expect(html).toContain('class="shell-home" href="/"');
+    expect(html).toContain('<main id="content" tabindex="-1"');
+    expect(html).toContain("<h1>Cro Sport Hub</h1>");
+    expect(html).not.toContain("Published results will be listed here.");
+  } finally {
+    globalThis.fetch = previous;
+  }
 });
 
 test("the shell styles use the shared UI tokens", () => {

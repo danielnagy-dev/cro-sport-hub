@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "@cro-sport-hub/ui/components.css";
 import "@cro-sport-hub/ui/tokens.css";
 import { SiteShell } from "./shell";
 import "./globals.css";

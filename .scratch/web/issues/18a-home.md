@@ -4,7 +4,7 @@
 
 **Blocked by:** None. Plan items 7 and 17 are on main. `GET /api/matches` returns `publishedMatchPageSchema`.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 300 counted lines. One page, the client method, and the tests that today expect a `Match` array. Plan 17 left the page as a heading.
 
@@ -22,11 +22,11 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] A fixture page with the seeded final and the seeded league match renders Sample Player A, Sample Player B, Sample Home, Sample Away, and the football goals. Order follows the fixture.
-- [ ] An empty `items` array renders `No published results.` The heading is still `Cro Sport Hub`.
-- [ ] A rejected fetch renders `Results are unavailable.` and the heading. It does not throw.
-- [ ] The client accepts a published page and rejects a bare `Match` array.
-- [ ] The document title mentions results. There is no `og:image`.
+- [x] A fixture page with the seeded final and the seeded league match renders Sample Player A, Sample Player B, Sample Home, Sample Away, and the football goals. Order follows the fixture.
+- [x] An empty `items` array renders `No published results.` The heading is still `Cro Sport Hub`.
+- [x] A rejected fetch renders `Results are unavailable.` and the heading. It does not throw.
+- [x] The client accepts a published page and rejects a bare `Match` array.
+- [x] The document title mentions results. There is no `og:image`.
 
 ## Verification
 
@@ -40,3 +40,7 @@ No. `publishedMatchPageSchema` already exists. The web client was still on the p
 
 - The home page render with a stubbed fetch. Catches a draft-shaped `Match` drawn as a card, a thrown fetch, and an empty page with no message.
 - `createApiClient().matches()`. Catches a client that still parses `matchSchema`.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/27

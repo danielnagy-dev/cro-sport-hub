@@ -54,6 +54,14 @@ main p {
   margin: 0;
 }
 
+.results {
+  display: grid;
+  gap: var(--csh-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .skip-link:focus-visible {
   outline: 2px solid var(--csh-color-focus);
   outline-offset: 2px;

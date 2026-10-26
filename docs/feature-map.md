@@ -30,8 +30,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
 | ui.results           | Scores, stats, and appearances                     | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
 | studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/` after login     | `vp run studio#test`   | plan items for the studio skeleton (formerly GH #34) |
-| web.home-placeholder | Web layout shell                                   | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | plan item 17                                         |
-| web.home             | Latest results home                                | web    | planned | `/`                                      | -                      | later plan                                           |
+| web.home             | Latest results home                                | web    | live    | `http://localhost:3000/`                 | `vp run verify:web`    | plan item 18a                                        |
 | web.sport            | Sport pages (tennis, football)                     | web    | planned | `/[sport]`                               | -                      | later plan                                           |
 | web.athlete          | Athlete page with club history and stats           | web    | planned | `/athletes/[slug]`                       | -                      | later plan                                           |
 | studio.login         | Login and auth guard                               | studio | live    | `http://localhost:4200/login`            | `vp run verify:studio` | plan item 22                                         |
@@ -181,7 +180,7 @@ Preconditions: port 6006 is free. Playwright Chromium is installed.
 
 ### ui.results: Match scores, tennis stats, and appearances
 
-Storybook shows a tennis set scoreboard, a retirement, a football score, serve and return percentages, and an appearances table. Names are samples. `Library/Base` is unchanged. The web home does not render these components.
+Storybook shows a tennis set scoreboard, a retirement, a football score, serve and return percentages, and an appearances table. Names are samples. `Library/Base` is unchanged. The web home renders `MatchCard`. Stats and appearances stay in Storybook.
 
 #### Sub-features
 
@@ -207,7 +206,7 @@ Preconditions: same as `ui.library`.
 - The tiebreak figure is the loser's points. It is announced with that player. The superscript is hidden from assistive tech so the number is not read twice.
 - Football scores do not name a winner, including a 2-0.
 - A tennis percentage is No attempts when its denominator is 0. That is a different cell from 0%.
-- These stories are not on the web or studio pages. The home page does not render `MatchCard`, so the stats view and the appearances table stay in the library.
+- The home page renders `MatchCard` for each published result. The stats view and the appearances table stay in the library.
 
 ### studio.shell: Studio layout shell
 
@@ -257,29 +256,34 @@ Preconditions: port 4200 is free. Playwright Chromium is installed. No Docker. T
 
 - Demo passwords and `JWT_SECRET` stay in the environment. The page does not display them.
 
-### web.home-placeholder: Web layout shell
+### web.home: Latest results home
 
-The public home page is a layout shell. It shows a skip link, a header link back to `/`, and the heading `Cro Sport Hub` inside `main`. Colors and type come from the shared UI tokens. It does not list results. A typed read client for `/api/sports` and `/api/matches` lives in the app and is not called from this page.
+The public home page lists the latest published tennis and football results. It keeps the skip link, the header link back to `/`, and the heading `Cro Sport Hub` inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
 
 #### Sub-features
 
-- `web.home-heading` renders the heading inside `main`.
-- `web.home-skip` offers a skip link to `#content`. The verify check still proves the heading.
+- `web.home-heading` renders the heading inside `main`. `vp run verify:web` proves it, including when the API is down.
+- `web.home-skip` offers a skip link to `#content`.
+- `web.home-results` renders Sample Player A, Sample Player B, Sample Home, Sample Away, and the football goals, in the fixture order. That proof is the web unit test.
+- `web.home-empty` shows `No published results.` when `items` is empty. The heading stays.
+- `web.home-unavailable` shows `Results are unavailable.` when the fetch fails. The page does not throw.
 
 #### How to get to it (user POV)
 
 - Open `http://localhost:3000/`.
-- The header link returns to this page. There is no other route yet.
+- The header link returns to this page. There is no `/tennis` or `/football` route yet.
 
 #### Driving it with verify
 
-Preconditions: port 3000 is free. Playwright Chromium is installed.
+Preconditions: port 3000 is free. Playwright Chromium is installed. The API is not required for the heading.
 
 - **Open home.** Run `vp run verify:web`. The `Home` row is `pass`, the `main` landmark is visible, and the text `Cro Sport Hub` is visible inside it.
+- **Cards.** `vp run web#test` renders a fixture page of the seeded final and the seeded league match. A live list needs the API, Docker, and the seed.
 
 #### Gotchas
 
 - `next dev` may write `apps/web/AGENTS.md`. Commit that file unchanged.
-- The read client is not called from this page. `GET /api/matches` returns a page of published results, and `GET /api/sports` is still not served. This client expects a `Match` array, so the page does not call either path.
+- The page calls `http://localhost:3001/api/matches` on the server. It does not call `/api/sports`. The client parses a published page and rejects a `Match` array.
+- When the API is down, the heading and `Results are unavailable.` still render, so `verify:web` passes.
 - The skip link stays off-screen until it receives focus, so the screenshot shows the header and the heading.
-- Later plan items replace this shell with the results home. Update this entry in that PR rather than claiming the results home is live.
+- There is no share image in the repo, so the page sets no `og:image`.
