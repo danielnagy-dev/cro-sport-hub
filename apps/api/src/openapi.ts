@@ -8,6 +8,7 @@ export function openApiConfig() {
     .setVersion("0.0.0")
     .addTag("health", "API process and local Postgres and Redis")
     .addTag("matches", "Published match lists and draft saves")
+    .addTag("athletes", "Public athlete profiles and club history")
     .addBearerAuth()
     .build();
 }

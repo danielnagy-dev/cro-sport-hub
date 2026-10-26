@@ -25,6 +25,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | api.health           | Health check                                       | api    | live    | `GET /health`                            | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | api.openapi          | OpenAPI docs                                       | api    | live    | `http://localhost:3001/docs`             | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | api.matches          | Published matches, latest and by sport             | api    | live    | `GET /api/matches` and `/{sport}`        | `vp run verify:api`    | plan items 7 and 7b                                  |
+| api.athletes         | Athlete profile and club history                   | api    | live    | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`      | plan item 8a                                         |
 | api.login            | JWT login for seeded studio users                  | api    | live    | `POST /api/login`                        | `vp run api#test`      | plan item 10                                         |
 | api.match-drafts     | Save tennis and football drafts                    | api    | live    | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`      | plan item 11                                         |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
@@ -120,6 +121,10 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 - The seeded quarterfinal is a draft and is not listed. A newer unpublished football match is not on `/api/matches/football`.
 - Club names are strings on the football item. v1 has no `/api/teams` route.
 - `verify:api` does not load the sample seed. Do not point it at an unknown slug: HTTP 404 fails the run.
+
+### api.athletes: Athlete profile and club history
+
+`GET /api/athletes/{slug}` returns `slug`, `name`, `sport`, `country`, optional `birthYear` and `position`, and `clubs` (`{ name, from, to? }`, current spell first, names only). `GET /api/athletes?sport=` returns `{ slug, name }[]` sorted by name. Unknown athlete is HTTP 404 `Unknown athlete`. An unknown sport is HTTP 404 `Unknown sport`. No `results` field. The PGLite suite is the proof; `verify:api` needs Docker and does not load the seed.
 
 ### api.login: JWT login
 

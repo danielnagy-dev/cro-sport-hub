@@ -45,6 +45,14 @@ export {
 export type { PublishedMatch, PublishedMatchPage } from "./published-match.ts";
 
 export {
+  athleteNameListSchema,
+  athleteNameSchema,
+  publicAthleteSchema,
+  publicClubSpellSchema,
+} from "./published-athlete.ts";
+export type { AthleteName, PublicAthlete, PublicClubSpell } from "./published-athlete.ts";
+
+export {
   evaluateTennisScore,
   tennisBestOfSchema,
   tennisMatchSchema,

@@ -4,7 +4,7 @@
 
 **Blocked by:** None. The catalog, the seed, and the published match reads are on main.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 340 counted lines. The published match list (plan 7) was both sports plus paging in one diff; this is one profile select, one club-name join, and a short slug list.
 
@@ -22,12 +22,12 @@ Plan is this note. Architect sketches the response schemas below, then develop. 
 
 ## Acceptance
 
-- [ ] `GET /api/athletes/karlo-brkic` returns Karlo Brkić, football, and the two Sample clubs in the order above. The JSON has no team id, slug, country, or crest.
-- [ ] `GET /api/athletes/sample-player-a` returns Sample Player A, tennis, and `"clubs": []`.
-- [ ] `GET /api/athletes/nobody` is HTTP 404 and the message is `Unknown athlete`.
-- [ ] `GET /api/athletes?sport=football` returns the five seeded football slugs and no tennis slug. `?sport=curling` is HTTP 404 `Unknown sport`.
-- [ ] Neither body has a `results` field.
-- [ ] `/docs-json` documents both paths, including the 404s.
+- [x] `GET /api/athletes/karlo-brkic` returns Karlo Brkić, football, and the two Sample clubs in the order above. The JSON has no team id, slug, country, or crest.
+- [x] `GET /api/athletes/sample-player-a` returns Sample Player A, tennis, and `"clubs": []`.
+- [x] `GET /api/athletes/nobody` is HTTP 404 and the message is `Unknown athlete`.
+- [x] `GET /api/athletes?sport=football` returns the five seeded football slugs and no tennis slug. `?sport=curling` is HTTP 404 `Unknown sport`.
+- [x] Neither body has a `results` field.
+- [x] `/docs-json` documents both paths, including the 404s.
 
 ## Verification
 
@@ -42,3 +42,7 @@ Yes. New response schemas live in `libs/shared-types`. No ADR: this is the publi
 - `GET /api/athletes/:slug` against the seeded PGLite catalog. Catches a leaked club id, a dropped spell, and an unknown slug.
 - `GET /api/athletes?sport=`. Catches the other sport in the list, and an unknown sport slug.
 - `GET /docs-json`. Catches a path missing from OpenAPI.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/28

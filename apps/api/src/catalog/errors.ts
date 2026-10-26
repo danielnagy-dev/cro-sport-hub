@@ -9,8 +9,10 @@ import {
   teamSchema,
   tennisMatchSchema,
   tennisMatchStatsSchema,
+  type AthleteName,
   type AthleteTeam,
   type FieldIssue,
+  type PublicAthlete,
   type PublishedMatchPage,
   type Role,
 } from "@cro-sport-hub/shared-types";
@@ -74,6 +76,8 @@ export type Catalog = {
     key: string | AthleteTeamKey | CatalogParticipantKey,
   ): Promise<Stored | undefined>;
   listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>;
+  readPublicAthlete(slug: string): Promise<PublicAthlete>;
+  listPublicAthletes(sport: string): Promise<AthleteName[]>;
   saveDraft(
     sport: "tennis" | "football",
     body: unknown,

@@ -13,6 +13,10 @@ import {
   type CatalogDb,
   type CatalogErrorCode,
 } from "./errors.js";
+import {
+  listPublicAthletes as queryAthletes,
+  readPublicAthlete as queryAthlete,
+} from "./published-athletes.js";
 import { listPublishedMatches } from "./published-matches.js";
 import { readRecord, writeRecord } from "./records.js";
 import * as schema from "./schema.js";
@@ -43,6 +47,13 @@ function failed(code: CatalogErrorCode, message: string, cause: unknown): Catalo
   return new CatalogError(code, message, undefined, { cause });
 }
 
+function readParsed<T>(load: () => Promise<T>): Promise<T> {
+  return load().catch((error: unknown) => {
+    if (error instanceof z.ZodError) return invalidRecord(error);
+    throw error;
+  });
+}
+
 export async function openCatalog(
   db: CatalogDb,
   options?: { close?: () => Promise<void> },
@@ -64,14 +75,9 @@ export async function openCatalog(
   return {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
-    listPublishedMatches: async (query) => {
-      try {
-        return await listPublishedMatches(db, query);
-      } catch (error) {
-        if (error instanceof z.ZodError) return invalidRecord(error);
-        throw error;
-      }
-    },
+    listPublishedMatches: (query) => readParsed(() => listPublishedMatches(db, query)),
+    readPublicAthlete: (slug) => readParsed(() => queryAthlete(db, slug)),
+    listPublicAthletes: (sport) => readParsed(() => queryAthletes(db, sport)),
     saveDraft: (sport, body, actorId, mode) => saveDraft(db, sport, body, actorId, mode),
     close: () => {
       closing ??= options?.close?.() ?? Promise.resolve();
