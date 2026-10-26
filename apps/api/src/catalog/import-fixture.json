@@ -1,0 +1,45 @@
+{
+  "matches": [
+    {
+      "sport": "tennis",
+      "id": "match-import-cup",
+      "sourceRef": "sample-cup-sf",
+      "competitionId": "comp-sample-cup",
+      "date": "2026-10-21",
+      "round": "Semi-final",
+      "playerAId": "sample-player-a",
+      "playerBId": "sample-player-b",
+      "winnerId": "sample-player-a",
+      "bestOf": 3,
+      "score": [
+        [6, 4],
+        [6, 3]
+      ],
+      "retired": false
+    },
+    {
+      "sport": "football",
+      "id": "match-import-league",
+      "sourceRef": "sample-league-md12",
+      "competitionId": "comp-sample-league",
+      "date": "2026-10-21",
+      "round": "Matchday 12",
+      "homeTeamId": "club-sample-home",
+      "awayTeamId": "club-sample-away",
+      "homeGoals": 1,
+      "awayGoals": 0,
+      "appearances": [
+        {
+          "athleteId": "karlo-brkic",
+          "teamId": "club-sample-home",
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "yellowCards": 0,
+          "redCard": false
+        }
+      ]
+    }
+  ]
+}

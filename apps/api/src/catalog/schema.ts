@@ -115,6 +115,16 @@ export const footballMatches = pgTable("football_matches", {
   awayGoals: integer("away_goals").notNull(),
 });
 
+export const importRuns = pgTable("import_runs", {
+  id: text("id").primaryKey(),
+  startedAt: text("started_at").notNull(),
+  finishedAt: text("finished_at").notNull(),
+  createdCount: integer("created_count").notNull(),
+  updatedCount: integer("updated_count").notNull(),
+  skippedCount: integer("skipped_count").notNull(),
+  error: text("error").notNull(),
+});
+
 export const appearances = pgTable(
   "appearances",
   {

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { saveDraft } from "./drafts.js";
 import { selectAthletes, selectCompetitions, selectTeams } from "./editor-lookups.js";
 import { listEditorMatches as readEditorMatches } from "./editor-matches.js";
+import { bindCatalog } from "./import-runs.js";
 import { rejectMatch, submitMatch } from "./workflow.js";
 import {
   CatalogError,
@@ -34,6 +35,7 @@ function migrationStatements(): string[] {
     "0003_v1_football.sql",
     "0004_v1_match_sport_index.sql",
     "0005_v1_credentials.sql",
+    "0006_v1_import_runs.sql",
   ].flatMap((name) =>
     readFileSync(join(migrationDir, name), "utf8")
       .replaceAll(/--.*$/gm, "")
@@ -76,7 +78,7 @@ export async function openCatalog(
     throw failed("migration", "The catalog migration failed", error);
   }
   let closing: Promise<void> | undefined;
-  return {
+  const catalog: Catalog = {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
     listPublishedMatches: (query) => readParsed(() => listPublishedMatches(db, query)),
@@ -97,6 +99,8 @@ export async function openCatalog(
       return closing;
     },
   };
+  bindCatalog(catalog, db);
+  return catalog;
 }
 
 export async function openPostgresCatalog(databaseUrl: string): Promise<Catalog> {
