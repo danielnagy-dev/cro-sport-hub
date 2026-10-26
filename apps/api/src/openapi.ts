@@ -7,7 +7,7 @@ export function openApiConfig() {
     .setDescription("REST API for tennis and football results. Version 1 uses seed and test data.")
     .setVersion("0.0.0")
     .addTag("health", "API process and local Postgres and Redis")
-    .addTag("matches", "Published match lists and draft saves")
+    .addTag("matches", "Published match lists, draft saves, and review transitions")
     .addTag("athletes", "Public athlete profiles and club history")
     .addBearerAuth()
     .build();

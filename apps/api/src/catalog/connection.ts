@@ -6,6 +6,7 @@ import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { z } from "zod";
 import { saveDraft } from "./drafts.js";
+import { rejectMatch, submitMatch } from "./workflow.js";
 import {
   CatalogError,
   invalidRecord,
@@ -80,6 +81,8 @@ export async function openCatalog(
     readPublicAthlete: (slug) => readParsed(() => queryAthlete(db, slug)),
     listPublicAthletes: (sport) => readParsed(() => queryAthletes(db, sport)),
     saveDraft: (sport, body, actorId, mode) => saveDraft(db, sport, body, actorId, mode),
+    submitMatch: (id) => submitMatch(db, id),
+    rejectMatch: (id) => rejectMatch(db, id),
     listTeams: () => listTeams(db),
     replaceTeam: (value) => replaceTeam(db, value),
     deleteTeam: (id) => deleteTeam(db, id),

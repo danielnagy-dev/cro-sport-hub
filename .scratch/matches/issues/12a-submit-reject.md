@@ -4,7 +4,7 @@
 
 **Blocked by:** None. Plan item 11b is on main (PR #24): the draft routes and `EditorGuard` on them. `EditorGuard` and `AdminGuard` have been on main since plan 10.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 320 counted lines. Plan 11b was about 410 lines for four write routes and the guard matrix. This is two transitions and that same matrix.
 
@@ -22,12 +22,12 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] An editor token submits the seeded draft quarterfinal. The row is `review`, and `reviewedBy` and `publishedAt` are empty. The body is `{ id, status: "review" }`.
-- [ ] An admin token rejects that row back to `draft` and both reviewer fields are empty.
-- [ ] Submit of a review or a published row is HTTP 409 `Only a draft can be submitted`. Reject of a draft or a published row is HTTP 409 `Only a match in review can be rejected`.
-- [ ] Reject with an editor token is HTTP 403 `Forbidden`. Submit and reject with no token are HTTP 401 `Invalid token`.
-- [ ] An unknown id is HTTP 404 `Unknown match`.
-- [ ] `/docs-json` lists both paths as bearer-secured. `GET /api/matches` stays unsecured.
+- [x] An editor token submits the seeded draft quarterfinal. The row is `review`, and `reviewedBy` and `publishedAt` are empty. The body is `{ id, status: "review" }`.
+- [x] An admin token rejects that row back to `draft` and both reviewer fields are empty.
+- [x] Submit of a review or a published row is HTTP 409 `Only a draft can be submitted`. Reject of a draft or a published row is HTTP 409 `Only a match in review can be rejected`.
+- [x] Reject with an editor token is HTTP 403 `Forbidden`. Submit and reject with no token are HTTP 401 `Invalid token`.
+- [x] An unknown id is HTTP 404 `Unknown match`.
+- [x] `/docs-json` lists both paths as bearer-secured. `GET /api/matches` stays unsecured.
 
 ## Verification
 
@@ -41,3 +41,7 @@ No. `statusSchema` and the `0002` checks already name the states. The guards are
 
 - `POST /api/matches/:id/submit` and `POST /api/matches/:id/reject` on PGLite. Catches a publish sneaking into this slice, a reviewer left on a rejected draft, and an editor who can reject.
 - `GET /docs-json`. Catches a transition path with no bearer scheme.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/30

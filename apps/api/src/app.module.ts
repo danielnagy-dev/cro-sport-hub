@@ -9,6 +9,7 @@ import { CREDENTIAL_STORE, LoginController } from "./auth/login.controller.js";
 import { AdminAuthGuard, EditorAuthGuard } from "./auth/role.guard.js";
 import { openPostgresCatalog } from "./catalog/catalog.js";
 import { MatchDraftsController } from "./match-drafts.controller.js";
+import { MatchWorkflowController } from "./match-workflow.controller.js";
 import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
 
 @Module({
@@ -19,6 +20,7 @@ import { CATALOG_OPENER, MatchesController } from "./matches.controller.js";
     AthletesController,
     LoginController,
     MatchDraftsController,
+    MatchWorkflowController,
     AdminTeamsController,
   ],
   providers: [

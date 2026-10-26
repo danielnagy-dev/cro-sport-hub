@@ -4,15 +4,16 @@ Entries for the API. Shared preconditions and driving conventions are in `docs/f
 
 ## Index
 
-| ID               | Feature                                | App | Status | Entry point (user POV)                   | Verify              | Since                                             |
-| ---------------- | -------------------------------------- | --- | ------ | ---------------------------------------- | ------------------- | ------------------------------------------------- |
-| api.health       | Health check                           | api | live   | `GET /health`                            | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
-| api.openapi      | OpenAPI docs                           | api | live   | `http://localhost:3001/docs`             | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
-| api.matches      | Published matches, latest and by sport | api | live   | `GET /api/matches` and `/{sport}`        | `vp run verify:api` | plan items 7 and 7b                               |
-| api.athletes     | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
-| api.login        | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
-| api.match-drafts | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
-| api.admin-teams  | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
+| ID                 | Feature                                | App | Status | Entry point (user POV)                   | Verify              | Since                                             |
+| ------------------ | -------------------------------------- | --- | ------ | ---------------------------------------- | ------------------- | ------------------------------------------------- |
+| api.health         | Health check                           | api | live   | `GET /health`                            | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.openapi        | OpenAPI docs                           | api | live   | `http://localhost:3001/docs`             | `vp run verify:api` | plan items for the API skeleton (formerly GH #35) |
+| api.matches        | Published matches, latest and by sport | api | live   | `GET /api/matches` and `/{sport}`        | `vp run verify:api` | plan items 7 and 7b                               |
+| api.athletes       | Athlete profile and club history       | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test`   | plan item 8a                                      |
+| api.login          | JWT login for seeded studio users      | api | live   | `POST /api/login`                        | `vp run api#test`   | plan item 10                                      |
+| api.match-drafts   | Save tennis and football drafts        | api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`   | plan item 11                                      |
+| api.match-workflow | Submit a draft and reject a review     | api | live   | `POST /api/matches/{id}/submit,/reject`  | `vp run api#test`   | plan item 12a                                     |
+| api.admin-teams    | Admin football clubs                   | api | live   | `/api/admin/teams`                       | `vp run api#test`   | plan item 13b                                     |
 
 Planned paths are estimates. The change that builds each feature updates its row.
 
@@ -100,7 +101,7 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 
 ### api.login: JWT login
 
-`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is attached to the draft save routes only. `GET /api/matches` stays public.
+`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is on the draft saves and on submit. `AdminGuard` is on reject and on `/api/admin/teams`. `GET /api/matches` stays public.
 
 `EDITOR_DEMO_PASSWORD`, `ADMIN_DEMO_PASSWORD`, and `JWT_SECRET` (at least 32 characters) come from the environment. Placeholders are in `.env.example`. Boot does not require `JWT_SECRET`.
 
@@ -128,6 +129,24 @@ The verify CLI only sends GET, so `vp run verify:api` proves the public reads an
 
 - A new draft is not on the public list. Editing a published match returns it to draft and removes it from that list.
 - `JWT_SECRET` is read on the draft route, not at boot. An edit replaces stats and appearances.
+
+### api.match-workflow: Submit a draft and reject a review
+
+`POST /api/matches/{id}/submit` moves a draft to review. An editor or an admin sends `Authorization: Bearer`. The response is HTTP 200 `{ id, status: "review" }`. The row does not gain `reviewedBy` or `publishedAt`. `POST /api/matches/{id}/reject` is admin only. The row must be in review. It becomes draft, and `reviewedBy` and `publishedAt` are cleared. The response is HTTP 200 `{ id, status: "draft" }`. A missing token is HTTP 401 `Invalid token`. An editor calling reject is HTTP 403 `Forbidden`. Submit of any other status is HTTP 409 `Only a draft can be submitted`. Reject of any other status is HTTP 409 `Only a match in review can be rejected`. An unknown id is HTTP 404 `Unknown match`. Publish is a later route. `GET /api/matches` stays public, and a match in review is not on that list.
+
+#### How to get to it (user POV)
+
+- `POST http://localhost:3001/api/matches/{id}/submit` or `/reject` with a bearer token. Shapes are on `GET /docs-json`.
+
+#### Driving it with verify
+
+The verify CLI only sends GET, so the transitions are the PGLite HTTP suite (`vp run api#test`). `vp run verify:api --route /api/matches` checks the public list still needs no token. That run needs Docker.
+
+#### Gotchas
+
+- Submit does not record who sent it. Reject clears a reviewer. Publish, which records one, is a later route.
+- Reject of a draft or a published row is HTTP 409. It does not clear those rows.
+- Nest's POST default is 201. These two routes set HTTP 200.
 
 ### api.admin-teams: Admin football clubs
 

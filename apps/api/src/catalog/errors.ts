@@ -85,6 +85,8 @@ export type Catalog = {
     actorId: string,
     mode: "create" | "update",
   ): Promise<{ id: string; status: "draft"; sport: "tennis" | "football" }>;
+  submitMatch(id: string): Promise<{ id: string; status: "review" }>;
+  rejectMatch(id: string): Promise<{ id: string; status: "draft" }>;
   listTeams(): Promise<readonly Team[]>;
   replaceTeam(value: unknown): Promise<Team>;
   deleteTeam(id: string): Promise<void>;
