@@ -121,3 +121,11 @@ The post-launch risk-path rule in `docs/team.md` stays as written for after depl
 Guard: `docs/team.md`, `.cursor/skills/develop/SKILL.md`, `.cursor/skills/review/SKILL.md`, and `.cursor/rules/lessons.mdc`. Where the lighter-review note above still names a foundation exception, this note wins.
 
 No new check: the gate is the phase heading. A script would restate the coordinator's job. Pre-launch that job is "only when Daniel asks."
+
+## 2026-10-26 — unsized tickets shipped too big
+
+Plan items 7, 11, and 22 were handed to develop as a few lines of scope. The diffs came back between 775 and 941 counted lines. Cause: nothing in the ticket forced an estimate or a split before `ready-for-agent`, so the size rule was applied after the code existed.
+
+Guard: `.cursor/skills/plan/SKILL.md`. A ticket without a size estimate is not `ready-for-agent`. An estimate over 400 counted lines is split before it is marked ready. The count is the same one Size already defines (code and tests).
+
+No new check: the estimate is a judgment written in the ticket. A lint can see that a line exists and still miss a made-up number. The coordinator reads the status before anyone starts. The short form is in `.cursor/rules/lessons.mdc`.

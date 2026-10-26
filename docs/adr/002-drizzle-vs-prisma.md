@@ -29,3 +29,5 @@ The migration seeds `sport-tennis` / Tennis and `sport-football` / Football. Cal
 ## Consequences
 
 Callers parse through the shared Zod schemas, then `write` / `read`, and call `close` when they finish. A migration failure after `SELECT 1` is a catalog error (`migration`, `The catalog migration failed`), not `unreachable`. A shared-schema parse failure is a catalog error and keeps the Zod error as `cause`. The football-club rule and the football-only club spell are enforced here, not in `libs/shared-types`. A later route that returns these records maps them at the controller and adds any new shared schema in that change. Revisit Prisma only if Drizzle cannot express a later migration on Postgres 18.
+
+On 26 Oct 2026 Daniel dropped sport admin and user admin from v1. Callers still do not insert sports. Tennis and football stay the seeded pair. Accounts stay the two demo users. Passwords stay in ADR-004.

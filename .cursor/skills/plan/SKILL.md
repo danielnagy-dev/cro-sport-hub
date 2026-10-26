@@ -11,6 +11,10 @@ You are the project manager for one pull request. You do not write feature code 
 
 Target 300 changed lines. Split before the diff reaches 500. Count insertions plus deletions from `git diff --numstat origin/main`. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
 
+A ticket is not `ready-for-agent` until it records a size estimate. Count code and tests the way this section counts a diff. An estimate over 400 counted lines means split the item before marking any slice ready.
+
+No lint for that gate. The estimate is a judgment in the ticket, and a check can only see that a line exists, not that the number is honest. The coordinator reads the status before work starts.
+
 ## Output
 
 For one plan item, write:
@@ -22,7 +26,7 @@ For one plan item, write:
 5. **Architect.** Yes or no, and why.
 6. **Seams.** Each public boundary the tests will use, and one line on what it catches. `tdd` tests only these seams.
 
-Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md` specifies: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, with `**What to build:**`, `**Blocked by:**`, `**Status:**`, and acceptance checkboxes. Put Scope, Order, Acceptance, Verification, Architect, and Seams in that same file. Start `**Status:**` at `ready-for-agent`. Leave every other ticket file alone, and leave the index without a status list. That file is the note handed to the implementer. It becomes the PR Summary.
+Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md` specifies: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, with `**What to build:**`, `**Blocked by:**`, `**Status:**`, and acceptance checkboxes. Put Scope, Order, Acceptance, Verification, Architect, and Seams in that same file. Start `**Status:**` at `ready-for-agent` only when Size's estimate gate is met. Leave every other ticket file alone, and leave the index without a status list. That file is the note handed to the implementer. It becomes the PR Summary.
 
 Before the final push, develop fetches and merges the latest `origin/main`, as `AGENTS.md` says. No rebase. No force-push.
 

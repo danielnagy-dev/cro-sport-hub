@@ -27,3 +27,5 @@ List passes are a template option, `donut` (default) or `text`. Hero size is `me
 ## Consequences
 
 Callers pass one player slide. They do not pass a cover. The list slide uses the same HTML document and the same hero rule; it is the stacked change, because the formatted player template plus this ADR plus the handoff already sit at the line budget. The document's font URLs are relative to `design/football-r13/html/`, next to the vendored faces. The PNG item writes the HTML there, or rewrites the URLs, then screenshots it at 1080×1350. Revisit Satori only if it renders these variable-font weights and `font-stretch` and still matches the reference PNG.
+
+On 26 Oct 2026 gallery slides use only fields the catalog already stores. The shirt number is omitted. Stats are text: goals, assists, minutes, and cards. A gallery slide does not draw the donut. Each slide has one optional caption. The round-13 handoff sample that includes a shirt number is unchanged.

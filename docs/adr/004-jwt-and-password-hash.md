@@ -21,3 +21,5 @@ Rejected: native `bcrypt` and `argon2`, because they need install scripts and a 
 ## Consequences
 
 `vp run api#seed` hashes the two demo passwords after the catalog rows are written. A missing or short variable fails that command and does not print the value. Login returns 401 for an unknown user, a wrong password, and a null hash, with one message. A missing `JWT_SECRET` fails the login request, not process boot, so `/health` and `GET /api/matches` still start. Callers send `Authorization: Bearer <token>`. Revisit a shared login schema when studio calls this route.
+
+On 26 Oct 2026 user admin was dropped from v1. The accounts stay `editor-demo` and `admin-demo`. Passwords stay `EDITOR_DEMO_PASSWORD` and `ADMIN_DEMO_PASSWORD`.
