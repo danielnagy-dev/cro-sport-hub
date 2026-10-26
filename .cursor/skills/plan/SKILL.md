@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Turns one plan item into a small pull-request scope, acceptance criteria, and a verification plan. Use when scoping work, ordering the next PR, or asked to plan a change. Does not implement.
+description: Turns one plan item into a small pull-request scope, acceptance criteria, and a verification plan. Records the shared files a ticket edits and which tickets may run together. Use when scoping work, ordering the next PR, or asked to plan a change. Does not implement.
 ---
 
 # Plan
@@ -11,7 +11,7 @@ You are the project manager for one pull request. You do not write feature code 
 
 Target 300 changed lines. Split before the diff reaches 500. Count insertions plus deletions from `git diff --numstat origin/main`. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
 
-A ticket is not `ready-for-agent` until it records a size estimate. Count code and tests the way this section counts a diff. An estimate over 400 counted lines means split the item before marking any slice ready.
+A ticket is not `ready-for-agent` until it records a size estimate. Count code and tests the way this section counts a diff. An estimate over 400 counted lines means split the item before marking any slice ready. A one-shot format of the whole tree stays one pull request. Splitting it leaves two styles. That ticket says the count passes 400 and remains one slice.
 
 No lint for that gate. The estimate is a judgment in the ticket, and a check can only see that a line exists, not that the number is honest. The coordinator reads the status before work starts.
 
@@ -25,8 +25,17 @@ For one plan item, write:
 4. **Verification.** Which `vp run verify:api|studio|web|ui` commands, which `--route` values, and which ids in the area file under `docs/feature-map/`. If nothing a user can reach changes, say `not applicable (no runtime change)`.
 5. **Architect.** Yes or no, and why.
 6. **Seams.** Each public boundary the tests will use, and one line on what it catches. `tdd` tests only these seams.
+7. **Shared files.** Every existing path this ticket edits, sorted, or `none` when it only adds files.
 
-Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md` specifies: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, with `**What to build:**`, `**Blocked by:**`, `**Status:**`, and acceptance checkboxes. Put Scope, Order, Acceptance, Verification, Architect, and Seams in that same file. Start `**Status:**` at `ready-for-agent` only when Size's estimate gate is met. Leave every other ticket file alone, and leave the index without a status list. That file is the note handed to the implementer. It becomes the PR Summary.
+## Shared files
+
+`**Shared files:**` sits with the other bold fields. List every existing file the ticket edits, as repo-root paths, sorted. A ticket that only adds files writes `none`. New files are left off the list.
+
+Two tickets may run together when their lists share no path. That pair is parallel-safe. The plan index (`.scratch/plan-index.md`) shows the groups. One group runs one ticket at a time. A ticket whose list meets two groups runs alone.
+
+ADR-007 names the API registration files. Once its feature folders are on main, an API feature's list is empty, or one sorted line in `libs/shared-types/src/index.ts` when the feature adds a shared export. Until then, a ticket that registers an API feature lists those files.
+
+Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md` specifies: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, with `**What to build:**`, `**Blocked by:**`, `**Status:**`, `**Shared files:**`, and acceptance checkboxes. Put Scope, Order, Acceptance, Verification, Architect, and Seams in that same file. Start `**Status:**` at `ready-for-agent` only when Size's estimate gate is met. Leave every other ticket file alone, and leave `docs/agents/issue-tracker.md` without a status list. That file is the note handed to the implementer. It becomes the PR Summary.
 
 Before the final push, develop fetches and merges the latest `origin/main`, as `AGENTS.md` says. No rebase. No force-push.
 

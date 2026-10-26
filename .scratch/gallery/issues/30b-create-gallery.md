@@ -2,7 +2,7 @@
 
 **What to build:** An editor creates a draft gallery from published football matches and sets one optional caption on each slide. This note is the spec.
 
-**Blocked by:** 30a (`.scratch/gallery/issues/30a-catalog-slides.md`). Slides come from that mapper.
+**Blocked by:** 30a (`.scratch/gallery/issues/30a-catalog-slides.md`), plus af1, af3, and af5 (ADR-007). Slides come from that mapper. Routes and catalog functions land as new files under the feature folder.
 
 **Status:** ready-for-agent
 

@@ -2,7 +2,7 @@
 
 **What to build:** When `IMPORT_SCHEDULE` is exactly `true`, the API runs the 14a fixture once per hour. Any other value, including unset, leaves the timer off, including during `vp run api#dev`. This note is the spec.
 
-**Blocked by:** 14a (`.scratch/import/issues/14a-import-fixture.md`). The timer calls `runImport`. It does not grow a second writer.
+**Blocked by:** 14a (`.scratch/import/issues/14a-import-fixture.md`), plus af1, af3, and af5 (ADR-007). The timer calls `runImport`. It does not grow a second writer. It registers on the import feature module, not on `AppModule`.
 
 **Status:** ready-for-agent
 

@@ -2,7 +2,7 @@
 
 **What to build:** A tennis `GET /api/athletes/:slug` gains `results`: published matches only, newest first, with the score, the raw stat counts, and percentages from `tennisPercentages`. Percentages are computed in that function. They are not a column. This note is the spec.
 
-**Blocked by:** 8a (`.scratch/athletes/issues/8a-athlete-profile.md`).
+**Blocked by:** af1, af3, and af5 (ADR-007, `.scratch/api-features/issues/`). 8a is on main (PR #28). This slice adds a function and `docs/feature-map/api/api.athletes.md` after those land, and it does not extend `Catalog` or the area index.
 
 **Status:** ready-for-agent
 
