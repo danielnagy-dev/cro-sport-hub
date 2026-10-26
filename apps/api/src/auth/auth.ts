@@ -6,7 +6,7 @@ import { Pool } from "pg";
 import { z } from "zod";
 
 const rounds = 10;
-const claims = z.object({ sub: z.string().min(1), role: roleSchema });
+const claims = z.object({ sub: z.string().min(1), role: z.string().min(1) });
 const credentialRow = z.object({
   id: z.string().min(1),
   role: roleSchema,
@@ -62,7 +62,7 @@ function signingKey(secret: string): Uint8Array {
 export async function readBearer(
   authorization: string | undefined,
   secret: string,
-): Promise<{ id: string; role: Role } | undefined> {
+): Promise<{ id: string; role: string } | undefined> {
   const key = signingKey(secret);
   if (authorization === undefined || !authorization.startsWith("Bearer ")) return undefined;
   const token = authorization.slice("Bearer ".length);

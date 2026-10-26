@@ -13,7 +13,7 @@ function context(authorization?: string): ExecutionContext {
   return { switchToHttp: () => ({ getRequest: () => ({ headers }) }) } as ExecutionContext;
 }
 
-async function bearer(role: "editor" | "admin", exp: number | string = "1h"): Promise<string> {
+async function bearer(role: string, exp: number | string = "1h"): Promise<string> {
   const token = await new SignJWT({ role })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject("editor-demo")
@@ -36,6 +36,16 @@ describe("role guards", () => {
     const header = await bearer("admin");
     await expect(editorGuard.canActivate(context(header))).resolves.toBe(true);
     await expect(adminGuard.canActivate(context(header))).resolves.toBe(true);
+  });
+
+  it("forbids a signed token whose role is not editor or admin", async () => {
+    const header = await bearer("viewer");
+    await expect(editorGuard.canActivate(context(header))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    await expect(adminGuard.canActivate(context(header))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 
   it("rejects a missing, broken, or expired bearer", async () => {

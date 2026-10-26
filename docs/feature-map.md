@@ -26,6 +26,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 | api.openapi          | OpenAPI docs                                       | api    | live    | `http://localhost:3001/docs`             | `vp run verify:api`    | plan items for the API skeleton (formerly GH #35)    |
 | api.matches          | Published matches, latest and by sport             | api    | live    | `GET /api/matches` and `/{sport}`        | `vp run verify:api`    | plan items 7 and 7b                                  |
 | api.login            | JWT login for seeded studio users                  | api    | live    | `POST /api/login`                        | `vp run api#test`      | plan item 10                                         |
+| api.match-drafts     | Save tennis and football drafts                    | api    | live    | `POST/PUT /api/matches/tennis,/football` | `vp run api#test`      | plan item 11                                         |
 | ui.library           | Component stories: Badge, SportTabs, AthleteHeader | ui     | live    | Storybook, port 6006, story Library/Base | `vp run verify:ui`     | plan items for the UI library (formerly GH #36)      |
 | ui.results           | Scores, stats, and appearances                     | ui     | live    | Storybook, port 6006, Results stories    | `vp run verify:ui`     | plan item 16                                         |
 | studio.shell         | Studio layout shell                                | studio | live    | `http://localhost:4200/` after login     | `vp run studio#test`   | plan items for the studio skeleton (formerly GH #34) |
@@ -123,7 +124,7 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 
 ### api.login: JWT login
 
-`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. Neither guard is attached, and `GET /api/matches` stays public.
+`POST /api/login` with `{ "id", "password" }` returns `{ "token" }` when the password matches the hash `vp run api#seed` stored for `editor-demo` or `admin-demo`. A wrong password, an unknown id, and a null hash are HTTP 401 `Invalid credentials`. A body that fails validation is HTTP 400. The HS256 token expires in 12 hours and carries `sub` and `role`. Send `Authorization: Bearer <token>`. `EditorGuard` allows editor and admin. `AdminGuard` allows admin only. `EditorGuard` is attached to the draft save routes only. `GET /api/matches` stays public.
 
 `EDITOR_DEMO_PASSWORD`, `ADMIN_DEMO_PASSWORD`, and `JWT_SECRET` (at least 32 characters) come from the environment. Placeholders are in `.env.example`. Boot does not require `JWT_SECRET`.
 
@@ -134,6 +135,23 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 #### Driving it with verify
 
 The verify CLI only sends GET, so it cannot log in. `vp run verify:api` and `vpx tools/verify/verify.ts api --route /api/matches` stay HTTP 200 with no bearer token. The API unit tests cover a signed token, HTTP 401, a bad body, and both guards. The handler sets HTTP 200 because Nest's POST default is 201.
+
+### api.match-drafts: Draft match saves
+
+`POST /api/matches/tennis` and `POST /api/matches/football` create a match. `PUT` on that path plus an id replaces one. Both force `status: draft`. An editor or admin sends `Authorization: Bearer`. No token is 401. Any other signed role is 403. The public `GET` routes stay open. Tennis takes a set score and optional raw stat counts. Football takes a score and optional appearances. Percentage fields are rejected. The response is `{ id, status: "draft", sport }`.
+
+#### How to get to it (user POV)
+
+- `POST http://localhost:3001/api/matches/tennis` or `/api/matches/football` with a bearer token. `PUT` adds the match id. Shapes are on `GET /docs-json`.
+
+#### Driving it with verify
+
+The verify CLI only sends GET, so `vp run verify:api` proves the public reads and `/docs`. Validation and draft status are the catalog suite. The role check is the HTTP suite.
+
+#### Gotchas
+
+- A new draft is not on the public list. Editing a published match returns it to draft and removes it from that list.
+- `JWT_SECRET` is read on the draft route, not at boot. An edit replaces stats and appearances.
 
 ### ui.library: Component stories
 
