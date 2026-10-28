@@ -29,7 +29,7 @@ import { EditorAuthGuard } from './auth/role.guard.js'
 import { catalogDb, type Catalog } from './catalog/catalog.js'
 import { selectAthletes, selectCompetitions, selectTeams } from './catalog/editor-lookups.js'
 import { unknownSportMessage } from './catalog/published-matches.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
 function lookupDocs(summary: string, item: z.ZodType) {
   return applyDecorators(

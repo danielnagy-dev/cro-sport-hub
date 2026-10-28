@@ -26,7 +26,7 @@ import {
 import { EditorAuthGuard } from './auth/role.guard.js'
 import { catalogDb } from './catalog/catalog.js'
 import { listEditorMatches } from './catalog/editor-matches.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
 const queryMessage =
   'sport is tennis or football, status is draft, review, or published, source is manual or import, limit is 1 to 50, and offset is 0 or greater'

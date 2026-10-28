@@ -8,7 +8,7 @@ import { setupOpenApi } from './openapi.js'
 loadRootEnv()
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(await AppModule.register())
   setupOpenApi(app)
   await app.listen(readApiConfig().port)
 }

@@ -29,7 +29,7 @@ import {
   unknownAthleteMessage,
 } from './catalog/published-athletes.js'
 import { UnknownSportError, unknownSportMessage } from './catalog/published-matches.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
 function profileDocs() {
   return applyDecorators(

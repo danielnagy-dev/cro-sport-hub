@@ -22,18 +22,14 @@ import {
   publishedMatchPageSchema,
   type PublishedMatchPage,
 } from '@cro-sport-hub/shared-types'
-import { catalogDb, type Catalog } from './catalog/catalog.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
+import { catalogDb } from './catalog/catalog.js'
 import {
   UnknownSportError,
   unknownSportMessage,
   listPublishedMatches,
   type PublishedMatchQuery,
 } from './catalog/published-matches.js'
-
-export type CatalogOpener = () => Promise<Catalog>
-
-/** Opens a catalog for one request. The Nest process does not connect on boot. */
-export const CATALOG_OPENER = Symbol('CATALOG_OPENER')
 
 const pageMessage = 'limit is 1 to 50 and offset is 0 or greater'
 

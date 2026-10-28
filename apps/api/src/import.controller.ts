@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger'
 import { AdminAuthGuard } from './auth/role.guard.js'
 import { listImportRuns, readImportFixture, runImport, type Catalog } from './catalog/catalog.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
 type AuthedRequest = { user?: { id: string } }
 

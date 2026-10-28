@@ -24,7 +24,7 @@ import { idSchema } from '@cro-sport-hub/shared-types'
 import { z } from 'zod'
 import { AdminAuthGuard, EditorAuthGuard } from './auth/role.guard.js'
 import { CatalogError, type Catalog } from './catalog/catalog.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
 const submittedSchema = z.strictObject({
   id: idSchema,

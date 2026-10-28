@@ -10,17 +10,14 @@ import {
 import { ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
 import { idSchema } from '@cro-sport-hub/shared-types'
 import { z } from 'zod'
-import { InvalidCredentials, login as signIn, readJwtSecret, type CredentialStore } from './auth.js'
+import { CREDENTIAL_STORE, type CredentialOpener } from './auth.module.js'
+import { InvalidCredentials, login as signIn, readJwtSecret } from './auth.js'
 
 const tokenSchema = z.object({ token: z.string() })
 const loginBody = z.strictObject({
   id: idSchema,
   password: z.string().min(1).max(72),
 })
-
-export const CREDENTIAL_STORE = Symbol('CREDENTIAL_STORE')
-
-export type CredentialOpener = () => Promise<CredentialStore & { close(): Promise<void> }>
 
 @ApiTags('auth')
 @Controller('api')

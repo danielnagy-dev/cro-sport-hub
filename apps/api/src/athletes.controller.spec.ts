@@ -8,7 +8,7 @@ import { AthletesController } from './athletes.controller.js'
 import { openCatalog } from './catalog/catalog.js'
 import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
-import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { setupOpenApi } from './openapi.js'
 
 const karlo = {

@@ -2,6 +2,7 @@ import { type INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 export function openApiConfig() {
+  // New features set @ApiTags on the controller. Do not call addTag here.
   return new DocumentBuilder()
     .setTitle('Cro Sport Hub API')
     .setDescription('REST API for tennis and football results. Version 1 uses seed and test data.')

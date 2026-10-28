@@ -4,7 +4,11 @@
 
 **Blocked by:** Pull requests #32, #33, #35, and #36. #32, #33, and #36 still register controllers in `app.module.ts`. #35 and #36 are plan item 14a. #29 and #30 have merged.
 
-**Status:** ready-for-agent
+**Status:** in-progress
+
+## Comments
+
+- PR #41 — https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/41
 
 **Size:** 340 counted lines. One loader, two small modules (`CatalogModule`, `AuthModule`), and a module file of about a dozen lines for each controller on main when this starts (the controllers those pull requests add, plus 14a). Recount before editing. Split off half the module files before the first edit if the count would pass 400.
 

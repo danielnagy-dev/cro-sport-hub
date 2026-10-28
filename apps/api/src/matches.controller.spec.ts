@@ -7,7 +7,8 @@ import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { openCatalog, type Catalog } from './catalog/catalog.js'
 import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
-import { CATALOG_OPENER, MatchesController, type CatalogOpener } from './matches.controller.js'
+import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
+import { MatchesController } from './matches.controller.js'
 import { setupOpenApi } from './openapi.js'
 
 const league = {
