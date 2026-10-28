@@ -4,7 +4,7 @@
 
 **Blocked by:** Pull requests #32, #33, #35, and #36. #32, #33, and #36 append to `docs/feature-map/api.md`. #35 and #36 are plan item 14a. #29 and #30 have merged.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 340 counted lines. `docs/feature-map/api.md` is 146 lines; the split counts as deletions plus the new files, plus a short skill edit. Recount with `git diff --numstat`. If that would pass 400, move half the ids in a follow-up before editing the rest.
 
@@ -27,9 +27,9 @@ Plan is this note. Architect is ADR-007. Develop. May run with af1 and af2. af6 
 
 ## Acceptance
 
-- [ ] Every id that `docs/feature-map/api.md` lists at the start has a file `docs/feature-map/api/<id>.md` with the same entry points and gotchas.
-- [ ] `docs/feature-map/api.md` has no index table and no per-id section.
-- [ ] The plan skill tells the next API ticket to add `docs/feature-map/api/<id>.md` and to leave the area file alone.
+- [x] Every id that `docs/feature-map/api.md` lists at the start has a file `docs/feature-map/api/<id>.md` with the same entry points and gotchas.
+- [x] `docs/feature-map/api.md` has no index table and no per-id section.
+- [x] The plan skill tells the next API ticket to add `docs/feature-map/api/<id>.md` and to leave the area file alone.
 
 ## Verification
 
@@ -42,3 +42,7 @@ Yes. The path shape is ADR-007. No new reader in `tools/verify`: the CLI does no
 ### Seams
 
 - The id file path. Catches an id whose prose stayed in `api.md`, which is how two features would keep editing one file.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/39
