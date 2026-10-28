@@ -48,7 +48,7 @@
   font-weight: 600;
 }
 
-.csh-sport-tabs__tab[aria-selected="true"] {
+.csh-sport-tabs__tab[aria-selected='true'] {
   border-bottom-color: var(--csh-color-text);
   color: var(--csh-color-text);
 }

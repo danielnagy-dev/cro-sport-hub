@@ -1,10 +1,10 @@
-import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /** Repository-root `.env`, three levels above `src/` and `dist/`. */
 export function rootEnvPath(moduleUrl: string = import.meta.url): string {
-  return resolve(dirname(fileURLToPath(moduleUrl)), "../../../.env");
+  return resolve(dirname(fileURLToPath(moduleUrl)), '../../../.env')
 }
 
 /**
@@ -13,7 +13,7 @@ export function rootEnvPath(moduleUrl: string = import.meta.url): string {
  */
 export function loadRootEnv(path: string = rootEnvPath()): void {
   if (!existsSync(path)) {
-    return;
+    return
   }
-  process.loadEnvFile(path);
+  process.loadEnvFile(path)
 }

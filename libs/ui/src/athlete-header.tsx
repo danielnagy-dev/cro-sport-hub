@@ -1,14 +1,14 @@
-import type { SportSlug } from "@cro-sport-hub/shared-types";
-import { Badge } from "./badge.tsx";
-import { sportLabel } from "./sports.ts";
+import type { SportSlug } from '@cro-sport-hub/shared-types'
+import { Badge } from './badge.tsx'
+import { sportLabel } from './sports.ts'
 
 export type AthleteHeaderProps = {
-  name: string;
-  country: string;
-  sport: SportSlug;
-  birthYear?: number;
-  position?: string;
-};
+  name: string
+  country: string
+  sport: SportSlug
+  birthYear?: number
+  position?: string
+}
 
 /** Page title for one athlete. The name is the heading. */
 export function AthleteHeader({ name, country, sport, birthYear, position }: AthleteHeaderProps) {
@@ -35,5 +35,5 @@ export function AthleteHeader({ name, country, sport, birthYear, position }: Ath
         ) : null}
       </dl>
     </header>
-  );
+  )
 }

@@ -1,63 +1,63 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { sql } from "drizzle-orm";
-import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { z } from "zod";
-import { saveDraft } from "./drafts.js";
-import { selectAthletes, selectCompetitions, selectTeams } from "./editor-lookups.js";
-import { listEditorMatches as readEditorMatches } from "./editor-matches.js";
-import { bindCatalog } from "./import-runs.js";
-import { rejectMatch, submitMatch } from "./workflow.js";
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { sql } from 'drizzle-orm'
+import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
+import { z } from 'zod'
+import { saveDraft } from './drafts.js'
+import { selectAthletes, selectCompetitions, selectTeams } from './editor-lookups.js'
+import { listEditorMatches as readEditorMatches } from './editor-matches.js'
+import { bindCatalog } from './import-runs.js'
+import { rejectMatch, submitMatch } from './workflow.js'
 import {
   CatalogError,
   invalidRecord,
   type Catalog,
   type CatalogDb,
   type CatalogErrorCode,
-} from "./errors.js";
+} from './errors.js'
 import {
   listPublicAthletes as queryAthletes,
   readPublicAthlete as queryAthlete,
-} from "./published-athletes.js";
-import { listPublishedMatches } from "./published-matches.js";
-import { readRecord, writeRecord } from "./records.js";
-import * as schema from "./schema.js";
-import { deleteTeam, listTeams, replaceTeam } from "./teams.js";
+} from './published-athletes.js'
+import { listPublishedMatches } from './published-matches.js'
+import { readRecord, writeRecord } from './records.js'
+import * as schema from './schema.js'
+import { deleteTeam, listTeams, replaceTeam } from './teams.js'
 
-const migrationDir = dirname(fileURLToPath(import.meta.url));
+const migrationDir = dirname(fileURLToPath(import.meta.url))
 
 function migrationStatements(): string[] {
   return [
-    "0001_v1_catalog.sql",
-    "0002_v1_matches.sql",
-    "0003_v1_football.sql",
-    "0004_v1_match_sport_index.sql",
-    "0005_v1_credentials.sql",
-    "0006_v1_import_runs.sql",
+    '0001_v1_catalog.sql',
+    '0002_v1_matches.sql',
+    '0003_v1_football.sql',
+    '0004_v1_match_sport_index.sql',
+    '0005_v1_credentials.sql',
+    '0006_v1_import_runs.sql',
   ].flatMap((name) =>
-    readFileSync(join(migrationDir, name), "utf8")
-      .replaceAll(/--.*$/gm, "")
-      .split(";")
+    readFileSync(join(migrationDir, name), 'utf8')
+      .replaceAll(/--.*$/gm, '')
+      .split(';')
       .map((statement) => statement.trim())
       .filter((statement) => statement.length > 0),
-  );
+  )
 }
 
 async function release(close: (() => Promise<void>) | undefined): Promise<void> {
-  await close?.().catch(() => undefined);
+  await close?.().catch(() => undefined)
 }
 
 function failed(code: CatalogErrorCode, message: string, cause: unknown): CatalogError {
-  return new CatalogError(code, message, undefined, { cause });
+  return new CatalogError(code, message, undefined, { cause })
 }
 
 function readParsed<T>(load: () => Promise<T>): Promise<T> {
   return load().catch((error: unknown) => {
-    if (error instanceof z.ZodError) return invalidRecord(error);
-    throw error;
-  });
+    if (error instanceof z.ZodError) return invalidRecord(error)
+    throw error
+  })
 }
 
 export async function openCatalog(
@@ -65,19 +65,19 @@ export async function openCatalog(
   options?: { close?: () => Promise<void> },
 ): Promise<Catalog> {
   try {
-    await db.execute(sql.raw("SELECT 1"));
+    await db.execute(sql.raw('SELECT 1'))
   } catch (error) {
-    await release(options?.close);
-    throw failed("unreachable", "Postgres is unreachable", error);
+    await release(options?.close)
+    throw failed('unreachable', 'Postgres is unreachable', error)
   }
   try {
-    for (const statement of migrationStatements()) await db.execute(sql.raw(statement));
+    for (const statement of migrationStatements()) await db.execute(sql.raw(statement))
   } catch (error) {
-    await release(options?.close);
-    if (error instanceof CatalogError) throw error;
-    throw failed("migration", "The catalog migration failed", error);
+    await release(options?.close)
+    if (error instanceof CatalogError) throw error
+    throw failed('migration', 'The catalog migration failed', error)
   }
-  let closing: Promise<void> | undefined;
+  let closing: Promise<void> | undefined
   const catalog: Catalog = {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
@@ -95,12 +95,12 @@ export async function openCatalog(
     replaceTeam: (value) => replaceTeam(db, value),
     deleteTeam: (id) => deleteTeam(db, id),
     close: () => {
-      closing ??= options?.close?.() ?? Promise.resolve();
-      return closing;
+      closing ??= options?.close?.() ?? Promise.resolve()
+      return closing
     },
-  };
-  bindCatalog(catalog, db);
-  return catalog;
+  }
+  bindCatalog(catalog, db)
+  return catalog
 }
 
 export async function openPostgresCatalog(databaseUrl: string): Promise<Catalog> {
@@ -109,13 +109,13 @@ export async function openPostgresCatalog(databaseUrl: string): Promise<Catalog>
     connectionTimeoutMillis: 500,
     query_timeout: 500,
     max: 1,
-  });
-  pool.on("error", () => undefined);
+  })
+  pool.on('error', () => undefined)
   try {
-    await pool.query("SELECT 1");
+    await pool.query('SELECT 1')
   } catch (error) {
-    await pool.end().catch(() => undefined);
-    throw failed("unreachable", "Postgres is unreachable", error);
+    await pool.end().catch(() => undefined)
+    throw failed('unreachable', 'Postgres is unreachable', error)
   }
-  return openCatalog(drizzlePg(pool, { schema }), { close: () => pool.end() });
+  return openCatalog(drizzlePg(pool, { schema }), { close: () => pool.end() })
 }

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { countryCodeSchema, httpsUrlSchema, idSchema, slugSchema, textSchema } from "./common.ts";
+import { z } from 'zod'
+import { countryCodeSchema, httpsUrlSchema, idSchema, slugSchema, textSchema } from './common.ts'
 
 /**
  * Club lookup for the two sides of a football match and for club history
@@ -16,6 +16,6 @@ export const teamSchema = z.strictObject({
   shortName: textSchema(12),
   country: countryCodeSchema,
   crestUrl: httpsUrlSchema.optional(),
-});
+})
 
-export type Team = z.infer<typeof teamSchema>;
+export type Team = z.infer<typeof teamSchema>

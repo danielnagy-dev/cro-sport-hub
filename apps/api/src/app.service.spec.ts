@@ -1,32 +1,32 @@
-import { describe, expect, it } from "vite-plus/test";
-import { AppService } from "./app.service.js";
+import { describe, expect, it } from 'vite-plus/test'
+import { AppService } from './app.service.js'
 
-describe("AppService", () => {
-  const service = new AppService();
+describe('AppService', () => {
+  const service = new AppService()
 
-  it("is ok only when Postgres and Redis are up", async () => {
+  it('is ok only when Postgres and Redis are up', async () => {
     const health = await service.getHealth({
-      postgres: async () => "up",
-      redis: async () => "up",
-    });
+      postgres: async () => 'up',
+      redis: async () => 'up',
+    })
 
     expect(health).toEqual({
-      status: "ok",
-      sharedTypes: "@cro-sport-hub/shared-types",
-      slideGenerator: "@cro-sport-hub/slide-generator",
-      postgres: "up",
-      redis: "up",
-    });
-  });
+      status: 'ok',
+      sharedTypes: '@cro-sport-hub/shared-types',
+      slideGenerator: '@cro-sport-hub/slide-generator',
+      postgres: 'up',
+      redis: 'up',
+    })
+  })
 
-  it("is an error when either dependency is down", async () => {
+  it('is an error when either dependency is down', async () => {
     const health = await service.getHealth({
-      postgres: async () => "up",
-      redis: async () => "down",
-    });
+      postgres: async () => 'up',
+      redis: async () => 'down',
+    })
 
-    expect(health.status).toBe("error");
-    expect(health.postgres).toBe("up");
-    expect(health.redis).toBe("down");
-  });
-});
+    expect(health.status).toBe('error')
+    expect(health.postgres).toBe('up')
+    expect(health.redis).toBe('down')
+  })
+})

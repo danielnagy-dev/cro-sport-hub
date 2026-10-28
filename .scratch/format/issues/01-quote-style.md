@@ -4,7 +4,7 @@
 
 **Blocked by:** Every open pull request. Start only when the forge shows none. A pull request that opens while this branch exists is merged from `origin/main` before the final push, and the format is run again on the files that merge added.
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Size:** The whole tree. Counted lines pass 400. This stays one pull request: the plan skill's one-shot format exception. Splitting it would leave two quote styles in the tree.
 

@@ -1,25 +1,25 @@
-import { Component, effect, inject } from "@angular/core";
-import { Router, RouterOutlet } from "@angular/router";
-import { AuthStore } from "./auth";
+import { Component, effect, inject } from '@angular/core'
+import { Router, RouterOutlet } from '@angular/router'
+import { AuthStore } from './auth'
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   imports: [RouterOutlet],
-  template: "<router-outlet />",
+  template: '<router-outlet />',
 })
 export class App {
-  private readonly auth = inject(AuthStore);
-  private readonly router = inject(Router);
+  private readonly auth = inject(AuthStore)
+  private readonly router = inject(Router)
 
   constructor() {
-    let signedIn = false;
+    let signedIn = false
     effect(() => {
       if (this.auth.session() !== null) {
-        signedIn = true;
-        return;
+        signedIn = true
+        return
       }
-      if (!signedIn || this.router.url.startsWith("/login")) return;
-      void this.router.navigateByUrl("/login");
-    });
+      if (!signedIn || this.router.url.startsWith('/login')) return
+      void this.router.navigateByUrl('/login')
+    })
   }
 }

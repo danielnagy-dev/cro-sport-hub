@@ -22,34 +22,34 @@ import {
   type SportSlug,
   type Team,
   type TeamLookup,
-} from "@cro-sport-hub/shared-types";
-import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
-import { z } from "zod";
-import type { PublishedMatchQuery } from "./published-matches.js";
-import type * as schema from "./schema.js";
+} from '@cro-sport-hub/shared-types'
+import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
+import { z } from 'zod'
+import type { PublishedMatchQuery } from './published-matches.js'
+import type * as schema from './schema.js'
 
-export type CatalogUser = { id: string; role: Role };
+export type CatalogUser = { id: string; role: Role }
 export type CatalogWriteKind =
-  | "competition"
-  | "team"
-  | "athlete"
-  | "athleteTeam"
-  | "user"
-  | "match"
-  | "tennisMatch"
-  | "tennisMatchStats"
-  | "footballMatch"
-  | "appearance";
-export type CatalogKind = "sport" | CatalogWriteKind;
-export type AthleteTeamKey = Pick<AthleteTeam, "athleteId" | "teamId" | "from">;
-export type CatalogParticipantKey = { matchId: string; athleteId: string };
+  | 'competition'
+  | 'team'
+  | 'athlete'
+  | 'athleteTeam'
+  | 'user'
+  | 'match'
+  | 'tennisMatch'
+  | 'tennisMatchStats'
+  | 'footballMatch'
+  | 'appearance'
+export type CatalogKind = 'sport' | CatalogWriteKind
+export type AthleteTeamKey = Pick<AthleteTeam, 'athleteId' | 'teamId' | 'from'>
+export type CatalogParticipantKey = { matchId: string; athleteId: string }
 export type CatalogErrorCode =
-  | "invalid"
-  | "not-football"
-  | "unknown-ref"
-  | "conflict"
-  | "unreachable"
-  | "migration";
+  | 'invalid'
+  | 'not-football'
+  | 'unknown-ref'
+  | 'conflict'
+  | 'unreachable'
+  | 'migration'
 
 export class CatalogError extends Error {
   constructor(
@@ -58,8 +58,8 @@ export class CatalogError extends Error {
     readonly issues?: readonly FieldIssue[],
     options?: ErrorOptions,
   ) {
-    super(message, options);
-    this.name = "CatalogError";
+    super(message, options)
+    this.name = 'CatalogError'
   }
 }
 
@@ -74,51 +74,51 @@ export type Stored =
   | z.output<typeof tennisMatchStatsSchema>
   | z.output<typeof footballMatchSchema>
   | z.output<typeof appearanceSchema>
-  | CatalogUser;
+  | CatalogUser
 
 export type Catalog = {
-  write(kind: CatalogWriteKind, value: unknown): Promise<void>;
+  write(kind: CatalogWriteKind, value: unknown): Promise<void>
   read(
     kind: CatalogKind,
     key: string | AthleteTeamKey | CatalogParticipantKey,
-  ): Promise<Stored | undefined>;
-  listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>;
-  listEditorMatches(query: EditorMatchListQuery): Promise<EditorMatchPage>;
-  readPublicAthlete(slug: string): Promise<PublicAthlete>;
-  listPublicAthletes(sport: string): Promise<AthleteName[]>;
-  listCompetitions(sport: SportSlug): Promise<CompetitionLookup[]>;
-  listAthletes(sport: SportSlug): Promise<AthleteLookup[]>;
-  listTeamLookups(): Promise<TeamLookup[]>;
+  ): Promise<Stored | undefined>
+  listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>
+  listEditorMatches(query: EditorMatchListQuery): Promise<EditorMatchPage>
+  readPublicAthlete(slug: string): Promise<PublicAthlete>
+  listPublicAthletes(sport: string): Promise<AthleteName[]>
+  listCompetitions(sport: SportSlug): Promise<CompetitionLookup[]>
+  listAthletes(sport: SportSlug): Promise<AthleteLookup[]>
+  listTeamLookups(): Promise<TeamLookup[]>
   saveDraft(
-    sport: "tennis" | "football",
+    sport: 'tennis' | 'football',
     body: unknown,
     actorId: string,
-    mode: "create" | "update",
-  ): Promise<{ id: string; status: "draft"; sport: "tennis" | "football" }>;
-  submitMatch(id: string): Promise<{ id: string; status: "review" }>;
-  rejectMatch(id: string): Promise<{ id: string; status: "draft" }>;
-  listTeams(): Promise<readonly Team[]>;
-  replaceTeam(value: unknown): Promise<Team>;
-  deleteTeam(id: string): Promise<void>;
-  close(): Promise<void>;
-};
+    mode: 'create' | 'update',
+  ): Promise<{ id: string; status: 'draft'; sport: 'tennis' | 'football' }>
+  submitMatch(id: string): Promise<{ id: string; status: 'review' }>
+  rejectMatch(id: string): Promise<{ id: string; status: 'draft' }>
+  listTeams(): Promise<readonly Team[]>
+  replaceTeam(value: unknown): Promise<Team>
+  deleteTeam(id: string): Promise<void>
+  close(): Promise<void>
+}
 
-export type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>;
+export type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
 export function invalidRecord(error: z.ZodError): never {
   throw new CatalogError(
-    "invalid",
-    "The record does not match the shared schema",
+    'invalid',
+    'The record does not match the shared schema',
     error.issues.map((issue) => ({ path: issue.path.map(String), message: issue.message })),
     { cause: error },
-  );
+  )
 }
 
 export function parseRecord<T>(
   parser: { safeParse: (value: unknown) => z.ZodSafeParseResult<T> },
   value: unknown,
 ): T {
-  const result = parser.safeParse(value);
-  if (result.success) return result.data;
-  return invalidRecord(result.error);
+  const result = parser.safeParse(value)
+  if (result.success) return result.data
+  return invalidRecord(result.error)
 }

@@ -9,12 +9,12 @@ services:
       POSTGRES_PASSWORD: dev-only-placeholder
       POSTGRES_DB: cro_sport
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       # Postgres 18 keeps the cluster in a versioned directory under this path.
       - postgres-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cro_sport -d cro_sport"]
+      test: ['CMD-SHELL', 'pg_isready -U cro_sport -d cro_sport']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -22,9 +22,9 @@ services:
   redis:
     image: redis:8-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10

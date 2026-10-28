@@ -1,34 +1,34 @@
-import type { TennisSetScore } from "@cro-sport-hub/shared-types";
-import type { ReactNode } from "react";
-import { Badge } from "./badge.tsx";
+import type { TennisSetScore } from '@cro-sport-hub/shared-types'
+import type { ReactNode } from 'react'
+import { Badge } from './badge.tsx'
 
 type TennisCard = {
-  sport: "tennis";
-  playerA: string;
-  playerB: string;
-  sets: readonly TennisSetScore[];
-  retired?: boolean;
+  sport: 'tennis'
+  playerA: string
+  playerB: string
+  sets: readonly TennisSetScore[]
+  retired?: boolean
   /** Side that won. Omitted for a retirement that has no winner yet. */
-  winner?: "a" | "b";
-};
+  winner?: 'a' | 'b'
+}
 
 type FootballCard = {
-  sport: "football";
-  homeTeam: string;
-  awayTeam: string;
-  homeGoals: number;
-  awayGoals: number;
-};
+  sport: 'football'
+  homeTeam: string
+  awayTeam: string
+  homeGoals: number
+  awayGoals: number
+}
 
-export type MatchCardProps = TennisCard | FootballCard;
+export type MatchCardProps = TennisCard | FootballCard
 
 function playerName(name: string, winner: boolean): ReactNode {
-  if (!winner) return name;
+  if (!winner) return name
   return (
     <>
       {name} <Badge>Winner</Badge>
     </>
-  );
+  )
 }
 
 /**
@@ -36,11 +36,11 @@ function playerName(name: string, winner: boolean): ReactNode {
  * player, and the superscript is hidden from assistive tech so it is not
  * announced twice.
  */
-function gamesCell(set: TennisSetScore, side: "a" | "b"): ReactNode {
-  const games = side === "a" ? set[0] : set[1];
-  const opponent = side === "a" ? set[1] : set[0];
-  const tiebreak = set.length === 3 ? set[2] : undefined;
-  if (tiebreak === undefined || games >= opponent) return games;
+function gamesCell(set: TennisSetScore, side: 'a' | 'b'): ReactNode {
+  const games = side === 'a' ? set[0] : set[1]
+  const opponent = side === 'a' ? set[1] : set[0]
+  const tiebreak = set.length === 3 ? set[2] : undefined
+  if (tiebreak === undefined || games >= opponent) return games
 
   return (
     <>
@@ -50,18 +50,18 @@ function gamesCell(set: TennisSetScore, side: "a" | "b"): ReactNode {
         <sup aria-hidden="true">{tiebreak}</sup>
       </span>
     </>
-  );
+  )
 }
 
 function TennisScoreboard({ playerA, playerB, sets, retired = false, winner }: TennisCard) {
-  const row = (side: "a" | "b", name: string) => (
+  const row = (side: 'a' | 'b', name: string) => (
     <tr>
       <th scope="row">{playerName(name, winner === side)}</th>
       {sets.map((set, index) => (
         <td key={`set-${index + 1}`}>{gamesCell(set, side)}</td>
       ))}
     </tr>
-  );
+  )
 
   return (
     <div className="csh-match-card">
@@ -80,13 +80,13 @@ function TennisScoreboard({ playerA, playerB, sets, retired = false, winner }: T
           </tr>
         </thead>
         <tbody>
-          {row("a", playerA)}
-          {row("b", playerB)}
+          {row('a', playerA)}
+          {row('b', playerB)}
         </tbody>
       </table>
       {retired ? <p className="csh-match-card__note">Retired</p> : null}
     </div>
-  );
+  )
 }
 
 function FootballScoreline({ homeTeam, awayTeam, homeGoals, awayGoals }: FootballCard) {
@@ -114,11 +114,11 @@ function FootballScoreline({ homeTeam, awayTeam, homeGoals, awayGoals }: Footbal
         </tbody>
       </table>
     </div>
-  );
+  )
 }
 
 /** Tennis set scoreboard or football score. Football has no winner. */
 export function MatchCard(props: MatchCardProps) {
-  if (props.sport === "tennis") return <TennisScoreboard {...props} />;
-  return <FootballScoreline {...props} />;
+  if (props.sport === 'tennis') return <TennisScoreboard {...props} />
+  return <FootballScoreline {...props} />
 }

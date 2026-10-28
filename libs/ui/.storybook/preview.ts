@@ -1,14 +1,14 @@
-import type { Preview } from "@storybook/react-vite";
-import "../src/tokens.css";
-import "../src/components.css";
+import type { Preview } from '@storybook/react-vite'
+import '../src/tokens.css'
+import '../src/components.css'
 
 const preview: Preview = {
   parameters: {
-    layout: "centered",
+    layout: 'centered',
     a11y: {
-      test: "error",
+      test: 'error',
     },
   },
-};
+}
 
-export default preview;
+export default preview

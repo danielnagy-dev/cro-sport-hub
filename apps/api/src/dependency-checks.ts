@@ -1,33 +1,33 @@
-import { Client } from "pg";
-import { createClient } from "redis";
-import { type DependencyStatus } from "./health-response.js";
+import { Client } from 'pg'
+import { createClient } from 'redis'
+import { type DependencyStatus } from './health-response.js'
 
-export const dependencyProbeTimeoutMs = 500;
+export const dependencyProbeTimeoutMs = 500
 
 export function createPostgresProbe(databaseUrl: string): Client {
   const client = new Client({
     connectionString: databaseUrl,
     connectionTimeoutMillis: dependencyProbeTimeoutMs,
     query_timeout: dependencyProbeTimeoutMs,
-  });
-  client.on("error", () => {
+  })
+  client.on('error', () => {
     // A drop after connect emits error. With no listener, Node exits.
-  });
-  return client;
+  })
+  return client
 }
 
 export async function checkPostgres(databaseUrl: string): Promise<DependencyStatus> {
-  const client = createPostgresProbe(databaseUrl);
+  const client = createPostgresProbe(databaseUrl)
   try {
-    await client.connect();
-    await client.query("SELECT 1");
-    return "up";
+    await client.connect()
+    await client.query('SELECT 1')
+    return 'up'
   } catch {
-    return "down";
+    return 'down'
   } finally {
     await client.end().catch(() => {
       // The client may never have connected.
-    });
+    })
   }
 }
 
@@ -40,24 +40,24 @@ function createRedisProbe(redisUrl: string) {
       socketTimeout: dependencyProbeTimeoutMs,
       reconnectStrategy: false,
     },
-  });
-  client.on("error", () => {
+  })
+  client.on('error', () => {
     // The probe reports "down" instead of crashing on a socket error.
-  });
-  return client;
+  })
+  return client
 }
 
 export async function checkRedis(redisUrl: string): Promise<DependencyStatus> {
-  const client = createRedisProbe(redisUrl);
+  const client = createRedisProbe(redisUrl)
   try {
-    await client.connect();
-    const reply = await client.ping();
-    return reply === "PONG" ? "up" : "down";
+    await client.connect()
+    const reply = await client.ping()
+    return reply === 'PONG' ? 'up' : 'down'
   } catch {
-    return "down";
+    return 'down'
   } finally {
     try {
-      client.destroy();
+      client.destroy()
     } catch {
       // Destroy throws when the client never opened.
     }

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod'
 import {
   countryCodeSchema,
   httpsUrlSchema,
@@ -6,9 +6,9 @@ import {
   isoDateSchema,
   slugSchema,
   textSchema,
-} from "./common.ts";
+} from './common.ts'
 
-export const birthYearSchema = z.int().min(1940).max(2015);
+export const birthYearSchema = z.int().min(1940).max(2015)
 
 export const athleteSchema = z.strictObject({
   id: idSchema,
@@ -19,9 +19,9 @@ export const athleteSchema = z.strictObject({
   birthYear: birthYearSchema.optional(),
   position: textSchema(40).optional(),
   photoUrl: httpsUrlSchema.optional(),
-});
+})
 
-export type Athlete = z.infer<typeof athleteSchema>;
+export type Athlete = z.infer<typeof athleteSchema>
 
 export const athleteTeamSchema = z
   .strictObject({
@@ -33,11 +33,11 @@ export const athleteTeamSchema = z
   .superRefine((period, ctx) => {
     if (period.to !== undefined && period.to < period.from) {
       ctx.addIssue({
-        code: "custom",
-        path: ["to"],
-        message: "The club spell cannot end before it starts",
-      });
+        code: 'custom',
+        path: ['to'],
+        message: 'The club spell cannot end before it starts',
+      })
     }
-  });
+  })
 
-export type AthleteTeam = z.infer<typeof athleteTeamSchema>;
+export type AthleteTeam = z.infer<typeof athleteTeamSchema>

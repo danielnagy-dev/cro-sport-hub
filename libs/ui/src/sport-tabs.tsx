@@ -1,31 +1,31 @@
-import type { SportSlug } from "@cro-sport-hub/shared-types";
-import type { KeyboardEvent, ReactNode } from "react";
-import { useId } from "react";
-import { nextSport, sportLabel, sportOrder } from "./sports.ts";
+import type { SportSlug } from '@cro-sport-hub/shared-types'
+import type { KeyboardEvent, ReactNode } from 'react'
+import { useId } from 'react'
+import { nextSport, sportLabel, sportOrder } from './sports.ts'
 
 export type SportTabsProps = {
-  value: SportSlug;
-  onChange: (sport: SportSlug) => void;
-  panels: Record<SportSlug, ReactNode>;
-};
+  value: SportSlug
+  onChange: (sport: SportSlug) => void
+  panels: Record<SportSlug, ReactNode>
+}
 
 export function SportTabs({ value, onChange, panels }: SportTabsProps) {
-  const baseId = useId();
+  const baseId = useId()
 
   function tabId(sport: SportSlug) {
-    return `${baseId}-${sport}-tab`;
+    return `${baseId}-${sport}-tab`
   }
 
   function panelId(sport: SportSlug) {
-    return `${baseId}-${sport}-panel`;
+    return `${baseId}-${sport}-panel`
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const next = nextSport(value, event.key);
-    if (next === undefined) return;
-    event.preventDefault();
-    if (next !== value) onChange(next);
-    document.getElementById(tabId(next))?.focus();
+    const next = nextSport(value, event.key)
+    if (next === undefined) return
+    event.preventDefault()
+    if (next !== value) onChange(next)
+    document.getElementById(tabId(next))?.focus()
   }
 
   return (
@@ -37,7 +37,7 @@ export function SportTabs({ value, onChange, panels }: SportTabsProps) {
         onKeyDown={onKeyDown}
       >
         {sportOrder.map((sport) => {
-          const selected = sport === value;
+          const selected = sport === value
           return (
             <button
               key={sport}
@@ -52,7 +52,7 @@ export function SportTabs({ value, onChange, panels }: SportTabsProps) {
             >
               {sportLabel[sport]}
             </button>
-          );
+          )
         })}
       </div>
       {sportOrder.map((sport) => (
@@ -69,5 +69,5 @@ export function SportTabs({ value, onChange, panels }: SportTabsProps) {
         </div>
       ))}
     </div>
-  );
+  )
 }

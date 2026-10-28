@@ -1,4 +1,4 @@
-import { computed, inject } from "@angular/core";
+import { computed, inject } from '@angular/core'
 import {
   patchState,
   signalStore,
@@ -6,66 +6,66 @@ import {
   withHooks,
   withMethods,
   withState,
-} from "@ngrx/signals";
-import type { Match, Sport, SportSlug } from "@cro-sport-hub/shared-types";
-import { forkJoin, type Subscription } from "rxjs";
-import { StudioApi } from "./studio-api";
+} from '@ngrx/signals'
+import type { Match, Sport, SportSlug } from '@cro-sport-hub/shared-types'
+import { forkJoin, type Subscription } from 'rxjs'
+import { StudioApi } from './studio-api'
 
-type EditorStatus = "loading" | "ready" | "error";
+type EditorStatus = 'loading' | 'ready' | 'error'
 
 type EditorState = {
-  sports: Sport[];
-  matches: Match[];
-  sportSlug: SportSlug;
-  status: EditorStatus;
-};
+  sports: Sport[]
+  matches: Match[]
+  sportSlug: SportSlug
+  status: EditorStatus
+}
 
 const initialState: EditorState = {
   sports: [],
   matches: [],
-  sportSlug: "tennis",
-  status: "loading",
-};
+  sportSlug: 'tennis',
+  status: 'loading',
+}
 
 export const EditorStore = signalStore(
-  { providedIn: "root" },
+  { providedIn: 'root' },
   withState(initialState),
   withComputed((store) => ({
     visibleMatches: computed(() => {
-      const sport = store.sports().find((item) => item.slug === store.sportSlug());
+      const sport = store.sports().find((item) => item.slug === store.sportSlug())
       if (sport === undefined) {
-        return [];
+        return []
       }
-      return store.matches().filter((match) => match.sportId === sport.id);
+      return store.matches().filter((match) => match.sportId === sport.id)
     }),
   })),
   withMethods((store, api = inject(StudioApi)) => {
-    let pending: Subscription | undefined;
+    let pending: Subscription | undefined
 
     return {
       load(): void {
-        pending?.unsubscribe();
-        patchState(store, { status: "loading" });
+        pending?.unsubscribe()
+        patchState(store, { status: 'loading' })
         pending = forkJoin({
           sports: api.sports(),
           matches: api.matches(),
         }).subscribe({
           next: ({ sports, matches }) => {
-            patchState(store, { sports, matches, status: "ready" });
+            patchState(store, { sports, matches, status: 'ready' })
           },
           error: () => {
-            patchState(store, { sports: [], matches: [], status: "error" });
+            patchState(store, { sports: [], matches: [], status: 'error' })
           },
-        });
+        })
       },
       selectSport(sportSlug: SportSlug): void {
-        patchState(store, { sportSlug });
+        patchState(store, { sportSlug })
       },
-    };
+    }
   }),
   withHooks({
     onInit(store) {
-      store.load();
+      store.load()
     },
   }),
-);
+)

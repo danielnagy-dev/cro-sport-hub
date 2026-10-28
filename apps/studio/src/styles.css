@@ -7,7 +7,7 @@
   --color-line: #d5dee6;
   --color-accent: #0a4f3c;
   --color-accent-ink: #f4fffb;
-  --font-sans: "Segoe UI", sans-serif;
+  --font-sans: 'Segoe UI', sans-serif;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
@@ -110,7 +110,7 @@ main button {
   text-align: left;
 }
 
-.sport-nav button[aria-pressed="true"] {
+.sport-nav button[aria-pressed='true'] {
   background: var(--color-accent);
   color: var(--color-accent-ink);
   border-color: var(--color-accent);

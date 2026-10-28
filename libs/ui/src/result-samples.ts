@@ -1,5 +1,5 @@
-import type { Appearance, TennisStatCounts } from "@cro-sport-hub/shared-types";
-import type { AppearanceLine } from "./appearances-table.tsx";
+import type { Appearance, TennisStatCounts } from '@cro-sport-hub/shared-types'
+import type { AppearanceLine } from './appearances-table.tsx'
 
 /** Counts behind the 60% / 66.7% story. Percentages are not stored here. */
 export const playedCounts: TennisStatCounts = {
@@ -15,7 +15,7 @@ export const playedCounts: TennisStatCounts = {
   breakPointsWon: 2,
   breakPointsTotal: 4,
   totalPointsWon: 20,
-};
+}
 
 /** First serve is 0%. Points won on that serve, and both break-point rates, had no attempts. */
 export const zeroDenominatorCounts: TennisStatCounts = {
@@ -32,7 +32,7 @@ export const zeroDenominatorCounts: TennisStatCounts = {
   breakPointsWon: 0,
   breakPointsTotal: 0,
   totalPointsWon: 0,
-};
+}
 
 function appearanceLine(
   overrides: Partial<Appearance>,
@@ -41,9 +41,9 @@ function appearanceLine(
 ): AppearanceLine {
   return {
     appearance: {
-      matchId: "match-1",
-      athleteId: "athlete-1",
-      teamId: "team-1",
+      matchId: 'match-1',
+      athleteId: 'athlete-1',
+      teamId: 'team-1',
       started: true,
       minutes: 90,
       goals: 1,
@@ -52,16 +52,16 @@ function appearanceLine(
       redCard: false,
       ...overrides,
     },
-    competition: { name: "Sample Cup", season: "2026" },
+    competition: { name: 'Sample Cup', season: '2026' },
     match: { date, round },
-  };
+  }
 }
 
 export const appearanceRows: readonly AppearanceLine[] = [
-  appearanceLine({ matchId: "match-1", yellowCards: 1 }, "QF", "2026-05-01"),
+  appearanceLine({ matchId: 'match-1', yellowCards: 1 }, 'QF', '2026-05-01'),
   appearanceLine(
     {
-      matchId: "match-2",
+      matchId: 'match-2',
       started: false,
       minutes: 12,
       goals: 0,
@@ -69,14 +69,14 @@ export const appearanceRows: readonly AppearanceLine[] = [
       yellowCards: 2,
       redCard: true,
     },
-    "Final",
-    "2026-05-20",
+    'Final',
+    '2026-05-20',
   ),
-  appearanceLine({ matchId: "match-3", minutes: 80, goals: 0, redCard: true }, "SF", "2026-05-10"),
+  appearanceLine({ matchId: 'match-3', minutes: 80, goals: 0, redCard: true }, 'SF', '2026-05-10'),
   appearanceLine(
-    { matchId: "match-4", yellowCards: 1, redCard: true, goals: 0 },
-    "R16",
-    "2026-04-28",
+    { matchId: 'match-4', yellowCards: 1, redCard: true, goals: 0 },
+    'R16',
+    '2026-04-28',
   ),
-  appearanceLine({ matchId: "match-5", started: false, minutes: 0, goals: 0 }, "R32", "2026-04-20"),
-];
+  appearanceLine({ matchId: 'match-5', started: false, minutes: 0, goals: 0 }, 'R32', '2026-04-20'),
+]

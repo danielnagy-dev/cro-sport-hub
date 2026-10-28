@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 
 /** Shared chrome for every public page. The page supplies `main`. */
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -14,5 +14,5 @@ export function SiteShell({ children }: { children: ReactNode }) {
       </header>
       {children}
     </div>
-  );
+  )
 }

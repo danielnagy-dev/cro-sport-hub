@@ -11,6 +11,10 @@ pnpm workspace run by Vite+ (`vp` 1.4.0). Node.js is pinned in `.node-version` (
 
 Run task commands from the repository root. Library declaration emit uses the catalog compiler, and that compiler is not resolved correctly if the task runner is started inside `apps/studio` or `apps/api`. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
 
+## Formatting
+
+`vp fmt` and `vp run format-check` use the root `fmt` object in `vite.config.ts` (oxfmt). TypeScript and JavaScript use single-quoted strings, no semicolons, and trailing commas in multi-line lists. JSX attribute strings stay double-quoted (`jsxSingleQuote` default). Run `vp fmt` before pushing when you touch formatted files.
+
 ## Before opening a pull request
 
 The author runs each required check once, from the repository root, and records a results table under `## Verification`. The commands are in `.cursor/skills/develop/SKILL.md`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off. `vp run typecheck` includes `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.

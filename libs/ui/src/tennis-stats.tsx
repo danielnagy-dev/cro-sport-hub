@@ -1,28 +1,28 @@
-import { tennisPercentages, type TennisStatCounts } from "@cro-sport-hub/shared-types";
+import { tennisPercentages, type TennisStatCounts } from '@cro-sport-hub/shared-types'
 
 export type TennisStatsProps = {
-  player: string;
-  stats: TennisStatCounts;
-};
+  player: string
+  stats: TennisStatCounts
+}
 
 const statRows = [
-  ["First serve", "firstServePct"],
-  ["First-serve points won", "firstServePointsWonPct"],
-  ["Second-serve points won", "secondServePointsWonPct"],
-  ["Break points saved", "breakPointsSavedPct"],
-  ["Break points converted", "breakPointsConvertedPct"],
-] as const;
+  ['First serve', 'firstServePct'],
+  ['First-serve points won', 'firstServePointsWonPct'],
+  ['Second-serve points won', 'secondServePointsWonPct'],
+  ['Break points saved', 'breakPointsSavedPct'],
+  ['Break points converted', 'breakPointsConvertedPct'],
+] as const
 
 /** One decimal when needed. `null` is a zero denominator, which is not 0%. */
 function formatPercentage(value: number | null): string {
-  if (value === null) return "No attempts";
-  const tenths = Math.round(value * 10) / 10;
-  return `${Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1)}%`;
+  if (value === null) return 'No attempts'
+  const tenths = Math.round(value * 10) / 10
+  return `${Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1)}%`
 }
 
 /** Serve and return percentages for one player in one match. */
 export function TennisStats({ player, stats }: TennisStatsProps) {
-  const percentages = tennisPercentages(stats);
+  const percentages = tennisPercentages(stats)
 
   return (
     <div className="csh-tennis-stats">
@@ -44,5 +44,5 @@ export function TennisStats({ player, stats }: TennisStatsProps) {
         </tbody>
       </table>
     </div>
-  );
+  )
 }

@@ -1,5 +1,5 @@
-import { expect, test } from "vite-plus/test";
-import { tennisMatchStatsSchema, tennisPercentages, tennisStatIssues } from "../src/index.ts";
+import { expect, test } from 'vite-plus/test'
+import { tennisMatchStatsSchema, tennisPercentages, tennisStatIssues } from '../src/index.ts'
 
 function counts(overrides: Partial<Parameters<typeof tennisStatIssues>[0]> = {}) {
   return {
@@ -16,28 +16,28 @@ function counts(overrides: Partial<Parameters<typeof tennisStatIssues>[0]> = {})
     breakPointsTotal: 4,
     totalPointsWon: 20,
     ...overrides,
-  };
+  }
 }
 
 function stats(overrides: Partial<Parameters<typeof tennisStatIssues>[0]> = {}) {
   return {
-    matchId: "match-1",
-    athleteId: "player-a",
+    matchId: 'match-1',
+    athleteId: 'player-a',
     ...counts(overrides),
-  };
+  }
 }
 
-test("accepts raw counts with and without optional winners", () => {
-  expect(tennisMatchStatsSchema.parse(stats())).toMatchObject({ aces: 3 });
-  expect(tennisStatIssues(counts()).length).toBe(0);
+test('accepts raw counts with and without optional winners', () => {
+  expect(tennisMatchStatsSchema.parse(stats())).toMatchObject({ aces: 3 })
+  expect(tennisStatIssues(counts()).length).toBe(0)
 
   const withOptional = tennisMatchStatsSchema.parse({
     ...stats(),
     winners: 8,
     unforcedErrors: 5,
-  });
-  expect(withOptional.winners).toBe(8);
-  expect(withOptional.unforcedErrors).toBe(5);
+  })
+  expect(withOptional.winners).toBe(8)
+  expect(withOptional.unforcedErrors).toBe(5)
 
   const zeros = counts({
     aces: 0,
@@ -52,70 +52,70 @@ test("accepts raw counts with and without optional winners", () => {
     breakPointsWon: 0,
     breakPointsTotal: 0,
     totalPointsWon: 0,
-  });
-  expect(tennisStatIssues(zeros)).toEqual([]);
-  expect(tennisMatchStatsSchema.safeParse(stats(zeros)).success).toBe(true);
-});
+  })
+  expect(tennisStatIssues(zeros)).toEqual([])
+  expect(tennisMatchStatsSchema.safeParse(stats(zeros)).success).toBe(true)
+})
 
 function statIssue(path: string, message: string) {
-  return { path: [path], message };
+  return { path: [path], message }
 }
 
-test("rejects inconsistent serve and break-point counts", () => {
+test('rejects inconsistent serve and break-point counts', () => {
   expect(tennisStatIssues(counts({ firstServeIn: 11 }))).toContainEqual(
-    statIssue("firstServeIn", "First serves in cannot exceed first serves played"),
-  );
+    statIssue('firstServeIn', 'First serves in cannot exceed first serves played'),
+  )
   expect(tennisStatIssues(counts({ firstServePointsWon: 7 }))).toContainEqual(
-    statIssue("firstServePointsWon", "First-serve points won cannot exceed first serves in"),
-  );
+    statIssue('firstServePointsWon', 'First-serve points won cannot exceed first serves in'),
+  )
   expect(tennisStatIssues(counts({ secondServeTotal: 5 }))).toContainEqual(
-    statIssue("secondServeTotal", "Second serves played must equal the first serves that missed"),
-  );
+    statIssue('secondServeTotal', 'Second serves played must equal the first serves that missed'),
+  )
   expect(tennisStatIssues(counts({ secondServePointsWon: 5, doubleFaults: 0 }))).toContainEqual(
-    statIssue("secondServePointsWon", "Second-serve points won cannot exceed second serves played"),
-  );
+    statIssue('secondServePointsWon', 'Second-serve points won cannot exceed second serves played'),
+  )
   expect(tennisStatIssues(counts({ doubleFaults: 5, secondServePointsWon: 0 }))).toContainEqual(
-    statIssue("doubleFaults", "Second-serve points won cannot exceed second serves that landed in"),
-  );
+    statIssue('doubleFaults', 'Second-serve points won cannot exceed second serves that landed in'),
+  )
   expect(tennisStatIssues(counts({ doubleFaults: 3, secondServePointsWon: 2 }))).toContainEqual(
-    statIssue("doubleFaults", "Second-serve points won cannot exceed second serves that landed in"),
-  );
+    statIssue('doubleFaults', 'Second-serve points won cannot exceed second serves that landed in'),
+  )
   expect(tennisStatIssues(counts({ aces: 7 }))).toContainEqual(
-    statIssue("aces", "Aces cannot exceed serve points won"),
-  );
+    statIssue('aces', 'Aces cannot exceed serve points won'),
+  )
   expect(tennisStatIssues(counts({ totalPointsWon: 5 }))).toContainEqual(
-    statIssue("totalPointsWon", "Total points won cannot be lower than serve points won"),
-  );
+    statIssue('totalPointsWon', 'Total points won cannot be lower than serve points won'),
+  )
   expect(tennisStatIssues(counts({ breakPointsSaved: 3 }))).toContainEqual(
-    statIssue("breakPointsSaved", "Break points saved cannot exceed break points faced"),
-  );
+    statIssue('breakPointsSaved', 'Break points saved cannot exceed break points faced'),
+  )
   expect(tennisStatIssues(counts({ breakPointsFaced: 11, breakPointsSaved: 0 }))).toContainEqual(
-    statIssue("breakPointsFaced", "Break points faced cannot exceed service points played"),
-  );
+    statIssue('breakPointsFaced', 'Break points faced cannot exceed service points played'),
+  )
   expect(tennisStatIssues(counts({ breakPointsWon: 5 }))).toContainEqual(
-    statIssue("breakPointsWon", "Break points won cannot exceed break points played"),
-  );
-  const mismatchedSecondServes = tennisMatchStatsSchema.safeParse(stats({ secondServeTotal: 5 }));
-  expect(mismatchedSecondServes.success).toBe(false);
+    statIssue('breakPointsWon', 'Break points won cannot exceed break points played'),
+  )
+  const mismatchedSecondServes = tennisMatchStatsSchema.safeParse(stats({ secondServeTotal: 5 }))
+  expect(mismatchedSecondServes.success).toBe(false)
   if (!mismatchedSecondServes.success) {
     expect(mismatchedSecondServes.error.issues).toContainEqual(
-      expect.objectContaining({ path: ["secondServeTotal"] }),
-    );
+      expect.objectContaining({ path: ['secondServeTotal'] }),
+    )
   }
-  expect(tennisMatchStatsSchema.safeParse(stats({ firstServeIn: 11 })).success).toBe(false);
-  expect(tennisMatchStatsSchema.safeParse({ ...stats(), firstServePct: 60 }).success).toBe(false);
-  expect(tennisMatchStatsSchema.safeParse(stats({ aces: -1 })).success).toBe(false);
-  expect(tennisMatchStatsSchema.safeParse(stats({ aces: 1.5 })).success).toBe(false);
-});
+  expect(tennisMatchStatsSchema.safeParse(stats({ firstServeIn: 11 })).success).toBe(false)
+  expect(tennisMatchStatsSchema.safeParse({ ...stats(), firstServePct: 60 }).success).toBe(false)
+  expect(tennisMatchStatsSchema.safeParse(stats({ aces: -1 })).success).toBe(false)
+  expect(tennisMatchStatsSchema.safeParse(stats({ aces: 1.5 })).success).toBe(false)
+})
 
-test("computes percentages and returns null when a total is zero", () => {
-  const result = tennisPercentages(counts());
+test('computes percentages and returns null when a total is zero', () => {
+  const result = tennisPercentages(counts())
 
-  expect(result.firstServePct).toBe(60);
-  expect(result.firstServePointsWonPct).toBeCloseTo((4 / 6) * 100);
-  expect(result.secondServePointsWonPct).toBe(50);
-  expect(result.breakPointsSavedPct).toBe(50);
-  expect(result.breakPointsConvertedPct).toBe(50);
+  expect(result.firstServePct).toBe(60)
+  expect(result.firstServePointsWonPct).toBeCloseTo((4 / 6) * 100)
+  expect(result.secondServePointsWonPct).toBe(50)
+  expect(result.breakPointsSavedPct).toBe(50)
+  expect(result.breakPointsConvertedPct).toBe(50)
 
   const noneIn = tennisPercentages(
     counts({
@@ -130,11 +130,11 @@ test("computes percentages and returns null when a total is zero", () => {
       breakPointsFaced: 0,
       totalPointsWon: 1,
     }),
-  );
-  expect(noneIn.firstServePct).toBe(0);
-  expect(noneIn.firstServePointsWonPct).toBeNull();
-  expect(noneIn.secondServePointsWonPct).toBe(25);
-  expect(noneIn.breakPointsSavedPct).toBeNull();
+  )
+  expect(noneIn.firstServePct).toBe(0)
+  expect(noneIn.firstServePointsWonPct).toBeNull()
+  expect(noneIn.secondServePointsWonPct).toBe(25)
+  expect(noneIn.breakPointsSavedPct).toBeNull()
 
   const allZero = tennisPercentages(
     counts({
@@ -151,12 +151,12 @@ test("computes percentages and returns null when a total is zero", () => {
       breakPointsTotal: 0,
       totalPointsWon: 0,
     }),
-  );
+  )
   expect(allZero).toEqual({
     firstServePct: null,
     firstServePointsWonPct: null,
     secondServePointsWonPct: null,
     breakPointsSavedPct: null,
     breakPointsConvertedPct: null,
-  });
-});
+  })
+})

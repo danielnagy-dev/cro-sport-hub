@@ -4,17 +4,17 @@
  */
 export const localDevDefaults = {
   port: 3001,
-  databaseUrl: "postgresql://cro_sport@127.0.0.1:5432/cro_sport",
-  redisUrl: "redis://127.0.0.1:6379",
-} as const;
+  databaseUrl: 'postgresql://cro_sport@127.0.0.1:5432/cro_sport',
+  redisUrl: 'redis://127.0.0.1:6379',
+} as const
 
 export type ApiConfig = {
-  port: number;
-  databaseUrl: string;
-  redisUrl: string;
-};
+  port: number
+  databaseUrl: string
+  redisUrl: string
+}
 
-const databaseProtocols = new Set(["postgresql:", "postgres:"]);
+const databaseProtocols = new Set(['postgresql:', 'postgres:'])
 
 export function readApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
   return {
@@ -22,29 +22,29 @@ export function readApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     databaseUrl: readUrl(
       env.DATABASE_URL,
       localDevDefaults.databaseUrl,
-      "DATABASE_URL",
+      'DATABASE_URL',
       databaseProtocols,
     ),
-    redisUrl: readUrl(env.REDIS_URL, localDevDefaults.redisUrl, "REDIS_URL", new Set(["redis:"])),
-  };
+    redisUrl: readUrl(env.REDIS_URL, localDevDefaults.redisUrl, 'REDIS_URL', new Set(['redis:'])),
+  }
 }
 
 function readPort(value: string | undefined): number {
-  if (value === undefined || value.trim() === "") {
-    return localDevDefaults.port;
+  if (value === undefined || value.trim() === '') {
+    return localDevDefaults.port
   }
 
-  const trimmed = value.trim();
+  const trimmed = value.trim()
   if (!/^[1-9]\d*$/.test(trimmed)) {
-    throw new Error("PORT must be an integer from 1 to 65535");
+    throw new Error('PORT must be an integer from 1 to 65535')
   }
 
-  const port = Number(trimmed);
+  const port = Number(trimmed)
   if (port > 65535) {
-    throw new Error("PORT must be an integer from 1 to 65535");
+    throw new Error('PORT must be an integer from 1 to 65535')
   }
 
-  return port;
+  return port
 }
 
 function readUrl(
@@ -53,21 +53,21 @@ function readUrl(
   name: string,
   protocols: ReadonlySet<string>,
 ): string {
-  const candidate = value === undefined ? fallback : value.trim();
-  if (candidate === "") {
-    throw new Error(`${name} must be a non-empty URL`);
+  const candidate = value === undefined ? fallback : value.trim()
+  if (candidate === '') {
+    throw new Error(`${name} must be a non-empty URL`)
   }
 
-  let parsed: URL;
+  let parsed: URL
   try {
-    parsed = new URL(candidate);
+    parsed = new URL(candidate)
   } catch {
-    throw new Error(`${name} must be a valid URL`);
+    throw new Error(`${name} must be a valid URL`)
   }
 
   if (!protocols.has(parsed.protocol)) {
-    throw new Error(`${name} must use ${[...protocols].join(" or ")}`);
+    throw new Error(`${name} must use ${[...protocols].join(' or ')}`)
   }
 
-  return candidate;
+  return candidate
 }
