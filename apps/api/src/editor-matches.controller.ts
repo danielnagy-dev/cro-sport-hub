@@ -24,6 +24,8 @@ import {
   type EditorMatchPage,
 } from '@cro-sport-hub/shared-types'
 import { EditorAuthGuard } from './auth/role.guard.js'
+import { catalogDb } from './catalog/catalog.js'
+import { listEditorMatches } from './catalog/editor-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
 
 const queryMessage =
@@ -69,7 +71,7 @@ export class EditorMatchesController {
   private async read(query: EditorMatchListQuery): Promise<EditorMatchPage> {
     const catalog = await this.openCatalog()
     try {
-      return await catalog.listEditorMatches(query)
+      return await listEditorMatches(catalogDb(catalog), query)
     } finally {
       await catalog.close()
     }

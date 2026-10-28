@@ -1,8 +1,9 @@
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { describe, expect, it } from 'vite-plus/test'
-import { openCatalog, type Catalog } from './catalog.js'
+import { openCatalog, catalogDb, type Catalog } from './catalog.js'
 import { seedCatalog } from './seed.js'
+import { listPublishedMatches } from './published-matches.js'
 import * as schema from './schema.js'
 
 const counts = {
@@ -156,7 +157,7 @@ describe('saveDraft', () => {
         message: 'That record is already stored',
       })
       expect(
-        JSON.stringify(await catalog.listPublishedMatches({ limit: 20, offset: 0 })),
+        JSON.stringify(await listPublishedMatches(catalogDb(catalog), { limit: 20, offset: 0 })),
       ).not.toContain(id)
     } finally {
       await catalog.close()
@@ -250,7 +251,9 @@ describe('saveDraft', () => {
           athleteId: 'filip-saric',
         }),
       ).toBeUndefined()
-      const listed = JSON.stringify(await catalog.listPublishedMatches({ limit: 20, offset: 0 }))
+      const listed = JSON.stringify(
+        await listPublishedMatches(catalogDb(catalog), { limit: 20, offset: 0 }),
+      )
       expect(listed).not.toContain('match-sample-final')
       expect(listed).not.toContain('match-sample-league')
     } finally {

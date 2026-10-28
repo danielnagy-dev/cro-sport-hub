@@ -6,6 +6,7 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { asc, eq } from 'drizzle-orm'
 import { type PgDatabase, type PgQueryResultHKT } from 'drizzle-orm/pg-core'
+import { readParsed } from './errors.js'
 import { UnknownSportError } from './published-matches.js'
 import * as schema from './schema.js'
 
@@ -44,44 +45,48 @@ function currentThenOlder(left: Spell, right: Spell): number {
 }
 
 export async function readPublicAthlete(db: CatalogDb, slug: string): Promise<PublicAthlete> {
-  const rows = await db
-    .select({
-      id: athletes.id,
-      slug: athletes.slug,
-      name: athletes.name,
-      sport: athletes.sportSlug,
-      country: athletes.country,
-      birthYear: athletes.birthYear,
-      position: athletes.position,
+  return readParsed(async () => {
+    const rows = await db
+      .select({
+        id: athletes.id,
+        slug: athletes.slug,
+        name: athletes.name,
+        sport: athletes.sportSlug,
+        country: athletes.country,
+        birthYear: athletes.birthYear,
+        position: athletes.position,
+      })
+      .from(athletes)
+      .where(eq(athletes.slug, slug))
+    const athlete = rows[0]
+    if (athlete === undefined) throw new UnknownAthleteError()
+    const spells = await db
+      .select({ name: teams.name, from: athleteTeams.from, to: athleteTeams.to })
+      .from(athleteTeams)
+      .innerJoin(teams, eq(teams.id, athleteTeams.teamId))
+      .where(eq(athleteTeams.athleteId, athlete.id))
+    return publicAthleteSchema.parse({
+      ...omitNulls({
+        slug: athlete.slug,
+        name: athlete.name,
+        sport: athlete.sport,
+        country: athlete.country,
+        birthYear: athlete.birthYear,
+        position: athlete.position,
+      }),
+      clubs: [...spells].sort(currentThenOlder).map((spell) => omitNulls(spell)),
     })
-    .from(athletes)
-    .where(eq(athletes.slug, slug))
-  const athlete = rows[0]
-  if (athlete === undefined) throw new UnknownAthleteError()
-  const spells = await db
-    .select({ name: teams.name, from: athleteTeams.from, to: athleteTeams.to })
-    .from(athleteTeams)
-    .innerJoin(teams, eq(teams.id, athleteTeams.teamId))
-    .where(eq(athleteTeams.athleteId, athlete.id))
-  return publicAthleteSchema.parse({
-    ...omitNulls({
-      slug: athlete.slug,
-      name: athlete.name,
-      sport: athlete.sport,
-      country: athlete.country,
-      birthYear: athlete.birthYear,
-      position: athlete.position,
-    }),
-    clubs: [...spells].sort(currentThenOlder).map((spell) => omitNulls(spell)),
   })
 }
 
 export async function listPublicAthletes(db: CatalogDb, sport: string): Promise<AthleteName[]> {
-  const sportId = await sportIdForSlug(db, sport)
-  const rows = await db
-    .select({ slug: athletes.slug, name: athletes.name })
-    .from(athletes)
-    .where(eq(athletes.sportId, sportId))
-    .orderBy(asc(athletes.name))
-  return athleteNameListSchema.parse(rows)
+  return readParsed(async () => {
+    const sportId = await sportIdForSlug(db, sport)
+    const rows = await db
+      .select({ slug: athletes.slug, name: athletes.name })
+      .from(athletes)
+      .where(eq(athletes.sportId, sportId))
+      .orderBy(asc(athletes.name))
+    return athleteNameListSchema.parse(rows)
+  })
 }

@@ -4,29 +4,24 @@ import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { z } from 'zod'
 import { saveDraft } from './drafts.js'
-import { selectAthletes, selectCompetitions, selectTeams } from './editor-lookups.js'
-import { listEditorMatches as readEditorMatches } from './editor-matches.js'
 import { bindCatalog } from './import-runs.js'
 import { rejectMatch, submitMatch } from './workflow.js'
-import {
-  CatalogError,
-  invalidRecord,
-  type Catalog,
-  type CatalogDb,
-  type CatalogErrorCode,
-} from './errors.js'
-import {
-  listPublicAthletes as queryAthletes,
-  readPublicAthlete as queryAthlete,
-} from './published-athletes.js'
-import { listPublishedMatches } from './published-matches.js'
+import { CatalogError, type Catalog, type CatalogDb, type CatalogErrorCode } from './errors.js'
 import { readRecord, writeRecord } from './records.js'
 import * as schema from './schema.js'
 import { deleteTeam, listTeams, replaceTeam } from './teams.js'
 
 const migrationDir = dirname(fileURLToPath(import.meta.url))
+
+const catalogDatabases = new WeakMap<Catalog, CatalogDb>()
+
+/** The Drizzle handle for one `openCatalog` session. */
+export function catalogDb(catalog: Catalog): CatalogDb {
+  const db = catalogDatabases.get(catalog)
+  if (db === undefined) throw new Error('The catalog handle is not from openCatalog')
+  return db
+}
 
 function migrationStatements(): string[] {
   return [
@@ -53,13 +48,6 @@ function failed(code: CatalogErrorCode, message: string, cause: unknown): Catalo
   return new CatalogError(code, message, undefined, { cause })
 }
 
-function readParsed<T>(load: () => Promise<T>): Promise<T> {
-  return load().catch((error: unknown) => {
-    if (error instanceof z.ZodError) return invalidRecord(error)
-    throw error
-  })
-}
-
 export async function openCatalog(
   db: CatalogDb,
   options?: { close?: () => Promise<void> },
@@ -81,13 +69,6 @@ export async function openCatalog(
   const catalog: Catalog = {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
-    listPublishedMatches: (query) => readParsed(() => listPublishedMatches(db, query)),
-    listEditorMatches: (query) => readParsed(() => readEditorMatches(db, query)),
-    readPublicAthlete: (slug) => readParsed(() => queryAthlete(db, slug)),
-    listPublicAthletes: (sport) => readParsed(() => queryAthletes(db, sport)),
-    listCompetitions: (sport) => readParsed(() => selectCompetitions(db, sport)),
-    listAthletes: (sport) => readParsed(() => selectAthletes(db, sport)),
-    listTeamLookups: () => readParsed(() => selectTeams(db)),
     saveDraft: (sport, body, actorId, mode) => saveDraft(db, sport, body, actorId, mode),
     submitMatch: (id) => submitMatch(db, id),
     rejectMatch: (id) => rejectMatch(db, id),
@@ -100,6 +81,7 @@ export async function openCatalog(
     },
   }
   bindCatalog(catalog, db)
+  catalogDatabases.set(catalog, db)
   return catalog
 }
 

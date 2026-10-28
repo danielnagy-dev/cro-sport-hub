@@ -9,23 +9,13 @@ import {
   teamSchema,
   tennisMatchSchema,
   tennisMatchStatsSchema,
-  type AthleteLookup,
-  type AthleteName,
   type AthleteTeam,
-  type CompetitionLookup,
-  type EditorMatchListQuery,
-  type EditorMatchPage,
   type FieldIssue,
-  type PublicAthlete,
-  type PublishedMatchPage,
   type Role,
-  type SportSlug,
   type Team,
-  type TeamLookup,
 } from '@cro-sport-hub/shared-types'
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
-import type { PublishedMatchQuery } from './published-matches.js'
 import type * as schema from './schema.js'
 
 export type CatalogUser = { id: string; role: Role }
@@ -82,13 +72,6 @@ export type Catalog = {
     kind: CatalogKind,
     key: string | AthleteTeamKey | CatalogParticipantKey,
   ): Promise<Stored | undefined>
-  listPublishedMatches(query: PublishedMatchQuery): Promise<PublishedMatchPage>
-  listEditorMatches(query: EditorMatchListQuery): Promise<EditorMatchPage>
-  readPublicAthlete(slug: string): Promise<PublicAthlete>
-  listPublicAthletes(sport: string): Promise<AthleteName[]>
-  listCompetitions(sport: SportSlug): Promise<CompetitionLookup[]>
-  listAthletes(sport: SportSlug): Promise<AthleteLookup[]>
-  listTeamLookups(): Promise<TeamLookup[]>
   saveDraft(
     sport: 'tennis' | 'football',
     body: unknown,
@@ -121,4 +104,11 @@ export function parseRecord<T>(
   const result = parser.safeParse(value)
   if (result.success) return result.data
   return invalidRecord(result.error)
+}
+
+export function readParsed<T>(load: () => Promise<T>): Promise<T> {
+  return load().catch((error: unknown) => {
+    if (error instanceof z.ZodError) return invalidRecord(error)
+    throw error
+  })
 }

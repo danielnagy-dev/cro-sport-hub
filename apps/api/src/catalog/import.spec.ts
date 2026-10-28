@@ -1,8 +1,9 @@
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { describe, expect, it } from 'vite-plus/test'
-import { openCatalog, readImportFixture, runImport, type Catalog } from './catalog.js'
+import { openCatalog, catalogDb, readImportFixture, runImport, type Catalog } from './catalog.js'
 import { seedCatalog } from './seed.js'
+import { listPublishedMatches } from './published-matches.js'
 import * as schema from './schema.js'
 
 const tiebreak = 'A 7-6 set needs the tiebreak points scored by the player who lost the set'
@@ -105,7 +106,9 @@ describe('runImport', () => {
         source: 'import',
         sourceRef: 'sample-league-md12',
       })
-      const listed = JSON.stringify(await catalog.listPublishedMatches({ limit: 20, offset: 0 }))
+      const listed = JSON.stringify(
+        await listPublishedMatches(catalogDb(catalog), { limit: 20, offset: 0 }),
+      )
       expect(listed).not.toContain('match-import-cup')
       expect(listed).not.toContain('match-import-league')
       await expectRun(catalog, readImportFixture(), 0, 0, 2)
@@ -120,7 +123,7 @@ describe('runImport', () => {
       })
       expect(await catalog.read('match', 'match-import-cup')).toMatchObject({ status: 'draft' })
       expect(
-        JSON.stringify(await catalog.listPublishedMatches({ limit: 20, offset: 0 })),
+        JSON.stringify(await listPublishedMatches(catalogDb(catalog), { limit: 20, offset: 0 })),
       ).not.toContain('match-import-cup')
     } finally {
       await catalog.close()

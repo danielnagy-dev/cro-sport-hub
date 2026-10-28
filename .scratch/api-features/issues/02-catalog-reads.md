@@ -4,7 +4,7 @@
 
 **Blocked by:** Pull requests #32, #33, #35, and #36, so the read methods those branches add are on main before this slice removes them. #29 has merged; its lookup reads are in this slice. #30 has merged; its submit and reject methods stay for af3. #35 edits `connection.ts`.
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 **Size:** 260 counted lines. The read methods and their call sites. Writes stay for af3. Recount before editing and split one read (matches, athletes, teams, editor) off before the first edit if the count would pass 400.
 
@@ -41,3 +41,7 @@ Yes. The function signatures are the ones ADR-007 sketches. `CatalogDb` stays in
 
 - `listPublishedMatches(db, query)` and the athlete read functions on PGLite. Catches a page whose order or names changed because the method wrapper was doing real work.
 - The `Catalog` type. Catches a read method left on the interface.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/40

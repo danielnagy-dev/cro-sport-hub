@@ -22,10 +22,11 @@ import {
   publishedMatchPageSchema,
   type PublishedMatchPage,
 } from '@cro-sport-hub/shared-types'
-import { type Catalog } from './catalog/catalog.js'
+import { catalogDb, type Catalog } from './catalog/catalog.js'
 import {
   UnknownSportError,
   unknownSportMessage,
+  listPublishedMatches,
   type PublishedMatchQuery,
 } from './catalog/published-matches.js'
 
@@ -97,7 +98,7 @@ export class MatchesController {
   private async readPublished(query: PublishedMatchQuery): Promise<PublishedMatchPage> {
     const catalog = await this.openCatalog()
     try {
-      return await catalog.listPublishedMatches(query)
+      return await listPublishedMatches(catalogDb(catalog), query)
     } finally {
       await catalog.close()
     }

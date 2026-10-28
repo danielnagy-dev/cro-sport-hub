@@ -26,7 +26,8 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { z } from 'zod'
 import { EditorAuthGuard } from './auth/role.guard.js'
-import type { Catalog } from './catalog/catalog.js'
+import { catalogDb, type Catalog } from './catalog/catalog.js'
+import { selectAthletes, selectCompetitions, selectTeams } from './catalog/editor-lookups.js'
 import { unknownSportMessage } from './catalog/published-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
 
@@ -68,20 +69,20 @@ export class EditorLookupsController {
   @sportLookupDocs('Competitions for one sport', competitionLookupSchema)
   competitions(@Query('sport') sport: unknown) {
     const slug = readSport(sport)
-    return this.read((catalog) => catalog.listCompetitions(slug))
+    return this.read((catalog) => selectCompetitions(catalogDb(catalog), slug))
   }
 
   @Get('athletes')
   @sportLookupDocs('Athletes for one sport', athleteLookupSchema)
   athletes(@Query('sport') sport: unknown) {
     const slug = readSport(sport)
-    return this.read((catalog) => catalog.listAthletes(slug))
+    return this.read((catalog) => selectAthletes(catalogDb(catalog), slug))
   }
 
   @Get('teams')
   @lookupDocs('Football clubs', teamLookupSchema)
   teams() {
-    return this.read((catalog) => catalog.listTeamLookups())
+    return this.read((catalog) => selectTeams(catalogDb(catalog)))
   }
 
   private async read<T>(load: (catalog: Catalog) => Promise<T>): Promise<T> {

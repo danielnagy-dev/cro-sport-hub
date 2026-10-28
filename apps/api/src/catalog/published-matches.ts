@@ -7,6 +7,7 @@ import {
 import { and, count, desc, eq, type SQL } from 'drizzle-orm'
 import { alias, type PgDatabase, type PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
+import { readParsed } from './errors.js'
 import * as schema from './schema.js'
 
 const { athletes, competitions, footballMatches, matches, sports, teams, tennisMatches } = schema
@@ -32,20 +33,22 @@ export async function listPublishedMatches(
   db: CatalogDb,
   query: PublishedMatchQuery,
 ): Promise<PublishedMatchPage> {
-  const sportId = query.sport === undefined ? undefined : await sportIdForSlug(db, query.sport)
-  const filter = publishedFilter(sportId)
-  const [counted, rows] = await Promise.all([
-    db.select({ total: count() }).from(matches).where(filter),
-    selectListedMatches(db, filter, query.limit, query.offset),
-  ])
-  return publishedMatchPageSchema.parse({
-    items: rows.map((row) => toPublished(row)),
-    limit: query.limit,
-    offset: query.offset,
-    total: z
-      .int()
-      .nonnegative()
-      .parse(Number(counted[0]?.total ?? 0)),
+  return readParsed(async () => {
+    const sportId = query.sport === undefined ? undefined : await sportIdForSlug(db, query.sport)
+    const filter = publishedFilter(sportId)
+    const [counted, rows] = await Promise.all([
+      db.select({ total: count() }).from(matches).where(filter),
+      selectListedMatches(db, filter, query.limit, query.offset),
+    ])
+    return publishedMatchPageSchema.parse({
+      items: rows.map((row) => toPublished(row)),
+      limit: query.limit,
+      offset: query.offset,
+      total: z
+        .int()
+        .nonnegative()
+        .parse(Number(counted[0]?.total ?? 0)),
+    })
   })
 }
 

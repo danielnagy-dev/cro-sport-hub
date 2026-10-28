@@ -21,8 +21,13 @@ import {
   type AthleteName,
   type PublicAthlete,
 } from '@cro-sport-hub/shared-types'
-import { type Catalog } from './catalog/catalog.js'
-import { UnknownAthleteError, unknownAthleteMessage } from './catalog/published-athletes.js'
+import { catalogDb, type Catalog } from './catalog/catalog.js'
+import {
+  listPublicAthletes,
+  readPublicAthlete,
+  UnknownAthleteError,
+  unknownAthleteMessage,
+} from './catalog/published-athletes.js'
 import { UnknownSportError, unknownSportMessage } from './catalog/published-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './matches.controller.js'
 
@@ -66,13 +71,13 @@ export class AthletesController {
     if (typeof sport !== 'string' || sport.length === 0) {
       throw new NotFoundException(unknownSportMessage)
     }
-    return this.read((catalog) => catalog.listPublicAthletes(sport))
+    return this.read((catalog) => listPublicAthletes(catalogDb(catalog), sport))
   }
 
   @Get('athletes/:slug')
   @profileDocs()
   profile(@Param('slug') slug: string): Promise<PublicAthlete> {
-    return this.read((catalog) => catalog.readPublicAthlete(slug))
+    return this.read((catalog) => readPublicAthlete(catalogDb(catalog), slug))
   }
 
   private async read<T>(load: (catalog: Catalog) => Promise<T>): Promise<T> {

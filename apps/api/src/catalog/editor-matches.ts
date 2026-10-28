@@ -8,6 +8,7 @@ import {
 import { and, count, eq, type SQL } from 'drizzle-orm'
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
+import { readParsed } from './errors.js'
 import { selectListedMatches } from './published-matches.js'
 import * as schema from './schema.js'
 
@@ -20,19 +21,21 @@ export async function listEditorMatches(
   db: CatalogDb,
   query: EditorMatchListQuery,
 ): Promise<EditorMatchPage> {
-  const filter = editorFilter(query)
-  const [counted, rows] = await Promise.all([
-    db.select({ total: count() }).from(matches).where(filter),
-    selectListedMatches(db, filter, query.limit, query.offset),
-  ])
-  return editorMatchPageSchema.parse({
-    items: rows.map((row) => toEditor(row)),
-    limit: query.limit,
-    offset: query.offset,
-    total: z
-      .int()
-      .nonnegative()
-      .parse(Number(counted[0]?.total ?? 0)),
+  return readParsed(async () => {
+    const filter = editorFilter(query)
+    const [counted, rows] = await Promise.all([
+      db.select({ total: count() }).from(matches).where(filter),
+      selectListedMatches(db, filter, query.limit, query.offset),
+    ])
+    return editorMatchPageSchema.parse({
+      items: rows.map((row) => toEditor(row)),
+      limit: query.limit,
+      offset: query.offset,
+      total: z
+        .int()
+        .nonnegative()
+        .parse(Number(counted[0]?.total ?? 0)),
+    })
   })
 }
 
