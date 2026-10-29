@@ -74,6 +74,8 @@ Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents
 
 The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `grill-me`, `writing-for-agents`, and `code-review`. Do not run `setup-matt-pocock-skills`. Do not install `implement`, `implement-spec`, `triage`, `to-spec`, `wayfinder`, `wizard`, or `pr`.
 
+Repo role skills live under `.cursor/skills/` (`architect`, `develop`, `plan`, `review`, `verify`, `fix-merge-conflicts`, `deslop`). `fix-merge-conflicts` and `deslop` are vendored from Cursor Team Kit (marketplace plugin id 677), copied 2026-10-29; each file's Source note lists adaptations.
+
 ## Docs to read before writing framework code
 
 - Angular: https://angular.dev/llms.txt and `.cursor/rules/angular-best-practices.mdc`
