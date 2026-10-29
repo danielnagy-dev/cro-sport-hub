@@ -4,7 +4,7 @@
 
 **Blocked by:** af3 (`.scratch/api-features/issues/03-catalog-writes.md`), which is the last slice editing `connection.ts` for the catalog object. #35 adds `0006_v1_import_runs.sql` and is on main by then, because af2 waits for #35.
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 160 counted lines. Replace the filename array and cover order with a test.
 

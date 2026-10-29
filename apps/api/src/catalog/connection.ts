@@ -1,5 +1,4 @@
-import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
@@ -7,6 +6,7 @@ import { Pool } from 'pg'
 import { bindCatalog } from './import-runs.js'
 import { CatalogError, type Catalog, type CatalogDb, type CatalogErrorCode } from './errors.js'
 import { readRecord, writeRecord } from './records.js'
+import { sqlMigrationStatements } from './migrations.js'
 import * as schema from './schema.js'
 
 const migrationDir = dirname(fileURLToPath(import.meta.url))
@@ -18,23 +18,6 @@ export function catalogDb(catalog: Catalog): CatalogDb {
   const db = catalogDatabases.get(catalog)
   if (db === undefined) throw new Error('The catalog handle is not from openCatalog')
   return db
-}
-
-function migrationStatements(): string[] {
-  return [
-    '0001_v1_catalog.sql',
-    '0002_v1_matches.sql',
-    '0003_v1_football.sql',
-    '0004_v1_match_sport_index.sql',
-    '0005_v1_credentials.sql',
-    '0006_v1_import_runs.sql',
-  ].flatMap((name) =>
-    readFileSync(join(migrationDir, name), 'utf8')
-      .replaceAll(/--.*$/gm, '')
-      .split(';')
-      .map((statement) => statement.trim())
-      .filter((statement) => statement.length > 0),
-  )
 }
 
 async function release(close: (() => Promise<void>) | undefined): Promise<void> {
@@ -56,7 +39,9 @@ export async function openCatalog(
     throw failed('unreachable', 'Postgres is unreachable', error)
   }
   try {
-    for (const statement of migrationStatements()) await db.execute(sql.raw(statement))
+    for (const statement of sqlMigrationStatements(migrationDir)) {
+      await db.execute(sql.raw(statement))
+    }
   } catch (error) {
     await release(options?.close)
     if (error instanceof CatalogError) throw error
