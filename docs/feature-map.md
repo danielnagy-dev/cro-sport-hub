@@ -1,6 +1,6 @@
 # Feature map
 
-What exists, who uses it, and how to reach and verify it. The entries are the area files below, and for the API one id file per feature under `docs/feature-map/api/`. The verify skill (`.cursor/skills/verify/SKILL.md`) reads this index, then the area file or the API id file.
+What exists, who uses it, and how to reach and verify it. Each area has a short area file and one id file per feature under `docs/feature-map/<area>/`. The verify skill (`.cursor/skills/verify/SKILL.md`) reads this index, then the area file when needed, then the id file for the feature.
 
 Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 
@@ -20,11 +20,11 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 
 ## Areas
 
-| Area   | File                                                         | Ids        |
-| ------ | ------------------------------------------------------------ | ---------- |
-| api    | `docs/feature-map/api.md` and `docs/feature-map/api/<id>.md` | `api.*`    |
-| ui     | `docs/feature-map/ui.md`                                     | `ui.*`     |
-| studio | `docs/feature-map/studio.md`                                 | `studio.*` |
-| web    | `docs/feature-map/web.md`                                    | `web.*`    |
+| Area   | File                                                               | Ids        |
+| ------ | ------------------------------------------------------------------ | ---------- |
+| api    | `docs/feature-map/api.md` and `docs/feature-map/api/<id>.md`       | `api.*`    |
+| ui     | `docs/feature-map/ui.md` and `docs/feature-map/ui/<id>.md`         | `ui.*`     |
+| studio | `docs/feature-map/studio.md` and `docs/feature-map/studio/<id>.md` | `studio.*` |
+| web    | `docs/feature-map/web.md` and `docs/feature-map/web/<id>.md`       | `web.*`    |
 
-A PR adds its entry to the area file it touches, not the index. For the API, add or update `docs/feature-map/api/<id>.md` and leave `docs/feature-map/api.md` alone. Studio, web, and ui still use their area files until af6.
+A PR adds or updates `docs/feature-map/<area>/<id>.md` for the feature it touches and leaves the area file alone. Do not edit this index for a new id alone.

@@ -4,7 +4,7 @@
 
 **Blocked by:** af5 (`.scratch/api-features/issues/05-api-feature-map.md`), which sets the path rule and the skill wording for the API.
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Size:** 360 counted lines. The three area files are 68, 70, and 47 lines. The split counts as deletions plus new files. Recount with `git diff --numstat`. If that would pass 400, land web first and leave studio and ui for a second slice before editing them.
 
@@ -29,9 +29,9 @@ Plan is this note. Architect is ADR-007. Develop. May run with af3 and af4. Dani
 
 ## Acceptance
 
-- [ ] Every studio, web, and ui id has `docs/feature-map/<area>/<id>.md` with the same entry points as today.
-- [ ] The three area files have no index table.
-- [ ] A ticket for a new studio screen is told to add a new id file and to leave `studio.md` alone.
+- [x] Every studio, web, and ui id has `docs/feature-map/<area>/<id>.md` with the same entry points as today.
+- [x] The three area files have no index table.
+- [x] A ticket for a new studio screen is told to add a new id file and to leave `studio.md` alone.
 
 ## Verification
 
@@ -44,3 +44,7 @@ Yes. Same path rule as af5. No CLI parser.
 ### Seams
 
 - The id file path for one studio id, one web id, and one ui id. Catches an area left as a single growing file.
+
+## Comments
+
+- https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/44

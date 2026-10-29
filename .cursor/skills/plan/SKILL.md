@@ -22,7 +22,7 @@ For one plan item, write:
 1. **Scope.** What is in, and what waits. One topic (`AGENTS.md`).
 2. **Order.** Plan, then architect if structure, shared types, or dependencies change, then develop. The coordinator applies the active phase in `docs/team.md`. Daniel squash-merges. That merge is the final gate.
 3. **Acceptance.** Observable checks, not a list of files to touch.
-4. **Verification.** Which `vp run verify:api|studio|web|ui` commands, which `--route` values, and which feature ids in `docs/feature-map/` (API ids in `docs/feature-map/api/<id>.md`; studio, web, and ui ids in their area files until af6). If nothing a user can reach changes, say `not applicable (no runtime change)`.
+4. **Verification.** Which `vp run verify:api|studio|web|ui` commands, which `--route` values, and which feature ids in `docs/feature-map/<area>/<id>.md`. If nothing a user can reach changes, say `not applicable (no runtime change)`.
 5. **Architect.** Yes or no, and why.
 6. **Seams.** Each public boundary the tests will use, and one line on what it catches. `tdd` tests only these seams.
 7. **Shared files.** Every existing path this ticket edits, sorted, or `none` when it only adds files.
@@ -39,10 +39,10 @@ Publish that note as one ticket file, in the shape `docs/agents/issue-tracker.md
 
 Before the final push, develop fetches and merges the latest `origin/main`, as `AGENTS.md` says. No rebase. No force-push.
 
-The develop PR updates the feature map when a route, endpoint, story, or user action changes; call that out here. A new API feature adds `docs/feature-map/api/<id>.md` and leaves `docs/feature-map/api.md` alone. Studio, web, and ui still add rows to their area files until af6. A PR does not edit the index `docs/feature-map.md` for a new id alone.
+The develop PR updates the feature map when a route, endpoint, story, or user action changes; call that out here. A new feature adds `docs/feature-map/<area>/<id>.md` and leaves that area's pointer file alone (`api.md`, `studio.md`, `web.md`, or `ui.md`). A PR does not edit the index `docs/feature-map.md` for a new id alone.
 
 When a decision is still open, follow `grilling`: ask Daniel in rounds, then write the settled answer into the note.
 
 When one item must become several PRs, split it into tracer-bullet vertical slices. Each slice is a narrow path through every layer it touches, verifiable on its own, and names the slices that block it. A wide mechanical refactor uses expand–contract: add the new form, migrate callers, then delete the old form. These split rules come from mattpocock `to-tickets`, which is not installed.
 
-Read `docs/team.md` and `docs/feature-map.md`, then the area file the change touches. Do not copy `AGENTS.md` into the note.
+Read `docs/team.md` and `docs/feature-map.md`, then the id file for the feature the change touches. Do not copy `AGENTS.md` into the note.
