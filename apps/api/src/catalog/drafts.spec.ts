@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { describe, expect, it } from 'vite-plus/test'
 import { openCatalog, catalogDb, type Catalog } from './catalog.js'
+import { saveDraft } from './drafts.js'
 import { seedCatalog } from './seed.js'
 import { listPublishedMatches } from './published-matches.js'
 import * as schema from './schema.js'
@@ -80,7 +81,8 @@ describe('saveDraft', () => {
       const id = 'match-draft-rally'
       const editor = 'editor-demo'
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody(id, {
             score: [
@@ -99,7 +101,8 @@ describe('saveDraft', () => {
         ],
       })
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody(id, {
             stats: [{ ...counts, athleteId: 'sample-player-a', firstServePct: 60 }],
@@ -109,10 +112,17 @@ describe('saveDraft', () => {
         ),
       ).rejects.toMatchObject({ issues: [{ message: 'Unrecognized key: "firstServePct"' }] })
       await expect(
-        catalog.saveDraft('tennis', tennisBody(id, { status: 'published' }), editor, 'create'),
+        saveDraft(
+          catalogDb(catalog),
+          'tennis',
+          tennisBody(id, { status: 'published' }),
+          editor,
+          'create',
+        ),
       ).rejects.toMatchObject({ issues: [{ message: 'Unrecognized key: "status"' }] })
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody(id, { stats: [{ ...counts, athleteId: 'sample-player-c' }] }),
           editor,
@@ -120,7 +130,8 @@ describe('saveDraft', () => {
         ),
       ).rejects.toMatchObject({ message: 'Stats belong to one of the two players' })
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody(id, {
             stats: [
@@ -135,7 +146,8 @@ describe('saveDraft', () => {
       expect(await catalog.read('match', id)).toBeUndefined()
 
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody(id, { stats: [{ ...counts, athleteId: 'sample-player-a' }] }),
           editor,
@@ -151,7 +163,7 @@ describe('saveDraft', () => {
         await catalog.read('tennisMatchStats', { matchId: id, athleteId: 'sample-player-a' }),
       ).toEqual({ matchId: id, athleteId: 'sample-player-a', ...counts })
       await expect(
-        catalog.saveDraft('tennis', tennisBody(id), editor, 'create'),
+        saveDraft(catalogDb(catalog), 'tennis', tennisBody(id), editor, 'create'),
       ).rejects.toMatchObject({
         code: 'conflict',
         message: 'That record is already stored',
@@ -169,7 +181,8 @@ describe('saveDraft', () => {
     try {
       const id = 'match-draft-kick'
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'football',
           footballBody(id, { appearances: [{ ...played, started: false, minutes: 0, goals: 1 }] }),
           'admin-demo',
@@ -180,7 +193,8 @@ describe('saveDraft', () => {
       })
       expect(await catalog.read('match', id)).toBeUndefined()
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'football',
           footballBody(id, { appearances: [played] }),
           'admin-demo',
@@ -199,7 +213,8 @@ describe('saveDraft', () => {
       })
 
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'tennis',
           tennisBody('match-sample-final', {
             date: '2026-10-18',
@@ -228,7 +243,8 @@ describe('saveDraft', () => {
       ).toBeUndefined()
 
       await expect(
-        catalog.saveDraft(
+        saveDraft(
+          catalogDb(catalog),
           'football',
           footballBody('match-sample-league', {
             date: '2026-10-19',

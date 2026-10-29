@@ -4,13 +4,10 @@ import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { saveDraft } from './drafts.js'
 import { bindCatalog } from './import-runs.js'
-import { rejectMatch, submitMatch } from './workflow.js'
 import { CatalogError, type Catalog, type CatalogDb, type CatalogErrorCode } from './errors.js'
 import { readRecord, writeRecord } from './records.js'
 import * as schema from './schema.js'
-import { deleteTeam, listTeams, replaceTeam } from './teams.js'
 
 const migrationDir = dirname(fileURLToPath(import.meta.url))
 
@@ -69,12 +66,6 @@ export async function openCatalog(
   const catalog: Catalog = {
     write: (kind, value) => writeRecord(db, kind, value),
     read: (kind, key) => readRecord(db, kind, key),
-    saveDraft: (sport, body, actorId, mode) => saveDraft(db, sport, body, actorId, mode),
-    submitMatch: (id) => submitMatch(db, id),
-    rejectMatch: (id) => rejectMatch(db, id),
-    listTeams: () => listTeams(db),
-    replaceTeam: (value) => replaceTeam(db, value),
-    deleteTeam: (id) => deleteTeam(db, id),
     close: () => {
       closing ??= options?.close?.() ?? Promise.resolve()
       return closing

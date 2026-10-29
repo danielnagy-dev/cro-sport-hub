@@ -4,7 +4,11 @@
 
 **Blocked by:** af2 (`.scratch/api-features/issues/02-catalog-reads.md`). The read slice has left `connection.ts` and `errors.ts`.
 
-**Status:** ready-for-agent
+**Status:** claimed
+
+## Comments
+
+- PR: https://cursor.com/codebase/danielnagy/cro-sport-hub/pull/43
 
 **Size:** 340 counted lines. `saveDraft` has the dense call sites. Submit and reject are already on main (#30). `runImport` takes a `Catalog` and is not a method in #35; leave it unless the merged code hung it on the interface. Recount the call sites before editing. If that count would pass 400, split `saveDraft` from the other writes before the first edit.
 

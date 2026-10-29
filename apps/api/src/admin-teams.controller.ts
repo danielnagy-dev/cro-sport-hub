@@ -16,8 +16,9 @@ import {
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { idSchema, teamSchema } from '@cro-sport-hub/shared-types'
 import { AdminAuthGuard } from './auth/role.guard.js'
-import { CatalogError, type Catalog } from './catalog/catalog.js'
+import { catalogDb, CatalogError, type Catalog } from './catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
+import { deleteTeam, listTeams, replaceTeam } from './catalog/teams.js'
 
 const idMessage = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
 
@@ -67,7 +68,7 @@ export class AdminTeamsController {
 
   @Get()
   list() {
-    return this.run((catalog) => catalog.listTeams())
+    return this.run((catalog) => listTeams(catalogDb(catalog)))
   }
 
   @Post()
@@ -83,7 +84,7 @@ export class AdminTeamsController {
   @Put(':id')
   @ApiParam({ name: 'id', description: 'Club id.' })
   update(@Param('id') id: string, @Body() body: unknown) {
-    return this.run((catalog) => catalog.replaceTeam(withId(body, id)))
+    return this.run((catalog) => replaceTeam(catalogDb(catalog), withId(body, id)))
   }
 
   @Delete(':id')
@@ -92,7 +93,7 @@ export class AdminTeamsController {
   remove(@Param('id') id: string) {
     return this.run(async (catalog) => {
       if (!idSchema.safeParse(id).success) throw new BadRequestException(idMessage)
-      await catalog.deleteTeam(id)
+      await deleteTeam(catalogDb(catalog), id)
     })
   }
 

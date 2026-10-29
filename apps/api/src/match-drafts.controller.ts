@@ -27,8 +27,9 @@ import {
 import { idSchema, sportSlugSchema } from '@cro-sport-hub/shared-types'
 import { z } from 'zod'
 import { EditorAuthGuard } from './auth/role.guard.js'
-import { CatalogError, type Catalog } from './catalog/catalog.js'
+import { catalogDb, CatalogError, type Catalog } from './catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
+import { saveDraft } from './catalog/drafts.js'
 
 const draftSavedSchema = z.strictObject({
   id: idSchema,
@@ -120,7 +121,7 @@ export class MatchDraftsController {
     if (actorId === undefined) throw new UnauthorizedException('Invalid token')
     const catalog: Catalog = await this.openCatalog()
     try {
-      return draftSavedSchema.parse(await catalog.saveDraft(sport, body, actorId, mode))
+      return draftSavedSchema.parse(await saveDraft(catalogDb(catalog), sport, body, actorId, mode))
     } catch (error) {
       throw toHttp(error)
     } finally {
