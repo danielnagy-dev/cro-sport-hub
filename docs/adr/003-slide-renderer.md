@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Plan item 28 adds the first template to `libs/slide-generator`: one football slide at 1080×1350. The round-13 handoff (interim, not final) is HTML and CSS rendered to PNG with headless Chrome. `apps/api`, `apps/studio`, `apps/web`, and `libs/ui` do not render slides. Splitting matches onto slides, and writing the PNG, are the next item. This item chooses the renderer and ships the template.
+Plan item 28 adds the first template to `libs/slide-generator`: one football slide at 1080×1350. The round-13 handoff (interim, not final) is HTML and CSS rendered to PNG with headless Chrome. Approved colour, type, and layout targets live in [`docs/design-system.md`](../design-system.md) (hero cell size still open). `apps/api`, `apps/studio`, `apps/web`, and `libs/ui` do not render slides. Splitting matches onto slides, and writing the PNG, are the next item. This item chooses the renderer and ships the template.
 
 The handoff depends on CSS the browser fit script used to measure: CSS grid, `font-stretch: 88%` on Archivo, Big Shoulders Display at weights 700, 800, and 900, `zoom` on the list, and a conic-gradient field texture. Both fonts in the handoff are variable files. There is no cover slide.
 

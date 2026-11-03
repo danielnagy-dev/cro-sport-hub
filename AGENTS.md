@@ -70,7 +70,7 @@ Vendored text that says `Call the Skill tool with X` means read and follow `.age
 
 Issue tracker: local markdown, one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. See `docs/agents/issue-tracker.md`. A ticket file, or the PR `## Summary`, is the spec.
 
-Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents/domain.md`.
+Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents/domain.md`. Football slide tokens and layout: `docs/design-system.md` (approved 2026-11-03; hero cell size still open).
 
 The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `grill-me`, `writing-for-agents`, and `code-review`. Do not run `setup-matt-pocock-skills`. Do not install `implement`, `implement-spec`, `triage`, `to-spec`, `wayfinder`, `wizard`, or `pr`.
 
