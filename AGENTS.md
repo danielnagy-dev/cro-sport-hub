@@ -17,7 +17,7 @@ Run task commands from the repository root. Library declaration emit uses the ca
 
 ## Before opening a pull request
 
-The author runs each required check once, from the repository root, and records a results table under `## Verification`. The commands are in `.cursor/skills/develop/SKILL.md`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off. `vp run typecheck` includes `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
+The author runs each required check once, from the repository root, and records a results table under `## Verification`. The commands are in `.cursor/skills/develop/SKILL.md`. GitHub Actions CI (`.github/workflows/ci.yml`) runs the same five tasks in the same order: `format-check`, `lint`, `typecheck`, `test`, and `build`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off. `vp run typecheck` includes `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
 
 ## Pull requests
 

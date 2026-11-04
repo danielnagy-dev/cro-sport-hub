@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -20,25 +20,33 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1.22.0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          cache: true
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
       - name: Format check
-        run: vp run format-check
+        run: pnpm exec vp run format-check
 
       - name: Lint
-        run: vp run lint
+        run: pnpm exec vp run lint
 
       - name: Typecheck
-        run: vp run typecheck
+        run: pnpm exec vp run typecheck
 
       - name: Test
-        run: vp run test
+        run: pnpm exec vp run test
 
       - name: Build
-        run: vp run build
+        run: pnpm exec vp run build
