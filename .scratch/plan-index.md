@@ -54,6 +54,7 @@ Dependency order is the table. 8a merged as #28, 24a as #29, 12a as #30, and 13b
 | 27c | Import log and Run now                        |      240 | 14a, 27a                 | ready-for-agent |
 | 31b | Gallery review and ZIP download               |      280 | 31a, 30d, 30e, 26a       | ready-for-agent |
 | 32  | v1 local README                               |      200 | every other ready ticket | ready-for-agent |
+| sb1 | Studio feature boundaries and import guard    |      165 | none                     | claimed         |
 
 Paths are `.scratch/<feature>/issues/<id>-<slug>.md`: `athletes` (8), `cache` (9), `matches` (12), `admin` (13), `import` (14a, 14b), `web` (18, 19, 20), `editor` (23a, 24a), `studio` (23b, 24b, 24c, 24d, 25, 26, 27, 31), `gallery` (30), `docs` (32), `api-features` (af1–af6), `format` (fmt).
 

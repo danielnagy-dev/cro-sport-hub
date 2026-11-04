@@ -9,7 +9,7 @@ import {
 } from '@ngrx/signals'
 import type { Match, Sport, SportSlug } from '@cro-sport-hub/shared-types'
 import { forkJoin, type Subscription } from 'rxjs'
-import { StudioApi } from './studio-api'
+import { StudioApi } from '../../core/studio-api'
 
 type EditorStatus = 'loading' | 'ready' | 'error'
 

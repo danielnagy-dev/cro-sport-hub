@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core'
 import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals'
 import { Router } from '@angular/router'
 import { idSchema } from '@cro-sport-hub/shared-types'
-import { AuthStore } from './auth'
+import { AuthStore } from '../../core/auth'
 
 @Component({
   selector: 'app-login',

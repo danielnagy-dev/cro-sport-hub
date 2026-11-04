@@ -4,7 +4,13 @@ import { Component } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
 import { expect } from 'vite-plus/test'
-import { authInterceptor, editorGuard, loginPath, TOKEN_STORE, type TokenStore } from './auth'
+import {
+  authInterceptor,
+  editorGuard,
+  loginPath,
+  TOKEN_STORE,
+  type TokenStore,
+} from '../../core/auth'
 import { LoginPage } from './login'
 
 @Component({ selector: 'home-probe', template: 'home-page' })

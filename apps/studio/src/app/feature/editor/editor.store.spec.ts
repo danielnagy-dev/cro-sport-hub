@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing'
 import { Subject, throwError } from 'rxjs'
 import { EditorStore } from './editor.store'
-import { StudioApi } from './studio-api'
-import { stubMatches, stubSports } from './stub-api'
+import { StudioApi } from '../../core/studio-api'
+import { stubMatches, stubSports } from '../../core/stub-api'
 
 describe('EditorStore', () => {
   it('loads matches for the selected sport', () => {

@@ -5,7 +5,7 @@ pnpm workspace run by Vite+ (`vp` 1.4.0). Node.js is pinned in `.node-version` (
 ## Layout
 
 - `apps/web` — Next.js App Router (`next build`, `next dev`)
-- `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands.
+- `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands. Feature folders and import rules: `.cursor/skills/architect/SKILL.md` (**Studio app**).
 - `apps/api` — NestJS (`nest build`)
 - `libs/shared-types`, `libs/ui` — workspace packages. `libs/slide-generator` renders the round-13 football template (ADR-003).
 

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing'
 import { of } from 'rxjs'
 import { appConfig } from './app.config'
-import { Shell } from './shell'
-import { StudioApi } from './studio-api'
-import { stubSports } from './stub-api'
+import { Shell } from './feature/editor/shell'
+import { StudioApi } from './core/studio-api'
+import { stubSports } from './core/stub-api'
 
 describe('Shell', () => {
   beforeEach(async () => {

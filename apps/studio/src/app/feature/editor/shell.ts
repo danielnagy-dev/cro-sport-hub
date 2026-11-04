@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core'
-import { AuthStore } from './auth'
+import { AuthStore } from '../../core/auth'
 import { EditorStore } from './editor.store'
 
 @Component({

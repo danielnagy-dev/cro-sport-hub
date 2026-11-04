@@ -26,7 +26,16 @@ Run when the change adds or moves a module, adds a dependency, changes a public 
 - `libs/ui` is the React component library. Studio (Angular) does not import it.
 - `libs/slide-generator` stays separate from `libs/ui`.
 - Workspace dependencies use the `workspace:*` protocol. TypeScript versions stay split as ADR-001 describes. Do not point `apps/studio` or `apps/api` at the catalog compiler.
+- `apps/studio` feature folders follow the lazy `feature/` layout and import-direction rules in this skill (see **Studio app**).
 - Run `vp` from the repository root.
 - A new runtime dependency needs an ADR. Dev-only tooling can stay in the PR description when it does not change the runtime graph.
 
 Visual design belongs to the designer outside this repo. Deploy and CI topology wait for DevOps.
+
+## Studio app
+
+- Each business flow is a lazy-loaded folder under `apps/studio/src/app/feature/`.
+- Sibling features do not import each other; share by moving code to `core/` or `libs/shared-types`.
+- Import direction is one way: `feature/` → `core/` or `layout/` → workspace libs, never the reverse.
+- Do not add a `feature-shared` folder; extract one level up instead.
+- `vp run guards` runs `tools/guards/boundaries.ts` on the studio tree.
