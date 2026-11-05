@@ -115,6 +115,29 @@ export const footballMatches = pgTable('football_matches', {
   awayGoals: integer('away_goals').notNull(),
 })
 
+export const galleries = pgTable('galleries', {
+  id: text('id').primaryKey(),
+  status: text('status').notNull(),
+  createdBy: text('created_by').notNull(),
+  reviewedBy: text('reviewed_by'),
+  publishedAt: text('published_at'),
+  createdAt: text('created_at').notNull(),
+})
+
+export const gallerySlides = pgTable(
+  'gallery_slides',
+  {
+    galleryId: text('gallery_id')
+      .notNull()
+      .references(() => galleries.id),
+    slideIndex: integer('slide_index').notNull(),
+    matchId: text('match_id').notNull(),
+    caption: text('caption'),
+    payload: jsonb('payload').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.galleryId, table.slideIndex] })],
+)
+
 export const importRuns = pgTable('import_runs', {
   id: text('id').primaryKey(),
   startedAt: text('started_at').notNull(),

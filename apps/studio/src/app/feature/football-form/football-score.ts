@@ -19,6 +19,17 @@ import {
 } from './draft-body'
 
 type LookupState = 'loading' | 'ready' | 'error'
+type FieldKey = keyof FootballFormModel
+
+const fields = [
+  ['competitionId', 'competition', 'Competition', 'Choose a competition', 'select'],
+  ['date', 'match-date', 'Date', '', 'date'],
+  ['round', 'round', 'Round', '', 'text'],
+  ['homeTeamId', 'home-club', 'Home club', 'Choose the home club', 'select'],
+  ['awayTeamId', 'away-club', 'Away club', 'Choose the away club', 'select'],
+  ['homeGoals', 'home-goals', 'Home goals', '', 'number'],
+  ['awayGoals', 'away-goals', 'Away goals', '', 'number'],
+] as const
 
 @Component({
   selector: 'app-football-score',
@@ -28,6 +39,7 @@ type LookupState = 'loading' | 'ready' | 'error'
 export class FootballScorePage {
   private readonly api = inject(StudioApi)
   protected readonly auth = inject(AuthStore)
+  protected readonly fieldConfigs = fields
 
   protected readonly model = signal<FootballFormModel>(initialFootballFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])
@@ -45,20 +57,24 @@ export class FootballScorePage {
   protected readonly footballForm = form(this.model, (path) => {
     const locked = () => this.savedId() !== undefined
     const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
-    const bindIssue = (fieldPath: typeof path.competitionId, field: string) => {
+    const bind = (fieldPath: (typeof path)[FieldKey], field: FieldKey) => {
       validate(fieldPath, () => {
         const issue = issueFor(field)
         return issue === undefined ? undefined : { kind: 'schema', message: issue.message }
       })
       disabled(fieldPath, { when: locked })
     }
-    bindIssue(path.competitionId, 'competitionId')
-    bindIssue(path.date, 'date')
-    bindIssue(path.round, 'round')
-    bindIssue(path.homeTeamId, 'homeTeamId')
-    bindIssue(path.awayTeamId, 'awayTeamId')
-    bindIssue(path.homeGoals, 'homeGoals')
-    bindIssue(path.awayGoals, 'awayGoals')
+    for (const key of [
+      'competitionId',
+      'date',
+      'round',
+      'homeTeamId',
+      'awayTeamId',
+      'homeGoals',
+      'awayGoals',
+    ] as const) {
+      bind(path[key], key)
+    }
     readonly(path.date, { when: locked })
     readonly(path.round, { when: locked })
   })
@@ -67,15 +83,24 @@ export class FootballScorePage {
     void this.loadLookups()
   }
 
-  protected fieldMessage(field: keyof FootballFormModel): string | undefined {
-    if (!this.submitAttempted()) {
-      const tree = this.footballForm[field]()
-      if (!tree.touched()) return undefined
-    }
+  protected formField(key: FieldKey) {
+    return this.footballForm[key]
+  }
+
+  protected lookupRows(key: FieldKey) {
+    return key === 'competitionId' ? this.competitions() : this.teams()
+  }
+
+  protected optionLabel(key: FieldKey, row: CompetitionLookup | TeamLookup): string {
+    return key === 'competitionId' && 'season' in row ? `${row.name} (${row.season})` : row.name
+  }
+
+  protected fieldMessage(field: FieldKey): string | undefined {
+    if (!this.submitAttempted() && !this.footballForm[field]().touched()) return undefined
     return this.draftIssues().find((issue) => issue.path[0] === field)?.message
   }
 
-  protected showErrors(field: keyof FootballFormModel): boolean {
+  protected showErrors(field: FieldKey): boolean {
     return this.fieldMessage(field) !== undefined
   }
 
@@ -84,7 +109,8 @@ export class FootballScorePage {
     if (this.savedId() !== undefined) return
     this.submitAttempted.set(true)
     this.footballForm().markAsTouched()
-    void this.send()
+    if (this.draftIssues().length > 0) return
+    void this.save()
   }
 
   private async loadLookups(): Promise<void> {
@@ -102,33 +128,21 @@ export class FootballScorePage {
     }
   }
 
-  private async send(): Promise<void> {
+  private async save(): Promise<void> {
     if (this.footballForm().submitting()) return
-    if (this.draftIssues().length > 0) return
     this.saveError.set(undefined)
-    const accepted = await submit(this.footballForm, {
+    await submit(this.footballForm, {
       action: async () => {
-        const body = buildFootballDraftBody(this.model(), this.draftMatchId)
         try {
-          const saved = await firstValueFrom(this.api.createFootballDraft(body))
+          const saved = await firstValueFrom(
+            this.api.createFootballDraft(buildFootballDraftBody(this.model(), this.draftMatchId)),
+          )
           this.savedId.set(saved.id)
-          return undefined
         } catch {
           this.saveError.set('The football match could not be saved.')
-          return undefined
         }
+        return undefined
       },
-    })
-    if (!accepted || this.saveError() !== undefined) this.focusProblem()
-  }
-
-  private focusProblem(): void {
-    setTimeout(() => {
-      const alert = document.getElementById('football-save-error')
-      const invalid = document.querySelector('[aria-invalid="true"]')
-      ;(alert ?? invalid)?.scrollIntoView({ block: 'nearest' })
-      if (alert instanceof HTMLElement) alert.focus()
-      else if (invalid instanceof HTMLElement) invalid.focus()
     })
   }
 }

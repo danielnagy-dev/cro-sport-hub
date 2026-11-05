@@ -14,7 +14,6 @@
     </div>
     }
   </header>
-
   <main id="content" class="tennis-main" tabindex="-1">
     <h2>New football match</h2>
     @if (lookupStatus() === "loading") {
@@ -27,120 +26,36 @@
     <p id="football-save-error" class="field-error" role="alert" tabindex="-1">{{ message }}</p>
     }
     <form class="tennis-form" (submit)="onSubmit($event)" novalidate>
+      @for (field of fieldConfigs; track field[0]) {
       <div class="tennis-field">
-        <label for="competition">Competition</label>
+        <label [for]="field[1]">{{ field[2] }}</label>
+        @if (field[4] === 'select') {
         <select
-          id="competition"
-          [formField]="footballForm.competitionId"
-          [attr.aria-invalid]="showErrors('competitionId') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('competitionId') ? 'competition-error' : null"
+          [id]="field[1]"
+          [formField]="formField(field[0])"
+          [attr.aria-invalid]="showErrors(field[0]) ? 'true' : 'false'"
+          [attr.aria-describedby]="showErrors(field[0]) ? field[1] + '-error' : null"
         >
-          <option value="">Choose a competition</option>
-          @for (row of competitions(); track row.id) {
-          <option [value]="row.id">{{ row.name }} ({{ row.season }})</option>
+          <option value="">{{ field[3] }}</option>
+          @for (row of lookupRows(field[0]); track row.id) {
+          <option [value]="row.id">{{ optionLabel(field[0], row) }}</option>
           }
         </select>
-        @if (showErrors("competitionId")) {
-        <p id="competition-error" class="field-error">{{ fieldMessage("competitionId") }}</p>
-        }
-      </div>
-
-      <div class="tennis-field">
-        <label for="match-date">Date</label>
+        } @else {
         <input
-          id="match-date"
-          type="date"
-          [formField]="footballForm.date"
-          [attr.aria-invalid]="showErrors('date') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('date') ? 'date-error' : null"
+          [id]="field[1]"
+          [type]="field[4]"
+          [autocomplete]="field[4] === 'text' ? 'off' : null"
+          [attr.inputmode]="field[4] === 'number' ? 'numeric' : null"
+          [formField]="formField(field[0])"
+          [attr.aria-invalid]="showErrors(field[0]) ? 'true' : 'false'"
+          [attr.aria-describedby]="showErrors(field[0]) ? field[1] + '-error' : null"
         />
-        @if (showErrors("date")) {
-        <p id="date-error" class="field-error">{{ fieldMessage("date") }}</p>
+        } @if (showErrors(field[0])) {
+        <p [id]="field[1] + '-error'" class="field-error">{{ fieldMessage(field[0]) }}</p>
         }
       </div>
-
-      <div class="tennis-field">
-        <label for="round">Round</label>
-        <input
-          id="round"
-          type="text"
-          autocomplete="off"
-          [formField]="footballForm.round"
-          [attr.aria-invalid]="showErrors('round') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('round') ? 'round-error' : null"
-        />
-        @if (showErrors("round")) {
-        <p id="round-error" class="field-error">{{ fieldMessage("round") }}</p>
-        }
-      </div>
-
-      <div class="tennis-field">
-        <label for="home-club">Home club</label>
-        <select
-          id="home-club"
-          [formField]="footballForm.homeTeamId"
-          [attr.aria-invalid]="showErrors('homeTeamId') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('homeTeamId') ? 'home-club-error' : null"
-        >
-          <option value="">Choose the home club</option>
-          @for (row of teams(); track row.id) {
-          <option [value]="row.id">{{ row.name }}</option>
-          }
-        </select>
-        @if (showErrors("homeTeamId")) {
-        <p id="home-club-error" class="field-error">{{ fieldMessage("homeTeamId") }}</p>
-        }
-      </div>
-
-      <div class="tennis-field">
-        <label for="away-club">Away club</label>
-        <select
-          id="away-club"
-          [formField]="footballForm.awayTeamId"
-          [attr.aria-invalid]="showErrors('awayTeamId') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('awayTeamId') ? 'away-club-error' : null"
-        >
-          <option value="">Choose the away club</option>
-          @for (row of teams(); track row.id) {
-          <option [value]="row.id">{{ row.name }}</option>
-          }
-        </select>
-        @if (showErrors("awayTeamId")) {
-        <p id="away-club-error" class="field-error">{{ fieldMessage("awayTeamId") }}</p>
-        }
-      </div>
-
-      <div class="tennis-field">
-        <label for="home-goals">Home goals</label>
-        <input
-          id="home-goals"
-          type="number"
-          inputmode="numeric"
-          [formField]="footballForm.homeGoals"
-          [attr.aria-invalid]="showErrors('homeGoals') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('homeGoals') ? 'home-goals-error' : null"
-        />
-        @if (showErrors("homeGoals")) {
-        <p id="home-goals-error" class="field-error">{{ fieldMessage("homeGoals") }}</p>
-        }
-      </div>
-
-      <div class="tennis-field">
-        <label for="away-goals">Away goals</label>
-        <input
-          id="away-goals"
-          type="number"
-          inputmode="numeric"
-          [formField]="footballForm.awayGoals"
-          [attr.aria-invalid]="showErrors('awayGoals') ? 'true' : 'false'"
-          [attr.aria-describedby]="showErrors('awayGoals') ? 'away-goals-error' : null"
-        />
-        @if (showErrors("awayGoals")) {
-        <p id="away-goals-error" class="field-error">{{ fieldMessage("awayGoals") }}</p>
-        }
-      </div>
-
-      @if (footballForm().submitting()) {
+      } @if (footballForm().submitting()) {
       <p role="status">Saving draft.</p>
       }
       <button type="submit" [disabled]="savedId() !== undefined">Save draft</button>

@@ -40,7 +40,7 @@ export type MatchSubmitted = { id: string; status: 'review' }
 function parseFootballDraftSaved(body: unknown): FootballDraftSaved {
   if (typeof body !== 'object' || body === null) throw new Error('Invalid football draft response')
   const row = body as Record<string, unknown>
-  if (typeof row['id'] !== 'string' || row['status'] !== 'draft' || row['sport'] !== 'football') {
+  if (row['status'] !== 'draft' || row['sport'] !== 'football' || typeof row['id'] !== 'string') {
     throw new Error('Invalid football draft response')
   }
   return { id: row['id'], status: 'draft', sport: 'football' }
