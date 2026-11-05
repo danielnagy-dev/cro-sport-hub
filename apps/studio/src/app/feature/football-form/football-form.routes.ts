@@ -7,4 +7,9 @@ export const footballFormRoutes: Routes = [
     loadComponent: () => import('./football-score').then((module) => module.FootballScorePage),
     canActivate: [editorGuard],
   },
+  {
+    path: 'matches/:id/football',
+    loadComponent: () => import('./football-score').then((module) => module.FootballScorePage),
+    canActivate: [editorGuard],
+  },
 ]

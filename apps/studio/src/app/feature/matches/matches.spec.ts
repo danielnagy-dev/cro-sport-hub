@@ -29,6 +29,16 @@ const quarterMatch: EditorMatch = {
   source: 'manual',
   label: 'Sample Player C vs Sample Player D',
 }
+const leagueMatch: EditorMatch = {
+  id: 'match-sample-league',
+  sport: 'football',
+  competition: 'Sample League',
+  date: '2026-10-19',
+  round: 'Matchday 8',
+  status: 'published',
+  source: 'manual',
+  label: 'Sample Home vs Sample Away',
+}
 
 function page(items: readonly EditorMatch[], total?: number): EditorMatchPage {
   return { items: [...items], limit: 20, offset: 0, total: total ?? items.length }
@@ -118,6 +128,17 @@ describe('MatchesPage', () => {
     expect(root.textContent).toContain('Sample Player C vs Sample Player D')
     const link = root.querySelector('a[href="/matches/match-sample-qf/tennis"]')
     expect(link?.textContent).toContain('Sample Player C vs Sample Player D')
+  })
+
+  it('links football rows to the edit route', async () => {
+    const fixture = TestBed.createComponent(MatchesPage)
+    fixture.detectChanges()
+    const http = TestBed.inject(HttpTestingController)
+    const root = fixture.nativeElement as HTMLElement
+    http.expectOne(editorMatchesPath).flush(page([leagueMatch]))
+    await fixture.whenStable()
+    const link = root.querySelector('a[href="/matches/match-sample-league/football"]')
+    expect(link?.textContent).toContain('Sample Home vs Sample Away')
   })
 })
 

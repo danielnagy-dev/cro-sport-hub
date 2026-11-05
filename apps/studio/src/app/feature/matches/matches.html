@@ -65,6 +65,8 @@
           <td>
             @if (row.sport === 'tennis') {
             <a [routerLink]="['/matches', row.id, 'tennis']">{{ row.label }}</a>
+            } @else if (row.sport === 'football') {
+            <a [routerLink]="['/matches', row.id, 'football']">{{ row.label }}</a>
             } @else { {{ row.label }} }
           </td>
           <td>{{ row.sport }}</td>
