@@ -83,19 +83,36 @@ function clickSubmitForReview(root: HTMLElement): void {
     ?.click()
 }
 
+const lookupFlush = {
+  competitions: [{ id: 'comp-sample-league', name: 'Sample League', season: '2026' }],
+  teams: [
+    { id: 'club-sample-home', name: 'Sample Home' },
+    { id: 'club-sample-away', name: 'Sample Away' },
+  ],
+  athletes: [{ id: 'athlete-karlo', name: 'Karlo Brkic' }],
+}
+
+const karloAppearance = {
+  athleteId: 'karlo-brkic',
+  teamId: 'club-sample-home',
+  started: true,
+  minutes: 90,
+  goals: 2,
+  assists: 0,
+  yellowCards: 0,
+  redCard: false,
+}
+
+function flushLookups(http: HttpTestingController): void {
+  http.expectOne(`${editorCompetitionsPath}?sport=football`).flush(lookupFlush.competitions)
+  http.expectOne(editorTeamsPath).flush(lookupFlush.teams)
+  http.expectOne(`${editorAthletesPath}?sport=football`).flush(lookupFlush.athletes)
+}
+
 async function boot(http: HttpTestingController) {
   const fixture = TestBed.createComponent(FootballScorePage)
   fixture.detectChanges()
-  http
-    .expectOne(`${editorCompetitionsPath}?sport=football`)
-    .flush([{ id: 'comp-sample-league', name: 'Sample League', season: '2026' }])
-  http.expectOne(editorTeamsPath).flush([
-    { id: 'club-sample-home', name: 'Sample Home' },
-    { id: 'club-sample-away', name: 'Sample Away' },
-  ])
-  http
-    .expectOne(`${editorAthletesPath}?sport=football`)
-    .flush([{ id: 'athlete-karlo', name: 'Karlo Brkic' }])
+  flushLookups(http)
   await fixture.whenStable()
   fixture.detectChanges()
   await fixture.whenStable()
@@ -114,6 +131,7 @@ describe('FootballScorePage', () => {
             component: FootballScorePage,
             canActivate: [editorGuard],
           },
+          { path: 'matches/:id/football', component: FootballScorePage },
         ]),
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
@@ -237,55 +255,16 @@ describe('FootballScorePage', () => {
     expect(root.textContent).toContain('Status: review')
     expect(root.textContent).not.toContain('Submit for review')
   })
-})
 
-describe('FootballScorePage edit', () => {
-  afterEach(() => {
-    TestBed.inject(HttpTestingController).verify()
-    TestBed.resetTestingModule()
-  })
-
-  async function bootEdit(id: string): Promise<{
-    harness: RouterTestingHarness
-    http: HttpTestingController
-    root: HTMLElement
-    draftRequest: ReturnType<HttpTestingController['expectOne']>
-  }> {
-    await TestBed.configureTestingModule({
-      imports: [FootballScorePage],
-      providers: [
-        provideRouter([{ path: 'matches/:id/football', component: FootballScorePage }]),
-        provideHttpClient(withInterceptors([authInterceptor])),
-        provideHttpClientTesting(),
-        { provide: TOKEN_STORE, useValue: tokenStore() },
-      ],
-    }).compileComponents()
-    TestBed.inject(TOKEN_STORE).write(editorBearer())
+  it('loads the draft and saves with PUT without status', async () => {
     const harness = await RouterTestingHarness.create()
-    await harness.navigateByUrl(`/matches/${id}/football`)
+    await harness.navigateByUrl('/matches/match-sample-league/football')
     await harness.fixture.whenStable()
     const http = TestBed.inject(HttpTestingController)
     const root = harness.routeNativeElement as HTMLElement
-    http
-      .expectOne(`${editorCompetitionsPath}?sport=football`)
-      .flush([{ id: 'comp-sample-league', name: 'Sample League', season: '2026' }])
-    http.expectOne(editorTeamsPath).flush([
-      { id: 'club-sample-home', name: 'Sample Home' },
-      { id: 'club-sample-away', name: 'Sample Away' },
-    ])
-    http
-      .expectOne(`${editorAthletesPath}?sport=football`)
-      .flush([{ id: 'athlete-karlo', name: 'Karlo Brkic' }])
+    flushLookups(http)
     await harness.fixture.whenStable()
-    const draftRequest = http.expectOne((req) =>
-      req.url.includes(`/api/editor/matches/football/${id}`),
-    )
-    return { harness, http, root, draftRequest }
-  }
-
-  it('loads the draft, fills the form, and saves with PUT without status', async () => {
-    const { harness, http, root, draftRequest } = await bootEdit('match-sample-league')
-    draftRequest.flush({
+    http.expectOne('/api/editor/matches/football/match-sample-league').flush({
       id: 'match-sample-league',
       competitionId: 'comp-sample-league',
       date: '2026-10-19',
@@ -294,18 +273,7 @@ describe('FootballScorePage edit', () => {
       awayTeamId: 'club-sample-away',
       homeGoals: 2,
       awayGoals: 1,
-      appearances: [
-        {
-          athleteId: 'karlo-brkic',
-          teamId: 'club-sample-home',
-          started: true,
-          minutes: 90,
-          goals: 2,
-          assists: 0,
-          yellowCards: 0,
-          redCard: false,
-        },
-      ],
+      appearances: [karloAppearance],
       status: 'draft',
     })
     await harness.fixture.whenStable()
@@ -316,25 +284,21 @@ describe('FootballScorePage edit', () => {
     const request = http.expectOne(footballDraftUpdatePath('match-sample-league'))
     const body = request.request.body as Record<string, unknown>
     expect(body['status']).toBeUndefined()
-    expect(body['appearances']).toEqual([
-      {
-        athleteId: 'karlo-brkic',
-        teamId: 'club-sample-home',
-        started: true,
-        minutes: 90,
-        goals: 2,
-        assists: 0,
-        yellowCards: 0,
-        redCard: false,
-      },
-    ])
+    expect(body['appearances']).toEqual([karloAppearance])
     request.flush({ id: 'match-sample-league', status: 'draft', sport: 'football' })
-    await harness.fixture.whenStable()
   })
 
   it('shows Match not found for an unknown id', async () => {
-    const { harness, root, draftRequest } = await bootEdit('match-missing')
-    draftRequest.flush(null, { status: 404, statusText: 'Not Found' })
+    const harness = await RouterTestingHarness.create()
+    await harness.navigateByUrl('/matches/match-missing/football')
+    await harness.fixture.whenStable()
+    const http = TestBed.inject(HttpTestingController)
+    const root = harness.routeNativeElement as HTMLElement
+    flushLookups(http)
+    await harness.fixture.whenStable()
+    http
+      .expectOne('/api/editor/matches/football/match-missing')
+      .flush(null, { status: 404, statusText: 'Not Found' })
     await harness.fixture.whenStable()
     harness.detectChanges()
     expect(root.textContent).toContain('Match not found')
