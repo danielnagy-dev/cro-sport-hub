@@ -14,6 +14,10 @@ import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { EditorLookupsController } from './editor-lookups.controller.js'
 import { MatchDraftsController } from './match-drafts.controller.js'
 import { MatchesController } from './matches.controller.js'
+import {
+  createInMemoryPublicReadCacheClient,
+  PUBLIC_READ_CACHE,
+} from './public-read-cache/client.js'
 import { setupOpenApi } from './openapi.js'
 
 const secret = 'test-jwt-secret-that-is-at-least-32'
@@ -50,6 +54,7 @@ describe('editor lookup routes', () => {
       ],
       providers: [
         { provide: CATALOG_OPENER, useValue: open },
+        { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
         { provide: CREDENTIAL_STORE, useValue: () => Promise.reject(new Error('unused')) },
         { provide: JWT_SECRET, useValue: secret },
         EditorAuthGuard,

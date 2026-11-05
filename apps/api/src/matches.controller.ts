@@ -30,6 +30,8 @@ import {
   listPublishedMatches,
   type PublishedMatchQuery,
 } from './catalog/published-matches.js'
+import { PUBLIC_READ_CACHE, type PublicReadCacheClient } from './public-read-cache/client.js'
+import { readCachedPublishedMatches } from './public-read-cache/published-matches.js'
 
 const pageMessage = 'limit is 1 to 50 and offset is 0 or greater'
 
@@ -69,7 +71,10 @@ function sportDocs() {
 @ApiTags('matches')
 @Controller('api')
 export class MatchesController {
-  constructor(@Inject(CATALOG_OPENER) private readonly openCatalog: CatalogOpener) {}
+  constructor(
+    @Inject(CATALOG_OPENER) private readonly openCatalog: CatalogOpener,
+    @Inject(PUBLIC_READ_CACHE) private readonly cache: PublicReadCacheClient,
+  ) {}
 
   @Get('matches')
   @pageDocs('Latest published matches')
@@ -91,7 +96,11 @@ export class MatchesController {
     }
   }
 
-  private async readPublished(query: PublishedMatchQuery): Promise<PublishedMatchPage> {
+  private readPublished(query: PublishedMatchQuery): Promise<PublishedMatchPage> {
+    return readCachedPublishedMatches(this.cache, () => this.loadPublished(query), query)
+  }
+
+  private async loadPublished(query: PublishedMatchQuery): Promise<PublishedMatchPage> {
     const catalog = await this.openCatalog()
     try {
       return await listPublishedMatches(catalogDb(catalog), query)
