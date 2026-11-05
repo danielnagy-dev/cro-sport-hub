@@ -3,13 +3,13 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing'
 import { expect } from 'vite-plus/test'
 import { firstValueFrom } from 'rxjs'
+import { CatalogApi, matchesPath, sportsPath } from './catalog-api'
 import { editorAthletesPath, editorCompetitionsPath, EditorLookupsApi } from './editor-lookups-api'
 import { stubApiInterceptor, stubMatches, stubSports } from './stub-api'
-import { matchesPath, sportsPath, StudioApi } from './studio-api'
 import { TennisApi, tennisDraftsPath } from './tennis-api'
 
-describe('StudioApi', () => {
-  let api: StudioApi
+describe('studio clients', () => {
+  let catalog: CatalogApi
   let lookups: EditorLookupsApi
   let tennis: TennisApi
   let http: HttpTestingController
@@ -18,7 +18,7 @@ describe('StudioApi', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     })
-    api = TestBed.inject(StudioApi)
+    catalog = TestBed.inject(CatalogApi)
     lookups = TestBed.inject(EditorLookupsApi)
     tennis = TestBed.inject(TennisApi)
     http = TestBed.inject(HttpTestingController)
@@ -29,8 +29,8 @@ describe('StudioApi', () => {
   })
 
   it('parses sports and matches', async () => {
-    const sports = firstValueFrom(api.sports())
-    const matches = firstValueFrom(api.matches())
+    const sports = firstValueFrom(catalog.sports())
+    const matches = firstValueFrom(catalog.matches())
     http.expectOne(sportsPath).flush(stubSports)
     http.expectOne(matchesPath).flush(stubMatches)
 
@@ -39,7 +39,7 @@ describe('StudioApi', () => {
   })
 
   it('rejects a match list that fails the schema', async () => {
-    const matches = firstValueFrom(api.matches())
+    const matches = firstValueFrom(catalog.matches())
     http.expectOne(matchesPath).flush([{ id: 'bad' }])
 
     await expect(matches).rejects.toThrow(
@@ -101,10 +101,10 @@ describe('stubApiInterceptor', () => {
   })
 
   it('answers the read endpoints with the stub', async () => {
-    const api = TestBed.inject(StudioApi)
+    const catalog = TestBed.inject(CatalogApi)
 
-    await expect(firstValueFrom(api.sports())).resolves.toEqual(stubSports)
-    await expect(firstValueFrom(api.matches())).resolves.toEqual(stubMatches)
+    await expect(firstValueFrom(catalog.sports())).resolves.toEqual(stubSports)
+    await expect(firstValueFrom(catalog.matches())).resolves.toEqual(stubMatches)
   })
 
   it('leaves every other request for the backend', () => {

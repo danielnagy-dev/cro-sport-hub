@@ -6,7 +6,7 @@ import { expect } from 'vite-plus/test'
 import type { EditorMatch, GalleryView } from '@cro-sport-hub/shared-types'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { galleriesPath, galleryPath, gallerySlidePath } from '../../core/gallery-api'
-import { editorMatchesPath } from '../../core/studio-api'
+import { editorMatchesPath } from '../../core/matches-api'
 import { GalleryNewPage } from './gallery-new'
 import { GalleryPage } from './gallery'
 

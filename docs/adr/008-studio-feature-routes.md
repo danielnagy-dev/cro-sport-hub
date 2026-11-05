@@ -20,4 +20,4 @@ Rejected: leaving the route object in the shell (that is the file every ticket e
 
 ## Consequences
 
-Two features whose shell entries are not adjacent can merge. Two entries inserted on the same line cannot. The shell stays a shared file with one line per feature. A feature's HTTP client is `core/<name>-api.ts`. Shared reads remain on `studio-api.ts`. Import direction is unchanged (`.cursor/skills/architect/SKILL.md`, **Studio app**).
+Two features whose shell entries are not adjacent can merge. Two entries inserted on the same line cannot. The shell stays a shared file with one line per feature. HTTP clients are per-feature files (`docs/adr/009-studio-feature-clients.md`). Import direction is unchanged (`.cursor/skills/architect/SKILL.md`, **Studio app**).
