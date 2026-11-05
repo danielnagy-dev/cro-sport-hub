@@ -40,4 +40,5 @@ No. The draft body is plan 11. The lookups are 24a. The form does not add a sche
 
 ## Comments
 
-- https://github.com/danielnagy-dev/cro-sport-hub/pull/46
+- Part 1 (logic): https://github.com/danielnagy-dev/cro-sport-hub/pull/47
+- Part 2 (form UI): https://github.com/danielnagy-dev/cro-sport-hub/pull/46
