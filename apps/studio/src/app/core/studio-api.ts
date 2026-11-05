@@ -25,7 +25,12 @@ export const editorCompetitionsPath = '/api/editor/competitions'
 export const editorAthletesPath = '/api/editor/athletes'
 export const tennisDraftsPath = '/api/matches/tennis'
 
+export function matchSubmitPath(id: string): string {
+  return `/api/matches/${id}/submit`
+}
+
 export type TennisDraftSaved = { id: string; status: 'draft'; sport: 'tennis' }
+export type MatchSubmitted = { id: string; status: 'review' }
 
 function parseTennisDraftSaved(body: unknown): TennisDraftSaved {
   if (typeof body !== 'object' || body === null) throw new Error('Invalid tennis draft response')
@@ -34,6 +39,15 @@ function parseTennisDraftSaved(body: unknown): TennisDraftSaved {
     throw new Error('Invalid tennis draft response')
   }
   return { id: row['id'], status: 'draft', sport: 'tennis' }
+}
+
+function parseMatchSubmitted(body: unknown): MatchSubmitted {
+  if (typeof body !== 'object' || body === null) throw new Error('Invalid submit response')
+  const row = body as Record<string, unknown>
+  if (typeof row['id'] !== 'string' || row['status'] !== 'review') {
+    throw new Error('Invalid submit response')
+  }
+  return { id: row['id'], status: 'review' }
 }
 
 export type EditorMatchFilters = {
@@ -86,5 +100,11 @@ export class StudioApi {
     return this.http
       .post(tennisDraftsPath, body)
       .pipe(map((response) => parseTennisDraftSaved(response)))
+  }
+
+  submitMatch(id: string): Observable<MatchSubmitted> {
+    return this.http
+      .post(matchSubmitPath(id), null)
+      .pipe(map((response) => parseMatchSubmitted(response)))
   }
 }
