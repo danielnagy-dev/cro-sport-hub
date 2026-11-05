@@ -1,0 +1,5 @@
+#!/bin/sh
+# git does not run pre-commit for a merge commit. This is the format check on that path.
+set -e
+root=$(git rev-parse --show-toplevel)
+exec "$root/.githooks/format-check"
