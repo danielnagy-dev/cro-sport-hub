@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { assertBoundarySelfTest, studioBoundaryFailures } from './boundaries.ts'
+import { assertModuleConstantSelfTest, moduleConstantFailures } from './module-constants.ts'
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 
@@ -52,6 +53,7 @@ function assertSelfTest(): void {
   }
   assertVendoredSkillProbe()
   assertBoundarySelfTest()
+  assertModuleConstantSelfTest()
   const missed = uncovered('tsc -p tools/verify/tsconfig.json', [
     'tools/verify/tsconfig.json',
     'tools/guards/tsconfig.json',
@@ -397,6 +399,7 @@ function main(): number {
     ...typecheckFailures(),
     ...vendoredSkillFailures(),
     ...studioBoundaryFailures(),
+    ...moduleConstantFailures(),
   ]
   console.log(`commits scanned: ${commits.label}`)
   console.log(prBody.note)

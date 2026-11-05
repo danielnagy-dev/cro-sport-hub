@@ -2,8 +2,8 @@ import { eq } from 'drizzle-orm'
 import { CatalogError, type CatalogDb } from './errors.js'
 import { matches } from './schema.js'
 
-const submitConflict = 'Only a draft can be submitted'
-const rejectConflict = 'Only a match in review can be rejected'
+const SUBMIT_CONFLICT = 'Only a draft can be submitted'
+const REJECT_CONFLICT = 'Only a match in review can be rejected'
 
 async function move(
   db: CatalogDb,
@@ -38,7 +38,7 @@ export async function submitMatch(
   db: CatalogDb,
   id: string,
 ): Promise<{ id: string; status: 'review' }> {
-  await move(db, id, 'draft', 'review', submitConflict, false)
+  await move(db, id, 'draft', 'review', SUBMIT_CONFLICT, false)
   return { id, status: 'review' }
 }
 
@@ -47,6 +47,6 @@ export async function rejectMatch(
   db: CatalogDb,
   id: string,
 ): Promise<{ id: string; status: 'draft' }> {
-  await move(db, id, 'review', 'draft', rejectConflict, true)
+  await move(db, id, 'review', 'draft', REJECT_CONFLICT, true)
   return { id, status: 'draft' }
 }

@@ -11,7 +11,7 @@ export type AppearancesTableProps = {
   rows: readonly AppearanceLine[]
 }
 
-const headers = [
+const HEADERS = [
   'Date',
   'Competition',
   'Round',
@@ -47,7 +47,7 @@ export function AppearancesTable({ athleteName, rows }: AppearancesTableProps) {
         <caption>{athleteName} appearances</caption>
         <thead>
           <tr>
-            {headers.map((header) => (
+            {HEADERS.map((header) => (
               <th key={header} scope="col">
                 {header}
               </th>

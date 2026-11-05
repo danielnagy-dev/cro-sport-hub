@@ -21,7 +21,7 @@ import {
 type LookupState = 'loading' | 'ready' | 'error'
 type FieldKey = keyof FootballFormModel
 
-const fields = [
+const FIELDS = [
   ['competitionId', 'competition', 'Competition', 'Choose a competition', 'select'],
   ['date', 'match-date', 'Date', '', 'date'],
   ['round', 'round', 'Round', '', 'text'],
@@ -39,7 +39,7 @@ const fields = [
 export class FootballScorePage {
   private readonly api = inject(StudioApi)
   protected readonly auth = inject(AuthStore)
-  protected readonly fieldConfigs = fields
+  protected readonly fieldConfigs = FIELDS
 
   protected readonly model = signal<FootballFormModel>(initialFootballFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])

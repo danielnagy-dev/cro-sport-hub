@@ -5,7 +5,7 @@ export type TennisStatsProps = {
   stats: TennisStatCounts
 }
 
-const statRows = [
+const STAT_ROWS = [
   ['First serve', 'firstServePct'],
   ['First-serve points won', 'firstServePointsWonPct'],
   ['Second-serve points won', 'secondServePointsWonPct'],
@@ -35,7 +35,7 @@ export function TennisStats({ player, stats }: TennisStatsProps) {
           </tr>
         </thead>
         <tbody>
-          {statRows.map(([label, key]) => (
+          {STAT_ROWS.map(([label, key]) => (
             <tr key={key}>
               <th scope="row">{label}</th>
               <td>{formatPercentage(percentages[key])}</td>

@@ -37,9 +37,9 @@ Do not add a status list to this file.
 
 ## Starting work
 
-Before editing, comment on the issue and set `status:claimed` (color `FBCA04`). Remove `status:ready-for-agent` when it is present.
+Read the issue (`gh issue view <number> --repo danielnagy-dev/cro-sport-hub`). The pull request body contains `Closes #N` for that issue; that link is the claim. Agents do not comment on the issue or set `status:claimed` (the agent token lacks issue write access).
 
-The pull request body contains `Closes #N` for that issue. The Plan item section names the same number. An issue with no pull request yet stays open. Agents do not merge. Daniel squash-merges. That merge is the final gate.
+The Plan item section names the same number. An issue with no pull request yet stays open. Agents do not merge. Daniel squash-merges. That merge is the final gate.
 
 Before the final push, fetch and merge the latest `origin/main` as `AGENTS.md` describes.
 

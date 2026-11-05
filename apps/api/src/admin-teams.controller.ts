@@ -20,10 +20,10 @@ import { catalogDb, CatalogError, type Catalog } from './catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { deleteTeam, listTeams, replaceTeam } from './catalog/teams.js'
 
-const idMessage = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
+const ID_MESSAGE = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
 
 function withId(body: unknown, id: string): unknown {
-  if (!idSchema.safeParse(id).success) throw new BadRequestException(idMessage)
+  if (!idSchema.safeParse(id).success) throw new BadRequestException(ID_MESSAGE)
   if (typeof body !== 'object' || body === null || Array.isArray(body)) return { id }
   if ('id' in body && body.id !== id) {
     throw new BadRequestException('The team id is the one in the path')
@@ -35,7 +35,7 @@ function bodyId(body: unknown): string {
   if (typeof body === 'object' && body !== null && 'id' in body && typeof body.id === 'string') {
     return body.id
   }
-  throw new BadRequestException(idMessage)
+  throw new BadRequestException(ID_MESSAGE)
 }
 
 function catalogCause(error: unknown): unknown {
@@ -92,7 +92,7 @@ export class AdminTeamsController {
   @ApiParam({ name: 'id', description: 'Club id.' })
   remove(@Param('id') id: string) {
     return this.run(async (catalog) => {
-      if (!idSchema.safeParse(id).success) throw new BadRequestException(idMessage)
+      if (!idSchema.safeParse(id).success) throw new BadRequestException(ID_MESSAGE)
       await deleteTeam(catalogDb(catalog), id)
     })
   }

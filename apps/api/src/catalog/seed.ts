@@ -9,23 +9,23 @@ import type { AthleteTeamKey, Catalog, CatalogParticipantKey, CatalogWriteKind }
 type SeedKey = string | AthleteTeamKey | CatalogParticipantKey
 type SeedRow = { kind: CatalogWriteKind; key: SeedKey; value: unknown }
 
-const editor = { id: 'editor-demo', role: 'editor' as const }
-const admin = { id: 'admin-demo', role: 'admin' as const }
+const EDITOR = { id: 'editor-demo', role: 'editor' as const } as const
+const ADMIN = { id: 'admin-demo', role: 'admin' as const } as const
 
-const cup = {
+const CUP = {
   id: 'comp-sample-cup',
   sportId: 'sport-tennis',
   name: 'Sample Cup',
   season: '2026',
   level: 'international' as const,
-}
-const league = {
+} as const
+const LEAGUE = {
   id: 'comp-sample-league',
   sportId: 'sport-football',
   name: 'Sample League',
   season: '2026/27',
   level: 'domestic' as const,
-}
+} as const
 
 function club(id: string, slug: string, name: string, shortName: string) {
   return { id, sportId: 'sport-football', slug, name, shortName, country: 'HR' }
@@ -74,13 +74,13 @@ const spells = [
 const finalMatch = {
   id: 'match-sample-final',
   sportId: 'sport-tennis',
-  competitionId: cup.id,
+  competitionId: CUP.id,
   date: '2026-10-18',
   round: 'Final',
   status: 'published' as const,
   source: 'manual' as const,
-  createdBy: editor.id,
-  reviewedBy: admin.id,
+  createdBy: EDITOR.id,
+  reviewedBy: ADMIN.id,
   publishedAt: '2026-10-18T18:00:00+00:00',
 }
 const finalDetail = {
@@ -132,12 +132,12 @@ const statsB = {
 const quarterfinal = {
   id: 'match-sample-qf',
   sportId: 'sport-tennis',
-  competitionId: cup.id,
+  competitionId: CUP.id,
   date: '2026-10-16',
   round: 'QF',
   status: 'draft' as const,
   source: 'manual' as const,
-  createdBy: editor.id,
+  createdBy: EDITOR.id,
 }
 const retiredDetail = {
   matchId: quarterfinal.id,
@@ -155,13 +155,13 @@ const retiredDetail = {
 const leagueMatch = {
   id: 'match-sample-league',
   sportId: 'sport-football',
-  competitionId: league.id,
+  competitionId: LEAGUE.id,
   date: '2026-10-19',
   round: 'Matchday 8',
   status: 'published' as const,
   source: 'manual' as const,
-  createdBy: editor.id,
-  reviewedBy: admin.id,
+  createdBy: EDITOR.id,
+  reviewedBy: ADMIN.id,
   publishedAt: '2026-10-19T20:00:00+00:00',
 }
 const scoreline = {
@@ -212,10 +212,10 @@ function byId(kind: CatalogWriteKind, value: { id: string }): SeedRow {
 }
 
 export const seedRows: readonly SeedRow[] = [
-  byId('user', editor),
-  byId('user', admin),
-  byId('competition', cup),
-  byId('competition', league),
+  byId('user', EDITOR),
+  byId('user', ADMIN),
+  byId('competition', CUP),
+  byId('competition', LEAGUE),
   byId('team', home),
   byId('team', away),
   byId('team', town),
