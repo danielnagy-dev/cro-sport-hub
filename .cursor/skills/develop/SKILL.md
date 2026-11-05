@@ -20,7 +20,7 @@ Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and
 - Stay inside the plan. A drive-by refactor is another PR.
 - For behaviour in `apps/api` and `libs/*`, follow `tdd`: red, then green, only at the seams in the plan. For a bug or a regression, follow `diagnosing-bugs`. When the interface shape is in question, read `codebase-design`. Do not follow `implement` or `implement-spec`.
 - Shared schemas go in `libs/shared-types`, using the architect's signatures.
-- English. Seed and test data only. No secrets or real personal data (`AGENTS.md`).
+- English. Seed and test data only. No secrets or real personal data (`CODING_STANDARDS.md`).
 - Linux and macOS both have to run the change. See `.cursor/rules/lessons.mdc`.
 
 ## Proof
