@@ -1,3 +1,4 @@
+import { timestampSchema } from '@cro-sport-hub/shared-types'
 import { type AddressInfo } from 'node:net'
 import { PGlite } from '@electric-sql/pglite'
 import { Test } from '@nestjs/testing'
@@ -12,17 +13,20 @@ import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
 import { MatchDraftsController } from './match-drafts.controller.js'
 import { MatchWorkflowController } from './match-workflow.controller.js'
+import { AthletesController } from './athletes.controller.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { MatchesController } from './matches.controller.js'
 import {
   createInMemoryPublicReadCacheClient,
   PUBLIC_READ_CACHE,
 } from './public-read-cache/client.js'
+import { publishedAthleteProfileCacheKey } from './public-read-cache/published-athletes.js'
+import { publishedMatchesCacheKey } from './public-read-cache/published-matches.js'
 import { setupOpenApi } from './openapi.js'
 
 const secret = 'test-jwt-secret-that-is-at-least-32'
 
-function tennisBody(id: string) {
+function tennisBody(id: string, overrides: Record<string, unknown> = {}) {
   return {
     id,
     competitionId: 'comp-sample-cup',
@@ -37,6 +41,7 @@ function tennisBody(id: string) {
       [6, 3],
     ],
     retired: false,
+    ...overrides,
   }
 }
 
@@ -56,10 +61,12 @@ function footballBody(id: string) {
 describe('match draft and review routes', () => {
   let close: (() => Promise<void>) | undefined
   let catalogDb: CatalogDb | undefined
+  let cache: ReturnType<typeof createInMemoryPublicReadCacheClient> | undefined
   afterEach(async () => {
     await close?.()
     close = undefined
     catalogDb = undefined
+    cache = undefined
   })
 
   async function bearer(role: string, sub = 'editor-demo'): Promise<string> {
@@ -94,11 +101,17 @@ describe('match draft and review routes', () => {
     const seeded = await open()
     await seedCatalog(seeded)
     await seeded.close()
+    cache = createInMemoryPublicReadCacheClient()
     const moduleRef = await Test.createTestingModule({
-      controllers: [MatchDraftsController, MatchWorkflowController, MatchesController],
+      controllers: [
+        MatchDraftsController,
+        MatchWorkflowController,
+        MatchesController,
+        AthletesController,
+      ],
       providers: [
         { provide: CATALOG_OPENER, useValue: open },
-        { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
+        { provide: PUBLIC_READ_CACHE, useValue: cache },
         { provide: JWT_SECRET, useValue: secret },
         EditorAuthGuard,
         AdminAuthGuard,
@@ -268,5 +281,96 @@ describe('match draft and review routes', () => {
     expect(paths['/api/matches'].get.security).toBeUndefined()
     expect(paths['/api/matches/{id}/submit'].post.security).toEqual([{ bearer: [] }])
     expect(paths['/api/matches/{id}/reject'].post.security).toEqual([{ bearer: [] }])
+  }, 20_000)
+
+  it('publishes a review, lists it publicly, and clears warm cache keys', async () => {
+    const port = await start()
+    const quarterfinal = 'match-sample-qf'
+    const publish = `/api/matches/${quarterfinal}/publish`
+    const submit = `/api/matches/${quarterfinal}/submit`
+    const editor = await bearer('editor')
+    const admin = await bearer('admin', 'admin-demo')
+    const matchKey = publishedMatchesCacheKey({ limit: 20, offset: 0 })
+    const athleteKey = publishedAthleteProfileCacheKey('sample-player-a')
+
+    expect(await send(port, 'POST', publish)).toMatchObject({
+      status: 401,
+      body: { message: 'Invalid token' },
+    })
+    expect(await send(port, 'POST', publish, undefined, editor)).toMatchObject({
+      status: 403,
+      body: { message: 'Forbidden' },
+    })
+    expect(await send(port, 'POST', publish, undefined, admin)).toMatchObject({
+      status: 409,
+      body: { message: 'Only a match in review can be published' },
+    })
+
+    expect(await send(port, 'POST', submit, undefined, editor)).toMatchObject({
+      status: 200,
+      body: { id: quarterfinal, status: 'review' },
+    })
+
+    expect((await send(port, 'GET', '/api/matches')).status).toBe(200)
+    expect((await send(port, 'GET', '/api/athletes/sample-player-a')).status).toBe(200)
+    if (cache === undefined) throw new Error('Expected the test cache')
+    expect(cache.entries.has(matchKey)).toBe(true)
+    expect(cache.entries.has(athleteKey)).toBe(true)
+
+    expect(await send(port, 'POST', publish, undefined, admin)).toMatchObject({
+      status: 200,
+      body: { id: quarterfinal, status: 'published' },
+    })
+    const published = await stored(quarterfinal)
+    expect(published).toMatchObject({ status: 'published', reviewedBy: 'admin-demo' })
+    if (published === undefined || !('publishedAt' in published)) {
+      throw new Error('Expected a published match row')
+    }
+    expect(timestampSchema.safeParse(published.publishedAt).success).toBe(true)
+    expect(cache.entries.has(matchKey)).toBe(false)
+    expect(cache.entries.has(athleteKey)).toBe(false)
+    expect(JSON.stringify((await send(port, 'GET', '/api/matches')).body)).toContain(quarterfinal)
+
+    expect(
+      await send(port, 'POST', '/api/matches/match-missing/publish', undefined, admin),
+    ).toMatchObject({ status: 404, body: { message: 'Unknown match' } })
+
+    const docs = await send(port, 'GET', '/docs-json')
+    expect(docs.body.paths['/api/matches/{id}/publish'].post.security).toEqual([{ bearer: [] }])
+  }, 20_000)
+
+  it('saveDraft on a published match clears warm public cache keys', async () => {
+    const port = await start()
+    const id = 'match-sample-final'
+    const editor = await bearer('editor')
+    const matchKey = publishedMatchesCacheKey({ limit: 20, offset: 0 })
+    const athleteKey = publishedAthleteProfileCacheKey('sample-player-a')
+
+    expect((await send(port, 'GET', '/api/matches')).status).toBe(200)
+    expect((await send(port, 'GET', '/api/athletes/sample-player-a')).status).toBe(200)
+    if (cache === undefined) throw new Error('Expected the test cache')
+    expect(cache.entries.has(matchKey)).toBe(true)
+    expect(cache.entries.has(athleteKey)).toBe(true)
+
+    expect(
+      await send(
+        port,
+        'PUT',
+        `/api/matches/tennis/${id}`,
+        tennisBody(id, {
+          date: '2026-10-18',
+          round: 'Final',
+          score: [
+            [6, 2],
+            [6, 1],
+          ],
+        }),
+        editor,
+      ),
+    ).toMatchObject({ status: 200, body: { id, status: 'draft', sport: 'tennis' } })
+    expect(await stored(id)).toMatchObject({ status: 'draft' })
+    expect(cache.entries.has(matchKey)).toBe(false)
+    expect(cache.entries.has(athleteKey)).toBe(false)
+    expect(JSON.stringify((await send(port, 'GET', '/api/matches')).body)).not.toContain(id)
   }, 20_000)
 })
