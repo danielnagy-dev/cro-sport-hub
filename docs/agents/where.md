@@ -14,7 +14,7 @@ Redis cache for public reads: `apps/api/src/public-read-cache/`. SQL and Drizzle
 
 ## Studio
 
-A screen is `apps/studio/src/app/feature/<name>/` (component, template, spec). Its routes are `feature/<name>/<name>.routes.ts` (`docs/adr/008-studio-feature-routes.md`). `apps/studio/src/app/app.routes.ts` is the shell: one `loadChildren` per feature, in folder order, and the `**` redirect. A new feature adds that routes file and one shell entry. Do not add a `loadComponent` to the shell, and do not add a routes file before the screen has a path. HTTP calls are methods on `apps/studio/src/app/core/studio-api.ts` (spec in the same folder). Import direction: `.cursor/skills/architect/SKILL.md` (**Studio app**).
+A screen is `apps/studio/src/app/feature/<name>/` (component, template, spec). Its routes are `feature/<name>/<name>.routes.ts` (`docs/adr/008-studio-feature-routes.md`). `apps/studio/src/app/app.routes.ts` is the shell: one `loadChildren` per feature, in folder order, and the `**` redirect. A new feature adds that routes file and one shell entry. Do not add a `loadComponent` to the shell, and do not add a routes file before the screen has a path. A feature's HTTP calls are `apps/studio/src/app/core/<name>-api.ts`. `core/studio-http.ts` is the shared request helper. Reads that several screens already share stay on `core/studio-api.ts`. A new screen adds its own client file and does not add a method to `studio-api.ts`. The client spec is `core/studio-api.spec.ts`. Import direction: `.cursor/skills/architect/SKILL.md` (**Studio app**).
 
 The home list is the stub `apps/studio/src/app/core/stub-api.ts`. `/matches` and the score forms call the API.
 

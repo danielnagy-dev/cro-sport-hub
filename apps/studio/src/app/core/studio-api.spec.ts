@@ -3,18 +3,15 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing'
 import { expect } from 'vite-plus/test'
 import { firstValueFrom } from 'rxjs'
+import { editorAthletesPath, editorCompetitionsPath, EditorLookupsApi } from './editor-lookups-api'
 import { stubApiInterceptor, stubMatches, stubSports } from './stub-api'
-import {
-  editorAthletesPath,
-  editorCompetitionsPath,
-  matchesPath,
-  sportsPath,
-  StudioApi,
-  tennisDraftsPath,
-} from './studio-api'
+import { matchesPath, sportsPath, StudioApi } from './studio-api'
+import { TennisApi, tennisDraftsPath } from './tennis-api'
 
 describe('StudioApi', () => {
   let api: StudioApi
+  let lookups: EditorLookupsApi
+  let tennis: TennisApi
   let http: HttpTestingController
 
   beforeEach(() => {
@@ -22,6 +19,8 @@ describe('StudioApi', () => {
       providers: [provideHttpClient(), provideHttpClientTesting()],
     })
     api = TestBed.inject(StudioApi)
+    lookups = TestBed.inject(EditorLookupsApi)
+    tennis = TestBed.inject(TennisApi)
     http = TestBed.inject(HttpTestingController)
   })
 
@@ -49,8 +48,8 @@ describe('StudioApi', () => {
   })
 
   it('parses editor lookups and a tennis draft save response', async () => {
-    const competitions = firstValueFrom(api.editorCompetitions('tennis'))
-    const athletes = firstValueFrom(api.editorAthletes('tennis'))
+    const competitions = firstValueFrom(lookups.editorCompetitions('tennis'))
+    const athletes = firstValueFrom(lookups.editorAthletes('tennis'))
     http
       .expectOne(`${editorCompetitionsPath}?sport=tennis`)
       .flush([{ id: 'comp-sample-cup', name: 'Sample Cup', season: '2026' }])
@@ -63,7 +62,7 @@ describe('StudioApi', () => {
     await expect(athletes).resolves.toEqual([{ id: 'sample-player-a', name: 'Sample Player A' }])
 
     const saved = firstValueFrom(
-      api.createTennisDraft({
+      tennis.createTennisDraft({
         id: 'match-new',
         competitionId: 'comp-sample-cup',
         date: '2026-10-20',
@@ -83,7 +82,7 @@ describe('StudioApi', () => {
   })
 
   it('rejects a tennis draft response that fails the schema', async () => {
-    const saved = firstValueFrom(api.createTennisDraft({ id: 'match-new' }))
+    const saved = firstValueFrom(tennis.createTennisDraft({ id: 'match-new' }))
     http
       .expectOne(tennisDraftsPath)
       .flush({ id: 'match-new', status: 'published', sport: 'tennis' })

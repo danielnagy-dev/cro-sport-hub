@@ -63,7 +63,7 @@ A check cannot see these, so they stay written rules:
 - Whether a token estimate or a line estimate is honest (`.cursor/skills/plan/SKILL.md`).
 - Dead prose in markdown. A linter cannot tell a stale sentence from a live rule.
 - An agent merging a pull request (`docs/team.md`).
-- The shell route list is one `loadChildren` entry per studio feature, in folder order, in `apps/studio/src/app/app.routes.ts`. Paths live in `apps/studio/src/app/feature/<name>/<name>.routes.ts` (`docs/adr/008-studio-feature-routes.md`). Two features that insert beside each other in that list still share the shell. Client methods are still one class in `apps/studio/src/app/core/studio-api.ts`. API features are separate files (`docs/adr/007-api-feature-files.md`).
+- The shell route list is one `loadChildren` entry per studio feature, in folder order, in `apps/studio/src/app/app.routes.ts`. Paths live in `apps/studio/src/app/feature/<name>/<name>.routes.ts` (`docs/adr/008-studio-feature-routes.md`). Two features that insert beside each other in that list still share the shell. A studio feature's HTTP client is `apps/studio/src/app/core/<name>-api.ts`. Do not add a new screen's methods to `studio-api.ts`. API features are separate files (`docs/adr/007-api-feature-files.md`).
 
 ## Before writing framework code
 

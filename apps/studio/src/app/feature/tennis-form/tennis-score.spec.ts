@@ -8,13 +8,9 @@ import { expect } from 'vite-plus/test'
 import type { WritableSignal } from '@angular/core'
 import type { AthleteLookup, CompetitionLookup } from '@cro-sport-hub/shared-types'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
-import {
-  editorAthletesPath,
-  editorCompetitionsPath,
-  matchSubmitPath,
-  tennisDraftUpdatePath,
-  tennisDraftsPath,
-} from '../../core/studio-api'
+import { editorAthletesPath, editorCompetitionsPath } from '../../core/editor-lookups-api'
+import { matchSubmitPath } from '../../core/match-submit-api'
+import { tennisDraftsPath, tennisDraftUpdatePath } from '../../core/tennis-api'
 import type { TennisFormModel } from './draft-body'
 import { TennisScorePage } from './tennis-score'
 
