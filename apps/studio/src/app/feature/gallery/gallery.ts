@@ -1,8 +1,9 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core'
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import type { GalleryView } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
+import { AuthStore } from '../../core/auth'
 import { GalleryApi } from '../../core/gallery-api'
 import { GalleryShell } from './gallery-shell'
 
@@ -10,6 +11,15 @@ function captionsFromGallery(gallery: GalleryView): Record<number, string> {
   const captions: Record<number, string> = {}
   for (const slide of gallery.slides) captions[slide.index] = slide.caption
   return captions
+}
+
+function readConflictMessage(error: HttpErrorResponse, fallback: string): string {
+  const body: unknown = error.error
+  if (typeof body === 'object' && body !== null && 'message' in body) {
+    const message = body.message
+    if (typeof message === 'string') return message
+  }
+  return fallback
 }
 
 @Component({
@@ -20,11 +30,31 @@ function captionsFromGallery(gallery: GalleryView): Record<number, string> {
       @if (loadStatus() === 'loading') {
         <p role="status">Loading gallery.</p>
       } @else if (loadStatus() === 'not-found') {
-        <p role="alert">Unknown gallery.</p>
+        <p role="alert">Gallery not found</p>
       } @else if (loadStatus() === 'error') {
         <p role="alert">The gallery could not be loaded.</p>
       } @else if (gallery(); as gallery) {
         <h2>Gallery {{ gallery.id }}</h2>
+        <p role="status">Status: {{ gallery.status }}</p>
+        @if (showAdminActions()) {
+          <div>
+            <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>
+            <button type="button" [disabled]="actionPending()" (click)="onPublish()">
+              Publish
+            </button>
+          </div>
+        }
+        @if (showDownload()) {
+          <button type="button" [disabled]="downloadPending()" (click)="onDownload()">
+            Download
+          </button>
+        }
+        @if (actionError(); as message) {
+          <p role="alert">{{ message }}</p>
+        }
+        @if (downloadError(); as message) {
+          <p role="alert">{{ message }}</p>
+        }
         @for (slide of gallery.slides; track slide.index) {
           <section>
             <h3>Slide {{ slide.index + 1 }}</h3>
@@ -58,12 +88,24 @@ export class GalleryPage implements OnDestroy {
   private pending: Subscription | undefined
   private readonly galleryId = this.route.snapshot.paramMap.get('id') ?? ''
 
+  protected readonly auth = inject(AuthStore)
   protected readonly gallery = signal<GalleryView | null>(null)
   protected readonly captions = signal<Record<number, string>>({})
   protected readonly previewUrls = signal<Record<number, string>>({})
   protected readonly loadStatus = signal<'loading' | 'ready' | 'not-found' | 'error'>('loading')
   protected readonly saveErrorIndex = signal<number | null>(null)
   protected readonly previewErrorIndex = signal<number | null>(null)
+  protected readonly actionError = signal<string | undefined>(undefined)
+  protected readonly downloadError = signal<string | undefined>(undefined)
+  protected readonly actionPending = signal(false)
+  protected readonly downloadPending = signal(false)
+
+  protected readonly showAdminActions = computed(() => {
+    const session = this.auth.session()
+    return session?.role === 'admin' && this.gallery()?.status === 'review'
+  })
+
+  protected readonly showDownload = computed(() => this.gallery()?.status === 'published')
 
   constructor() {
     if (this.galleryId.length === 0) {
@@ -139,6 +181,79 @@ export class GalleryPage implements OnDestroy {
 
   protected previewUrlFor(index: number): string | undefined {
     return this.previewUrls()[index]
+  }
+
+  protected onReject(): void {
+    if (!this.showAdminActions() || this.actionPending()) return
+    this.actionError.set(undefined)
+    this.actionPending.set(true)
+    this.pending?.unsubscribe()
+    this.pending = this.api.rejectGallery(this.galleryId).subscribe({
+      next: (saved) => {
+        this.patchGalleryStatus(saved.status)
+        this.actionPending.set(false)
+      },
+      error: (error: unknown) => this.onActionError(error, 'reject'),
+    })
+  }
+
+  protected onPublish(): void {
+    if (!this.showAdminActions() || this.actionPending()) return
+    this.actionError.set(undefined)
+    this.actionPending.set(true)
+    this.pending?.unsubscribe()
+    this.pending = this.api.publishGallery(this.galleryId).subscribe({
+      next: (saved) => {
+        this.patchGalleryStatus(saved.status)
+        this.actionPending.set(false)
+      },
+      error: (error: unknown) => this.onActionError(error, 'publish'),
+    })
+  }
+
+  protected onDownload(): void {
+    if (!this.showDownload() || this.downloadPending()) return
+    this.downloadError.set(undefined)
+    this.downloadPending.set(true)
+    this.pending?.unsubscribe()
+    this.pending = this.api.downloadGalleryZip(this.galleryId).subscribe({
+      next: (blob) => {
+        this.downloadPending.set(false)
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+        anchor.href = url
+        anchor.download = `${this.galleryId}.zip`
+        anchor.click()
+        URL.revokeObjectURL(url)
+      },
+      error: () => {
+        this.downloadPending.set(false)
+        this.downloadError.set('The gallery could not be downloaded.')
+      },
+    })
+  }
+
+  private patchGalleryStatus(status: GalleryView['status']): void {
+    const current = this.gallery()
+    if (current === null) return
+    this.gallery.set({ ...current, status })
+  }
+
+  private onActionError(error: unknown, kind: 'reject' | 'publish'): void {
+    this.actionPending.set(false)
+    if (error instanceof HttpErrorResponse && error.status === 409) {
+      const fallback =
+        kind === 'publish'
+          ? 'Only a gallery in review can be published'
+          : 'Only a gallery in review can be rejected'
+      this.actionError.set(readConflictMessage(error, fallback))
+      return
+    }
+    this.actionError.set(
+      kind === 'publish'
+        ? 'The gallery could not be published.'
+        : 'The gallery could not be rejected.',
+    )
   }
 
   private revokePreview(index: number): void {

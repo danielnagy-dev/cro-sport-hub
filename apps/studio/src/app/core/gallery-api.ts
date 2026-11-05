@@ -18,6 +18,39 @@ export function gallerySlidePath(id: string, index: number): string {
   return `${galleriesPath}/${id}/slides/${index}`
 }
 
+export function galleryRejectPath(id: string): string {
+  return `${galleryPath(id)}/reject`
+}
+
+export function galleryPublishPath(id: string): string {
+  return `${galleryPath(id)}/publish`
+}
+
+export function galleryDownloadPath(id: string): string {
+  return `${galleryPath(id)}/download`
+}
+
+export type GalleryRejected = { id: string; status: 'draft' }
+export type GalleryPublished = { id: string; status: 'published' }
+
+function parseGalleryRejected(body: unknown): GalleryRejected {
+  if (typeof body !== 'object' || body === null) throw new Error('Invalid reject response')
+  const row = body as Record<string, unknown>
+  if (typeof row['id'] !== 'string' || row['status'] !== 'draft') {
+    throw new Error('Invalid reject response')
+  }
+  return { id: row['id'], status: 'draft' }
+}
+
+function parseGalleryPublished(body: unknown): GalleryPublished {
+  if (typeof body !== 'object' || body === null) throw new Error('Invalid publish response')
+  const row = body as Record<string, unknown>
+  if (typeof row['id'] !== 'string' || row['status'] !== 'published') {
+    throw new Error('Invalid publish response')
+  }
+  return { id: row['id'], status: 'published' }
+}
+
 @Injectable({ providedIn: 'root' })
 export class GalleryApi {
   private readonly http = inject(StudioHttp)
@@ -44,5 +77,17 @@ export class GalleryApi {
 
   fetchGallerySlidePng(id: string, index: number): Observable<Blob> {
     return this.http.getBlob(`${gallerySlidePath(id, index)}.png`)
+  }
+
+  rejectGallery(id: string): Observable<GalleryRejected> {
+    return this.http.post(galleryRejectPath(id), null, parseGalleryRejected)
+  }
+
+  publishGallery(id: string): Observable<GalleryPublished> {
+    return this.http.post(galleryPublishPath(id), null, parseGalleryPublished)
+  }
+
+  downloadGalleryZip(id: string): Observable<Blob> {
+    return this.http.getBlob(galleryDownloadPath(id))
   }
 }
