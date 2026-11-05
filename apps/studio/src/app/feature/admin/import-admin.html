@@ -7,8 +7,7 @@
       <a routerLink="/">Home</a>
       <a routerLink="/matches">Matches</a>
       @if (auth.session()?.role === 'admin') {
-      <a routerLink="/admin/competitions">Competitions</a>
-      <a routerLink="/admin/import" aria-current="page">Import</a>
+      <a routerLink="/admin/teams">Admin</a>
       }
     </nav>
     @if (auth.session(); as session) {
@@ -19,6 +18,11 @@
     }
   </header>
   <main id="content" class="admin-import-main" tabindex="-1">
+    <nav class="admin-section-nav" aria-label="Admin sections">
+      <a routerLink="/admin/competitions">Competitions</a>
+      <a routerLink="/admin/teams">Teams</a>
+      <a routerLink="/admin/import" aria-current="page">Import</a>
+    </nav>
     <h2>Import log</h2>
     <p>Runs use the server fixture. There is no file upload or schedule control on this page.</p>
     <button type="button" [disabled]="runBusy()" (click)="onRunNow()">Run now</button>
