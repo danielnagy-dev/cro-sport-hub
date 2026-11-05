@@ -11,5 +11,4 @@ alwaysApply: false
 - Unit tests use Vitest through `vp test`, except `apps/studio`, which uses `ng test` (Angular's Vitest builder).
 - Import test helpers from `vite-plus/test`, not from `vitest`.
 - Depend on workspace packages with the `workspace:*` protocol.
-- Repository language is English.
-- Do not commit secrets or real personal data. Version 1 uses seed and test data only.
+- Repository language, secrets, and seed data: `CODING_STANDARDS.md`.

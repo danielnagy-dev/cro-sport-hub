@@ -1,6 +1,6 @@
 # Lessons
 
-Dated log. The second time a mistake appears, it becomes a check. The order is in `.cursor/rules/lessons.mdc`: lint rule, type, test, verify check, written rule.
+Dated log. The second time a mistake appears, it becomes a check. The corrections ladder is in `CODING_STANDARDS.md`. The order of checks is in `.cursor/rules/lessons.mdc`: lint rule, type, test, verify check, written rule.
 
 ## 2026-10-26 — file size
 

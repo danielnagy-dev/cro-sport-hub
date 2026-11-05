@@ -15,6 +15,8 @@ A ticket is not `ready-for-agent` until it records a size estimate. Count code a
 
 No lint for that gate. The estimate is a judgment in the ticket, and a check can only see that a line exists, not that the number is honest. The coordinator reads the status before work starts.
 
+Apply the token split in `AGENTS.md` (Hard rules) alongside this line count. Record it under Size. When either gate says the run does not fit, split before `status:ready-for-agent`.
+
 ## Output
 
 For one plan item, write:

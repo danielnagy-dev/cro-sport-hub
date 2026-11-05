@@ -1,108 +1,59 @@
 # cro-sport-hub
 
-pnpm workspace run by Vite+ (`vp` 1.4.0). Node.js is pinned in `.node-version` (24.22.1). Package manager is pnpm 12.15.0.
+pnpm workspace run by Vite+ (`vp`). Node is pinned in `.node-version`. The package manager is pnpm (`package.json` `devEngines.packageManager`).
 
 ## Layout
 
 - `apps/web` — Next.js App Router (`next build`, `next dev`)
 - `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands. Feature folders and import rules: `.cursor/skills/architect/SKILL.md` (**Studio app**).
 - `apps/api` — NestJS (`nest build`)
-- `libs/shared-types`, `libs/ui` — workspace packages. `libs/slide-generator` renders the round-13 football template (ADR-003).
+- `libs/shared-types`, `libs/ui`, `libs/slide-generator` — workspace packages. Slide tokens and layout: `docs/design-system.md`. Renderer: `docs/adr/003-slide-renderer.md`.
 
-Run task commands from the repository root. Library declaration emit uses the catalog compiler, and that compiler is not resolved correctly if the task runner is started inside `apps/studio` or `apps/api`. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
+Run `vp` from the repository root. Library declaration emit uses the catalog compiler, which does not resolve if the task runner starts inside `apps/studio` or `apps/api`. Compiler versions: `docs/adr/001-vite-plus-vs-nx.md`.
 
-## Formatting
+## Commands
 
-`vp fmt` and `vp run format-check` use the root `fmt` object in `vite.config.ts` (oxfmt). TypeScript and JavaScript use single-quoted strings, no semicolons, and trailing commas in multi-line lists. JSX attribute strings stay double-quoted (`jsxSingleQuote` default). Run `vp fmt` before pushing when you touch formatted files.
+Run these from the repository root. CI (`.github/workflows/ci.yml`, job `ci`) runs `format-check`, `lint`, `typecheck`, `test`, and `build` in that order, plus `tools/guards/pr-size.ts` on pull requests. Which of those a docs-only change skips: `.cursor/skills/develop/SKILL.md`.
 
-## Before opening a pull request
+- `vp fmt` and `vp run format-check` — oxfmt, root `fmt` in `vite.config.ts`. Style: `CODING_STANDARDS.md`.
+- `vp run lint` — Oxlint, then `tools/guards/check.ts` and `tools/guards/file-size.ts`. `vp run guards` is those guards with the cache off.
+- `vp run verify:<target>` — `.cursor/skills/verify/SKILL.md` for `api`, `studio`, `web`, and `ui`.
 
-The author runs each required check once, from the repository root, and records a results table under `## Verification`. The commands are in `.cursor/skills/develop/SKILL.md`. GitHub Actions CI (`.github/workflows/ci.yml`) runs the same five tasks in the same order: `format-check`, `lint`, `typecheck`, `test`, and `build`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off. `vp run typecheck` includes `ngc --noEmit` for `apps/studio`. The shared linter does not typecheck Angular templates.
+## Hard rules
 
-## Pull requests
-
-- One topic per pull request. Split before 500 counted lines (same count as `.cursor/skills/plan/SKILL.md`); CI fails larger pull requests via `tools/guards/pr-size.ts`.
-- Title is a Conventional Commits subject. The title becomes the squash commit subject.
-- The description follows `.github/pull_request_template.md`, in this order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots when the UI changes, Verification, Checklist, and Review. It becomes the squash commit body. `## Summary` is the spec when the pull request has no GitHub issue.
-- Do not commit secrets or real personal data. Version 1 uses seed and test data only.
-- No `Co-authored-by` line with an email in a commit message or the PR description. If a hook adds one, strip it before pushing.
-- The pull request body includes `Closes #N` for the GitHub issue it finishes. Plan item is `none` when there is no issue. Do not add a ticket file under `.scratch/`. The convention is `docs/agents/issue-tracker.md`.
-- Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push). When that merge changes the tree, rerun the checks.
+- One topic per pull request. Split before 500 counted lines (`tools/guards/pr-size.ts`; the count is in `.cursor/skills/plan/SKILL.md`). The title is a Conventional Commits subject and becomes the squash subject. The body follows `.github/pull_request_template.md` and becomes the squash commit body. Include `Closes #N`, or Plan item `none` when there is no issue (`docs/agents/issue-tracker.md`). Do not add a ticket file under `.scratch/`.
+- `## Verification` is required. A passing test suite is not that section. A missing section is blocking (`.cursor/skills/review/SKILL.md`). A behaviour change also includes `summary.md` from `.cursor/skills/verify/SKILL.md`. Docs-only: `verify` is `not applicable (no runtime change)`.
+- Before the final push, fetch and merge the latest `origin/main`. No rebase. No force-push. When that merge changes the tree, rerun the checks.
 - Agents do not merge. Daniel squash-merges. That merge is the final gate. Who reviews is the phase in `docs/team.md`.
+- No `Co-authored-by` line that contains an email in a commit message or the pull request body. If a hook adds the trailer, strip it before pushing.
+- English. Seed and test data only. No secrets or real personal data (`CODING_STANDARDS.md`).
+- When a route, endpoint, story, or user action changes, update `docs/feature-map/<area>/<id>.md` (for example `docs/feature-map/api/api.athletes.md`). The area file explains how ids are named and holds no feature table. Do not edit `docs/feature-map.md` for a new id.
+- Estimate the tokens a task will need before starting. tokens / 150k is roughly the number of tickets. Keep each run well inside its context window. Split before starting.
+- Markdown does not accumulate dead prose: no session-specific, dated, or stale detail. `docs/lessons.md` is the dated log. Elsewhere, point at code instead of restating it.
+- Prefer a deterministic check (lint, pre-commit, or CI) when one is feasible. The corrections ladder, and which rule each check already enforces, is `CODING_STANDARDS.md`. A repeated mistake is logged in `docs/lessons.md`. The short form agents always see is `.cursor/rules/lessons.mdc`.
 
-## Verification
+## Agent modes
 
-- Use the `verify` skill (`.cursor/skills/verify/SKILL.md`). Run `vp run verify:<target>` for each app or library the PR touches (`api`, `studio`, `web`, `ui`), plus `--route` for the routes you changed.
-- First run on a new machine: `vp exec playwright install chromium`.
-- The PR description must have a `## Verification` section with the results table, the pasted `summary.md`, the screenshots (cloud agents: attach as artifacts), and anything you could not verify, with the reason. "Tests pass" alone is not verification.
-- A missing `## Verification` section is blocking. One missing row is a missing result: the reviewer runs that command (`.cursor/skills/review/SKILL.md`).
-- Pure docs or config PRs still include the results table. The `verify` row is `not applicable (no runtime change)`.
-- Reviewers (human or agent) treat a missing Verification section as a blocking comment.
+Each repo role skill is a mode. Read and follow `.cursor/skills/<name>/SKILL.md` for the whole run. A cloud agent can be launched with a Cursor custom mode set to that skill name (`plan`, `develop`, `review`, and the others below). Custom modes are an account setting. When they are unavailable, tell the agent to follow the matching skill file.
 
-## Feature map
+- **plan** — Scoping work, ordering the next pull request, or turning one plan item into a GitHub issue (`docs/agents/issue-tracker.md`). Does not implement. `.cursor/skills/plan/SKILL.md`.
+- **develop** — One `ready-for-agent` issue, one pull request. Runs the checks once, fills `## Verification`, and ends with the self-review in `## Review`. Does not merge. `.cursor/skills/develop/SKILL.md`.
+- **review** — The author self-review at the end of develop, or a separate agent only when `docs/team.md` says so. One pass. Verdict in `## Review`. Does not rerun the author's checks. `.cursor/skills/review/SKILL.md`.
+- **architect** — A new module, dependency, public type in `libs/shared-types`, or an app boundary. Does not implement. `.cursor/skills/architect/SKILL.md`.
+- **verify** — Smoke proof before a pull request that touches a runtime app or library, or when asked for proof. `vp run verify:<target>`. `.cursor/skills/verify/SKILL.md`.
+- **fix-merge-conflicts** — Conflict markers or a failed merge with `main`. `.cursor/skills/fix-merge-conflicts/SKILL.md`.
+- **deslop** — Clean generated noise from the diff against `main` before opening a pull request. `.cursor/skills/deslop/SKILL.md`.
 
-`docs/feature-map.md` is the area index only. Each user-reachable feature has an id file at `docs/feature-map/<area>/<id>.md` (for example `docs/feature-map/api/api.athletes.md`). The area file (`docs/feature-map/api.md`, `studio.md`, `web.md`, or `ui.md`) explains how ids are named and holds no feature table. Update the id file in the same PR that adds or changes a route, endpoint, story, or user action. Do not edit `docs/feature-map.md` for a single new id.
+Roles and the active phase: `docs/team.md`.
 
-## Corrections ladder
+## Skills
 
-When a reviewer finds a mistake that could happen again, fix it at the highest level that works, in this order:
+Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win. Role skills keep the repo rules and delegate general technique to those copies. Provenance and update steps: `.agents/skills/THIRD_PARTY.md`. Do not install a skill named in `BLOCKED_SKILLS` in `tools/guards/check.ts`.
 
-1. Code structure (types, one shared helper, delete the second way of doing it).
-2. Lint rule, compiler setting or CI check (root `vite.config.ts`, tsconfig, `.github/workflows/ci.yml`).
-3. A scoped rule in `.cursor/rules/`.
-4. A skill in `.cursor/skills/`.
+Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. `grill-me` is `grilling`. `tdd` is `codebase-design`.
 
-Never only a comment or a human-only style guide. Delete hacks and workarounds once the real fix lands; agents copy what they see.
-
-## Lessons
-
-A mistake that shows up a second time becomes an automatic check before another PR repeats it. Prefer a lint rule, then a type, then a test, then a `vp run verify:*` check, then a written rule. The log is `docs/lessons.md`. The short form agents always see is `.cursor/rules/lessons.mdc`. `vp run lint` runs `tools/guards/check.ts`. `vp run guards` is the same check with the cache off.
-
-A file fails when bytes/4 is over 5,000 estimated tokens. The ignore list and the temporary baseline are at the top of `tools/guards/file-size.ts`. A repeated mistake becomes this automatic check (`vp run lint`, `vp run guards`, and `.githooks/pre-commit`; the root `prepare` script sets `core.hooksPath`).
-
-## Agent skills
-
-Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `docs/team.md`, and `.cursor/skills/` win. Role skills keep the repo rules and delegate general technique to those copies. Provenance and the update steps are in `.agents/skills/THIRD_PARTY.md`.
-
-A review follows `.cursor/skills/review`: one pass, no sub-agents. The vendored `code-review` sub-agents run only when that file calls the review deep.
-
-Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. That covers `grill-me` (X is `grilling`) and `tdd` (X is `codebase-design`).
-
-Issue tracker: GitHub Issues. See `docs/agents/issue-tracker.md`. The issue body, or the PR `## Summary` when there is no issue, is the spec.
-
-Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents/domain.md`. Football slide tokens and layout: `docs/design-system.md` (approved 2026-11-03; hero cell size still open).
-
-The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `grill-me`, `writing-for-agents`, and `code-review`. Do not run `setup-matt-pocock-skills`. Do not install `implement`, `implement-spec`, `triage`, `to-spec`, `wayfinder`, `wizard`, or `pr`.
-
-Repo role skills live under `.cursor/skills/` (`architect`, `develop`, `plan`, `review`, `verify`, `fix-merge-conflicts`, `deslop`). `fix-merge-conflicts` and `deslop` are vendored from Cursor Team Kit (marketplace plugin id 677), copied 2026-10-29; each file's Source note lists adaptations.
-
-### Agent modes
-
-Each repo role skill is a mode: read and follow `.cursor/skills/<name>/SKILL.md` for the run. A cloud agent can be launched with a Cursor custom mode set to that skill name (`plan`, `develop`, `review`, and so on). Custom modes are an account setting; when they are unavailable, tell the agent to follow the matching skill file instead.
-
-**plan** — Use when scoping work, ordering the next pull request, or turning one plan item into implementable scope. Produces a GitHub issue in the shape `docs/agents/issue-tracker.md` specifies (goal, scope, acceptance, size estimate, shared files, verification, architect yes/no, seams), labeled `status:ready-for-agent` only when the size gate is met. Does not write feature code and does not merge.
-
-**develop** — Use when implementing one `ready-for-agent` issue as one scoped pull request (target ~300 counted lines, split before 500). Claims the issue, runs the checks once, fills the PR template and `## Verification`, and ends with the self-review report in `## Review`. Does not widen scope and does not merge.
-
-**review** — Use at the end of a develop run for the author self-review, or as a separate agent only when `docs/team.md` says so (prefer custom mode `review`). One pass over the ticket, PR body, and `origin/main...HEAD`; produces `ready` or `changes needed`, majors, and at most five nits in `## Review`. Does not rerun the verification suite; a separate review agent does not write feature code, push fixes, or merge.
-
-**architect** — Use before a non-trivial change that adds or moves a module, adds a dependency, changes a public type in `libs/shared-types`, or crosses an app boundary. Produces an ADR when the choice is hard to reverse and a type sketch before implementation. Does not implement the feature and does not merge.
-
-**verify** — Use before opening or updating a pull request that touches runtime apps or libraries, or when asked for smoke proof. Runs `vp run verify:<target>` (and `--route` as needed), saves evidence under `artifacts/verify/`, and pastes `summary.md` into `## Verification`. Compiling and unit tests alone are not proof.
-
-**fix-merge-conflicts** — Use when the branch has conflict markers or a failed merge with `main`. Resolves conflicts with minimal edits, reruns compile, lint, and relevant tests, then hands off to the normal develop final-push workflow. Does not push until conflicts are resolved and those checks pass.
-
-**deslop** — Use before opening a pull request or when asked to clean the branch diff against `main`. Removes AI-generated noise (extra comments, abnormal guards, `any` casts, and similar) with behavior unchanged unless fixing a clear bug.
-
-## Docs to read before writing framework code
-
-- Angular: https://angular.dev/llms.txt and `.cursor/rules/angular-best-practices.mdc`
-- Next.js: the version-matched docs in `node_modules/next/dist/docs/` (see the managed block below if present), index https://nextjs.org/docs/llms.txt
-- NestJS: https://docs.nestjs.com/llms.txt (append `.md` to a chapter URL)
-- Vite+: https://viteplus.dev/llms.txt
-- Vitest: https://vitest.dev/llms.txt · Zod: https://zod.dev/llms.txt · Storybook: https://storybook.js.org/llms.txt
-- ORM: Drizzle. Decision and the llms.txt link: `docs/adr/002-drizzle-vs-prisma.md`
-
-## Next.js agent block
+The issue body, or the pull request `## Summary` when there is no issue, is the spec (`docs/agents/issue-tracker.md`). ADRs: `docs/agents/domain.md`.
 
 `next dev` writes `apps/web/AGENTS.md` with a `<!-- BEGIN:nextjs-agent-rules -->` block when it detects a coding agent. Commit that file as is.
+
+Before writing framework code, read `CODING_STANDARDS.md`.

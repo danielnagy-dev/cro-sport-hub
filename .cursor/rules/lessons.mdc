@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Lessons and platforms
 
-- A mistake seen a second time becomes an automatic check before the next PR repeats it. Log it in `docs/lessons.md` (date, mistake, root cause, guard, where). Prefer a lint rule, then a type that rules it out, then a test, then a `vp run verify:*` check, then a written rule. A written rule must say why no check was added. The corrections ladder in `AGENTS.md` still comes first: if a code change removes the mistake, do that instead of adding a check.
+- A mistake seen a second time becomes an automatic check before the next PR repeats it. Log it in `docs/lessons.md` (date, mistake, root cause, guard, where). Prefer a lint rule, then a type that rules it out, then a test, then a `vp run verify:*` check, then a written rule. A written rule must say why no check was added. The corrections ladder in `CODING_STANDARDS.md` still comes first: if a code change removes the mistake, do that instead of adding a check.
 - Tools and scripts run on Linux and on macOS. Do not read the Linux proc filesystem or any other Linux-only API. Daniel runs macOS. Port checks bind a socket or call `lsof`.
 - No `Co-authored-by` line that contains an email in a commit message or a PR description. `vp run guards` fails on one. If the environment adds the trailer, strip it before pushing. No extra check: the guard already fails the email, and it cannot stop the hook from writing the message.
 - Agents do not merge. Daniel squash-merges. That merge is the final gate.
