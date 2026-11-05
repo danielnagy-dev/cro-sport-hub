@@ -4,7 +4,7 @@
 
 **Blocked by:** 18a (`.scratch/web/issues/18a-home.md`).
 
-**Status:** claimed
+**Status:** resolved
 
 **Size:** 280 counted lines. The 18a list component, twice, plus two metadata objects and two header links.
 
@@ -37,3 +37,7 @@ No. Same client and the same `MatchCard` as 18a. Two explicit routes, so `athlet
 
 - The tennis page and the football page with stubbed fetches. Catches a football card on `/tennis`, and a fetch error that fails the response.
 - The home header. Catches a sport name with no link.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/39
