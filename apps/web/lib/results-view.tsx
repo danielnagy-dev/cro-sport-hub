@@ -1,0 +1,44 @@
+import { packageId as sharedTypesPackageId, type PublishedMatch } from '@cro-sport-hub/shared-types'
+import { MatchCard, packageId as uiPackageId, type MatchCardProps } from '@cro-sport-hub/ui'
+
+export function cardProps(match: PublishedMatch): MatchCardProps {
+  if (match.sport === 'tennis') {
+    return {
+      sport: 'tennis',
+      playerA: match.playerA,
+      playerB: match.playerB,
+      sets: match.score,
+      retired: match.retired,
+      winner: match.winner,
+    }
+  }
+  return {
+    sport: 'football',
+    homeTeam: match.homeTeam,
+    awayTeam: match.awayTeam,
+    homeGoals: match.homeGoals,
+    awayGoals: match.awayGoals,
+  }
+}
+
+/** Shared results list inside `main`. Empty and failed-fetch copy match the home page. */
+export function ResultsMain({ items }: { items: readonly PublishedMatch[] | undefined }) {
+  return (
+    <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
+      <h1>Cro Sport Hub</h1>
+      {items === undefined ? (
+        <p>Results are unavailable.</p>
+      ) : items.length === 0 ? (
+        <p>No published results.</p>
+      ) : (
+        <ul className="results">
+          {items.map((item) => (
+            <li key={item.id}>
+              <MatchCard {...cardProps(item)} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
+  )
+}

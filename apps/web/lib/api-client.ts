@@ -8,6 +8,8 @@ import {
 /** `GET /api/sports` is not served. `GET /api/matches` returns a published page. */
 export const sportsPath = '/api/sports'
 export const matchesPath = '/api/matches'
+export const tennisMatchesPath = `${matchesPath}/tennis`
+export const footballMatchesPath = `${matchesPath}/football`
 
 /** Non-OK HTTP from a read. Schema failures throw from the shared schemas instead. */
 export class ApiClientError extends Error {
@@ -23,6 +25,8 @@ export class ApiClientError extends Error {
 export type ApiClient = {
   sports: () => Promise<Sport[]>
   matches: () => Promise<PublishedMatchPage>
+  matchesTennis: () => Promise<PublishedMatchPage>
+  matchesFootball: () => Promise<PublishedMatchPage>
 }
 
 type ApiClientOptions = {
@@ -55,6 +59,12 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     },
     async matches() {
       return publishedMatchPageSchema.parse(await read(matchesPath))
+    },
+    async matchesTennis() {
+      return publishedMatchPageSchema.parse(await read(tennisMatchesPath))
+    },
+    async matchesFootball() {
+      return publishedMatchPageSchema.parse(await read(footballMatchesPath))
     },
   }
 }

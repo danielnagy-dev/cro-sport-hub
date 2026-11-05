@@ -17,7 +17,7 @@ The public home page lists the latest published tennis and football results. It 
 #### How to get to it (user POV)
 
 - Open `http://localhost:3000/`.
-- The header link returns to this page. There is no `/tennis` or `/football` route yet.
+- The header link returns to this page. Sport pages are `/tennis` and `/football` (see `web.sport`).
 
 #### Driving it with verify
 
