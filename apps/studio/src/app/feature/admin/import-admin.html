@@ -1,0 +1,67 @@
+<div class="shell">
+  <header class="shell-header">
+    <a class="skip-link" href="#content">Skip to import log</a>
+    <p class="shell-mark">Cro Sport Hub</p>
+    <h1>Studio</h1>
+    <nav class="shell-nav" aria-label="Studio sections">
+      <a routerLink="/">Home</a>
+      <a routerLink="/matches">Matches</a>
+      @if (auth.session()?.role === 'admin') {
+      <a routerLink="/admin/teams">Admin</a>
+      }
+    </nav>
+    @if (auth.session(); as session) {
+    <div class="shell-session">
+      <span>{{ session.id }}</span>
+      <button type="button" (click)="logOut()">Log out</button>
+    </div>
+    }
+  </header>
+  <main id="content" class="admin-import-main" tabindex="-1">
+    <nav class="admin-section-nav" aria-label="Admin sections">
+      <a routerLink="/admin/competitions">Competitions</a>
+      <a routerLink="/admin/teams">Teams</a>
+      <a routerLink="/admin/import" aria-current="page">Import</a>
+    </nav>
+    <h2>Import log</h2>
+    <p>Runs use the server fixture. There is no file upload or schedule control on this page.</p>
+    <button type="button" [disabled]="runBusy()" (click)="onRunNow()">Run now</button>
+    @if (runError(); as message) {
+    <p role="alert">{{ message }}</p>
+    } @if (loadStatus() === 'loading') {
+    <p role="status">Loading import runs.</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">The import log could not be loaded.</p>
+    } @else {
+    <table>
+      <caption>
+        Fixture import runs, newest first
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Started</th>
+          <th scope="col">Created</th>
+          <th scope="col">Updated</th>
+          <th scope="col">Skipped</th>
+          <th scope="col">Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+        <tr>
+          <td>{{ row.startedAt }}</td>
+          <td>{{ row.createdCount }}</td>
+          <td>{{ row.updatedCount }}</td>
+          <td>{{ row.skippedCount }}</td>
+          <td>{{ row.error === '' ? '—' : row.error }}</td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="5">No import runs yet.</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+  </main>
+</div>
