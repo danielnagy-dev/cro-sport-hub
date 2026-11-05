@@ -1,4 +1,8 @@
-import { packageId as sharedTypesPackageId, type PublishedMatch } from '@cro-sport-hub/shared-types'
+import {
+  packageId as sharedTypesPackageId,
+  type AthleteName,
+  type PublishedMatch,
+} from '@cro-sport-hub/shared-types'
 import { MatchCard, packageId as uiPackageId, type MatchCardProps } from '@cro-sport-hub/ui'
 
 export function cardProps(match: PublishedMatch): MatchCardProps {
@@ -21,24 +25,58 @@ export function cardProps(match: PublishedMatch): MatchCardProps {
   }
 }
 
+function ResultsSection({ items }: { items: readonly PublishedMatch[] | undefined }) {
+  if (items === undefined) return <p>Results are unavailable.</p>
+  if (items.length === 0) return <p>No published results.</p>
+  return (
+    <ul className="results">
+      {items.map((item) => (
+        <li key={item.id}>
+          <MatchCard {...cardProps(item)} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function AthleteLinks({ athletes }: { athletes: readonly AthleteName[] }) {
+  if (athletes.length === 0) return null
+  return (
+    <nav className="sport-athletes" aria-label="Athletes">
+      <ul className="sport-athletes__list">
+        {athletes.map((athlete) => (
+          <li key={athlete.slug}>
+            <a href={`/athletes/${athlete.slug}`}>{athlete.name}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
 /** Shared results list inside `main`. Empty and failed-fetch copy match the home page. */
 export function ResultsMain({ items }: { items: readonly PublishedMatch[] | undefined }) {
   return (
     <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
       <h1>Cro Sport Hub</h1>
-      {items === undefined ? (
-        <p>Results are unavailable.</p>
-      ) : items.length === 0 ? (
-        <p>No published results.</p>
-      ) : (
-        <ul className="results">
-          {items.map((item) => (
-            <li key={item.id}>
-              <MatchCard {...cardProps(item)} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <ResultsSection items={items} />
+    </main>
+  )
+}
+
+/** Sport page: optional athlete links plus the shared results list. */
+export function SportResultsMain({
+  items,
+  athletes,
+}: {
+  items: readonly PublishedMatch[] | undefined
+  athletes: readonly AthleteName[] | undefined
+}) {
+  return (
+    <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
+      <h1>Cro Sport Hub</h1>
+      {athletes === undefined ? null : <AthleteLinks athletes={athletes} />}
+      <ResultsSection items={items} />
     </main>
   )
 }

@@ -11,6 +11,7 @@ Each sport page server-renders published matches for that sport only. The shared
 - `web.sport-tennis` calls `GET /api/matches/tennis` and shows tennis cards only.
 - `web.sport-football` calls `GET /api/matches/football` and shows football cards only.
 - `web.sport-nav` exposes the header links to both routes.
+- `web.sport-athlete-links` lists athletes for that sport with links to `/athletes/<slug>` when `GET /api/athletes?sport=` succeeds.
 
 #### How to get to it (user POV)
 
@@ -27,5 +28,5 @@ Preconditions: port 3000 is free. Playwright Chromium is installed. The API is n
 #### Gotchas
 
 - Only `/tennis` and `/football` are sport pages. Other paths keep the existing not-found behaviour.
-- The server calls `http://localhost:3001/api/matches/tennis` or `/football`. It does not call `/api/sports`.
-- Athlete links on sport pages are plan item 19a.
+- The server calls `http://localhost:3001/api/matches/tennis` or `/football`, and `http://localhost:3001/api/athletes?sport=tennis` or `?sport=football` for athlete links. It does not call `/api/sports`.
+- When the athlete list fetch fails, the page omits the link list and still renders results cards.
