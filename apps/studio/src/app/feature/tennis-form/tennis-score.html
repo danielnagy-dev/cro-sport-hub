@@ -221,9 +221,7 @@
         </dl>
         }
       </fieldset>
-      }
-
-      @if (tennisForm().submitting()) {
+      } @if (tennisForm().submitting()) {
       <p role="status">Saving draft.</p>
       }
       <button type="submit" [disabled]="savedId() !== undefined">Save draft</button>
