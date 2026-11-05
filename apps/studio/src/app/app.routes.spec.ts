@@ -5,6 +5,7 @@ import { expect } from 'vite-plus/test'
 import { App } from './app'
 import { appConfig } from './app.config'
 import { TOKEN_STORE, type TokenStore } from './core/auth'
+import { editorMatchesPath } from './core/matches-api'
 
 const editorPaths = [
   '/',
@@ -81,11 +82,20 @@ describe('studioRoutes', () => {
     await guest.router.navigateByUrl('/login')
     settle(guest.http)
     expect(guest.router.url).toBe('/login')
+    await guest.router.navigateByUrl('/admin/competitions')
+    settle(guest.http)
+    expect(guest.router.url).toBe('/login')
   })
 
   it('sends an unknown path home for an editor', async () => {
     const { router, http } = await boot(editorToken())
     await router.navigateByUrl('/missing')
+    settle(http)
+    expect(router.url).toBe('/')
+    await router.navigateByUrl('/matches')
+    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    expect(document.querySelector('a[href="/admin/competitions"]')).toBeNull()
+    await router.navigateByUrl('/admin/competitions')
     settle(http)
     expect(router.url).toBe('/')
   })

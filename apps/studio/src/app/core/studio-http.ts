@@ -23,6 +23,10 @@ export class StudioHttp {
     return this.http.patch(url, body).pipe(map((response) => parse(response)))
   }
 
+  delete(url: string): Observable<void> {
+    return this.http.delete(url).pipe(map(() => undefined))
+  }
+
   getBlob(url: string): Observable<Blob> {
     return this.http.get(url, { responseType: 'blob' })
   }
