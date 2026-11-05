@@ -4,10 +4,18 @@ import {
   roundSchema,
   tennisBestOfSchema,
   tennisMatchSchema,
+  tennisStatIssues,
   type FieldIssue,
+  type TennisStatCounts,
 } from '@cro-sport-hub/shared-types'
 
 export type SetRow = { gamesA: string; gamesB: string; tiebreak: string }
+
+export type StatCountModel = {
+  [Key in keyof TennisStatCounts]: string
+}
+
+export type TennisDraftStat = TennisStatCounts & { athleteId: string }
 
 export type TennisDraftBody = {
   id: string
@@ -20,6 +28,7 @@ export type TennisDraftBody = {
   bestOf: number
   score: number[][]
   retired?: true
+  stats?: TennisDraftStat[]
 }
 
 export type TennisFormModel = {
@@ -32,12 +41,48 @@ export type TennisFormModel = {
   bestOf: string
   retired: boolean
   sets: SetRow[]
+  playerAStats: StatCountModel
+  playerBStats: StatCountModel
+}
+
+export const statCountKeys = [
+  'aces',
+  'doubleFaults',
+  'firstServeIn',
+  'firstServeTotal',
+  'firstServePointsWon',
+  'secondServePointsWon',
+  'secondServeTotal',
+  'breakPointsSaved',
+  'breakPointsFaced',
+  'breakPointsWon',
+  'breakPointsTotal',
+  'totalPointsWon',
+] as const satisfies readonly (keyof TennisStatCounts)[]
+
+export const statCountLabels: Record<keyof TennisStatCounts, string> = {
+  aces: 'Aces',
+  doubleFaults: 'Double faults',
+  firstServeIn: 'First serves in',
+  firstServeTotal: 'First serves played',
+  firstServePointsWon: 'First-serve points won',
+  secondServePointsWon: 'Second-serve points won',
+  secondServeTotal: 'Second serves played',
+  breakPointsSaved: 'Break points saved',
+  breakPointsFaced: 'Break points faced',
+  breakPointsWon: 'Break points won',
+  breakPointsTotal: 'Break points played',
+  totalPointsWon: 'Total points won',
 }
 
 const setCount = 5
 
 function emptySetRow(): SetRow {
   return { gamesA: '', gamesB: '', tiebreak: '' }
+}
+
+function emptyStatRow(): StatCountModel {
+  return Object.fromEntries(statCountKeys.map((key) => [key, ''])) as StatCountModel
 }
 
 export function initialTennisFormModel(): TennisFormModel {
@@ -51,6 +96,8 @@ export function initialTennisFormModel(): TennisFormModel {
     bestOf: '3',
     retired: false,
     sets: Array.from({ length: setCount }, emptySetRow),
+    playerAStats: emptyStatRow(),
+    playerBStats: emptyStatRow(),
   }
 }
 
@@ -63,6 +110,27 @@ function parseGames(value: string): number | undefined {
   if (value.trim() === '') return undefined
   const parsed = Number(value)
   return Number.isInteger(parsed) ? parsed : Number.NaN
+}
+
+function parseCount(value: string): number | undefined {
+  if (value.trim() === '') return 0
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined
+}
+
+export function isStatBlockEmpty(row: StatCountModel): boolean {
+  return statCountKeys.every((key) => row[key].trim() === '')
+}
+
+export function parseStatCounts(row: StatCountModel): TennisStatCounts | undefined {
+  if (isStatBlockEmpty(row)) return undefined
+  const counts = {} as TennisStatCounts
+  for (const key of statCountKeys) {
+    const parsed = parseCount(row[key])
+    if (parsed === undefined) return undefined
+    counts[key] = parsed
+  }
+  return counts
 }
 
 export function buildScore(sets: readonly SetRow[]): number[][] {
@@ -89,6 +157,12 @@ export function buildScore(sets: readonly SetRow[]): number[][] {
   return score
 }
 
+function buildStatEntry(row: StatCountModel, athleteId: string): TennisDraftStat | undefined {
+  const counts = parseStatCounts(row)
+  if (counts === undefined || athleteId.trim() === '') return undefined
+  return { athleteId, ...counts }
+}
+
 export function buildTennisDraftBody(model: TennisFormModel, matchId: string): TennisDraftBody {
   const bestOf = Number(model.bestOf)
   const body: TennisDraftBody = {
@@ -103,6 +177,11 @@ export function buildTennisDraftBody(model: TennisFormModel, matchId: string): T
     score: buildScore(model.sets),
   }
   if (model.retired) body.retired = true
+  const stats = [
+    buildStatEntry(model.playerAStats, model.playerAId),
+    buildStatEntry(model.playerBStats, model.playerBId),
+  ].filter((entry): entry is TennisDraftStat => entry !== undefined)
+  if (stats.length > 0) body.stats = stats
   return body
 }
 
@@ -110,6 +189,25 @@ function pushIssue(issues: FieldIssue[], path: string, message: string | undefin
   if (message === undefined || message.length === 0) return
   if (issues.some((issue) => issue.path[0] === path)) return
   issues.push({ path: [path], message })
+}
+
+function statIssuesForPlayer(
+  row: StatCountModel,
+  athleteId: string,
+  block: 'playerAStats' | 'playerBStats',
+): readonly FieldIssue[] {
+  if (isStatBlockEmpty(row)) return []
+  if (idSchema.safeParse(athleteId).success === false) {
+    return [{ path: [block], message: 'Choose the player before entering stats' }]
+  }
+  const counts = parseStatCounts(row)
+  if (counts === undefined) {
+    return [{ path: [block], message: 'Stat counts must be whole numbers from 0 upward' }]
+  }
+  return tennisStatIssues(counts).map((issue) => ({
+    path: [block, ...issue.path],
+    message: issue.message,
+  }))
 }
 
 export function validateTennisDraft(
@@ -150,6 +248,13 @@ export function validateTennisDraft(
       if (key === 'matchId') continue
       if (typeof key === 'string') pushIssue(issues, key, issue.message)
     }
+  }
+
+  for (const issue of statIssuesForPlayer(model.playerAStats, model.playerAId, 'playerAStats')) {
+    issues.push(issue)
+  }
+  for (const issue of statIssuesForPlayer(model.playerBStats, model.playerBId, 'playerBStats')) {
+    issues.push(issue)
   }
 
   return issues

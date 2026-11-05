@@ -4,12 +4,13 @@ import {
   type PublicClubSpell,
 } from '@cro-sport-hub/shared-types'
 import { AthleteHeader, packageId as uiPackageId } from '@cro-sport-hub/ui'
+import { AthleteTennisResults } from './athlete-tennis-results'
 
 function clubRange(spell: PublicClubSpell): string {
   return spell.to === undefined ? spell.from : `${spell.from} – ${spell.to}`
 }
 
-/** Athlete profile inside `main`. Omits tennis results and football appearances (later slices). */
+/** Athlete profile inside `main`. Football appearances stay a later slice. */
 export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
   return (
     <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
@@ -34,6 +35,9 @@ export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
           </ul>
         )}
       </section>
+      {profile.sport === 'tennis' ? (
+        <AthleteTennisResults athleteName={profile.name} results={profile.results} />
+      ) : null}
     </main>
   )
 }

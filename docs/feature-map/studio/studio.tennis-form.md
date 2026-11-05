@@ -4,7 +4,7 @@
 | ------ | ------ | ------------------------------------------ | ------------------------------------------------ | ------------- |
 | studio | live   | `http://localhost:4200/matches/new/tennis` | `vp run studio#test` and `verify:studio --route` | plan item 24b |
 
-After login, `/matches/new/tennis` loads editor lookup lists for competitions and tennis players, then saves a new draft with `POST /api/matches/tennis`. The body matches plan 11: set score fields only, no `status`, no `stats`, and no percentage fields. Client validation uses the shared tennis schemas and shows each message beside the field. A successful save keeps the new match id on the page for plan 24c. There is no edit route or GET-by-id in this slice.
+After login, `/matches/new/tennis` loads editor lookup lists for competitions and tennis players, then saves a new draft with `POST /api/matches/tennis`. The body matches plan 11: set score fields, optional raw stat counts for both players (no percentage fields), and no `status`. Client validation uses the shared tennis schemas and shows each message beside the field. A successful save keeps the new match id on the page and leaves the form read-only. Editors with a saved draft can call `POST /api/matches/{id}/submit`; success shows status `review` and hides the submit control. The page shows the five percentages from `tennisPercentages` as text (including `No attempts` when a denominator is zero). There is no edit route or GET-by-id in this slice.
 
 #### How to get to it (user POV)
 
@@ -16,9 +16,9 @@ After login, `/matches/new/tennis` loads editor lookup lists for competitions an
 Preconditions: port 4200 is free. Playwright Chromium is installed. The verify CLI does not create a session.
 
 - **Anonymous run.** `vp run verify:studio --route /matches/new/tennis` opens `/login` because `editorGuard` blocks the form.
-- **Proof.** `vp run studio#test` stubs HTTP and covers validation, a successful create that keeps the id on the page, and a guest redirect. Live save needs the API.
+- **Proof.** `vp run studio#test` stubs HTTP and covers validation, optional stats on the draft body, percentage display, submit for review, and a guest redirect. Live save and submit need the API.
 
 #### Gotchas
 
 - The matches table does not link here until plan 24d.
-- Stat counts and submit for review are plan 24c, not this route.
+- Reopening a saved draft is plan 24d.
