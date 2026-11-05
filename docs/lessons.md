@@ -138,6 +138,6 @@ No new check: the estimate is a judgment written in the ticket. A lint can see t
 
 The committed local markdown ticket tree still looked like the issue tracker after GitHub Issues became the spec. Agents opened those files instead of `gh issue view`.
 
-Guard: `tools/guards/no-scratch.ts`, wired from `tools/guards/check.ts`. It fails when git tracks a path under the retired tree, when a tracked plan index reappears, or when a tracked file outside the allowlist mentions that path. Order lives in each issue's `Blocked by:` line; parallel safety is shared files in Notes.
+Guard: `tools/guards/no-scratch.ts`, wired from `tools/guards/check.ts`. It fails when git tracks a path under the retired tree, when a tracked plan index reappears, or when a tracked file outside the allowlist mentions that path. Order lives in each issue's `## Blocked by` section (`#N` references); parallel safety is shared files in Notes.
 
 No pre-commit hook: staged paths cannot recreate a deleted tree without a commit, and mention checks belong with the other repo guards in CI lint.
