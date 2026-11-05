@@ -78,6 +78,33 @@ main p {
   list-style: none;
 }
 
+.sport-athletes {
+  margin-bottom: var(--csh-space-4);
+}
+
+.sport-athletes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--csh-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sport-athletes__list a {
+  color: inherit;
+}
+
+.athlete-clubs h2 {
+  margin: var(--csh-space-4) 0 var(--csh-space-2);
+  font-size: 1.125rem;
+}
+
+.athlete-clubs__list {
+  margin: 0;
+  padding-left: var(--csh-space-4);
+}
+
 .skip-link:focus-visible {
   outline: 2px solid var(--csh-color-focus);
   outline-offset: 2px;

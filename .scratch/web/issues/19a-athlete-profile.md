@@ -4,7 +4,7 @@
 
 **Blocked by:** 8a (`.scratch/athletes/issues/8a-athlete-profile.md`) and 18b (`.scratch/web/issues/18b-sport-pages.md`).
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 280 counted lines. One dynamic page, `AthleteHeader`, a club list, and a short link list on the two sport pages.
 
@@ -20,10 +20,10 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] `/athletes/sample-player-a` shows Sample Player A, tennis, and `No clubs.`
-- [ ] `/athletes/karlo-brkic` shows Karlo Brkić, Sample Town, and Sample Home, with no club id.
-- [ ] An unknown slug is HTTP 404. A failed fetch shows `This athlete is unavailable.`
-- [ ] `/football` links to `/athletes/karlo-brkic` and does not link to `sample-player-a`. `/tennis` does the opposite for Sample Player A.
+- [x] `/athletes/sample-player-a` shows Sample Player A, tennis, and `No clubs.`
+- [x] `/athletes/karlo-brkic` shows Karlo Brkić, Sample Town, and Sample Home, with no club id.
+- [x] An unknown slug is HTTP 404. A failed fetch shows `This athlete is unavailable.`
+- [x] `/football` links to `/athletes/karlo-brkic` and does not link to `sample-player-a`. `/tennis` does the opposite for Sample Player A.
 
 ## Verification
 
@@ -37,3 +37,7 @@ No. The page reads the 8a schema. `AthleteHeader` is already in `libs/ui`. Studi
 
 - The athlete page with a stubbed profile. Catches a club id on the page, and a thrown fetch.
 - The sport-page athlete links. Catches a tennis slug on `/football`.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/45

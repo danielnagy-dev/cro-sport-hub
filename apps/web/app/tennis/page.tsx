@@ -1,7 +1,7 @@
-import type { PublishedMatch } from '@cro-sport-hub/shared-types'
+import type { AthleteName, PublishedMatch } from '@cro-sport-hub/shared-types'
 import type { Metadata } from 'next'
 import { createApiClient } from '../../lib/api-client'
-import { ResultsMain } from '../../lib/results-view'
+import { SportResultsMain } from '../../lib/results-view'
 
 /** Local API origin. The server calls it. The browser does not. */
 const resultsApiOrigin = 'http://localhost:3001'
@@ -15,12 +15,19 @@ export const metadata: Metadata = {
 }
 
 export default async function TennisPage() {
+  const client = createApiClient({ baseUrl: resultsApiOrigin })
   let items: readonly PublishedMatch[] | undefined
+  let athletes: readonly AthleteName[] | undefined
   try {
-    items = (await createApiClient({ baseUrl: resultsApiOrigin }).matchesTennis()).items
+    items = (await client.matchesTennis()).items
   } catch {
     items = undefined
   }
+  try {
+    athletes = await client.athletesBySport('tennis')
+  } catch {
+    athletes = undefined
+  }
 
-  return <ResultsMain items={items} />
+  return <SportResultsMain items={items} athletes={athletes} />
 }
