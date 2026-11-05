@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this for a chore that is not a bug and not a feature. The agent ticket is still `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. Copy Goal into **What to build:**. Acceptance criteria, Blocked by, and Size use the same names on that file.
+        Use this for a chore that is not a bug and not a feature. An agent files this form. The issue is the spec. Do not add a `.scratch` ticket.
 
   - type: dropdown
     id: area

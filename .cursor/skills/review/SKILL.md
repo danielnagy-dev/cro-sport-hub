@@ -20,7 +20,7 @@ This file is the pass, and it wins over the vendored `code-review` skill. The pa
 
 ## Read
 
-Read this file, the PR body, and the ticket `.scratch/<feature-slug>/issues/<NN>-<slug>.md` when the PR names an id. When that file is not on the branch, the spec is the PR `## Summary` (`docs/agents/issue-tracker.md`). Then:
+Read this file, the PR body, and the GitHub issue named by `Closes #N` (`gh issue view <number> --repo danielnagy-dev/cro-sport-hub`). When the PR has no issue, the spec is the PR `## Summary` (`docs/agents/issue-tracker.md`). Then:
 
 ```bash
 git diff --numstat origin/main...HEAD
@@ -64,7 +64,7 @@ Majors:
 - Counted size past the split line at 500. Over the 300 target, and at or under 500, is a nit.
 - `## Changes` misses a top-level path from `git diff --stat origin/main...HEAD`.
 - A `Co-authored-by` line in the PR body or in `git log origin/main..HEAD` contains an email.
-- The PR edits a ticket file that is not its own, or adds a per-item status list to `docs/agents/issue-tracker.md`.
+- The PR adds a file under `.scratch/`, or adds a per-item status list to `docs/agents/issue-tracker.md`. Open work is a GitHub issue. History files already under `.scratch/` stay as they are.
 - The final-push line is missing, or `final push: merged origin/main and reran the checks` sits on a table recorded before that merge changed the tree. The other line is `final push: origin/main already contained`.
 
 A missing verification row is the one extra command, not a major, unless you run it and it fails. A docs-only diff says `not applicable (no runtime change)` for `verify`.
