@@ -149,6 +149,29 @@ export type TennisPercentages = {
   breakPointsConvertedPct: number | null
 }
 
+export const tennisPercentagesSchema = z.strictObject({
+  firstServePct: z.number().nullable(),
+  firstServePointsWonPct: z.number().nullable(),
+  secondServePointsWonPct: z.number().nullable(),
+  breakPointsSavedPct: z.number().nullable(),
+  breakPointsConvertedPct: z.number().nullable(),
+})
+
+export const tennisStatCountsSchema = z.strictObject({
+  aces: countSchema,
+  doubleFaults: countSchema,
+  firstServeIn: countSchema,
+  firstServeTotal: countSchema,
+  firstServePointsWon: countSchema,
+  secondServePointsWon: countSchema,
+  secondServeTotal: countSchema,
+  breakPointsSaved: countSchema,
+  breakPointsFaced: countSchema,
+  breakPointsWon: countSchema,
+  breakPointsTotal: countSchema,
+  totalPointsWon: countSchema,
+})
+
 function percentage(count: number, total: number): number | null {
   if (total === 0) {
     return null

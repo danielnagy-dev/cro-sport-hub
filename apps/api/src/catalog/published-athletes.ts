@@ -6,6 +6,7 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { asc, eq } from 'drizzle-orm'
 import { type PgDatabase, type PgQueryResultHKT } from 'drizzle-orm/pg-core'
+import { listTennisResultsForAthlete } from '../features/athletes/list-tennis-results.js'
 import { readParsed } from './errors.js'
 import { UnknownSportError } from './published-matches.js'
 import * as schema from './schema.js'
@@ -65,7 +66,7 @@ export async function readPublicAthlete(db: CatalogDb, slug: string): Promise<Pu
       .from(athleteTeams)
       .innerJoin(teams, eq(teams.id, athleteTeams.teamId))
       .where(eq(athleteTeams.athleteId, athlete.id))
-    return publicAthleteSchema.parse({
+    const profile = {
       ...omitNulls({
         slug: athlete.slug,
         name: athlete.name,
@@ -75,7 +76,12 @@ export async function readPublicAthlete(db: CatalogDb, slug: string): Promise<Pu
         position: athlete.position,
       }),
       clubs: [...spells].sort(currentThenOlder).map((spell) => omitNulls(spell)),
-    })
+    }
+    if (athlete.sport === 'tennis') {
+      const results = await listTennisResultsForAthlete(db, athlete.id)
+      return publicAthleteSchema.parse({ ...profile, sport: 'tennis', results })
+    }
+    return publicAthleteSchema.parse({ ...profile, sport: 'football' })
   })
 }
 

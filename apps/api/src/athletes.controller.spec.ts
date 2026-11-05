@@ -1,5 +1,9 @@
 import { type AddressInfo } from 'node:net'
-import { athleteNameListSchema, publicAthleteSchema } from '@cro-sport-hub/shared-types'
+import {
+  athleteNameListSchema,
+  publicAthleteSchema,
+  tennisPercentages,
+} from '@cro-sport-hub/shared-types'
 import { PGlite } from '@electric-sql/pglite'
 import { Test } from '@nestjs/testing'
 import { drizzle } from 'drizzle-orm/pglite'
@@ -28,6 +32,48 @@ const playerA = {
   sport: 'tennis' as const,
   country: 'HR',
   clubs: [],
+  results: [
+    {
+      id: 'match-sample-final',
+      competition: 'Sample Cup',
+      date: '2026-10-18',
+      round: 'Final',
+      opponent: 'Sample Player B',
+      winner: 'athlete' as const,
+      bestOf: 3,
+      score: [
+        [6, 4],
+        [7, 6, 5],
+      ],
+      retired: false,
+      aces: 3,
+      doubleFaults: 1,
+      firstServeIn: 6,
+      firstServeTotal: 10,
+      firstServePointsWon: 4,
+      secondServePointsWon: 2,
+      secondServeTotal: 4,
+      breakPointsSaved: 1,
+      breakPointsFaced: 2,
+      breakPointsWon: 2,
+      breakPointsTotal: 4,
+      totalPointsWon: 20,
+      percentages: tennisPercentages({
+        aces: 3,
+        doubleFaults: 1,
+        firstServeIn: 6,
+        firstServeTotal: 10,
+        firstServePointsWon: 4,
+        secondServePointsWon: 2,
+        secondServeTotal: 4,
+        breakPointsSaved: 1,
+        breakPointsFaced: 2,
+        breakPointsWon: 2,
+        breakPointsTotal: 4,
+        totalPointsWon: 20,
+      }),
+    },
+  ],
 }
 const footballNames = [
   { slug: 'bruno-peric', name: 'Bruno Perić' },
@@ -95,7 +141,10 @@ describe('public athletes', () => {
 
     const tennis = publicAthleteSchema.parse(await body(port, '/api/athletes/sample-player-a'))
     expect(tennis).toEqual(playerA)
-    expect(tennis).not.toHaveProperty('results')
+    if (tennis.sport !== 'tennis') throw new Error('expected tennis profile')
+    expect(tennis.results).toHaveLength(1)
+    expect(tennis.results[0]?.percentages?.firstServePct).toBe(60)
+    expect(tennis.results.find((row) => row.date === '2026-10-16')).toBeUndefined()
 
     const missing = await fetch(`http://127.0.0.1:${port}/api/athletes/nobody`)
     expect(missing.status).toBe(404)
