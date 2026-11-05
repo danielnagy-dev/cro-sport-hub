@@ -5,6 +5,7 @@ import { createServer } from 'node:net'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from '@playwright/test'
+import { runEditorFlow, type EditorStep } from './editor-flow.ts'
 import {
   apiPaths,
   composeServices,
@@ -41,7 +42,7 @@ type Report = {
 }
 
 const USAGE =
-  'Usage: vpx tools/verify/verify.ts <api|studio|web|ui|doctor> [api|studio|web|ui] [--route <path>]... [--url <baseUrl>] [--out <dir>] [--timeout <s>]'
+  'Usage: vpx tools/verify/verify.ts <api|studio|web|ui|editor|doctor> [api|studio|web|ui] [--route <path>]... [--url <baseUrl>] [--out <dir>] [--timeout <s>]'
 
 class VerifyError extends Error {
   constructor(
@@ -62,7 +63,7 @@ function isTarget(value: string): value is TargetName {
 }
 
 function parseArgs(argv: readonly string[]): {
-  command: TargetName | 'doctor'
+  command: TargetName | 'doctor' | 'editor'
   doctorTarget?: TargetName
   routes: string[]
   url?: string
@@ -70,11 +71,14 @@ function parseArgs(argv: readonly string[]): {
   timeoutSeconds?: number
 } {
   const [command, ...rest] = argv
-  if (command === undefined || (command !== 'doctor' && !isTarget(command))) {
+  if (
+    command === undefined ||
+    (command !== 'doctor' && command !== 'editor' && !isTarget(command))
+  ) {
     throw new Error(USAGE)
   }
   const options: {
-    command: TargetName | 'doctor'
+    command: TargetName | 'doctor' | 'editor'
     doctorTarget?: TargetName
     routes: string[]
     url?: string
@@ -711,6 +715,202 @@ async function startCompose(root: string, services: readonly string[]): Promise<
   }
 }
 
+const EDITOR_STACK: readonly TargetName[] = ['api', 'studio', 'web']
+
+function requireEditorEnv(): { editor: string; admin: string } {
+  const secret = process.env.JWT_SECRET?.trim() ?? ''
+  if (secret.length < 32) {
+    throw new VerifyError(
+      'env',
+      'process.env',
+      'JWT_SECRET must be at least 32 characters in the environment.',
+    )
+  }
+  const editor = process.env.EDITOR_DEMO_PASSWORD ?? ''
+  const admin = process.env.ADMIN_DEMO_PASSWORD ?? ''
+  if (editor.length < 8 || editor.length > 72 || admin.length < 8 || admin.length > 72) {
+    throw new VerifyError(
+      'env',
+      'process.env',
+      'EDITOR_DEMO_PASSWORD and ADMIN_DEMO_PASSWORD must be 8 to 72 characters in the environment.',
+    )
+  }
+  return { editor, admin }
+}
+
+async function seedCatalog(root: string): Promise<void> {
+  const vp = resolveVp(root)
+  await new Promise<void>((resolvePromise, reject) => {
+    execFile(
+      vp,
+      ['run', 'api#seed'],
+      { cwd: root, env: childEnv(root, 'api'), encoding: 'utf8' },
+      (error, _stdout, stderr) => {
+        if (error) {
+          const text = typeof stderr === 'string' ? stderr.trim() : ''
+          reject(new Error(text !== '' ? text : error.message))
+          return
+        }
+        resolvePromise()
+      },
+    )
+  })
+}
+
+function editorStepLabel(step: EditorStep): string {
+  if (step.ok) return 'pass'
+  const reason = step.detail ?? 'failed'
+  return `fail: ${reason.replaceAll('\n', ' ').slice(0, 180)}`
+}
+
+function writeEditorSummary(
+  report: {
+    gitSha: string
+    gitDirty: boolean
+    reused: boolean
+    checks: EditorStep[]
+  },
+  outDir: string,
+): Promise<void> {
+  const lines = [
+    '# verify editor',
+    '',
+    `- git: ${report.gitSha}${report.gitDirty ? ' (dirty)' : ' (clean)'}`,
+    `- reused: ${report.reused}`,
+    `- result: ${report.checks.every((check) => check.ok) ? 'pass' : 'fail'}`,
+    '',
+    '| Step | URL | Result | Screenshot |',
+    '|---|---|---|---|',
+    ...report.checks.map(
+      (check) =>
+        `| ${check.name} | ${check.url} | ${editorStepLabel(check)} | ${check.screenshot ?? ''} |`,
+    ),
+    '',
+  ]
+  return writeFile(join(outDir, 'summary.md'), lines.join('\n'))
+}
+
+async function runEditorVerify(
+  root: string,
+  outDir: string,
+  timeoutSeconds?: number,
+): Promise<number> {
+  const passwords = requireEditorEnv()
+  const startedAt = new Date()
+  const logPath = join(outDir, 'server.log')
+  const logStream = createWriteStream(logPath)
+  const stop = new AbortController()
+  const checks: EditorStep[] = []
+  const children: ChildProcess[] = []
+  let startedServices: string[] = []
+
+  const cleanup = async (): Promise<void> => {
+    stop.abort()
+    for (const child of children) {
+      if (child.pid !== undefined) await killProcessGroup(child.pid)
+    }
+    await endLog(logStream)
+    if (startedServices.length > 0) {
+      try {
+        await run('docker', ['compose', 'stop', ...startedServices], root)
+      } catch {
+        // Teardown best effort.
+      }
+    }
+  }
+
+  try {
+    const missing = await missingComposeServices(root)
+    if (missing.length > 0) {
+      startedServices = [...missing]
+      await startCompose(root, missing)
+    }
+    await seedCatalog(root)
+
+    for (const name of EDITOR_STACK) {
+      const spec = targets[name]
+      const holders = await portHolders(spec.port)
+      if (holders !== undefined) {
+        throw new VerifyError(
+          'port',
+          `http://localhost:${spec.port}`,
+          `${busyMessage(spec.port, holders)}. Refusing to start a second server.`,
+        )
+      }
+      const vp = resolveVp(root)
+      const server = spawn(vp, spec.command.slice(1), {
+        cwd: root,
+        env: childEnv(root, spec.name),
+        detached: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      })
+      children.push(server)
+      logStream.write(`$ vp ${spec.command.slice(1).join(' ')}\n`)
+      server.stdout?.pipe(logStream, { end: false })
+      server.stderr?.pipe(logStream, { end: false })
+      await new Promise<void>((resolvePromise, reject) => {
+        server.once('spawn', () => resolvePromise())
+        server.once('error', reject)
+      })
+      const base = `http://localhost:${spec.port}`
+      await waitUntilReady(
+        joinUrl(base, spec.readinessPath),
+        (timeoutSeconds ?? spec.timeoutSeconds) * 1000,
+        server,
+        logPath,
+        logStream,
+      )
+    }
+
+    const browserStatus = chromiumStatus()
+    if (!browserStatus.ok) throw new VerifyError('browser', 'playwright', browserStatus.detail)
+    const browser = await chromium.launch({ headless: true })
+    try {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
+      checks.push(
+        ...(await runEditorFlow(
+          page,
+          { studio: `http://localhost:${ports.studio}`, web: `http://localhost:${ports.web}` },
+          passwords,
+          outDir,
+          { value: 0 },
+        )),
+      )
+      await page.close()
+    } finally {
+      await browser.close()
+    }
+  } catch (error) {
+    if (!stop.signal.aborted) {
+      const message = error instanceof Error ? error.message : 'verify:editor failed'
+      checks.push({
+        name: 'verify:editor',
+        url: `http://localhost:${ports.studio}`,
+        ok: false,
+        detail: message,
+        screenshot: null,
+      })
+    }
+  } finally {
+    await cleanup()
+  }
+
+  const git = gitMeta(root)
+  const report = {
+    target: 'editor' as const,
+    gitSha: git.gitSha,
+    gitDirty: git.gitDirty,
+    startedAt: startedAt.toISOString(),
+    durationMs: Date.now() - startedAt.getTime(),
+    reused: false,
+    checks,
+  }
+  await writeFile(join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
+  await writeEditorSummary(report, outDir)
+  console.log(readFileSync(join(outDir, 'summary.md'), 'utf8'))
+  return checks.every((check) => check.ok) ? 0 : 1
+}
+
 async function drive(
   spec: TargetSpec,
   base: string,
@@ -799,6 +999,15 @@ async function main(): Promise<number> {
   const options = parseArgs(process.argv.slice(2))
   const root = repoRoot()
   if (options.command === 'doctor') return doctor(root, options.doctorTarget)
+  if (options.command === 'editor') {
+    const startedAt = new Date()
+    const outDir =
+      options.out === undefined
+        ? join(root, 'artifacts', 'verify', 'editor', stamp(startedAt))
+        : resolve(root, options.out)
+    await mkdir(outDir, { recursive: true })
+    return runEditorVerify(root, outDir, options.timeoutSeconds)
+  }
 
   const spec = targets[options.command]
   const startedAt = new Date()

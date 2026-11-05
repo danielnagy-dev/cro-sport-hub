@@ -116,6 +116,7 @@ export default defineConfig({
       'verify:studio': { command: 'vpx tools/verify/verify.ts studio', cache: false },
       'verify:web': { command: 'vpx tools/verify/verify.ts web', cache: false },
       'verify:visitor': { command: 'vpx tools/verify/visitor.ts', cache: false },
+      'verify:editor': { command: 'vpx tools/verify/verify.ts editor', cache: false },
       'verify:ui': { command: 'vpx tools/verify/verify.ts ui', cache: false },
     },
   },
