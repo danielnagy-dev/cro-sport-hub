@@ -8,4 +8,9 @@ export const adminRoutes: Routes = [
       import('./competitions-admin').then((module) => module.CompetitionsAdminPage),
     canActivate: [adminGuard],
   },
+  {
+    path: 'admin/import',
+    loadComponent: () => import('./import-admin').then((module) => module.ImportAdminPage),
+    canActivate: [adminGuard],
+  },
 ]

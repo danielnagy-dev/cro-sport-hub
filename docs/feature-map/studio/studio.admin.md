@@ -3,9 +3,13 @@
 | App    | Status | Entry point (user POV)                     | Verify               | Since         |
 | ------ | ------ | ------------------------------------------ | -------------------- | ------------- |
 | studio | live   | `http://localhost:4200/admin/competitions` | `vp run studio#test` | plan item 27a |
+| studio | live   | `http://localhost:4200/admin/import`       | `vp run studio#test` | plan item 27c |
 
 An admin manages competitions at `/admin/competitions` through `/api/admin/competitions`. The shell header shows **Admin** only for an admin session. Editors are turned away by `adminGuard`. Guests go to `/login`.
+
+An admin reads fixture import runs at `/admin/import` from `GET /api/admin/import/runs` and starts a run with **Run now** (`POST /api/admin/import`). The table shows when each run started, created, updated, and skipped counts, and any error string. Runs are newest first. There is no file upload or schedule control on the page.
 
 #### How to get to it (user POV)
 
 - Log in as `admin-demo`, then open `/admin/competitions` or choose **Admin** in the header.
+- Log in as `admin-demo`, then open `/admin/import` or choose **Import** in the admin header links on that page.
