@@ -41,7 +41,7 @@ The author runs each required check once, from the repository root, and records 
 
 ## Feature map
 
-`docs/feature-map.md` is the index. Area files under `docs/feature-map/` list every user-reachable feature and how to reach it. Update the area file in the same PR that adds or changes a route, endpoint, story or user action. A PR adds its entry to the area file it touches, not the index.
+`docs/feature-map.md` is the area index only. Each user-reachable feature has an id file at `docs/feature-map/<area>/<id>.md` (for example `docs/feature-map/api/api.athletes.md`). The area file (`docs/feature-map/api.md`, `studio.md`, `web.md`, or `ui.md`) explains how ids are named and holds no feature table. Update the id file in the same PR that adds or changes a route, endpoint, story, or user action. Do not edit `docs/feature-map.md` for a single new id.
 
 ## Corrections ladder
 
