@@ -4,7 +4,7 @@ import { ApiClientError, createApiClient } from '../../../lib/api-client'
 import { AthleteProfileMain, AthleteUnavailableMain } from '../../../lib/athlete-view'
 
 /** Local API origin. The server calls it. The browser does not. */
-const profileApiOrigin = 'http://localhost:3001'
+const PROFILE_API_ORIGIN = 'http://localhost:3001'
 
 /** Render on each request so a down API is not baked into the build. */
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 type PageProps = { params: Promise<{ slug: string }> }
 
 async function loadProfile(slug: string) {
-  return createApiClient({ baseUrl: profileApiOrigin }).athlete(slug)
+  return createApiClient({ baseUrl: PROFILE_API_ORIGIN }).athlete(slug)
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

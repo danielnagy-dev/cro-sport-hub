@@ -3,9 +3,9 @@ import { eq } from 'drizzle-orm'
 import { CatalogError, type CatalogDb } from './errors.js'
 import { matches } from './schema.js'
 
-const submitConflict = 'Only a draft can be submitted'
-const rejectConflict = 'Only a match in review can be rejected'
-const publishConflict = 'Only a match in review can be published'
+const SUBMIT_CONFLICT = 'Only a draft can be submitted'
+const REJECT_CONFLICT = 'Only a match in review can be rejected'
+const PUBLISH_CONFLICT = 'Only a match in review can be published'
 
 function publishTimestamp(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0')
@@ -50,7 +50,7 @@ export async function submitMatch(
   db: CatalogDb,
   id: string,
 ): Promise<{ id: string; status: 'review' }> {
-  await move(db, id, 'draft', 'review', submitConflict, false)
+  await move(db, id, 'draft', 'review', SUBMIT_CONFLICT, false)
   return { id, status: 'review' }
 }
 
@@ -59,7 +59,7 @@ export async function rejectMatch(
   db: CatalogDb,
   id: string,
 ): Promise<{ id: string; status: 'draft' }> {
-  await move(db, id, 'review', 'draft', rejectConflict, true)
+  await move(db, id, 'review', 'draft', REJECT_CONFLICT, true)
   return { id, status: 'draft' }
 }
 
@@ -78,7 +78,7 @@ export async function publishMatch(
       .where(eq(matches.id, id))
     const row = rows[0]
     if (row === undefined) throw new CatalogError('unknown-ref', 'Unknown match')
-    if (row.status !== 'review') throw new CatalogError('conflict', publishConflict)
+    if (row.status !== 'review') throw new CatalogError('conflict', PUBLISH_CONFLICT)
     await database
       .update(matches)
       .set({ status: 'published', reviewedBy, publishedAt })

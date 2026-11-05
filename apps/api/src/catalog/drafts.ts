@@ -16,14 +16,14 @@ import * as schema from './schema.js'
 
 const { appearances, footballMatches, matches, tennisMatches, tennisMatchStats } = schema
 
-const draftHeader = {
+const DRAFT_HEADER = {
   id: idSchema,
   competitionId: idSchema,
   date: isoDateSchema,
   round: roundSchema,
-}
+} as const
 const tennisDraftSchema = z.strictObject({
-  ...draftHeader,
+  ...DRAFT_HEADER,
   playerAId: idSchema,
   playerBId: idSchema,
   winnerId: idSchema,
@@ -33,7 +33,7 @@ const tennisDraftSchema = z.strictObject({
   stats: z.array(z.unknown()).max(2).optional(),
 })
 const footballDraftSchema = z.strictObject({
-  ...draftHeader,
+  ...DRAFT_HEADER,
   homeTeamId: idSchema,
   awayTeamId: idSchema,
   homeGoals: z.unknown(),
