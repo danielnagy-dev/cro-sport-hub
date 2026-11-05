@@ -27,6 +27,6 @@ Preconditions: port 4200 is free. Playwright Chromium is installed. No Docker.
 #### Gotchas
 
 - The first Angular dev build is slow. Readiness waits up to 180 seconds.
-- Match rows come from the in-app stub (`apps/studio/src/app/stub-api.ts`), not from `GET /health` or the API. A green studio run does not prove the API.
+- Match rows come from the in-app stub (`apps/studio/src/app/core/stub-api.ts`), not from `GET /health` or the API. A green studio run does not prove the API.
 - `QF` is seed data, not a person's name. When the seed round changes, update this entry and the shell unit test together.
 - `/` is behind `editorGuard`. An editor and an admin may enter. A guest is sent to `/login`.

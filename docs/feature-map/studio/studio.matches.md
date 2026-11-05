@@ -4,7 +4,7 @@
 | ------ | ------ | ------------------------------- | ---------------------------------------- | ------------- |
 | studio | live   | `http://localhost:4200/matches` | `vp run studio#test` and `verify:studio` | plan item 23b |
 
-After login, `/matches` loads `GET /api/editor/matches` with the stored bearer. Three native `<select>` filters (sport, status, source) each include an All option; changing a filter reloads the list. The table caption is `Editorial match list`. Columns are label, sport, competition, date, round, status, and source. An empty page shows `No matches.` A failed load shows `The match list could not be loaded.` and leaves the filters enabled. Row links wait for plan 24b. The home shell at `/` still uses the stub list.
+After login, `/matches` loads `GET /api/editor/matches` with the stored bearer. Three native `<select>` filters (sport, status, source) each include an All option; changing a filter reloads the list. The table caption is `Editorial match list`. Columns are label, sport, competition, date, round, status, and source. An empty page shows `No matches.` A failed load shows `The match list could not be loaded.` and leaves the filters enabled. A tennis row links to `/matches/<id>/tennis`. A football row is a label. The home shell at `/` still uses the stub (`studio.shell`).
 
 #### How to get to it (user POV)
 

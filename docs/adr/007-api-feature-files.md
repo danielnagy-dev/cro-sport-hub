@@ -34,7 +34,7 @@ The migration runner reads `*.sql` beside itself and sorts the names. `0001` thr
 
 ### Docs
 
-One file per feature id: `docs/feature-map/<area>/<id>.md` (API ids under `docs/feature-map/api/`). The area file says how the directory is named and holds no index table. `docs/feature-map.md` keeps the four area rows. The verify skill reads the id file.
+One file per feature id: `docs/feature-map/<area>/<id>.md` (API ids under `docs/feature-map/api/`). The id is `<area>.<slug>`. The area file holds no index table and no id list. `docs/feature-map.md` keeps the four area rows. The verify skill reads the id file.
 
 ### What was rejected
 
@@ -48,8 +48,6 @@ One file per feature id: `docs/feature-map/<area>/<id>.md` (API ids under `docs/
 
 ## Consequences
 
-Implementing pull requests start after #32, #33, #35, and #36 have merged. Those branches still append to the old files. #35 and #36 are plan item 14a (the import core, then the admin routes). #29 and #30 have merged.
+Two API features may run together when neither adds a shared export and neither edits an existing feature file. Two features that both add a line to `libs/shared-types/src/index.ts` are not parallel-safe: alphabetical order and a trailing comma keep the previous line stable, and they do not merge two inserts at the same place.
 
-Until those pull requests merge, the plan index runs API registration tickets one at a time. Afterwards, two API features may run together when neither adds a shared export, and when neither edits an existing feature file. Two features that both add a line to the barrel are not parallel-safe: alphabetical order and a trailing comma keep the previous line stable, and they do not merge two inserts at the same place.
-
-Tickets are `.scratch/api-features/issues/`. The plan skill records shared files, and `.scratch/plan-index.md` shows the groups. No new runtime dependency. af1 sets this status to Accepted. Later slices follow the decision and leave this line alone.
+Open work is a GitHub issue (`docs/agents/issue-tracker.md`). `.scratch/` is retired ticket text. The plan skill records shared files, and `.scratch/plan-index.md` only points at which issues share a file. No new runtime dependency.

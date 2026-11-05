@@ -6,8 +6,8 @@ alwaysApply: false
 
 # Angular studio
 
-- Standalone components and signals. This app is built and tested with the Angular CLI (`ng build`, `ng test`).
-- Vite+ only runs those commands through `vp run`. Do not move the app onto a Vite Angular plugin.
+- Standalone components and signals. From the repository root: `vp run studio#build` and `vp run studio#test` (`AGENTS.md`). The test task runs `ng test --watch=false`.
+- Do not move the app onto a Vite Angular plugin. Do not run `ng` from `apps/studio`.
 - Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`. Do not point this package at the catalog compiler.
 - Template typecheck is the `typecheck` task (`ngc --noEmit`). The shared linter does not typecheck Angular templates.
 - Task caching ignores `.angular/**`. Keep that exclusion on studio tasks.
