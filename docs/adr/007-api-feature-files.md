@@ -50,4 +50,4 @@ One file per feature id: `docs/feature-map/<area>/<id>.md` (API ids under `docs/
 
 Two API features may run together when neither adds a shared export and neither edits an existing feature file. Two features that both add a line to `libs/shared-types/src/index.ts` are not parallel-safe: alphabetical order and a trailing comma keep the previous line stable, and they do not merge two inserts at the same place.
 
-Open work is a GitHub issue (`docs/agents/issue-tracker.md`). The plan skill records shared files, and `docs/agents/plan-index.md` points at which issues share a file. No new runtime dependency.
+Open work is a GitHub issue (`docs/agents/issue-tracker.md`). The plan skill records shared files in each issue's Notes. No new runtime dependency.

@@ -1,5 +1,5 @@
 /**
- * Fail when `.scratch/` is tracked or when tracked files mention that path.
+ * Fail when `.scratch/` is tracked, when a plan index is tracked, or when tracked files mention `.scratch/`.
  * Wired from `tools/guards/check.ts` (CI lint and `vp run guards`).
  * Linux and macOS. No network.
  */
@@ -12,6 +12,12 @@ const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 
 export const mentionNeedle = '.scratch/'
 
+/** Tracked ticket-order files that must not return (GitHub Issues hold order). */
+export const trackedPlanIndexPaths = new Set([
+  'docs/agents/plan-index.md',
+  '.scratch/plan-index.md',
+])
+
 /** Paths that may mention the retired folder (this guard and its tests only). */
 export const mentionAllowlist = new Set([
   'tools/guards/no-scratch.ts',
@@ -21,11 +27,12 @@ export const mentionAllowlist = new Set([
 ])
 
 export function trackedScratchPaths(paths: readonly string[]): string[] {
-  const hits: string[] = []
+  const hits = new Set<string>()
   for (const path of paths) {
-    if (path === '.scratch' || path.startsWith('.scratch/')) hits.push(path)
+    if (path === '.scratch' || path.startsWith('.scratch/')) hits.add(path)
+    if (trackedPlanIndexPaths.has(path)) hits.add(path)
   }
-  return hits.sort()
+  return [...hits].sort()
 }
 
 export function mentionFailures(
@@ -67,7 +74,11 @@ export function noScratchFailures(
 ): string[] {
   const failures: string[] = []
   for (const path of trackedScratchPaths(tracked)) {
-    failures.push(`${path}: tracked path under ${mentionNeedle}`)
+    if (trackedPlanIndexPaths.has(path)) {
+      failures.push(`${path}: tracked plan index (use GitHub Issues Blocked by lines)`)
+    } else {
+      failures.push(`${path}: tracked path under ${mentionNeedle}`)
+    }
   }
   failures.push(...mentionFailures(tracked, readText))
   return failures
