@@ -42,7 +42,7 @@
 - [ ] Typecheck (`vp run typecheck`, or `not run` in Verification with the reason)
 - [ ] Tests (`vp run test`, or `not run` in Verification with the reason)
 - [ ] Docs updated when a route, endpoint, story, or user action changed
-- [ ] Counted size is under 500
+- [ ] Counted size is not over 500 (`tools/guards/pr-size.ts` fails above that)
 - [ ] Merged `origin/main` before the final push (no rebase, no force-push)
 
 ## Review

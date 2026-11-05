@@ -1,5 +1,5 @@
-name: Task
-description: A chore, refactor, or doc slice with no new user-facing behavior
+name: Task or chore
+description: A refactor, doc slice, or other chore with no new user-facing behavior
 title: '[Task]: '
 body:
   - type: markdown
