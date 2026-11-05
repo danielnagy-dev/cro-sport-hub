@@ -94,3 +94,10 @@ export type { TennisMatchStats, TennisPercentages, TennisStatCounts } from './te
 
 export { appearanceIssues, appearanceSchema, footballMatchSchema } from './football.ts'
 export type { Appearance, AppearanceCounts, FootballMatch } from './football.ts'
+
+export {
+  galleryCaptionPatchSchema,
+  galleryCreateBodySchema,
+  galleryCreatedSchema,
+  galleryViewSchema,
+} from './gallery.ts'
