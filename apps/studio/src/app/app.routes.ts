@@ -25,6 +25,12 @@ export const studioRoutes: Routes = [
     canActivate: [editorGuard],
   },
   {
+    path: 'matches/new/football',
+    loadComponent: () =>
+      import('./feature/football-form/football-score').then((module) => module.FootballScorePage),
+    canActivate: [editorGuard],
+  },
+  {
     path: 'matches/:id/tennis',
     loadComponent: () =>
       import('./feature/tennis-form/tennis-score').then((module) => module.TennisScorePage),
