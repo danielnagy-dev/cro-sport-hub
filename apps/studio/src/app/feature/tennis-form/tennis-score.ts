@@ -30,7 +30,7 @@ type LookupState = 'loading' | 'ready' | 'error'
 type MatchStatus = Status
 type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
-const percentageRows = [
+const PERCENTAGE_ROWS = [
   ['First serve', 'firstServePct'],
   ['First-serve points won', 'firstServePointsWonPct'],
   ['Second-serve points won', 'secondServePointsWonPct'],
@@ -77,7 +77,7 @@ export class TennisScorePage {
 
   protected readonly statCountKeys = statCountKeys
   protected readonly statCountLabels = statCountLabels
-  protected readonly percentageRows = percentageRows
+  protected readonly percentageRows = PERCENTAGE_ROWS
 
   protected readonly draftIssues = computed(() =>
     validateTennisDraft(this.model(), this.activeMatchId()),
@@ -184,7 +184,7 @@ export class TennisScorePage {
 
   protected percentageValue(
     block: 'playerAStats' | 'playerBStats',
-    key: (typeof percentageRows)[number][1],
+    key: (typeof PERCENTAGE_ROWS)[number][1],
   ): string {
     const row = block === 'playerAStats' ? this.model().playerAStats : this.model().playerBStats
     const counts = parseStatCounts(row)

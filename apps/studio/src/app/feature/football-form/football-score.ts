@@ -23,7 +23,7 @@ import {
   type FootballFormModel,
 } from './draft-body'
 
-const appearanceCountFields = [
+const APPEARANCE_COUNT_FIELDS = [
   ['minutes', 'Minutes'],
   ['goals', 'Goals'],
   ['assists', 'Assists'],
@@ -33,7 +33,7 @@ const appearanceCountFields = [
 type LookupState = 'loading' | 'ready' | 'error'
 type FieldKey = keyof Omit<FootballFormModel, 'appearances'>
 
-const fields = [
+const FIELDS = [
   ['competitionId', 'competition', 'Competition', 'Choose a competition', 'select'],
   ['date', 'match-date', 'Date', '', 'date'],
   ['round', 'round', 'Round', '', 'text'],
@@ -51,8 +51,8 @@ const fields = [
 export class FootballScorePage {
   private readonly api = inject(StudioApi)
   protected readonly auth = inject(AuthStore)
-  protected readonly fieldConfigs = fields
-  protected readonly appearanceCountFields = appearanceCountFields
+  protected readonly fieldConfigs = FIELDS
+  protected readonly appearanceCountFields = APPEARANCE_COUNT_FIELDS
 
   protected readonly model = signal<FootballFormModel>(initialFootballFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])

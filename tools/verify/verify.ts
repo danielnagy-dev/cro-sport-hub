@@ -40,7 +40,7 @@ type Report = {
   checks: Check[]
 }
 
-const usage =
+const USAGE =
   'Usage: vpx tools/verify/verify.ts <api|studio|web|ui|doctor> [api|studio|web|ui] [--route <path>]... [--url <baseUrl>] [--out <dir>] [--timeout <s>]'
 
 class VerifyError extends Error {
@@ -71,7 +71,7 @@ function parseArgs(argv: readonly string[]): {
 } {
   const [command, ...rest] = argv
   if (command === undefined || (command !== 'doctor' && !isTarget(command))) {
-    throw new Error(usage)
+    throw new Error(USAGE)
   }
   const options: {
     command: TargetName | 'doctor'
@@ -89,7 +89,7 @@ function parseArgs(argv: readonly string[]): {
   for (; index < rest.length; index += 1) {
     const flag = rest[index]
     const value = rest[index + 1]
-    if (value === undefined) throw new Error(usage)
+    if (value === undefined) throw new Error(USAGE)
     if (flag === '--route') options.routes.push(value)
     else if (flag === '--url') options.url = value
     else if (flag === '--out') options.out = value
@@ -97,7 +97,7 @@ function parseArgs(argv: readonly string[]): {
       if (!/^[1-9]\d*$/.test(value))
         throw new Error('--timeout must be a positive number of seconds')
       options.timeoutSeconds = Number(value)
-    } else throw new Error(usage)
+    } else throw new Error(USAGE)
     index += 1
   }
   return options
