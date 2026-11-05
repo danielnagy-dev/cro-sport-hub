@@ -23,7 +23,7 @@ The author runs each required check once, from the repository root, and records 
 
 - One topic per pull request.
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
-- The description says what changed, why, and how to test it. The description becomes the squash commit body.
+- The description follows `.github/pull_request_template.md`, in this order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots when the UI changes, Verification, Checklist, and Review. It becomes the squash commit body. `## Summary` is the spec when the ticket file is not on the branch.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
 - No `Co-authored-by` line with an email in a commit message or the PR description. If a hook adds one, strip it before pushing.
 - A pull request edits only its own ticket file, `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. The index is `docs/agents/issue-tracker.md`. It has no status list.

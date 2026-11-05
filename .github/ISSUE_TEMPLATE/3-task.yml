@@ -1,0 +1,77 @@
+name: Task
+description: A chore, refactor, or doc slice with no new user-facing behavior
+title: '[Task]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for a chore that is not a bug and not a feature. The agent ticket is still `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. Copy Goal into **What to build:**. Acceptance criteria, Blocked by, and Size use the same names on that file.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - apps/web
+        - apps/studio
+        - apps/api
+        - libs/ui
+        - libs/shared-types
+        - docs or config
+        - tooling
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What to build. One topic.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in, and what waits.
+      placeholder: |
+        In:
+        Out:
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable checks. One checkbox per check.
+      placeholder: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked by
+      description: Plan ids that must land first. Write none when nothing blocks this.
+      placeholder: none
+    validations:
+      required: true
+
+  - type: input
+    id: size
+    attributes:
+      label: Size
+      description: Counted lines. Target 300. Split before 500. A corrected estimate over 400 is split before the ticket is ready-for-agent.
+      placeholder: '120'
+    validations:
+      required: true
+
+  - type: textarea
+    id: shared-files
+    attributes:
+      label: Shared files
+      description: Existing paths this ticket edits, sorted. Write none when it only adds files.
+      placeholder: none

@@ -24,6 +24,8 @@ Read the file at the referenced path. The user will normally pass the path or th
 
 Origin has no GitHub or GitLab issues. A `#123` in a commit is not an issue id. Do not call `gh` or `glab`. Do not create labels, issues, or comments on a remote. Read the ticket file, or the PR `## Summary` when the file is not in the branch. Status on a ticket is plan-item status, not a remote issue.
 
+GitHub issue forms in `.github/ISSUE_TEMPLATE/` use the same fields (goal, acceptance criteria, blocked by, size) for people filing on GitHub. Agents still write the local ticket and do not open a GitHub issue.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
