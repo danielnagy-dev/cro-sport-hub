@@ -8,6 +8,9 @@ export default defineConfig({
   test: {
     include: ['src/**/*.spec.ts'],
     environment: 'node',
+    // PGLite migrations + seed per suite; CI runners often exceed Vitest's 5s default.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
   run: {
     tasks: {
