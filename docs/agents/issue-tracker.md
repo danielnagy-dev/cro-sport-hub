@@ -15,7 +15,7 @@ Otherwise `gh issue create` with this body:
 - **Goal.** What to build. One topic.
 - **Scope.** What is in, and what waits.
 - **Acceptance criteria.** Observable checks, one checkbox each.
-- **Blocked by.** `#N` for an open issue. `none` when nothing open blocks it. Name a merged plan id in prose when that history matters.
+- **Blocked by.** Under the `## Blocked by` heading: list each open blocker as `#N` (optional `[plan-id]` in parentheses). Say `none` or equivalent when no open issue blocks it. Extra sentences on the same section (for example `Already merged, no issue: 12a.`) are informational; only `#N` references decide order.
 - **Size.** Counted lines. Target 300. Split before 500. A corrected estimate over 400 is split before the issue is ready.
 - **Notes.** Shared files, verification, architect, and seams.
 
@@ -45,4 +45,6 @@ Before the final push, fetch and merge the latest `origin/main` as `AGENTS.md` d
 
 ## Order
 
-Which issues may run together is `docs/agents/plan-index.md`. That file is a pointer. It is not a second tracker.
+The next work is any open issue whose `## Blocked by` section has no open `#N` blockers (every `#N` listed there is closed, or the section states there is none). The issue body is the spec. There is no separate plan index in the repo.
+
+Two issues may run in parallel when each is unblocked and their **Shared files** lists in Notes share no path (see `.cursor/skills/plan/SKILL.md`).
