@@ -18,6 +18,7 @@ export function skillNamesFromLock(lock: SkillsLock): string[] {
 
 export function excludedFromCount(path: string, skillNames: readonly string[]): boolean {
   if (exactExcluded.has(path)) return true
+  if (path.startsWith('.scratch/')) return true
   for (const name of skillNames) {
     const prefix = `.agents/skills/${name}/`
     if (path.startsWith(prefix)) return true

@@ -2,7 +2,7 @@
 
 Open work is a GitHub issue on [danielnagy-dev/cro-sport-hub](https://github.com/danielnagy-dev/cro-sport-hub/issues). The issue body is the spec. A pull request `## Summary` is the spec only when the pull request has no issue.
 
-Files left under `.scratch/<area>/issues/` are history from the local-markdown tracker. Do not start work from them, and do not add a new file there.
+The retired local-markdown ticket tree is gone. Do not recreate it.
 
 `wayfinder` is not installed. Do not create `map.md`.
 
@@ -15,7 +15,7 @@ Otherwise `gh issue create` with this body:
 - **Goal.** What to build. One topic.
 - **Scope.** What is in, and what waits.
 - **Acceptance criteria.** Observable checks, one checkbox each.
-- **Blocked by.** `#N` for an open issue. `none` when nothing open blocks it. Name a merged plan id in prose when that history matters.
+- **Blocked by.** Under the `## Blocked by` heading: list each open blocker as `#N` (optional `[plan-id]` in parentheses). Say `none` or equivalent when no open issue blocks it. Extra sentences on the same section (for example `Already merged, no issue: 12a.`) are informational; only `#N` references decide order.
 - **Size.** Counted lines. Target 300. Split before 500. A corrected estimate over 400 is split before the issue is ready.
 - **Notes.** Shared files, verification, architect, and seams.
 
@@ -23,7 +23,7 @@ Title: `[<id>] <title>`. Keep an existing plan id such as `4b`. A new id continu
 
 Labels, applied when the issue is opened:
 
-- `area:<area>` matches the old `.scratch` directory (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
+- `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
 - `type:feature`, `type:bug`, or `type:task`. Colors `A2EEEF`, `D73A4A`, `C5DEF5`.
 - `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`.
 
@@ -45,4 +45,6 @@ Before the final push, fetch and merge the latest `origin/main` as `AGENTS.md` d
 
 ## Order
 
-Which issues may run together is `.scratch/plan-index.md`. That file is a pointer. It is not a second tracker.
+The next work is any open issue whose `## Blocked by` section has no open `#N` blockers (every `#N` listed there is closed, or the section states there is none). The issue body is the spec. There is no separate plan index in the repo.
+
+Two issues may run in parallel when each is unblocked and their **Shared files** lists in Notes share no path (see `.cursor/skills/plan/SKILL.md`).

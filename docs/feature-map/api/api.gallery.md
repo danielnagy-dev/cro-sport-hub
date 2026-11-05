@@ -1,12 +1,14 @@
-# api.gallery: Draft galleries, captions, render, and PNG bytes
+# api.gallery: Draft galleries, captions, render, PNG bytes, and review workflow
 
-| App | Status | Entry point (user POV)                                                       | Verify              | Since       |
-| --- | ------ | ---------------------------------------------------------------------------- | ------------------- | ----------- |
-| api | live   | `POST /api/galleries`, captions, `POST …/render`, `GET …/slides/{index}.png` | `vp run verify:api` | plan #52–53 |
+| App | Status | Entry point (user POV)                                                | Verify              | Since       |
+| --- | ------ | --------------------------------------------------------------------- | ------------------- | ----------- |
+| api | live   | `POST /api/galleries`, captions, render, PNG, submit, reject, publish | `vp run verify:api` | plan #52–54 |
 
 Editors and admins create draft football galleries from published match ids, read the draft, and patch slide captions. `POST /api/galleries/:id/render` rasterizes stored slides (caption included) with the slide-generator Chromium renderer and saves PNG bytes on each row. A later render overwrites bytes. The JSON body is `{ slideCount }`. Unknown gallery is HTTP 404 `Unknown gallery`. When Chromium is not installed, render is HTTP 503 with the message from `footballRendererReason` and no bytes are written.
 
 `GET /api/galleries/:id/slides/:index.png` returns `image/png` for one rendered slide. The caller sends `Authorization: Bearer`. There is no public image URL. A slide with no PNG bytes is HTTP 404 `Slide is not rendered`. Missing or invalid bearer token is HTTP 401 `Invalid token` on render and on the PNG route.
+
+`POST /api/galleries/:id/submit` moves a draft to review. An editor or an admin sends `Authorization: Bearer`. The response is HTTP 200 `{ id, status: "review" }`. The row does not gain `reviewedBy` or `publishedAt`. `POST /api/galleries/:id/reject` is admin only. The row must be in review. It becomes draft, and `reviewedBy` and `publishedAt` are cleared. The response is HTTP 200 `{ id, status: "draft" }`. `POST /api/galleries/:id/publish` is admin only. The row must be in review. It becomes published, `reviewedBy` is the caller, and `publishedAt` is an ISO timestamp with a numeric offset. The response is HTTP 200 `{ id, status: "published" }`. PNG bytes are not required to publish. These three routes do not call `invalidatePublicReads`. A missing token is HTTP 401 `Invalid token`. An editor calling reject or publish is HTTP 403 `Forbidden`. Submit of any other status is HTTP 409 `Only a draft gallery can be submitted`. Reject or publish of any other status is HTTP 409 with the matching message. An unknown id is HTTP 404 `Unknown gallery`.
 
 #### How to get to it (user POV)
 
@@ -15,6 +17,9 @@ Editors and admins create draft football galleries from published match ids, rea
 - Caption: `PATCH http://localhost:3001/api/galleries/{id}/slides/{index}` with `{ "caption": "…" }`.
 - Render: `POST http://localhost:3001/api/galleries/{id}/render`.
 - PNG: `GET http://localhost:3001/api/galleries/{id}/slides/0.png`.
+- Submit: `POST http://localhost:3001/api/galleries/{id}/submit`.
+- Reject: `POST http://localhost:3001/api/galleries/{id}/reject`.
+- Publish: `POST http://localhost:3001/api/galleries/{id}/publish`.
 
 Shapes are on `GET /docs-json`. Swagger UI is `/docs`.
 
@@ -23,7 +28,7 @@ Shapes are on `GET /docs-json`. Swagger UI is `/docs`.
 Preconditions: same as `api.health`. Migrations run on the first request.
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. It does not call render or download PNG bytes.
-- **Behaviour.** The PGLite HTTP suite in `apps/api` covers create, caption, render (stubbed renderer when Chromium is present), PNG bytes, missing Chromium, and auth.
+- **Behaviour.** The PGLite HTTP suite in `apps/api` covers create, caption, render (stubbed renderer when Chromium is present), PNG bytes, missing Chromium, auth, and submit, reject, and publish (including that publish does not clear `pub:v1:` cache keys).
 
 #### Gotchas
 

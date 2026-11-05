@@ -275,6 +275,82 @@ export async function renderGalleryPngs(
   return parseRecord(galleryRenderResponseSchema, { slideCount: slides.length })
 }
 
+const submitConflict = 'Only a draft gallery can be submitted'
+const rejectConflict = 'Only a gallery in review can be rejected'
+const publishConflict = 'Only a gallery in review can be published'
+
+function isoTimestampWithOffset(date = new Date()): string {
+  const pad = (value: number) => String(value).padStart(2, '0')
+  const offsetMinutes = -date.getTimezoneOffset()
+  const sign = offsetMinutes >= 0 ? '+' : '-'
+  const absolute = Math.abs(offsetMinutes)
+  const hours = pad(Math.floor(absolute / 60))
+  const minutes = pad(absolute % 60)
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${hours}:${minutes}`
+}
+
+async function moveGallery(
+  db: CatalogDb,
+  id: string,
+  from: 'draft' | 'review',
+  status: 'draft' | 'review' | 'published',
+  conflict: string,
+  patch: { reviewedBy: string | null; publishedAt: string | null },
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const database = tx as unknown as CatalogDb
+    const row = (
+      await database
+        .select({ status: galleries.status })
+        .from(galleries)
+        .where(eq(galleries.id, id))
+    )[0]
+    if (row === undefined) throw new CatalogError('unknown-ref', 'Unknown gallery')
+    if (row.status !== from) throw new CatalogError('conflict', conflict)
+    await database
+      .update(galleries)
+      .set({ status, reviewedBy: patch.reviewedBy, publishedAt: patch.publishedAt })
+      .where(eq(galleries.id, id))
+  })
+}
+
+/** Draft becomes review. Does not record a reviewer or a publish time. */
+export async function submitGallery(
+  db: CatalogDb,
+  id: string,
+): Promise<{ id: string; status: 'review' }> {
+  await moveGallery(db, id, 'draft', 'review', submitConflict, {
+    reviewedBy: null,
+    publishedAt: null,
+  })
+  return { id, status: 'review' }
+}
+
+/** Review becomes draft. Clears any reviewer and publish time. */
+export async function rejectGallery(
+  db: CatalogDb,
+  id: string,
+): Promise<{ id: string; status: 'draft' }> {
+  await moveGallery(db, id, 'review', 'draft', rejectConflict, {
+    reviewedBy: null,
+    publishedAt: null,
+  })
+  return { id, status: 'draft' }
+}
+
+/** Review becomes published. Records the reviewer and an ISO time with a numeric offset. */
+export async function publishGallery(
+  db: CatalogDb,
+  id: string,
+  reviewerId: string,
+): Promise<{ id: string; status: 'published' }> {
+  await moveGallery(db, id, 'review', 'published', publishConflict, {
+    reviewedBy: reviewerId,
+    publishedAt: isoTimestampWithOffset(),
+  })
+  return { id, status: 'published' }
+}
+
 export async function readGallerySlidePng(
   db: CatalogDb,
   galleryId: string,

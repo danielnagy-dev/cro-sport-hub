@@ -5,6 +5,7 @@ import { join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { assertBoundarySelfTest, studioBoundaryFailures } from './boundaries.ts'
 import { assertModuleConstantSelfTest, moduleConstantFailures } from './module-constants.ts'
+import { noScratchFailures } from './no-scratch.ts'
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 
@@ -400,6 +401,7 @@ function main(): number {
     ...vendoredSkillFailures(),
     ...studioBoundaryFailures(),
     ...moduleConstantFailures(),
+    ...noScratchFailures(),
   ]
   console.log(`commits scanned: ${commits.label}`)
   console.log(prBody.note)

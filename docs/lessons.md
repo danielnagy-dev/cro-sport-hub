@@ -98,9 +98,9 @@ The pre-launch foundation exception in this note was retired later the same day.
 
 PRs #8 and #9 both conflicted on `docs/agents/issue-tracker.md` after #7 merged. Cause: the status table and the plan notes lived in one file, so every pull request edited it.
 
-Guard: one GitHub issue per plan item (`docs/agents/issue-tracker.md`), titled `[<id>] <title>`. A pull request references `Closes #N` and does not add a `.scratch` ticket. Files left under `.scratch/` are history. The local-markdown layout from mattpocock/skills `issue-tracker-local.md` at `5beb35b040e3de97e54fa9e386d7e42d15c295c2` is that history. The index does not list items. Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push) and rerun the checks when that merge changes the tree. A merge that does not change the tree leaves the recorded results in place, so checks still run once. Where: `docs/agents/issue-tracker.md`, `.cursor/skills/plan`, `.cursor/skills/develop`, `.cursor/skills/review`, `AGENTS.md`, `docs/team.md`, and the short form in `.cursor/rules/lessons.mdc`.
+Guard: one GitHub issue per plan item (`docs/agents/issue-tracker.md`), titled `[<id>] <title>`. A pull request references `Closes #N`. The local-markdown layout from mattpocock/skills `issue-tracker-local.md` at `5beb35b040e3de97e54fa9e386d7e42d15c295c2` was retired in favour of GitHub Issues. The index does not list items. Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push) and rerun the checks when that merge changes the tree. A merge that does not change the tree leaves the recorded results in place, so checks still run once. Where: `docs/agents/issue-tracker.md`, `.cursor/skills/plan`, `.cursor/skills/develop`, `.cursor/skills/review`, `AGENTS.md`, `docs/team.md`, and the short form in `.cursor/rules/lessons.mdc`.
 
-No guard in `tools/guards/check.ts`, and no `plan:list` script. A script would restate the directory and need a task plus a typecheck entry. A guard that a branch edited only its own ticket file needs the plan id, and the diff does not carry one. A ban on tables in the index misses a bullet list and rejects a legitimate table. Structure removes the shared list, so there is nothing left for a check to police. `.scratch/` is not gitignored, so the upstream path is committed as-is.
+No `plan:list` script. A script would restate the directory and need a task plus a typecheck entry. A guard that a branch edited only its own ticket file needs the plan id, and the diff does not carry one. A ban on tables in the index misses a bullet list and rejects a legitimate table. Structure removes the shared list, so there is nothing left for a check to police.
 
 ## 2026-10-25 — empty `toThrow`
 
@@ -133,3 +133,11 @@ Plan items 7, 11, and 22 were handed to develop as a few lines of scope. The dif
 Guard: `.cursor/skills/plan/SKILL.md`. A ticket without a size estimate is not `ready-for-agent`. An estimate over 400 counted lines is split before it is marked ready. The count is the same one Size already defines (code and tests).
 
 No new check: the estimate is a judgment written in the ticket. A lint can see that a line exists and still miss a made-up number. The coordinator reads the status before anyone starts. The short form is in `.cursor/rules/lessons.mdc`.
+
+## 2026-11-05 — agents restarted work from stale local tickets
+
+The committed local markdown ticket tree still looked like the issue tracker after GitHub Issues became the spec. Agents opened those files instead of `gh issue view`.
+
+Guard: `tools/guards/no-scratch.ts`, wired from `tools/guards/check.ts`. It fails when git tracks a path under the retired tree, when a tracked plan index reappears, or when a tracked file outside the allowlist mentions that path. Order lives in each issue's `## Blocked by` section (`#N` references); parallel safety is shared files in Notes.
+
+No pre-commit hook: staged paths cannot recreate a deleted tree without a commit, and mention checks belong with the other repo guards in CI lint.

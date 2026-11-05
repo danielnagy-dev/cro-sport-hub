@@ -30,6 +30,8 @@ import { EditorAuthGuard } from './auth/role.guard.js'
 import { catalogDb, CatalogError, type Catalog } from './catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { saveDraft } from './catalog/drafts.js'
+import { invalidatePublicReads } from './public-read-cache/invalidate-public-reads.js'
+import { PUBLIC_READ_CACHE, type PublicReadCacheClient } from './public-read-cache/client.js'
 
 const draftSavedSchema = z.strictObject({
   id: idSchema,
@@ -88,7 +90,10 @@ function toHttp(error: unknown): unknown {
 @UseGuards(EditorAuthGuard)
 @Controller('api')
 export class MatchDraftsController {
-  constructor(@Inject(CATALOG_OPENER) private readonly openCatalog: CatalogOpener) {}
+  constructor(
+    @Inject(CATALOG_OPENER) private readonly openCatalog: CatalogOpener,
+    @Inject(PUBLIC_READ_CACHE) private readonly cache: PublicReadCacheClient,
+  ) {}
 
   @Post('matches/tennis')
   @draftDocs('Save a tennis match as a draft', true)
@@ -121,7 +126,11 @@ export class MatchDraftsController {
     if (actorId === undefined) throw new UnauthorizedException('Invalid token')
     const catalog: Catalog = await this.openCatalog()
     try {
-      return draftSavedSchema.parse(await saveDraft(catalogDb(catalog), sport, body, actorId, mode))
+      const saved = draftSavedSchema.parse(
+        await saveDraft(catalogDb(catalog), sport, body, actorId, mode),
+      )
+      await invalidatePublicReads(this.cache)
+      return saved
     } catch (error) {
       throw toHttp(error)
     } finally {

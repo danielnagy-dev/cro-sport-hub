@@ -33,11 +33,11 @@ For one plan item, write:
 
 `**Shared files:**` sits with the other bold fields. List every existing file the ticket edits, as repo-root paths, sorted. A ticket that only adds files writes `none`. New files are left off the list.
 
-Two issues may run together when their shared-file lists share no path. That pair is parallel-safe. The plan index (`.scratch/plan-index.md`) shows the groups as issue links. One group runs one issue at a time. An issue whose list meets two groups runs alone.
+Two issues may run together when both are unblocked (every `#N` under `## Blocked by` is closed, or the section says none) and their shared-file lists share no path. That pair is parallel-safe. Issues that touch the same shared path run one at a time. An issue whose list meets two groups runs alone.
 
 ADR-007 names the API registration files. Once its feature folders are on main, an API feature's list is empty, or one sorted line in `libs/shared-types/src/index.ts` when the feature adds a shared export. Until then, a ticket that registers an API feature lists those files.
 
-Publish that note as one GitHub issue, in the shape `docs/agents/issue-tracker.md` specifies. Search for `[<id>]` first so a rerun does not open a duplicate. Title `[<id>] <title>`. Body sections are Goal, Scope, Acceptance criteria, Blocked by, Size, and Notes (shared files, verification, architect, seams). Label `area:<area>`, `type:feature` or `type:bug` or `type:task`, and `status:ready-for-agent` only when Size's estimate gate is met. Blocked by uses `#N` for an open issue. Do not add a `.scratch` ticket file, and leave `docs/agents/issue-tracker.md` without a status list. The issue body is the note handed to the implementer. It becomes the PR Summary.
+Publish that note as one GitHub issue, in the shape `docs/agents/issue-tracker.md` specifies. Search for `[<id>]` first so a rerun does not open a duplicate. Title `[<id>] <title>`. Body sections are Goal, Scope, Acceptance criteria, Blocked by, Size, and Notes (shared files, verification, architect, seams). Label `area:<area>`, `type:feature` or `type:bug` or `type:task`, and `status:ready-for-agent` only when Size's estimate gate is met. The `## Blocked by` section lists `#N` for each open blocker (optional `[plan-id]`); use `none` when nothing open blocks it. Merged-only history can follow in prose on that section. Leave `docs/agents/issue-tracker.md` without a status list. The issue body is the note handed to the implementer. It becomes the PR Summary.
 
 Before the final push, develop fetches and merges the latest `origin/main`, as `AGENTS.md` says. No rebase. No force-push.
 

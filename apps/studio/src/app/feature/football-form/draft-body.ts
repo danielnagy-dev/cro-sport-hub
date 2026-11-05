@@ -1,10 +1,23 @@
 import {
+  appearanceSchema,
   footballMatchSchema,
   idSchema,
   isoDateSchema,
   roundSchema,
+  type Appearance,
   type FieldIssue,
 } from '@cro-sport-hub/shared-types'
+
+export type AppearanceRowModel = {
+  athleteId: string
+  teamId: string
+  started: boolean
+  minutes: string
+  goals: string
+  assists: string
+  yellowCards: string
+  redCard: boolean
+}
 
 export type FootballFormModel = {
   competitionId: string
@@ -14,6 +27,20 @@ export type FootballFormModel = {
   awayTeamId: string
   homeGoals: string
   awayGoals: string
+  appearances: AppearanceRowModel[]
+}
+
+export function emptyAppearanceRow(): AppearanceRowModel {
+  return {
+    athleteId: '',
+    teamId: '',
+    started: false,
+    minutes: '',
+    goals: '',
+    assists: '',
+    yellowCards: '',
+    redCard: false,
+  }
 }
 
 export function initialFootballFormModel(): FootballFormModel {
@@ -25,6 +52,7 @@ export function initialFootballFormModel(): FootballFormModel {
     awayTeamId: '',
     homeGoals: '',
     awayGoals: '',
+    appearances: [],
   }
 }
 
@@ -38,8 +66,44 @@ function parseGoals(value: string): number | undefined {
   return Number.isInteger(parsed) ? parsed : Number.NaN
 }
 
-export function buildFootballDraftBody(model: FootballFormModel, matchId: string) {
+function parseCount(value: string): number | undefined {
+  if (value.trim() === '') return 0
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined
+}
+
+function rowFilled(row: AppearanceRowModel): boolean {
+  return row.athleteId.trim() !== ''
+}
+
+function parseAppearanceRow(row: AppearanceRowModel): Omit<Appearance, 'matchId'> | undefined {
+  if (!rowFilled(row)) return undefined
+  const minutes = parseCount(row.minutes)
+  const goals = parseCount(row.goals)
+  const assists = parseCount(row.assists)
+  const yellowCards = parseCount(row.yellowCards)
+  if (
+    minutes === undefined ||
+    goals === undefined ||
+    assists === undefined ||
+    yellowCards === undefined
+  ) {
+    return undefined
+  }
   return {
+    athleteId: row.athleteId,
+    teamId: row.teamId,
+    started: row.started,
+    minutes,
+    goals,
+    assists,
+    yellowCards,
+    redCard: row.redCard,
+  }
+}
+
+export function buildFootballDraftBody(model: FootballFormModel, matchId: string) {
+  const body = {
     id: matchId,
     competitionId: model.competitionId,
     date: model.date,
@@ -48,12 +112,31 @@ export function buildFootballDraftBody(model: FootballFormModel, matchId: string
     awayTeamId: model.awayTeamId,
     homeGoals: parseGoals(model.homeGoals) ?? Number.NaN,
     awayGoals: parseGoals(model.awayGoals) ?? Number.NaN,
+  } as {
+    id: string
+    competitionId: string
+    date: string
+    round: string
+    homeTeamId: string
+    awayTeamId: string
+    homeGoals: number
+    awayGoals: number
+    appearances?: Omit<Appearance, 'matchId'>[]
   }
+  const appearances = model.appearances
+    .map((row) => parseAppearanceRow(row))
+    .filter((row): row is Omit<Appearance, 'matchId'> => row !== undefined)
+  if (appearances.length > 0) body.appearances = appearances
+  return body
 }
 
-function pushIssue(issues: FieldIssue[], path: string, message: string | undefined): void {
-  if (!message || issues.some((issue) => issue.path[0] === path)) return
-  issues.push({ path: [path], message })
+function pushIssue(
+  issues: FieldIssue[],
+  path: readonly string[],
+  message: string | undefined,
+): void {
+  if (!message || issues.some((issue) => issue.path.join('.') === path.join('.'))) return
+  issues.push({ path: [...path], message })
 }
 
 export function validateFootballDraft(
@@ -83,7 +166,7 @@ export function validateFootballDraft(
         : undefined,
     ],
   ] as const) {
-    pushIssue(issues, path, message)
+    pushIssue(issues, [path], message)
   }
   const football = footballMatchSchema.safeParse({
     matchId,
@@ -95,8 +178,40 @@ export function validateFootballDraft(
   if (!football.success) {
     for (const issue of football.error.issues) {
       const key = issue.path[0]
-      if (key !== 'matchId' && typeof key === 'string') pushIssue(issues, key, issue.message)
+      if (key !== 'matchId' && typeof key === 'string') pushIssue(issues, [key], issue.message)
     }
   }
+
+  for (const [index, row] of model.appearances.entries()) {
+    if (!rowFilled(row)) continue
+    const parsed = parseAppearanceRow(row)
+    const rowPath = ['appearances', String(index)] as const
+    if (parsed === undefined) {
+      pushIssue(issues, rowPath, 'Appearance counts must be whole numbers from 0 upward')
+      continue
+    }
+    if (
+      model.homeTeamId !== '' &&
+      model.awayTeamId !== '' &&
+      parsed.teamId !== model.homeTeamId &&
+      parsed.teamId !== model.awayTeamId
+    ) {
+      pushIssue(issues, [...rowPath, 'teamId'], 'The appearance club is one of the two sides')
+    }
+    const checked = appearanceSchema.safeParse({ matchId, ...parsed })
+    if (!checked.success) {
+      for (const issue of checked.error.issues) {
+        if (issue.path[0] === 'matchId') continue
+        const field = issue.path[0]
+        if (typeof field === 'string') pushIssue(issues, [...rowPath, field], issue.message)
+      }
+    }
+  }
+
+  const athleteIds = model.appearances.filter(rowFilled).map((row) => row.athleteId)
+  if (new Set(athleteIds).size !== athleteIds.length) {
+    pushIssue(issues, ['appearances'], 'Each athlete is listed once')
+  }
+
   return issues
 }

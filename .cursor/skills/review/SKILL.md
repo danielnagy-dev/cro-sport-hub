@@ -64,7 +64,7 @@ Majors:
 - Counted size past the split line at 500. Over the 300 target, and at or under 500, is a nit.
 - `## Changes` misses a top-level path from `git diff --stat origin/main...HEAD`.
 - A `Co-authored-by` line in the PR body or in `git log origin/main..HEAD` contains an email.
-- The PR adds a file under `.scratch/`, or adds a per-item status list to `docs/agents/issue-tracker.md`. Open work is a GitHub issue. History files already under `.scratch/` stay as they are.
+- The PR adds a per-item status list to `docs/agents/issue-tracker.md`, or reintroduces tracked paths under the retired local ticket tree (`tools/guards/no-scratch.ts`). Open work is a GitHub issue.
 - The final-push line is missing, or `final push: merged origin/main and reran the checks` sits on a table recorded before that merge changed the tree. The other line is `final push: origin/main already contained`.
 
 A missing verification row is the one extra command, not a major, unless you run it and it fails. A docs-only diff says `not applicable (no runtime change)` for `verify`.

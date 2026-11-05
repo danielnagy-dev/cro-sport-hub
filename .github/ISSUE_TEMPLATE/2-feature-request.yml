@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Search open issues first. An agent files this form (goal, acceptance criteria, blocked by, size). The issue is the spec. Do not add a `.scratch` ticket.
+        Search open issues first. An agent files this form (goal, acceptance criteria, blocked by, size). The issue is the spec. Do not add a local markdown ticket file.
 
   - type: dropdown
     id: area
