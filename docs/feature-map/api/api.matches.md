@@ -21,6 +21,7 @@ Preconditions: same as `api.health`. Migrations run on the first request. No see
 
 #### Gotchas
 
+- Responses are cached in Redis for 60 seconds (`pub:v1:matches:` keys). A reader can see the same page for up to a minute after a row changes until plan item 9b deletes the key.
 - The seeded quarterfinal is a draft and is not listed. A newer unpublished football match is not on `/api/matches/football`.
 - Club names are strings on the football item. v1 has no `/api/teams` route.
 - `verify:api` does not load the sample seed. Do not point it at an unknown slug: HTTP 404 fails the run.

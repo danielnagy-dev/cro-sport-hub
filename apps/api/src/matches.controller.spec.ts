@@ -9,6 +9,10 @@ import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { MatchesController } from './matches.controller.js'
+import {
+  createInMemoryPublicReadCacheClient,
+  PUBLIC_READ_CACHE,
+} from './public-read-cache/client.js'
 import { setupOpenApi } from './openapi.js'
 
 const league = {
@@ -89,7 +93,10 @@ describe('published matches', () => {
 
     const moduleRef = await Test.createTestingModule({
       controllers: [MatchesController],
-      providers: [{ provide: CATALOG_OPENER, useValue: open }],
+      providers: [
+        { provide: CATALOG_OPENER, useValue: open },
+        { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
+      ],
     }).compile()
     const app = moduleRef.createNestApplication()
     setupOpenApi(app)
