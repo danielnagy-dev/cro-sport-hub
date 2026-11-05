@@ -37,3 +37,7 @@ No. The draft body is plan 11. The lookups are 24a. The form does not add a sche
 ### Seams
 
 - The tennis form submit, stubbed HTTP. Catches a POST that includes `status` or `stats`, a 7-6 set that is sent, and an empty form that is sent.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/46
