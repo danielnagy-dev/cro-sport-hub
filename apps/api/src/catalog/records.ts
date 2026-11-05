@@ -228,20 +228,20 @@ export async function writeRecord(
   }
 }
 
-const idTables = {
+const ID_TABLES = {
   sport: sports,
   competition: competitions,
   team: teams,
   athlete: athletes,
   user: users,
-}
-const idParsers = {
+} as const
+const ID_PARSERS = {
   sport: sportSchema,
   competition: competitionSchema,
   team: teamSchema,
   athlete: athleteSchema,
   user: userSchema,
-}
+} as const
 
 async function readMatchRow(
   db: CatalogDb,
@@ -335,12 +335,12 @@ export async function readRecord(
       : parseRecord(athleteTeamSchema, publicRow(row, ['athleteSport']))
   }
   if (typeof key !== 'string') throw new CatalogError('invalid', 'That record is read by id')
-  const table = idTables[kind]
+  const table = ID_TABLES[kind]
   const rows = await db.select().from(table).where(eq(table.id, key))
   const row = rows[0]
   if (row === undefined) return undefined
   const hidden = kind === 'team' || kind === 'athlete' ? ['sportSlug'] : []
-  const parsed = idParsers[kind].safeParse(publicRow(row, hidden))
+  const parsed = ID_PARSERS[kind].safeParse(publicRow(row, hidden))
   if (!parsed.success) return invalidRecord(parsed.error)
   return parsed.data
 }

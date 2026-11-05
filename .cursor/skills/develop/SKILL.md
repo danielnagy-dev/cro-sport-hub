@@ -10,7 +10,7 @@ Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and
 ## Before editing
 
 - Read the plan: scope, acceptance, verification, and the size target in `.cursor/skills/plan/SKILL.md` (300 lines, split before 500). The spec is the GitHub issue (`docs/agents/issue-tracker.md`). `gh issue view <number> --repo danielnagy-dev/cro-sport-hub`.
-- Before editing, comment on that issue and set the label `status:claimed`. Remove `status:ready-for-agent` when it is present. Create `status:claimed` (color `FBCA04`) when the label is missing. The pull request body includes `Closes #N`.
+- Before editing, read the issue. The pull request body includes `Closes #N`; that link is the claim. Agents do not comment on the issue or change issue labels (the agent token lacks issue write access). Do not add a local ticket markdown file (`docs/agents/issue-tracker.md`).
 - Read the rule for the files you touch: `.cursor/rules/api-nest.mdc`, `studio-angular.mdc`, `angular-best-practices.mdc`, `web-next.mdc`, and `typescript-testing.mdc` for TypeScript.
 - If the plan says a sketch or an ADR is required, do not start without it.
 - Run `vp` from the repository root. See `docs/adr/001-vite-plus-vs-nx.md`.

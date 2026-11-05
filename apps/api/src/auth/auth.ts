@@ -5,7 +5,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { Pool } from 'pg'
 import { z } from 'zod'
 
-const rounds = 10
+const ROUNDS = 10
 const claims = z.object({ sub: z.string().min(1), role: z.string().min(1) })
 const credentialRow = z.object({
   id: z.string().min(1),
@@ -30,10 +30,10 @@ export type Sql = {
 }
 
 let dummy: Promise<string> | undefined
-const dummyHash = (): Promise<string> => (dummy ??= hash(randomBytes(32).toString('hex'), rounds))
+const dummyHash = (): Promise<string> => (dummy ??= hash(randomBytes(32).toString('hex'), ROUNDS))
 
 export function hashPassword(password: string): Promise<string> {
-  return hash(password, rounds)
+  return hash(password, ROUNDS)
 }
 
 export function readJwtSecret(env: NodeJS.ProcessEnv): string {

@@ -10,16 +10,16 @@ import {
   type FootballSlide,
 } from './football.ts'
 
-const install = 'Playwright Chromium is not installed. Run: vp exec playwright install chromium'
+const INSTALL_MSG = 'Playwright Chromium is not installed. Run: vp exec playwright install chromium'
 
 /** `undefined` when the Chromium binary from `vp exec playwright install chromium` is present. */
 export function footballRendererReason(): string | undefined {
   try {
     const executable = chromium.executablePath()
-    if (!existsSync(executable)) return `${install} (${executable})`
+    if (!existsSync(executable)) return `${INSTALL_MSG} (${executable})`
   } catch (error) {
-    const detail = error instanceof Error ? error.message : install
-    return `${install} (${detail})`
+    const detail = error instanceof Error ? error.message : INSTALL_MSG
+    return `${INSTALL_MSG} (${detail})`
   }
   return undefined
 }
