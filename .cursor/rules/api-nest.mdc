@@ -8,5 +8,5 @@ alwaysApply: false
 
 - NestJS CLI builds the API (`nest build`). Vite+ runs that command with `vp run` from the repository root.
 - Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`. Do not point this package at the catalog compiler.
-- Unit tests are Vitest, run with `vp test`. Test files import `vite-plus/test` or use `vite-plus/test/globals`.
+- Unit tests are Vitest. From the repository root: `vp run api#test` (`AGENTS.md`). Test files import `vite-plus/test` or use `vite-plus/test/globals`.
 - Do not add a package-local formatter or linter config. Lint and format come from the root `vite.config.ts`.

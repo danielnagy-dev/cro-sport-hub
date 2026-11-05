@@ -8,7 +8,7 @@ alwaysApply: false
 
 - Strict TypeScript. Compiler versions are in `docs/adr/001-vite-plus-vs-nx.md`.
 - Libraries are built with `vp pack`. Apps keep their own CLIs.
-- Unit tests use Vitest through `vp test`, except `apps/studio`, which uses `ng test` (Angular's Vitest builder).
+- Unit tests run from the repository root with the package `#test` task in `AGENTS.md`. Studio's task runs `ng test --watch=false`.
 - Import test helpers from `vite-plus/test`, not from `vitest`.
 - Depend on workspace packages with the `workspace:*` protocol.
 - Repository language, secrets, and seed data: `CODING_STANDARDS.md`.

@@ -9,7 +9,7 @@
 #### How to get to it (user POV)
 
 - Open `http://localhost:4200/login`, or open `/` with no session.
-- Dev `ng serve` proxies `/api` to `http://localhost:3001`. The match list is still the stub.
+- Dev `ng serve` proxies `/api` to `http://localhost:3001`. The home list is still the stub (`studio.shell`).
 
 #### Driving it with verify
 

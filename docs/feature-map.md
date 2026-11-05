@@ -8,7 +8,7 @@ Status: `live` (merged and verifiable) · `planned` (in the PR plan, not built).
 
 - Run from the repo root on Node 24.22.1. `vp install`, then `vp exec playwright install chromium` once.
 - API needs Docker Compose services `postgres` and `redis` (`docker-compose.yml`).
-- Data: seed and test data only. No real people. The studio match list is an in-app stub. Login calls `POST /api/login`.
+- Data: seed and test data only. No real people. The studio home list is the stub described in `docs/feature-map/studio/studio.shell.md`. `/matches` calls the API. Login calls `POST /api/login`.
 
 ## Driving conventions
 
