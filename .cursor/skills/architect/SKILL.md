@@ -35,6 +35,7 @@ Visual design belongs to the designer outside this repo. Deploy and CI topology 
 ## Studio app
 
 - Each business flow is a lazy-loaded folder under `apps/studio/src/app/feature/`.
+- Its routes are `feature/<name>/<name>.routes.ts`. `app.routes.ts` only lists `loadChildren` (one entry per feature, folder order) and the `**` redirect. Paths and guards stay in the feature file (`docs/adr/008-studio-feature-routes.md`).
 - Sibling features do not import each other; share by moving code to `core/` or `libs/shared-types`.
 - Import direction is one way: `feature/` → `core/` or `layout/` → workspace libs, never the reverse.
 - Do not add a `feature-shared` folder; extract one level up instead.

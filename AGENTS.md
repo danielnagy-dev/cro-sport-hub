@@ -5,7 +5,7 @@ pnpm workspace run by Vite+ (`vp`). Node is pinned in `.node-version`. The packa
 ## Layout
 
 - `apps/web` — Next.js App Router (`next build`, `next dev`)
-- `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands. Feature folders and import rules: `.cursor/skills/architect/SKILL.md` (**Studio app**).
+- `apps/studio` — Angular standalone components and signals. The Angular CLI builds and tests it. Vite+ only runs those commands. A feature is `apps/studio/src/app/feature/<name>/` with `<name>.routes.ts`. `app.routes.ts` only lazy-loads those files. Import rules: `.cursor/skills/architect/SKILL.md` (**Studio app**).
 - `apps/api` — NestJS (`nest build`)
 - `libs/shared-types`, `libs/ui`, `libs/slide-generator` — workspace packages. Slide tokens and layout: `docs/design-system.md`. Renderer: `docs/adr/003-slide-renderer.md`.
 - Where a route, HTTP client, or controller lives: `docs/agents/where.md`.
