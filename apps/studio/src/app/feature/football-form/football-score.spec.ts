@@ -333,7 +333,7 @@ describe('FootballScorePage edit', () => {
   })
 
   it('shows Match not found for an unknown id', async () => {
-    const { harness, http, root, draftRequest } = await bootEdit('match-missing')
+    const { harness, root, draftRequest } = await bootEdit('match-missing')
     draftRequest.flush(null, { status: 404, statusText: 'Not Found' })
     await harness.fixture.whenStable()
     harness.detectChanges()
