@@ -6,16 +6,24 @@ import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
 import { StudioApi } from '../../core/studio-api'
 
-type LoadStatus = 'loading' | 'ready' | 'error'
+type MatchesState = {
+  items: EditorMatch[]
+  sport: SportSlug | ''
+  status: Status | ''
+  source: MatchSource | ''
+  loadStatus: 'loading' | 'ready' | 'error'
+}
+
+const initialMatchesState: MatchesState = {
+  items: [],
+  sport: '',
+  status: '',
+  source: '',
+  loadStatus: 'loading',
+}
 
 const MatchesStore = signalStore(
-  withState({
-    items: [] as EditorMatch[],
-    sport: '' as SportSlug | '',
-    status: '' as Status | '',
-    source: '' as MatchSource | '',
-    loadStatus: 'loading' as LoadStatus,
-  }),
+  withState(initialMatchesState),
   withMethods((store, api = inject(StudioApi)) => {
     let pending: Subscription | undefined
 
