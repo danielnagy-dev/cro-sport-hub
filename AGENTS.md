@@ -76,6 +76,24 @@ The installed set is `tdd`, `diagnosing-bugs`, `codebase-design`, `grilling`, `g
 
 Repo role skills live under `.cursor/skills/` (`architect`, `develop`, `plan`, `review`, `verify`, `fix-merge-conflicts`, `deslop`). `fix-merge-conflicts` and `deslop` are vendored from Cursor Team Kit (marketplace plugin id 677), copied 2026-10-29; each file's Source note lists adaptations.
 
+### Agent modes
+
+Each repo role skill is a mode: read and follow `.cursor/skills/<name>/SKILL.md` for the run. A cloud agent can be launched with a Cursor custom mode set to that skill name (`plan`, `develop`, `review`, and so on). Custom modes are an account setting; when they are unavailable, tell the agent to follow the matching skill file instead.
+
+**plan** — Use when scoping work, ordering the next pull request, or turning one plan item into implementable scope. Produces a GitHub issue in the shape `docs/agents/issue-tracker.md` specifies (goal, scope, acceptance, size estimate, shared files, verification, architect yes/no, seams), labeled `status:ready-for-agent` only when the size gate is met. Does not write feature code and does not merge.
+
+**develop** — Use when implementing one `ready-for-agent` issue as one scoped pull request (target ~300 counted lines, split before 500). Claims the issue, runs the checks once, fills the PR template and `## Verification`, and ends with the self-review report in `## Review`. Does not widen scope and does not merge.
+
+**review** — Use at the end of a develop run for the author self-review, or as a separate agent only when `docs/team.md` says so (prefer custom mode `review`). One pass over the ticket, PR body, and `origin/main...HEAD`; produces `ready` or `changes needed`, majors, and at most five nits in `## Review`. Does not rerun the verification suite; a separate review agent does not write feature code, push fixes, or merge.
+
+**architect** — Use before a non-trivial change that adds or moves a module, adds a dependency, changes a public type in `libs/shared-types`, or crosses an app boundary. Produces an ADR when the choice is hard to reverse and a type sketch before implementation. Does not implement the feature and does not merge.
+
+**verify** — Use before opening or updating a pull request that touches runtime apps or libraries, or when asked for smoke proof. Runs `vp run verify:<target>` (and `--route` as needed), saves evidence under `artifacts/verify/`, and pastes `summary.md` into `## Verification`. Compiling and unit tests alone are not proof.
+
+**fix-merge-conflicts** — Use when the branch has conflict markers or a failed merge with `main`. Resolves conflicts with minimal edits, reruns compile, lint, and relevant tests, then hands off to the normal develop final-push workflow. Does not push until conflicts are resolved and those checks pass.
+
+**deslop** — Use before opening a pull request or when asked to clean the branch diff against `main`. Removes AI-generated noise (extra comments, abnormal guards, `any` casts, and similar) with behavior unchanged unless fixing a clear bug.
+
 ## Docs to read before writing framework code
 
 - Angular: https://angular.dev/llms.txt and `.cursor/rules/angular-best-practices.mdc`
