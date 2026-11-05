@@ -6,7 +6,7 @@ Commands are in `AGENTS.md`. Open these paths first.
 
 A feature is a Nest module at `apps/api/src/features/<name>/<name>.module.ts`. `AppModule.register` loads every module in that directory (`apps/api/src/load-feature-modules.ts`, `docs/adr/007-api-feature-files.md`). A new feature adds the folder.
 
-Controllers added with the feature live in that folder (`apps/api/src/features/gallery/`). Older controllers are still `apps/api/src/<name>.controller.ts`. The feature module imports them: `features/athletes/athletes.module.ts` imports `AthletesController`.
+Controllers added with the feature live in that folder (`apps/api/src/features/gallery/`). Older controllers are still `apps/api/src/<name>.controller.ts`. The feature module imports them: `apps/api/src/features/athletes/athletes.module.ts` imports `AthletesController`.
 
 Redis cache for public reads: `apps/api/src/public-read-cache/`. SQL and Drizzle: `apps/api/src/catalog/`. Schemas shared with studio and web: `libs/shared-types/src/<topic>.ts` and one export line in `libs/shared-types/src/index.ts`.
 
