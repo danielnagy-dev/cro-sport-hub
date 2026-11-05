@@ -37,3 +37,7 @@ No. The page reads the 8a schema. `AthleteHeader` is already in `libs/ui`. Studi
 
 - The athlete page with a stubbed profile. Catches a club id on the page, and a thrown fetch.
 - The sport-page athlete links. Catches a tennis slug on `/football`.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/45
