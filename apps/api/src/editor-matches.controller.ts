@@ -4,6 +4,8 @@ import {
   Controller,
   Get,
   Inject,
+  NotFoundException,
+  Param,
   Query,
   UseGuards,
 } from '@nestjs/common'
@@ -11,8 +13,10 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -20,11 +24,15 @@ import {
 import {
   editorMatchListQuerySchema,
   editorMatchPageSchema,
+  editorTennisDraftSchema,
+  idSchema,
   type EditorMatchListQuery,
   type EditorMatchPage,
+  type EditorTennisDraft,
 } from '@cro-sport-hub/shared-types'
 import { EditorAuthGuard } from './auth/role.guard.js'
-import { catalogDb } from './catalog/catalog.js'
+import { catalogDb, CatalogError } from './catalog/catalog.js'
+import { readEditorTennisDraft } from './catalog/editor-tennis-draft.js'
 import { listEditorMatches } from './catalog/editor-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
@@ -56,6 +64,21 @@ function editorDocs() {
   )
 }
 
+function readTennisDocs() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: 'Read one tennis match for editing' }),
+    ApiParam({ name: 'id', description: 'Match id.' }),
+    ApiOkResponse({
+      description: 'Draft body the tennis POST accepts, plus status.',
+      standardSchema: editorTennisDraftSchema,
+    }),
+    ApiNotFoundResponse({ description: 'Unknown match' }),
+    ApiUnauthorizedResponse({ description: 'Invalid token' }),
+    ApiForbiddenResponse({ description: 'Forbidden' }),
+  )
+}
+
 @ApiTags('matches')
 @UseGuards(EditorAuthGuard)
 @Controller('api/editor')
@@ -66,6 +89,27 @@ export class EditorMatchesController {
   @editorDocs()
   list(@Query() query: Record<string, unknown>): Promise<EditorMatchPage> {
     return this.read(readEditorQuery(query))
+  }
+
+  @Get('matches/tennis/:id')
+  @readTennisDocs()
+  readTennis(@Param('id') id: string): Promise<EditorTennisDraft> {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown match')
+    return this.readOne(id)
+  }
+
+  private async readOne(id: string): Promise<EditorTennisDraft> {
+    const catalog = await this.openCatalog()
+    try {
+      return await readEditorTennisDraft(catalogDb(catalog), id)
+    } catch (error) {
+      if (error instanceof CatalogError && error.code === 'unknown-ref') {
+        throw new NotFoundException(error.message)
+      }
+      throw error
+    } finally {
+      await catalog.close()
+    }
   }
 
   private async read(query: EditorMatchListQuery): Promise<EditorMatchPage> {
