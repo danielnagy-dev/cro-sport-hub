@@ -4,7 +4,7 @@
 
 **Blocked by:** 24a (`.scratch/editor/issues/24a-editor-lookups.md`) and 23b (`.scratch/studio/issues/23b-matches-table.md`). `POST /api/matches/tennis` and `PUT /api/matches/tennis/:id` are on main (plan 11b, PR #24).
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 340 counted lines. One signal form and its tests. Plan 22 was about 941 lines because the session and both guards were in the same diff.
 
@@ -37,3 +37,7 @@ No. The draft body is plan 11. The lookups are 24a. The form does not add a sche
 ### Seams
 
 - The tennis form submit, stubbed HTTP. Catches a POST that includes `status` or `stats`, a 7-6 set that is sent, and an empty form that is sent.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/46

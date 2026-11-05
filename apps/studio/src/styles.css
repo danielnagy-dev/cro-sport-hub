@@ -77,6 +77,73 @@ body {
   outline-offset: 2px;
 }
 
+.tennis-main {
+  padding: var(--space-5) var(--space-6);
+  max-width: 48rem;
+}
+
+.tennis-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tennis-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tennis-field select,
+.tennis-field input[type='text'],
+.tennis-field input[type='date'],
+.tennis-field input[type='number'] {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.tennis-field select:focus-visible,
+.tennis-field input:focus-visible,
+.tennis-check input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.tennis-sets {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin: 0;
+}
+
+.tennis-set-row {
+  display: grid;
+  grid-template-columns: 5rem repeat(3, minmax(4rem, 1fr));
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.tennis-set-label {
+  font-weight: 600;
+}
+
+.tennis-check label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tennis-check input {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .shell-nav a[aria-current='page'] {
   text-decoration: underline;
 }
