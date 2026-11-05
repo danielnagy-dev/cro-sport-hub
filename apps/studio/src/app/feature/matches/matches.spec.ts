@@ -116,6 +116,8 @@ describe('MatchesPage', () => {
     http.expectOne(`${editorMatchesPath}?status=draft`).flush(page([quarterMatch], 1))
     await fixture.whenStable()
     expect(root.textContent).toContain('Sample Player C vs Sample Player D')
+    const link = root.querySelector('a[href="/matches/match-sample-qf/tennis"]')
+    expect(link?.textContent).toContain('Sample Player C vs Sample Player D')
   })
 })
 

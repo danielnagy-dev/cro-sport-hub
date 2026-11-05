@@ -3,6 +3,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { TestBed, type ComponentFixture } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
+import { RouterTestingHarness } from '@angular/router/testing'
 import { expect } from 'vite-plus/test'
 import type { WritableSignal } from '@angular/core'
 import type { AthleteLookup, CompetitionLookup } from '@cro-sport-hub/shared-types'
@@ -11,6 +12,7 @@ import {
   editorAthletesPath,
   editorCompetitionsPath,
   matchSubmitPath,
+  tennisDraftUpdatePath,
   tennisDraftsPath,
 } from '../../core/studio-api'
 import type { TennisFormModel } from './draft-body'
@@ -113,6 +115,7 @@ async function boot(): Promise<{
   http.expectOne(`${editorAthletesPath}?sport=tennis`).flush(athletes)
   await fixture.whenStable()
   fixture.detectChanges()
+  await fixture.whenStable()
   return { fixture, http, root }
 }
 
@@ -250,6 +253,83 @@ describe('TennisScorePage', () => {
       'A 7-6 set needs the tiebreak points scored by the player who lost the set',
     )
     http.expectNone(tennisDraftsPath)
+  })
+})
+
+describe('TennisScorePage edit', () => {
+  async function bootEdit(id: string): Promise<{
+    harness: RouterTestingHarness
+    http: HttpTestingController
+    root: HTMLElement
+    draftRequest: ReturnType<HttpTestingController['expectOne']>
+  }> {
+    await TestBed.configureTestingModule({
+      imports: [TennisScorePage],
+      providers: [
+        provideRouter([{ path: 'matches/:id/tennis', component: TennisScorePage }]),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: TOKEN_STORE, useValue: memoryStore() },
+      ],
+    }).compileComponents()
+    TestBed.inject(TOKEN_STORE).write(bearer(Math.floor(Date.now() / 1000) + 3600))
+    const harness = await RouterTestingHarness.create()
+    await harness.navigateByUrl(`/matches/${id}/tennis`)
+    await harness.fixture.whenStable()
+    const http = TestBed.inject(HttpTestingController)
+    const root = harness.routeNativeElement as HTMLElement
+    http.expectOne(`${editorCompetitionsPath}?sport=tennis`).flush(competitions)
+    http.expectOne(`${editorAthletesPath}?sport=tennis`).flush(athletes)
+    await harness.fixture.whenStable()
+    const draftRequest = http.expectOne((req) =>
+      req.url.includes(`/api/editor/matches/tennis/${id}`),
+    )
+    return { harness, http, root, draftRequest }
+  }
+
+  it('loads the draft, fills the form, and saves with PUT without status', async () => {
+    const { harness, http, root, draftRequest } = await bootEdit('match-sample-qf')
+    draftRequest.flush({
+      id: 'match-sample-qf',
+      competitionId: 'comp-sample-cup',
+      date: '2026-10-16',
+      round: 'QF',
+      playerAId: 'sample-player-c',
+      playerBId: 'sample-player-d',
+      winnerId: 'sample-player-c',
+      bestOf: 3,
+      score: [
+        [6, 3],
+        [4, 2],
+      ],
+      retired: true,
+      status: 'draft',
+    })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Edit tennis match')
+    const round = root.querySelector('#round')
+    expect(round instanceof HTMLInputElement ? round.value : '').toBe('QF')
+    clickSave(root)
+    await harness.fixture.whenStable()
+    const request = http.expectOne(tennisDraftUpdatePath('match-sample-qf'))
+    const body = request.request.body as Record<string, unknown>
+    expect(body['status']).toBeUndefined()
+    expect(body['firstServePct']).toBeUndefined()
+    request.flush({ id: 'match-sample-qf', status: 'draft', sport: 'tennis' })
+    await harness.fixture.whenStable()
+    http.verify()
+    TestBed.resetTestingModule()
+  })
+
+  it('shows Match not found for an unknown id', async () => {
+    const { harness, http, root, draftRequest } = await bootEdit('match-missing')
+    draftRequest.flush(null, { status: 404, statusText: 'Not Found' })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Match not found')
+    http.verify()
+    TestBed.resetTestingModule()
   })
 })
 

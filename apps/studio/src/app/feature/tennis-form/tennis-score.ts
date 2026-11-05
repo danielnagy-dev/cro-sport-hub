@@ -1,13 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core'
+import { Component, computed, inject, signal, afterNextRender } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
 import { HttpErrorResponse } from '@angular/common/http'
-import { RouterLink } from '@angular/router'
+import { ActivatedRoute, RouterLink, Router } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
   tennisPercentages,
   type AthleteLookup,
   type CompetitionLookup,
+  type Status,
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
 import { AuthStore } from '../../core/auth'
@@ -20,12 +21,14 @@ import {
   parseStatCounts,
   statCountKeys,
   statCountLabels,
+  tennisFormFromDraft,
   validateTennisDraft,
   type TennisFormModel,
 } from './draft-body'
 
 type LookupState = 'loading' | 'ready' | 'error'
-type MatchStatus = 'draft' | 'review'
+type MatchStatus = Status
+type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
 const percentageRows = [
   ['First serve', 'firstServePct'],
@@ -42,7 +45,13 @@ const percentageRows = [
 })
 export class TennisScorePage {
   private readonly api = inject(StudioApi)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
+
+  protected readonly routeMatchId = signal<string | undefined>(undefined)
+  protected readonly isEditMode = computed(() => this.routeMatchId() !== undefined)
+  protected readonly pageLoadState = signal<PageLoadState>('loading')
 
   protected readonly model = signal<TennisFormModel>(initialTennisFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])
@@ -55,6 +64,7 @@ export class TennisScorePage {
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
   protected readonly draftMatchId = newMatchId()
+  protected readonly activeMatchId = computed(() => this.routeMatchId() ?? this.draftMatchId)
 
   protected readonly statBlockConfigs = [
     { block: 'playerAStats', legend: 'Player A stats (raw counts)', idPrefix: 'stat-a' },
@@ -70,11 +80,14 @@ export class TennisScorePage {
   protected readonly percentageRows = percentageRows
 
   protected readonly draftIssues = computed(() =>
-    validateTennisDraft(this.model(), this.draftMatchId),
+    validateTennisDraft(this.model(), this.activeMatchId()),
   )
 
   protected readonly tennisForm = form(this.model, (path) => {
-    const locked = () => this.savedId() !== undefined
+    const locked = () => {
+      if (this.isEditMode()) return this.matchStatus() !== 'draft'
+      return this.savedId() !== undefined
+    }
     const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
     const bindIssue = (fieldPath: typeof path.competitionId, field: string) => {
       validate(fieldPath, () => {
@@ -105,7 +118,38 @@ export class TennisScorePage {
   })
 
   constructor() {
-    void this.loadLookups()
+    void this.bootLookups()
+    afterNextRender(() => {
+      void this.bootDraft()
+    })
+  }
+
+  private async bootLookups(): Promise<void> {
+    this.pageLoadState.set('loading')
+    await this.loadLookups()
+    if (this.lookupStatus() === 'ready' && this.editMatchId() === undefined) {
+      this.pageLoadState.set('ready')
+    }
+  }
+
+  private async bootDraft(): Promise<void> {
+    const matchId = this.editMatchId()
+    if (matchId === undefined) return
+    this.routeMatchId.set(matchId)
+    this.savedId.set(matchId)
+    this.pageLoadState.set('loading')
+    try {
+      const draft = await firstValueFrom(this.api.loadEditorTennisDraft(matchId))
+      this.model.set(tennisFormFromDraft(draft))
+      this.matchStatus.set(draft.status)
+      this.pageLoadState.set('ready')
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.pageLoadState.set('not-found')
+        return
+      }
+      this.pageLoadState.set('error')
+    }
   }
 
   protected fieldMessage(field: keyof TennisFormModel | 'score'): string | undefined {
@@ -158,7 +202,8 @@ export class TennisScorePage {
 
   protected onSubmit(event: Event): void {
     event.preventDefault()
-    if (this.savedId() !== undefined) return
+    if (!this.isEditMode() && this.savedId() !== undefined) return
+    if (this.isEditMode() && this.matchStatus() !== 'draft') return
     this.submitAttempted.set(true)
     this.tennisForm().markAsTouched()
     void this.send()
@@ -167,6 +212,15 @@ export class TennisScorePage {
   protected onSubmitForReview(): void {
     if (this.savedId() === undefined || this.matchStatus() !== 'draft') return
     void this.sendForReview()
+  }
+
+  private editMatchId(): string | undefined {
+    const fromParam = this.route.snapshot.paramMap.get('id')
+    if (fromParam !== null) return fromParam
+    const match = /^\/matches\/([^/]+)\/tennis/.exec(this.router.url)
+    const fromUrl = match?.[1]
+    if (fromUrl === undefined || fromUrl === 'new') return undefined
+    return fromUrl
   }
 
   private async loadLookups(): Promise<void> {
@@ -181,6 +235,7 @@ export class TennisScorePage {
       this.lookupStatus.set('ready')
     } catch {
       this.lookupStatus.set('error')
+      this.pageLoadState.set('error')
     }
   }
 
@@ -188,11 +243,14 @@ export class TennisScorePage {
     if (this.tennisForm().submitting()) return
     if (this.draftIssues().length > 0) return
     this.saveError.set(undefined)
+    const matchId = this.activeMatchId()
     const accepted = await submit(this.tennisForm, {
       action: async () => {
-        const body = buildTennisDraftBody(this.model(), this.draftMatchId)
+        const body = buildTennisDraftBody(this.model(), matchId)
         try {
-          const saved = await firstValueFrom(this.api.createTennisDraft(body))
+          const saved = this.isEditMode()
+            ? await firstValueFrom(this.api.updateTennisDraft(matchId, body))
+            : await firstValueFrom(this.api.createTennisDraft(body))
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
           return undefined
