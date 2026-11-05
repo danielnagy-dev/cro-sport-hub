@@ -4,7 +4,7 @@
 
 **Blocked by:** None. The template and `footballSlides` are on main (plan items 28 and 29, ADR-003).
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 300 counted lines. Optional number, position, and caption on the template, a mapper in a new file, and tests. Persistence is 30b. PNG bytes are 30c.
 
@@ -24,11 +24,11 @@ Plan is this note. Architect sketches the mapper signature below. Develop, then 
 
 ## Acceptance
 
-- [ ] A handoff player that still passes `number` renders `#` plus that number, and a document with no caption has no caption line.
-- [ ] A mapped slide for Karlo Brkić in `match-sample-league` (2 goals, 90 minutes, no cards, position Forward, no shirt number) includes Goals `2`, Minutes `90`, Cards `None`, and Forward, and includes neither a `#` span nor a `ring` class.
-- [ ] Filip Šarić in that match maps Cards to `Second yellow` and the hero to goals. Bruno Perić maps the hero to `none` and lineup to sub.
-- [ ] A non-empty caption is one text line. An empty caption adds no line.
-- [ ] Five appearances in that match are one list slide. `football.ts` is still at or under 20000 bytes.
+- [x] A handoff player that still passes `number` renders `#` plus that number, and a document with no caption has no caption line.
+- [x] A mapped slide for Karlo Brkić in `match-sample-league` (2 goals, 90 minutes, no cards, position Forward, no shirt number) includes Goals `2`, Minutes `90`, Cards `None`, and Forward, and includes neither a `#` span nor a `ring` class.
+- [x] Filip Šarić in that match maps Cards to `Second yellow` and the hero to goals. Bruno Perić maps the hero to `none` and lineup to sub.
+- [x] A non-empty caption is one text line. An empty caption adds no line.
+- [x] Five appearances in that match are one list slide. `football.ts` is still at or under 20000 bytes.
 
 ## Verification
 
