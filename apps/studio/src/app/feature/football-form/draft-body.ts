@@ -5,6 +5,7 @@ import {
   isoDateSchema,
   roundSchema,
   type Appearance,
+  type EditorFootballDraft,
   type FieldIssue,
 } from '@cro-sport-hub/shared-types'
 
@@ -53,6 +54,29 @@ export function initialFootballFormModel(): FootballFormModel {
     homeGoals: '',
     awayGoals: '',
     appearances: [],
+  }
+}
+
+/** Maps an editor GET body into the signal form model. */
+export function footballFormFromDraft(draft: EditorFootballDraft): FootballFormModel {
+  return {
+    competitionId: draft.competitionId,
+    date: draft.date,
+    round: draft.round,
+    homeTeamId: draft.homeTeamId,
+    awayTeamId: draft.awayTeamId,
+    homeGoals: String(draft.homeGoals),
+    awayGoals: String(draft.awayGoals),
+    appearances: (draft.appearances ?? []).map((row) => ({
+      athleteId: row.athleteId,
+      teamId: row.teamId,
+      started: row.started,
+      minutes: String(row.minutes),
+      goals: String(row.goals),
+      assists: String(row.assists),
+      yellowCards: String(row.yellowCards),
+      redCard: row.redCard,
+    })),
   }
 }
 

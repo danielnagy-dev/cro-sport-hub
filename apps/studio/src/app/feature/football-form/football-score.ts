@@ -1,7 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core'
+import { Component, computed, inject, signal, afterNextRender } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
 import { HttpErrorResponse } from '@angular/common/http'
-import { RouterLink } from '@angular/router'
+import { ActivatedRoute, RouterLink, Router } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
@@ -19,6 +19,7 @@ import { MatchSubmitApi } from '../../core/match-submit-api'
 import {
   buildFootballDraftBody,
   emptyAppearanceRow,
+  footballFormFromDraft,
   initialFootballFormModel,
   newMatchId,
   validateFootballDraft,
@@ -33,6 +34,7 @@ const APPEARANCE_COUNT_FIELDS = [
 ] as const
 
 type LookupState = 'loading' | 'ready' | 'error'
+type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 type FieldKey = keyof Omit<FootballFormModel, 'appearances'>
 
 const FIELDS = [
@@ -54,9 +56,15 @@ export class FootballScorePage {
   private readonly lookups = inject(EditorLookupsApi)
   private readonly football = inject(FootballApi)
   private readonly submitApi = inject(MatchSubmitApi)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
   protected readonly fieldConfigs = FIELDS
   protected readonly appearanceCountFields = APPEARANCE_COUNT_FIELDS
+
+  protected readonly routeMatchId = signal<string | undefined>(undefined)
+  protected readonly isEditMode = computed(() => this.routeMatchId() !== undefined)
+  protected readonly pageLoadState = signal<PageLoadState>('loading')
 
   protected readonly model = signal<FootballFormModel>(initialFootballFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])
@@ -70,13 +78,18 @@ export class FootballScorePage {
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
   protected readonly draftMatchId = newMatchId()
+  protected readonly activeMatchId = computed(() => this.routeMatchId() ?? this.draftMatchId)
+  protected readonly formLocked = computed(() => {
+    if (this.isEditMode()) return this.matchStatus() !== 'draft'
+    return this.savedId() !== undefined
+  })
 
   protected readonly draftIssues = computed(() =>
-    validateFootballDraft(this.model(), this.draftMatchId),
+    validateFootballDraft(this.model(), this.activeMatchId()),
   )
 
   protected readonly footballForm = form(this.model, (path) => {
-    const locked = () => this.savedId() !== undefined
+    const locked = () => this.formLocked()
     const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
     const bind = (fieldPath: (typeof path)[FieldKey], field: FieldKey) => {
       validate(fieldPath, () => {
@@ -101,7 +114,47 @@ export class FootballScorePage {
   })
 
   constructor() {
-    void this.loadLookups()
+    void this.bootLookups()
+    afterNextRender(() => {
+      void this.bootDraft()
+    })
+  }
+
+  private async bootLookups(): Promise<void> {
+    this.pageLoadState.set('loading')
+    await this.loadLookups()
+    if (this.lookupStatus() === 'ready' && this.editMatchId() === undefined) {
+      this.pageLoadState.set('ready')
+    }
+  }
+
+  private async bootDraft(): Promise<void> {
+    const matchId = this.editMatchId()
+    if (matchId === undefined) return
+    this.routeMatchId.set(matchId)
+    this.savedId.set(matchId)
+    this.pageLoadState.set('loading')
+    try {
+      const draft = await firstValueFrom(this.football.loadEditorFootballDraft(matchId))
+      this.model.set(footballFormFromDraft(draft))
+      this.matchStatus.set(draft.status)
+      this.pageLoadState.set('ready')
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.pageLoadState.set('not-found')
+        return
+      }
+      this.pageLoadState.set('error')
+    }
+  }
+
+  private editMatchId(): string | undefined {
+    const fromParam = this.route.snapshot.paramMap.get('id')
+    if (fromParam !== null) return fromParam
+    const match = /^\/matches\/([^/]+)\/football/.exec(this.router.url)
+    const fromUrl = match?.[1]
+    if (fromUrl === undefined || fromUrl === 'new') return undefined
+    return fromUrl
   }
 
   protected formField(key: FieldKey) {
@@ -159,7 +212,7 @@ export class FootballScorePage {
   }
 
   protected addAppearance(): void {
-    if (this.savedId() !== undefined) return
+    if (this.formLocked()) return
     this.model.update((current) => ({
       ...current,
       appearances: [...current.appearances, emptyAppearanceRow()],
@@ -167,7 +220,7 @@ export class FootballScorePage {
   }
 
   protected removeAppearance(index: number): void {
-    if (this.savedId() !== undefined) return
+    if (this.formLocked()) return
     this.model.update((current) => ({
       ...current,
       appearances: current.appearances.filter((_, rowIndex) => rowIndex !== index),
@@ -176,7 +229,7 @@ export class FootballScorePage {
 
   protected onSubmit(event: Event): void {
     event.preventDefault()
-    if (this.savedId() !== undefined) return
+    if (this.formLocked()) return
     this.submitAttempted.set(true)
     this.footballForm().markAsTouched()
     if (this.draftIssues().length > 0) return
@@ -202,20 +255,21 @@ export class FootballScorePage {
       this.lookupStatus.set('ready')
     } catch {
       this.lookupStatus.set('error')
+      this.pageLoadState.set('error')
     }
   }
 
   private async save(): Promise<void> {
     if (this.footballForm().submitting()) return
     this.saveError.set(undefined)
+    const matchId = this.activeMatchId()
     await submit(this.footballForm, {
       action: async () => {
+        const body = buildFootballDraftBody(this.model(), matchId)
         try {
-          const saved = await firstValueFrom(
-            this.football.createFootballDraft(
-              buildFootballDraftBody(this.model(), this.draftMatchId),
-            ),
-          )
+          const saved = this.isEditMode()
+            ? await firstValueFrom(this.football.updateFootballDraft(matchId, body))
+            : await firstValueFrom(this.football.createFootballDraft(body))
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
         } catch {

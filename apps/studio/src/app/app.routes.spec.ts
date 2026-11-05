@@ -12,6 +12,7 @@ const editorPaths = [
   '/matches/new/tennis',
   '/matches/new/football',
   '/matches/match-sample/tennis',
+  '/matches/match-sample/football',
   '/galleries/new',
   '/galleries/gallery-demo',
 ]

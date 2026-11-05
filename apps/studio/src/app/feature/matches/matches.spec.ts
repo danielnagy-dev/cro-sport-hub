@@ -19,6 +19,16 @@ const finalMatch: EditorMatch = {
   source: 'manual',
   label: 'Sample Player A vs Sample Player B',
 }
+const leagueMatch: EditorMatch = {
+  id: 'match-sample-league',
+  sport: 'football',
+  competition: 'Sample League',
+  date: '2026-10-19',
+  round: 'Matchday 8',
+  status: 'published',
+  source: 'manual',
+  label: 'Sample Home vs Sample Away',
+}
 const quarterMatch: EditorMatch = {
   id: 'match-sample-qf',
   sport: 'tennis',
@@ -113,11 +123,13 @@ describe('MatchesPage', () => {
     expect(root.textContent).toContain('The match list could not be loaded.')
     expect(root.querySelector('select')).toBeInstanceOf(HTMLSelectElement)
     pickSelect(root, 'filter-status', 'draft')
-    http.expectOne(`${editorMatchesPath}?status=draft`).flush(page([quarterMatch], 1))
+    http.expectOne(`${editorMatchesPath}?status=draft`).flush(page([quarterMatch, leagueMatch], 2))
     await fixture.whenStable()
     expect(root.textContent).toContain('Sample Player C vs Sample Player D')
     const link = root.querySelector('a[href="/matches/match-sample-qf/tennis"]')
     expect(link?.textContent).toContain('Sample Player C vs Sample Player D')
+    const footballLink = root.querySelector('a[href="/matches/match-sample-league/football"]')
+    expect(footballLink?.textContent).toContain('Sample Home vs Sample Away')
   })
 })
 

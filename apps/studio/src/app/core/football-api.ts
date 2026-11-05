@@ -1,8 +1,17 @@
 import { inject, Injectable } from '@angular/core'
+import { editorFootballDraftSchema, type EditorFootballDraft } from '@cro-sport-hub/shared-types'
 import type { Observable } from 'rxjs'
 import { StudioHttp } from './studio-http'
 
 export const footballDraftsPath = '/api/matches/football'
+
+export function editorFootballDraftPath(id: string): string {
+  return `/api/editor/matches/football/${id}`
+}
+
+export function footballDraftUpdatePath(id: string): string {
+  return `/api/matches/football/${id}`
+}
 
 export type FootballDraftSaved = { id: string; status: 'draft'; sport: 'football' }
 
@@ -21,5 +30,15 @@ export class FootballApi {
 
   createFootballDraft(body: unknown): Observable<FootballDraftSaved> {
     return this.http.post(footballDraftsPath, body, parseFootballDraftSaved)
+  }
+
+  updateFootballDraft(id: string, body: unknown): Observable<FootballDraftSaved> {
+    return this.http.put(footballDraftUpdatePath(id), body, parseFootballDraftSaved)
+  }
+
+  loadEditorFootballDraft(id: string): Observable<EditorFootballDraft> {
+    return this.http.get(editorFootballDraftPath(id), (response) =>
+      editorFootballDraftSchema.parse(response),
+    )
   }
 }
