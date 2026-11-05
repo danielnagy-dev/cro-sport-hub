@@ -8,6 +8,9 @@ export const galleryCreatedSchema = z.strictObject({
   id: idSchema,
   slideIndexes: z.array(z.number().int().nonnegative()),
 })
+export const galleryRenderResponseSchema = z.strictObject({
+  slideCount: z.number().int().nonnegative(),
+})
 const galleryTextStatSchema = z.object({ label: z.string(), value: z.string() })
 const gallerySlidePlayerSchema = z.object({
   name: z.string(),
