@@ -6,6 +6,10 @@
 
 **Status:** claimed
 
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/42
+
 **Size:** 320 counted lines. One route, one table, three native filters, and the HTTP tests. Plan 22 was about 941 lines because it included the session and both guards.
 
 ## Scope
