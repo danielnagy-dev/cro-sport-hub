@@ -10,6 +10,8 @@ Editors and admins create draft football galleries from published match ids, rea
 
 `POST /api/galleries/:id/submit` moves a draft to review. An editor or an admin sends `Authorization: Bearer`. The response is HTTP 200 `{ id, status: "review" }`. The row does not gain `reviewedBy` or `publishedAt`. `POST /api/galleries/:id/reject` is admin only. The row must be in review. It becomes draft, and `reviewedBy` and `publishedAt` are cleared. The response is HTTP 200 `{ id, status: "draft" }`. `POST /api/galleries/:id/publish` is admin only. The row must be in review. It becomes published, `reviewedBy` is the caller, and `publishedAt` is an ISO timestamp with a numeric offset. The response is HTTP 200 `{ id, status: "published" }`. PNG bytes are not required to publish. These three routes do not call `invalidatePublicReads`. A missing token is HTTP 401 `Invalid token`. An editor calling reject or publish is HTTP 403 `Forbidden`. Submit of any other status is HTTP 409 `Only a draft gallery can be submitted`. Reject or publish of any other status is HTTP 409 with the matching message. An unknown id is HTTP 404 `Unknown gallery`.
 
+`GET /api/galleries/:id/download` returns `application/zip` when status is `published` and every slide has PNG bytes. The caller sends `Authorization: Bearer`. Entries are `01.png`, `02.png`, in `slide_index` order. Any other status is HTTP 409 `Only an approved gallery can be downloaded`. A published gallery with a missing PNG is HTTP 409 `Gallery slides are not rendered` and returns no partial archive. Unknown id is HTTP 404 `Unknown gallery`. Missing or invalid bearer token is HTTP 401 `Invalid token`.
+
 #### How to get to it (user POV)
 
 - Create: `POST http://localhost:3001/api/galleries` with `{ "matchIds": ["…"] }`.
@@ -20,6 +22,7 @@ Editors and admins create draft football galleries from published match ids, rea
 - Submit: `POST http://localhost:3001/api/galleries/{id}/submit`.
 - Reject: `POST http://localhost:3001/api/galleries/{id}/reject`.
 - Publish: `POST http://localhost:3001/api/galleries/{id}/publish`.
+- Download ZIP: `GET http://localhost:3001/api/galleries/{id}/download`.
 
 Shapes are on `GET /docs-json`. Swagger UI is `/docs`.
 
@@ -28,7 +31,7 @@ Shapes are on `GET /docs-json`. Swagger UI is `/docs`.
 Preconditions: same as `api.health`. Migrations run on the first request.
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. It does not call render or download PNG bytes.
-- **Behaviour.** The PGLite HTTP suite in `apps/api` covers create, caption, render (stubbed renderer when Chromium is present), PNG bytes, missing Chromium, auth, and submit, reject, and publish (including that publish does not clear `pub:v1:` cache keys).
+- **Behaviour.** The PGLite HTTP suite in `apps/api` covers create, caption, render (stubbed renderer when Chromium is present), PNG bytes, missing Chromium, auth, submit, reject, publish (including that publish does not clear `pub:v1:` cache keys), and ZIP download of published galleries with rendered slides.
 
 #### Gotchas
 
