@@ -44,7 +44,7 @@ Behaviour changes also paste `summary.md` in `## Verification`.
 
 ## Pull request
 
-Fill `.github/pull_request_template.md`: plan item, size, every top-level path under Changes, how to test, the results table, and verification. Fill `## Review` in this run, in the shape `.cursor/skills/review/SKILL.md` specifies. Leave it empty only when a separate agent will run.
+Fill `.github/pull_request_template.md` in section order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots (or `not applicable`), Verification (the results table), Checklist, and Review. Fill `## Review` in this run, in the shape `.cursor/skills/review/SKILL.md` specifies. Leave it empty only when a separate agent will run.
 
 The title is a Conventional Commits subject. It becomes the squash subject.
 

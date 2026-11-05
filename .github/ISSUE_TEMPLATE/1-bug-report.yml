@@ -1,0 +1,87 @@
+name: Bug report
+description: Something in the apps or libraries does the wrong thing
+title: '[Bug]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search open issues first. Work an agent will implement still becomes a ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. These fields match that ticket (goal, acceptance criteria, blocked by, size). Version 1 uses seed and test data only. Do not paste secrets or real personal data.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - apps/web
+        - apps/studio
+        - apps/api
+        - libs/ui
+        - libs/shared-types
+        - docs or config
+        - tooling
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: The outcome once this is fixed. Matches **What to build:** on a local ticket.
+      placeholder: The match list shows an empty state when the API returns no rows.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Commands, routes, and seed data. Prefer text over a screenshot.
+      placeholder: |
+        1. Start the API and the web app.
+        2. Open /football.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable checks. One checkbox per check.
+      placeholder: |
+        - [ ] Opening /football with no matches shows "No matches."
+        - [ ] A failed load shows the error and leaves the page usable.
+    validations:
+      required: true
+
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked by
+      description: Plan ids or links that must land first. Write none when nothing blocks this.
+      placeholder: none
+    validations:
+      required: true
+
+  - type: input
+    id: size
+    attributes:
+      label: Size
+      description: Counted lines for the fix. Target 300. Split before 500. Write unknown when you are reporting, not estimating.
+      placeholder: unknown
+    validations:
+      required: true

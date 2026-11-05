@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Plan tickets
+    url: https://github.com/danielnagy-dev/cro-sport-hub/blob/main/docs/agents/issue-tracker.md
+    about: Day-to-day work is a local ticket under .scratch/. Agents do not open a GitHub issue.
+  - name: Pull request guide
+    url: https://github.com/danielnagy-dev/cro-sport-hub/blob/main/AGENTS.md
+    about: How a pull request is written, checked, and merged.
