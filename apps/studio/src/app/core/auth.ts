@@ -10,7 +10,7 @@ export type Session = { token: string; id: string; role: Role; exp: number }
 export type SignInResult = 'ok' | 'invalid' | 'rejected'
 
 export const loginPath = '/api/login'
-const storageKey = 'studio.token'
+const STORAGE_KEY = 'studio.token'
 
 export type TokenStore = {
   read(): string | null
@@ -20,9 +20,9 @@ export type TokenStore = {
 
 export const TOKEN_STORE = new InjectionToken<TokenStore>('TOKEN_STORE', {
   factory: () => ({
-    read: () => sessionStorage.getItem(storageKey),
-    write: (token) => sessionStorage.setItem(storageKey, token),
-    clear: () => sessionStorage.removeItem(storageKey),
+    read: () => sessionStorage.getItem(STORAGE_KEY),
+    write: (token) => sessionStorage.setItem(STORAGE_KEY, token),
+    clear: () => sessionStorage.removeItem(STORAGE_KEY),
   }),
 })
 

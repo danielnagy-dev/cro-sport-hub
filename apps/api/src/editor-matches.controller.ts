@@ -36,10 +36,10 @@ import { readEditorTennisDraft } from './catalog/editor-tennis-draft.js'
 import { listEditorMatches } from './catalog/editor-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 
-const queryMessage =
+const QUERY_MESSAGE =
   'sport is tennis or football, status is draft, review, or published, source is manual or import, limit is 1 to 50, and offset is 0 or greater'
 
-const filters = ['sport', 'status', 'source'] as const
+const FILTERS = ['sport', 'status', 'source'] as const
 
 function queryParam(name: string, schema: Record<string, unknown>) {
   return ApiQuery({ name, required: false, schema })
@@ -58,7 +58,7 @@ function editorDocs() {
       description: 'Matches in every workflow state, newest first.',
       standardSchema: editorMatchPageSchema,
     }),
-    ApiBadRequestResponse({ description: queryMessage }),
+    ApiBadRequestResponse({ description: QUERY_MESSAGE }),
     ApiUnauthorizedResponse({ description: 'Invalid token' }),
     ApiForbiddenResponse({ description: 'Forbidden' }),
   )
@@ -127,13 +127,13 @@ function readEditorQuery(query: Record<string, unknown>): EditorMatchListQuery {
     limit: query.limit === undefined ? '20' : query.limit,
     offset: query.offset === undefined ? '0' : query.offset,
   }
-  for (const key of filters) {
+  for (const key of FILTERS) {
     if (query[key] !== undefined) input[key] = query[key]
   }
   if (Object.values(input).some((value) => typeof value !== 'string')) {
-    throw new BadRequestException(queryMessage)
+    throw new BadRequestException(QUERY_MESSAGE)
   }
   const parsed = editorMatchListQuerySchema.safeParse(input)
-  if (!parsed.success) throw new BadRequestException(queryMessage)
+  if (!parsed.success) throw new BadRequestException(QUERY_MESSAGE)
   return parsed.data
 }

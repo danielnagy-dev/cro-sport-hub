@@ -76,7 +76,7 @@ export const statCountLabels: Record<keyof TennisStatCounts, string> = {
   totalPointsWon: 'Total points won',
 }
 
-const setCount = 5
+const SET_COUNT = 5
 
 function emptySetRow(): SetRow {
   return { gamesA: '', gamesB: '', tiebreak: '' }
@@ -96,7 +96,7 @@ export function initialTennisFormModel(): TennisFormModel {
     winnerId: '',
     bestOf: '3',
     retired: false,
-    sets: Array.from({ length: setCount }, emptySetRow),
+    sets: Array.from({ length: SET_COUNT }, emptySetRow),
     playerAStats: emptyStatRow(),
     playerBStats: emptyStatRow(),
   }
@@ -109,9 +109,9 @@ function statRowFromCounts(counts: TennisStatCounts): StatCountModel {
 }
 
 function setsFromScore(score: EditorTennisDraft['score']): SetRow[] {
-  const rows = Array.from({ length: setCount }, emptySetRow)
+  const rows = Array.from({ length: SET_COUNT }, emptySetRow)
   for (const [index, set] of score.entries()) {
-    if (index >= setCount) break
+    if (index >= SET_COUNT) break
     rows[index] = {
       gamesA: String(set[0]),
       gamesB: String(set[1]),

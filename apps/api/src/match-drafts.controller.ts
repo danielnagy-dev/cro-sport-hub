@@ -39,7 +39,7 @@ const draftSavedSchema = z.strictObject({
   sport: sportSlugSchema,
 })
 
-const idMessage = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
+const ID_MESSAGE = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
 
 type AuthedRequest = { user?: { id: string } }
 type DraftSport = 'tennis' | 'football'
@@ -58,7 +58,7 @@ function draftDocs(summary: string, created: boolean) {
 }
 
 function withId(body: unknown, id: string): unknown {
-  if (!idSchema.safeParse(id).success) throw new BadRequestException(idMessage)
+  if (!idSchema.safeParse(id).success) throw new BadRequestException(ID_MESSAGE)
   if (typeof body !== 'object' || body === null || Array.isArray(body)) return { id }
   if ('id' in body && body.id !== id) {
     throw new BadRequestException('The match id is the one in the path')

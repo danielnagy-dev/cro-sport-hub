@@ -33,7 +33,7 @@ import {
 import { PUBLIC_READ_CACHE, type PublicReadCacheClient } from './public-read-cache/client.js'
 import { readCachedPublishedMatches } from './public-read-cache/published-matches.js'
 
-const pageMessage = 'limit is 1 to 50 and offset is 0 or greater'
+const PAGE_MESSAGE = 'limit is 1 to 50 and offset is 0 or greater'
 
 function pageDocs(summary: string) {
   return applyDecorators(
@@ -52,7 +52,7 @@ function pageDocs(summary: string) {
       description: 'Published matches, newest first.',
       standardSchema: publishedMatchPageSchema,
     }),
-    ApiBadRequestResponse({ description: pageMessage }),
+    ApiBadRequestResponse({ description: PAGE_MESSAGE }),
   )
 }
 
@@ -114,9 +114,9 @@ function readPage(query: Record<string, unknown>): { limit: number; offset: numb
   const limit = query.limit === undefined ? '20' : query.limit
   const offset = query.offset === undefined ? '0' : query.offset
   if (typeof limit !== 'string' || typeof offset !== 'string') {
-    throw new BadRequestException(pageMessage)
+    throw new BadRequestException(PAGE_MESSAGE)
   }
   const parsed = matchListQuerySchema.safeParse({ limit, offset })
-  if (!parsed.success) throw new BadRequestException(pageMessage)
+  if (!parsed.success) throw new BadRequestException(PAGE_MESSAGE)
   return parsed.data
 }
