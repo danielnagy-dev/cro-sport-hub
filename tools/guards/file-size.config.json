@@ -1,0 +1,40 @@
+{
+  "exact": [
+    "pnpm-lock.yaml",
+    "apps/api/src/catalog/seed.ts",
+    ".cursor/rules/angular-best-practices.mdc"
+  ],
+  "prefixes": [".agents/skills/", "libs/slide-generator/design/"],
+  "catalogSqlDir": "apps/api/src/catalog/",
+  "suffixes": [
+    ".lock",
+    ".ttf",
+    ".otf",
+    ".woff",
+    ".woff2",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".ico",
+    ".svg",
+    ".pdf",
+    ".bin",
+    ".tsbuildinfo"
+  ],
+  "generatedDirNames": [
+    "node_modules",
+    "dist",
+    "dist-ssr",
+    ".next",
+    ".angular",
+    "coverage",
+    "storybook-static",
+    "artifacts",
+    "out",
+    "out-tsc",
+    "test-results"
+  ],
+  "baseline": ["tools/verify/verify.ts"]
+}
