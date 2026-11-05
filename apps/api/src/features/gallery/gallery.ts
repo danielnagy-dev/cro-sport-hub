@@ -1,6 +1,17 @@
 import { randomUUID } from 'node:crypto'
-import { catalogSlides, footballSlides, type FootballSlide } from '@cro-sport-hub/slide-generator'
-import { galleryCreatedSchema, galleryViewSchema, statusSchema } from '@cro-sport-hub/shared-types'
+import {
+  catalogSlides,
+  footballRendererReason,
+  footballSlides,
+  renderFootballPngs,
+  type FootballSlide,
+} from '@cro-sport-hub/slide-generator'
+import {
+  galleryCreatedSchema,
+  galleryRenderResponseSchema,
+  galleryViewSchema,
+  statusSchema,
+} from '@cro-sport-hub/shared-types'
 import { and, asc, eq } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
@@ -215,4 +226,76 @@ export async function patchGallerySlideCaption(
     .where(and(eq(gallerySlides.galleryId, galleryId), eq(gallerySlides.slideIndex, slideIndex)))
     .returning({ slideIndex: gallerySlides.slideIndex })
   if (updated.length === 0) throw new CatalogError('unknown-ref', 'Unknown slide')
+}
+
+function slideForRender(payload: unknown, caption: string | null): FootballSlide {
+  const parsed = storedSlideSchema.parse(payload)
+  if (caption === null || caption.length === 0) return parsed
+  return { ...parsed, caption }
+}
+
+export async function renderGalleryPngs(
+  db: CatalogDb,
+  galleryId: string,
+  render: (slides: readonly FootballSlide[]) => Promise<Uint8Array[]> = renderFootballPngs,
+) {
+  if (
+    (
+      await db.select({ id: galleries.id }).from(galleries).where(eq(galleries.id, galleryId))
+    )[0] === undefined
+  ) {
+    throw new CatalogError('unknown-ref', 'Unknown gallery')
+  }
+  const reason = footballRendererReason()
+  if (reason !== undefined) throw new CatalogError('invalid', reason)
+  const rows = await db
+    .select()
+    .from(gallerySlides)
+    .where(eq(gallerySlides.galleryId, galleryId))
+    .orderBy(asc(gallerySlides.slideIndex))
+  const slides = rows.map((row) => slideForRender(row.payload, row.caption))
+  const pngs = await render(slides)
+  if (pngs.length !== slides.length) {
+    throw new Error('The renderer returned the wrong number of PNGs')
+  }
+  await db.transaction(async (tx) => {
+    const database = tx as unknown as CatalogDb
+    for (let index = 0; index < rows.length; index += 1) {
+      await database
+        .update(gallerySlides)
+        .set({ png: Buffer.from(pngs[index]) })
+        .where(
+          and(
+            eq(gallerySlides.galleryId, galleryId),
+            eq(gallerySlides.slideIndex, rows[index].slideIndex),
+          ),
+        )
+    }
+  })
+  return parseRecord(galleryRenderResponseSchema, { slideCount: slides.length })
+}
+
+export async function readGallerySlidePng(
+  db: CatalogDb,
+  galleryId: string,
+  slideIndex: number,
+): Promise<Buffer> {
+  if (
+    (
+      await db.select({ id: galleries.id }).from(galleries).where(eq(galleries.id, galleryId))
+    )[0] === undefined
+  ) {
+    throw new CatalogError('unknown-ref', 'Unknown gallery')
+  }
+  const row = (
+    await db
+      .select({ png: gallerySlides.png })
+      .from(gallerySlides)
+      .where(and(eq(gallerySlides.galleryId, galleryId), eq(gallerySlides.slideIndex, slideIndex)))
+  )[0]
+  if (row === undefined) throw new CatalogError('unknown-ref', 'Unknown slide')
+  if (row.png === null || row.png.length === 0) {
+    throw new CatalogError('unknown-ref', 'Slide is not rendered')
+  }
+  return row.png
 }

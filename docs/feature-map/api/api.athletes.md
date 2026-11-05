@@ -10,4 +10,6 @@ Tennis profiles add `results`: published matches only, newest `match_date` first
 
 Football profiles add `results`: published appearances only, newest `match_date` first (`id` breaks ties). Each item has `id`, `competition`, `date`, `round`, `club` (name only), `started`, `minutes`, `goals`, `assists`, `yellowCards`, and `redCard` from the stored appearance row.
 
+Responses are cached in Redis for 60 seconds (`pub:v1:athletes:` keys). A reader can see the same profile or name list for up to a minute after a row changes until `invalidatePublicReads` runs (plan item 12b on publish).
+
 The PGLite suite is the proof; `verify:api --route /api/athletes/karlo-brkic` needs Docker and does not load the seed.

@@ -186,6 +186,67 @@ test('football profile lists club names without ids or a tennis scoreboard', asy
   expect(html).not.toContain('sample-town')
   expect(html).not.toContain('versus')
   expect(html).not.toContain('Set 1')
+  expect(html).toContain('<caption>Karlo Brkić appearances</caption>')
+  expect(html).toContain('Sample League')
+  expect(html).toContain('Matchday 8')
+  expect(html).toContain('scope="row">2026-10-19</th>')
+  expect(html).toContain('>90</td>')
+  expect(html).toContain('>2</td>')
+})
+
+const filip = {
+  slug: 'filip-saric',
+  name: 'Filip Šarić',
+  sport: 'football' as const,
+  country: 'HR',
+  position: 'Right back',
+  clubs: [{ name: 'Sample Home', from: '2025-07-01' }],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 0,
+      assists: 0,
+      yellowCards: 2,
+      redCard: true,
+    },
+  ],
+}
+
+test('football profile maps two yellows to Second yellow in appearances', async () => {
+  const { html } = await renderAthlete('filip-saric', (path) => {
+    if (path === athletePath('filip-saric')) return json(filip)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(html).toContain('>Second yellow</td>')
+})
+
+test('tennis profile does not render the football appearances table', async () => {
+  const { html } = await renderAthlete('sample-player-a', (path) => {
+    if (path === athletePath('sample-player-a')) return json(playerA)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(html).not.toContain('appearances</caption>')
+  expect(html).not.toContain('No appearances')
+})
+
+test('football profile with no published appearances shows the empty copy', async () => {
+  const emptyKarlo = { ...karlo, results: [] as typeof karlo.results }
+  const { html } = await renderAthlete('karlo-brkic', (path) => {
+    if (path === athletePath('karlo-brkic')) return json(emptyKarlo)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(html).toContain('Karlo Brkić appearances')
+  expect(html).toContain('No appearances')
+  expect(html).not.toContain('<caption>')
 })
 
 test('an unknown slug triggers not found', async () => {

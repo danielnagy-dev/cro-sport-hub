@@ -99,5 +99,6 @@ export {
   galleryCaptionPatchSchema,
   galleryCreateBodySchema,
   galleryCreatedSchema,
+  galleryRenderResponseSchema,
   galleryViewSchema,
 } from './gallery.ts'

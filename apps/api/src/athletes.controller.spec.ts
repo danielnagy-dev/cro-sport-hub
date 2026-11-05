@@ -13,6 +13,10 @@ import { openCatalog } from './catalog/catalog.js'
 import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
+import {
+  createInMemoryPublicReadCacheClient,
+  PUBLIC_READ_CACHE,
+} from './public-read-cache/client.js'
 import { setupOpenApi } from './openapi.js'
 
 const karlo = {
@@ -123,7 +127,10 @@ describe('public athletes', () => {
 
     const moduleRef = await Test.createTestingModule({
       controllers: [AthletesController],
-      providers: [{ provide: CATALOG_OPENER, useValue: open }],
+      providers: [
+        { provide: CATALOG_OPENER, useValue: open },
+        { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
+      ],
     }).compile()
     const app = moduleRef.createNestApplication()
     setupOpenApi(app)
