@@ -1,11 +1,15 @@
 import { expect, test } from 'vite-plus/test'
 import { mentionFailures, mentionNeedle, trackedScratchPaths } from './no-scratch.ts'
 
-test('trackedScratchPaths finds the tree root and nested files', () => {
-  expect(trackedScratchPaths(['apps/a.ts', '.scratch/plan-index.md', '.scratch'])).toEqual([
-    '.scratch',
-    '.scratch/plan-index.md',
-  ])
+test('trackedScratchPaths finds the tree root, nested files, and plan index paths', () => {
+  expect(
+    trackedScratchPaths([
+      'apps/a.ts',
+      '.scratch/plan-index.md',
+      'docs/agents/plan-index.md',
+      '.scratch',
+    ]),
+  ).toEqual(['.scratch', '.scratch/plan-index.md', 'docs/agents/plan-index.md'])
 })
 
 test('mentionFailures skips the guard sources and flags other paths', () => {

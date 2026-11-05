@@ -45,4 +45,6 @@ Before the final push, fetch and merge the latest `origin/main` as `AGENTS.md` d
 
 ## Order
 
-Which issues may run together is `docs/agents/plan-index.md`. That file is a pointer. It is not a second tracker.
+The next work is any open issue whose `Blocked by:` line lists only closed issues, or `Blocked by: none`. The issue body is the spec. There is no separate plan index in the repo.
+
+Two issues may run in parallel when each is unblocked and their **Shared files** lists in Notes share no path (see `.cursor/skills/plan/SKILL.md`).

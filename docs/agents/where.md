@@ -1,6 +1,8 @@
 # Where to look
 
-Commands are in `AGENTS.md`. Open these paths first.
+Commands are in `AGENTS.md`. Open work and order: `docs/agents/issue-tracker.md` (GitHub Issues; the issue body is the spec; `Blocked by:` is order).
+
+Open these paths first.
 
 ## API
 

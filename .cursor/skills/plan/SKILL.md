@@ -33,7 +33,7 @@ For one plan item, write:
 
 `**Shared files:**` sits with the other bold fields. List every existing file the ticket edits, as repo-root paths, sorted. A ticket that only adds files writes `none`. New files are left off the list.
 
-Two issues may run together when their shared-file lists share no path. That pair is parallel-safe. The plan index (`docs/agents/plan-index.md`) shows the groups as issue links. One group runs one issue at a time. An issue whose list meets two groups runs alone.
+Two issues may run together when both are unblocked (`Blocked by:` in the issue body) and their shared-file lists share no path. That pair is parallel-safe. Issues that touch the same shared path run one at a time. An issue whose list meets two groups runs alone.
 
 ADR-007 names the API registration files. Once its feature folders are on main, an API feature's list is empty, or one sorted line in `libs/shared-types/src/index.ts` when the feature adds a shared export. Until then, a ticket that registers an API feature lists those files.
 
