@@ -22,16 +22,19 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 import {
+  editorFootballDraftSchema,
   editorMatchListQuerySchema,
   editorMatchPageSchema,
   editorTennisDraftSchema,
   idSchema,
+  type EditorFootballDraft,
   type EditorMatchListQuery,
   type EditorMatchPage,
   type EditorTennisDraft,
 } from '@cro-sport-hub/shared-types'
 import { EditorAuthGuard } from './auth/role.guard.js'
 import { catalogDb, CatalogError } from './catalog/catalog.js'
+import { readEditorFootballDraft } from './catalog/editor-football-draft.js'
 import { readEditorTennisDraft } from './catalog/editor-tennis-draft.js'
 import { listEditorMatches } from './catalog/editor-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
@@ -64,15 +67,16 @@ function editorDocs() {
   )
 }
 
-function readTennisDocs() {
+function readOneDocs(
+  summary: string,
+  description: string,
+  standardSchema: typeof editorTennisDraftSchema | typeof editorFootballDraftSchema,
+) {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'Read one tennis match for editing' }),
+    ApiOperation({ summary }),
     ApiParam({ name: 'id', description: 'Match id.' }),
-    ApiOkResponse({
-      description: 'Draft body the tennis POST accepts, plus status.',
-      standardSchema: editorTennisDraftSchema,
-    }),
+    ApiOkResponse({ description, standardSchema }),
     ApiNotFoundResponse({ description: 'Unknown match' }),
     ApiUnauthorizedResponse({ description: 'Invalid token' }),
     ApiForbiddenResponse({ description: 'Forbidden' }),
@@ -92,16 +96,34 @@ export class EditorMatchesController {
   }
 
   @Get('matches/tennis/:id')
-  @readTennisDocs()
+  @readOneDocs(
+    'Read one tennis match for editing',
+    'Draft body the tennis POST accepts, plus status.',
+    editorTennisDraftSchema,
+  )
   readTennis(@Param('id') id: string): Promise<EditorTennisDraft> {
     if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown match')
-    return this.readOne(id)
+    return this.readOne(id, readEditorTennisDraft)
   }
 
-  private async readOne(id: string): Promise<EditorTennisDraft> {
+  @Get('matches/football/:id')
+  @readOneDocs(
+    'Read one football match for editing',
+    'Draft body the football POST accepts, plus status.',
+    editorFootballDraftSchema,
+  )
+  readFootball(@Param('id') id: string): Promise<EditorFootballDraft> {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown match')
+    return this.readOne(id, readEditorFootballDraft)
+  }
+
+  private async readOne<T>(
+    id: string,
+    read: (db: ReturnType<typeof catalogDb>, matchId: string) => Promise<T>,
+  ): Promise<T> {
     const catalog = await this.openCatalog()
     try {
-      return await readEditorTennisDraft(catalogDb(catalog), id)
+      return await read(catalogDb(catalog), id)
     } catch (error) {
       if (error instanceof CatalogError && error.code === 'unknown-ref') {
         throw new NotFoundException(error.message)

@@ -54,6 +54,9 @@ export {
 } from './editor-match.ts'
 export type { EditorMatch, EditorMatchListQuery, EditorMatchPage } from './editor-match.ts'
 
+export { editorFootballDraftSchema } from './editor-football-draft.ts'
+export type { EditorFootballDraft } from './editor-football-draft.ts'
+
 export { editorTennisDraftSchema } from './editor-tennis-draft.ts'
 export type { EditorTennisDraft } from './editor-tennis-draft.ts'
 

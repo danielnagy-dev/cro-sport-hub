@@ -8,14 +8,17 @@
 
 `GET /api/editor/matches/tennis/:id` returns one tennis match for editing. The body matches what `POST /api/matches/tennis` accepts, including `stats` when stored, plus `status`. There is no percentage field. A football id or an unknown id is HTTP 404 `Unknown match`. No token is HTTP 401 `Invalid token`. OpenAPI marks the path with bearer security.
 
+`GET /api/editor/matches/football/:id` returns one football match for editing. The body matches what `POST /api/matches/football` accepts, including `appearances` when they are stored, plus `status`. A tennis id or an unknown id is HTTP 404 `Unknown match`. No token is HTTP 401 `Invalid token`. OpenAPI marks the path with bearer security.
+
 #### How to get to it (user POV)
 
 - `GET http://localhost:3001/api/editor/matches` with `Authorization: Bearer`. The shape is on `GET /docs-json`.
 - `GET http://localhost:3001/api/editor/matches/tennis/match-sample-qf` with `Authorization: Bearer` returns the seeded draft quarterfinal.
+- `GET http://localhost:3001/api/editor/matches/football/match-sample-league` with `Authorization: Bearer` returns the seeded league match, the 2-1 score, and Karlo Brkić's appearance.
 
 #### Driving it with verify
 
-The verify CLI sends GET and does not send a bearer. `vp run verify:api --route /api/matches` checks the public list. Do not add `/api/editor/matches` or `/api/editor/matches/tennis/:id`: without a token those routes are HTTP 401, and a 401 fails the run. The PGLite HTTP suite is the proof for this list and the tennis read.
+The verify CLI sends GET and does not send a bearer. `vp run verify:api --route /api/matches` checks the public list. Do not add `/api/editor/matches`, `/api/editor/matches/tennis/:id`, or `/api/editor/matches/football/:id`: without a token those routes are HTTP 401, and a 401 fails the run. The PGLite HTTP suite is the proof for this list and the tennis and football reads.
 
 #### Gotchas
 
