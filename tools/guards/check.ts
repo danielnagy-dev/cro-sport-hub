@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { assertBoundarySelfTest, studioBoundaryFailures } from './boundaries.ts'
+import { noScratchFailures } from './no-scratch.ts'
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 
@@ -397,6 +398,7 @@ function main(): number {
     ...typecheckFailures(),
     ...vendoredSkillFailures(),
     ...studioBoundaryFailures(),
+    ...noScratchFailures(),
   ]
   console.log(`commits scanned: ${commits.label}`)
   console.log(prBody.note)

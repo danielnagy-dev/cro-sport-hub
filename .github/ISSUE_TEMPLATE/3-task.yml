@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this for a chore that is not a bug and not a feature. An agent files this form. The issue is the spec. Do not add a `.scratch` ticket.
+        Use this for a chore that is not a bug and not a feature. An agent files this form. The issue is the spec. Do not add a local markdown ticket file.
 
   - type: dropdown
     id: area

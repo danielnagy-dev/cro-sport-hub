@@ -2,7 +2,7 @@
 
 Open work is a GitHub issue on [danielnagy-dev/cro-sport-hub](https://github.com/danielnagy-dev/cro-sport-hub/issues). The issue body is the spec. A pull request `## Summary` is the spec only when the pull request has no issue.
 
-Files left under `.scratch/<area>/issues/` are history from the local-markdown tracker. Do not start work from them, and do not add a new file there.
+The retired local-markdown ticket tree is gone. Do not recreate it.
 
 `wayfinder` is not installed. Do not create `map.md`.
 
@@ -23,7 +23,7 @@ Title: `[<id>] <title>`. Keep an existing plan id such as `4b`. A new id continu
 
 Labels, applied when the issue is opened:
 
-- `area:<area>` matches the old `.scratch` directory (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
+- `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
 - `type:feature`, `type:bug`, or `type:task`. Colors `A2EEEF`, `D73A4A`, `C5DEF5`.
 - `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`.
 
@@ -45,4 +45,4 @@ Before the final push, fetch and merge the latest `origin/main` as `AGENTS.md` d
 
 ## Order
 
-Which issues may run together is `.scratch/plan-index.md`. That file is a pointer. It is not a second tracker.
+Which issues may run together is `docs/agents/plan-index.md`. That file is a pointer. It is not a second tracker.

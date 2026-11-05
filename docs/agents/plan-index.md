@@ -1,8 +1,6 @@
 # Plan index
 
-GitHub Issues are the source of truth for open work. This file records order and which issues may run together. It has no status table. The convention is `docs/agents/issue-tracker.md`. Issue numbers here are GitHub issues. Older `PR #N` notes in history files may be Cursor Origin numbers from before 2026-11-05.
-
-Files still under `.scratch/<area>/issues/` are history. Do not start work from them.
+GitHub Issues are the source of truth for open work. This file records order and which issues may run together. It has no status table. The convention is `docs/agents/issue-tracker.md`. Issue numbers here are GitHub issues. Older `PR #N` notes in history may be Cursor Origin numbers from before 2026-11-05.
 
 ## Order
 
