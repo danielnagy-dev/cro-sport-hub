@@ -7,6 +7,7 @@ import { RouterTestingHarness } from '@angular/router/testing'
 import { expect, vi } from 'vite-plus/test'
 import { App } from '../app'
 import { appConfig } from '../app.config'
+import { editorMatchesPath } from './matches-api'
 import {
   adminGuard,
   AuthStore,
@@ -220,20 +221,29 @@ describe('session redirect', () => {
     tokens.write(bearer('editor', Math.floor(Date.now() / 1000) + hour))
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [...appConfig.providers, { provide: TOKEN_STORE, useValue: tokens }],
+      providers: [
+        ...appConfig.providers,
+        provideHttpClientTesting(),
+        { provide: TOKEN_STORE, useValue: tokens },
+      ],
     }).compileComponents()
 
     const fixture = TestBed.createComponent(App)
-    await TestBed.inject(Router).navigateByUrl('/')
+    const router = TestBed.inject(Router)
+    const http = TestBed.inject(HttpTestingController)
+    fixture.detectChanges()
+    await router.navigateByUrl('/matches')
+    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    fixture.detectChanges()
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(TestBed.inject(Router).url).toBe('/')
-    expect(root.textContent).toContain('QF')
+    expect(router.url).toBe('/matches')
     expect(root.textContent).toContain('editor-demo')
 
     TestBed.inject(AuthStore).logOut()
     await fixture.whenStable()
     expect(TestBed.inject(Router).url).toBe('/login')
     expect(root.textContent).toContain('Log in')
+    http.verify()
   })
 })

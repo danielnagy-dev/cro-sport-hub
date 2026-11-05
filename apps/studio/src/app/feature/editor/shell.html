@@ -6,6 +6,9 @@
     <nav class="shell-nav" aria-label="Studio sections">
       <a routerLink="/" aria-current="page">Home</a>
       <a routerLink="/matches">Matches</a>
+      @if (auth.session()?.role === 'admin') {
+      <a routerLink="/admin/competitions">Admin</a>
+      }
     </nav>
     @if (auth.session(); as session) {
     <div class="shell-session">
