@@ -13,6 +13,7 @@ const editorPaths = [
   '/matches/new/football',
   '/matches/match-sample/football',
   '/matches/match-sample/tennis',
+  '/matches/match-sample-qf/review',
   '/galleries/new',
   '/galleries/gallery-demo',
 ]

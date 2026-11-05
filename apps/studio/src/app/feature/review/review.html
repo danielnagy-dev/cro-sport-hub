@@ -1,0 +1,57 @@
+<div class="shell">
+  <header class="shell-header">
+    <a class="skip-link" href="#content">Skip to review</a>
+    <p class="shell-mark">Cro Sport Hub</p>
+    <h1>Studio</h1>
+    <nav class="shell-nav" aria-label="Studio sections">
+      <a routerLink="/">Home</a>
+      <a routerLink="/matches">Matches</a>
+    </nav>
+    @if (auth.session(); as session) {
+    <div class="shell-session">
+      <span>{{ session.id }}</span>
+      <button type="button" (click)="logOut()">Log out</button>
+    </div>
+    }
+  </header>
+
+  <main id="content" class="review-main" tabindex="-1">
+    <h2>Review match</h2>
+    @if (loadStatus() === 'loading') {
+    <p role="status">Loading match.</p>
+    } @else if (loadStatus() === 'not-found') {
+    <p role="alert">Match not found</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">The match could not be loaded.</p>
+    } @else if (summary(); as row) {
+    <dl class="review-summary">
+      <div>
+        <dt>Label</dt>
+        <dd>{{ row.label }}</dd>
+      </div>
+      <div>
+        <dt>Sport</dt>
+        <dd>{{ row.sport }}</dd>
+      </div>
+      <div>
+        <dt>Status</dt>
+        <dd>{{ status() }}</dd>
+      </div>
+    </dl>
+    @if (row.sport === 'tennis') {
+    <p><a [routerLink]="['/matches', row.id, 'tennis']">Edit tennis match</a></p>
+    } @else {
+    <p><a [routerLink]="['/matches', row.id, 'football']">Edit football match</a></p>
+    }
+    @if (showAdminActions()) {
+    <div class="review-actions">
+      <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>
+      <button type="button" [disabled]="actionPending()" (click)="onPublish()">Publish</button>
+    </div>
+    }
+    @if (actionError(); as message) {
+    <p role="alert">{{ message }}</p>
+    }
+    }
+  </main>
+</div>
