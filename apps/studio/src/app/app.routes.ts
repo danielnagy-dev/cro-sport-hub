@@ -36,5 +36,16 @@ export const studioRoutes: Routes = [
       import('./feature/tennis-form/tennis-score').then((module) => module.TennisScorePage),
     canActivate: [editorGuard],
   },
+  {
+    path: 'galleries/new',
+    loadComponent: () =>
+      import('./feature/gallery/gallery-new').then((module) => module.GalleryNewPage),
+    canActivate: [editorGuard],
+  },
+  {
+    path: 'galleries/:id',
+    loadComponent: () => import('./feature/gallery/gallery').then((module) => module.GalleryPage),
+    canActivate: [editorGuard],
+  },
   { path: '**', redirectTo: '' },
 ]
