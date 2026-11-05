@@ -21,7 +21,7 @@ The author runs each required check once, from the repository root, and records 
 
 ## Pull requests
 
-- One topic per pull request.
+- One topic per pull request. Split before 500 counted lines (same count as `.cursor/skills/plan/SKILL.md`); CI fails larger pull requests via `tools/guards/pr-size.ts`.
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
 - The description follows `.github/pull_request_template.md`, in this order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots when the UI changes, Verification, Checklist, and Review. It becomes the squash commit body. `## Summary` is the spec when the ticket file is not on the branch.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
@@ -41,7 +41,7 @@ The author runs each required check once, from the repository root, and records 
 
 ## Feature map
 
-`docs/feature-map.md` is the index. Area files under `docs/feature-map/` list every user-reachable feature and how to reach it. Update the area file in the same PR that adds or changes a route, endpoint, story or user action. A PR adds its entry to the area file it touches, not the index.
+`docs/feature-map.md` is the area index only. Each user-reachable feature has an id file at `docs/feature-map/<area>/<id>.md` (for example `docs/feature-map/api/api.athletes.md`). The area file (`docs/feature-map/api.md`, `studio.md`, `web.md`, or `ui.md`) explains how ids are named and holds no feature table. Update the id file in the same PR that adds or changes a route, endpoint, story, or user action. Do not edit `docs/feature-map.md` for a single new id.
 
 ## Corrections ladder
 

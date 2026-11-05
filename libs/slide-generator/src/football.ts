@@ -3,6 +3,7 @@
  * Hero size is computed here. See ADR-003.
  * List passes are text ("84%" over "38/45"). There is no list donut.
  */
+import { injectCaption } from './caption.ts'
 export const slideWidth = 1080
 export const slideHeight = 1350
 export const designRound = '13-interim' as const
@@ -30,15 +31,15 @@ export type FootballFixture = {
 export type FootballPerson = {
   name: string
   club: string
-  number: number
-  position: string
+  number?: number
+  position?: string
   fixture: FootballFixture
   stats: readonly FootballStatInput[]
   /** Stat key to force. `"none"` leaves the grid without a hero. */
   hero?: string
   lineup?: 'start' | 'sub'
 }
-type SlideMeta = { competition: string; round: string; date: string }
+type SlideMeta = { competition: string; round: string; date: string; caption?: string }
 export type FootballSlide =
   | (SlideMeta & { kind: 'player'; player: FootballPerson })
   | (SlideMeta & { kind: 'list'; players: readonly FootballPerson[] })
@@ -83,6 +84,9 @@ export function footballTemplate(
     slide.kind === 'player'
       ? playerBody(slide, options, heroes)
       : listBody(slide, options, heroes, zoom)
+  let html = page(colourway, options.brand ?? 'HRVATSKI SPORT', body, slide.kind)
+  const cap = slide.caption
+  html = injectCaption(html, cap === undefined || cap === '' ? undefined : esc(cap))
   return {
     width: slideWidth,
     height: slideHeight,
@@ -91,7 +95,7 @@ export function footballTemplate(
     designRound,
     heroes,
     zoom,
-    html: page(colourway, options.brand ?? 'HRVATSKI SPORT', body, slide.kind),
+    html,
   }
 }
 
@@ -305,7 +309,11 @@ function who(person: FootballPerson): string {
   const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : ''
   const accent = /[ČĆŠŽĐ]/.test(surname.toUpperCase()) ? ' acc' : ''
   const given = first === '' ? '' : `<span class="fn">${esc(first)}</span>`
-  return `<div class="name${accent}">${given}<span class="ln">${esc(surname)}</span></div><p class="id"><span>${esc(person.club)}</span><i></i><span>#${person.number}</span><i></i><span>${esc(person.position)}</span></p>`
+  const id: string[] = [`<span>${esc(person.club)}</span>`]
+  if (person.number !== undefined) id.push('<i></i>', `<span>#${person.number}</span>`)
+  if (person.position !== undefined && person.position !== '')
+    id.push('<i></i>', `<span>${esc(person.position)}</span>`)
+  return `<div class="name${accent}">${given}<span class="ln">${esc(surname)}</span></div><p class="id">${id.join('')}</p>`
 }
 
 function matchLine(person: FootballPerson, player: boolean): string {

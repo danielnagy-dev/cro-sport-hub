@@ -4,7 +4,7 @@
 
 **Blocked by:** 8b (`.scratch/athletes/issues/8b-tennis-results.md`), so the tennis `results` object is already on the schema this slice extends.
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 300 counted lines. The same shape as 8b, on the appearance table plan 5b already stores. One sport, no new formula.
 
@@ -38,3 +38,7 @@ Yes, for the football result object. No ADR. The fields are `appearanceSchema` p
 
 - `GET /api/athletes/karlo-brkic` and `GET /api/athletes/filip-saric` on the seeded catalog. Catches a draft appearance, a club id, and a card pair that does not match the stored counts.
 - `GET /docs-json`. Catches football results missing from OpenAPI.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/44

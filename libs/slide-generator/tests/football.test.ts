@@ -220,3 +220,18 @@ test('hero size, colourway, and the missing cover are template options', () => {
   expect(footballTemplate(player, { colourway: 'light' }).html).toContain('#F4EEE1')
   expect(() => footballTemplate({ kind: 'cover' } as never)).toThrow('Round 13 has no cover slide')
 })
+
+test('optional shirt number and caption stay off the handoff defaults', () => {
+  expect(footballTemplate(player).html).toContain('#9')
+  const bare = footballTemplate({
+    ...player,
+    player: { ...karlo, number: undefined, position: 'Forward' },
+  })
+  expect(bare.html).not.toMatch(/#9</)
+  expect(bare.html).toContain('Forward</span>')
+  expect(footballTemplate(player).html).not.toContain('Sample night')
+  const captioned = footballTemplate({ ...player, caption: 'Sample night' })
+  expect(captioned.html).toContain('Sample night')
+  expect(footballTemplate({ ...player, caption: '' }).html).not.toContain('Sample night')
+  expect(footballTemplate({ ...serie, caption: 'List note' }).html).toContain('List note')
+})

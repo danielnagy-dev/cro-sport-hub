@@ -1,5 +1,9 @@
 import { type AddressInfo } from 'node:net'
-import { athleteNameListSchema, publicAthleteSchema } from '@cro-sport-hub/shared-types'
+import {
+  athleteNameListSchema,
+  publicAthleteSchema,
+  tennisPercentages,
+} from '@cro-sport-hub/shared-types'
 import { PGlite } from '@electric-sql/pglite'
 import { Test } from '@nestjs/testing'
 import { drizzle } from 'drizzle-orm/pglite'
@@ -21,6 +25,21 @@ const karlo = {
     { name: 'Sample Home', from: '2025-07-01' },
     { name: 'Sample Town', from: '2023-07-01', to: '2025-06-30' },
   ],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 2,
+      assists: 0,
+      yellowCards: 0,
+      redCard: false,
+    },
+  ],
 }
 const playerA = {
   slug: 'sample-player-a',
@@ -28,6 +47,48 @@ const playerA = {
   sport: 'tennis' as const,
   country: 'HR',
   clubs: [],
+  results: [
+    {
+      id: 'match-sample-final',
+      competition: 'Sample Cup',
+      date: '2026-10-18',
+      round: 'Final',
+      opponent: 'Sample Player B',
+      winner: 'athlete' as const,
+      bestOf: 3,
+      score: [
+        [6, 4],
+        [7, 6, 5],
+      ],
+      retired: false,
+      aces: 3,
+      doubleFaults: 1,
+      firstServeIn: 6,
+      firstServeTotal: 10,
+      firstServePointsWon: 4,
+      secondServePointsWon: 2,
+      secondServeTotal: 4,
+      breakPointsSaved: 1,
+      breakPointsFaced: 2,
+      breakPointsWon: 2,
+      breakPointsTotal: 4,
+      totalPointsWon: 20,
+      percentages: tennisPercentages({
+        aces: 3,
+        doubleFaults: 1,
+        firstServeIn: 6,
+        firstServeTotal: 10,
+        firstServePointsWon: 4,
+        secondServePointsWon: 2,
+        secondServeTotal: 4,
+        breakPointsSaved: 1,
+        breakPointsFaced: 2,
+        breakPointsWon: 2,
+        breakPointsTotal: 4,
+        totalPointsWon: 20,
+      }),
+    },
+  ],
 }
 const footballNames = [
   { slug: 'bruno-peric', name: 'Bruno Perić' },
@@ -91,11 +152,27 @@ describe('public athletes', () => {
     expect(footballText).not.toContain('sample-home')
     expect(footballText).not.toContain('sample-town')
     expect(footballText).not.toContain('crest')
-    expect(footballer).not.toHaveProperty('results')
+    if (footballer.sport !== 'football') throw new Error('expected football profile')
+    expect(footballer.results).toHaveLength(1)
+    expect(footballer.results[0]?.club).toBe('Sample Home')
+
+    const filip = publicAthleteSchema.parse(await body(port, '/api/athletes/filip-saric'))
+    if (filip.sport !== 'football') throw new Error('expected football profile')
+    expect(filip.results[0]?.yellowCards).toBe(2)
+    expect(filip.results[0]?.redCard).toBe(true)
+
+    const bruno = publicAthleteSchema.parse(await body(port, '/api/athletes/bruno-peric'))
+    if (bruno.sport !== 'football') throw new Error('expected football profile')
+    expect(bruno.results[0]?.minutes).toBe(0)
+    expect(bruno.results[0]?.started).toBe(false)
+    expect(bruno.results[0]?.yellowCards).toBe(1)
 
     const tennis = publicAthleteSchema.parse(await body(port, '/api/athletes/sample-player-a'))
     expect(tennis).toEqual(playerA)
-    expect(tennis).not.toHaveProperty('results')
+    if (tennis.sport !== 'tennis') throw new Error('expected tennis profile')
+    expect(tennis.results).toHaveLength(1)
+    expect(tennis.results[0]?.percentages?.firstServePct).toBe(60)
+    expect(tennis.results.find((row) => row.date === '2026-10-16')).toBeUndefined()
 
     const missing = await fetch(`http://127.0.0.1:${port}/api/athletes/nobody`)
     expect(missing.status).toBe(404)

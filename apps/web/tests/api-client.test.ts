@@ -1,5 +1,13 @@
 import { expect, test } from 'vite-plus/test'
-import { createApiClient, matchesPath, sportsPath } from '../lib/api-client'
+import {
+  createApiClient,
+  athletePath,
+  athletesBySportPath,
+  footballMatchesPath,
+  matchesPath,
+  sportsPath,
+  tennisMatchesPath,
+} from '../lib/api-client'
 
 const sport = { id: 'sport-tennis', slug: 'tennis', name: 'Tennis' }
 
@@ -15,6 +23,32 @@ const match = {
   reviewedBy: 'editor-2',
   publishedAt: '2026-10-18T18:00:00+00:00',
 }
+
+const karlo = {
+  slug: 'karlo-brkic',
+  name: 'Karlo Brkić',
+  sport: 'football' as const,
+  country: 'HR',
+  position: 'Forward',
+  clubs: [{ name: 'Sample Home', from: '2025-07-01' }],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 2,
+      assists: 0,
+      yellowCards: 0,
+      redCard: false,
+    },
+  ],
+}
+
+const athleteNames = [{ slug: 'sample-player-a', name: 'Sample Player A' }]
 
 const publishedPage = {
   items: [
@@ -47,18 +81,24 @@ function routes(bodies: Record<string, { status?: number; body: unknown }>) {
   return { fetchImpl, calls }
 }
 
-test('parses sports and a published match page from the read paths', async () => {
+test('parses sports and published match pages from the read paths', async () => {
   const { fetchImpl, calls } = routes({
     [sportsPath]: { body: [sport] },
     [matchesPath]: { body: publishedPage },
+    [tennisMatchesPath]: { body: { ...publishedPage, items: [] } },
+    [footballMatchesPath]: { body: publishedPage },
   })
   const api = createApiClient({ fetch: fetchImpl, baseUrl: 'http://localhost:3001' })
 
   await expect(api.sports()).resolves.toEqual([sport])
   await expect(api.matches()).resolves.toEqual(publishedPage)
+  await expect(api.matchesTennis()).resolves.toEqual({ ...publishedPage, items: [] })
+  await expect(api.matchesFootball()).resolves.toEqual(publishedPage)
   expect(calls).toEqual([
     { url: 'http://localhost:3001/api/sports', accept: 'application/json' },
     { url: 'http://localhost:3001/api/matches', accept: 'application/json' },
+    { url: 'http://localhost:3001/api/matches/tennis', accept: 'application/json' },
+    { url: 'http://localhost:3001/api/matches/football', accept: 'application/json' },
   ])
 })
 
@@ -82,4 +122,19 @@ test('rejects a bare Match array', async () => {
   const api = createApiClient({ fetch: fetchImpl })
 
   await expect(api.matches()).rejects.toThrow(/expected object, received array/)
+})
+
+test('parses athlete profile and sport name lists', async () => {
+  const { fetchImpl, calls } = routes({
+    [athletePath('karlo-brkic')]: { body: karlo },
+    [athletesBySportPath('tennis')]: { body: athleteNames },
+  })
+  const api = createApiClient({ fetch: fetchImpl, baseUrl: 'http://localhost:3001' })
+
+  await expect(api.athlete('karlo-brkic')).resolves.toEqual(karlo)
+  await expect(api.athletesBySport('tennis')).resolves.toEqual(athleteNames)
+  expect(calls.map((call) => call.url)).toEqual([
+    'http://localhost:3001/api/athletes/karlo-brkic',
+    'http://localhost:3001/api/athletes?sport=tennis',
+  ])
 })

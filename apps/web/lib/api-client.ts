@@ -1,13 +1,29 @@
 import {
+  athleteNameListSchema,
   publishedMatchPageSchema,
+  publicAthleteSchema,
   sportSchema,
+  type AthleteName,
+  type PublicAthlete,
   type PublishedMatchPage,
   type Sport,
+  type SportSlug,
 } from '@cro-sport-hub/shared-types'
 
 /** `GET /api/sports` is not served. `GET /api/matches` returns a published page. */
 export const sportsPath = '/api/sports'
 export const matchesPath = '/api/matches'
+export const tennisMatchesPath = `${matchesPath}/tennis`
+export const footballMatchesPath = `${matchesPath}/football`
+export const athletesPath = '/api/athletes'
+
+export function athletePath(slug: string): string {
+  return `${athletesPath}/${slug}`
+}
+
+export function athletesBySportPath(sport: SportSlug): string {
+  return `${athletesPath}?sport=${sport}`
+}
 
 /** Non-OK HTTP from a read. Schema failures throw from the shared schemas instead. */
 export class ApiClientError extends Error {
@@ -23,6 +39,10 @@ export class ApiClientError extends Error {
 export type ApiClient = {
   sports: () => Promise<Sport[]>
   matches: () => Promise<PublishedMatchPage>
+  matchesTennis: () => Promise<PublishedMatchPage>
+  matchesFootball: () => Promise<PublishedMatchPage>
+  athlete: (slug: string) => Promise<PublicAthlete>
+  athletesBySport: (sport: SportSlug) => Promise<AthleteName[]>
 }
 
 type ApiClientOptions = {
@@ -55,6 +75,18 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     },
     async matches() {
       return publishedMatchPageSchema.parse(await read(matchesPath))
+    },
+    async matchesTennis() {
+      return publishedMatchPageSchema.parse(await read(tennisMatchesPath))
+    },
+    async matchesFootball() {
+      return publishedMatchPageSchema.parse(await read(footballMatchesPath))
+    },
+    async athlete(slug) {
+      return publicAthleteSchema.parse(await read(athletePath(slug)))
+    },
+    async athletesBySport(sport) {
+      return athleteNameListSchema.parse(await read(athletesBySportPath(sport)))
     },
   }
 }
