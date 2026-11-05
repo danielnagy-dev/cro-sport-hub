@@ -18,7 +18,7 @@
 
 #### Driving it with verify
 
-The verify CLI sends GET and does not send a bearer. `vp run verify:api --route /api/matches` checks the public list. Do not add `/api/editor/matches`, `/api/editor/matches/tennis/:id`, or `/api/editor/matches/football/:id`: without a token those routes are HTTP 401, and a 401 fails the run. The PGLite HTTP suite is the proof for this list and the tennis and football reads.
+The verify CLI has no bearer. The PGLite HTTP suite covers this list and both editor reads; do not add those GET paths to verify.
 
 #### Gotchas
 
