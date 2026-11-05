@@ -8,10 +8,13 @@
 
 `GET /api/editor/matches/tennis/:id` returns one tennis match for editing. The body matches what `POST /api/matches/tennis` accepts, including `stats` when stored, plus `status`. There is no percentage field. A football id or an unknown id is HTTP 404 `Unknown match`. No token is HTTP 401 `Invalid token`. OpenAPI marks the path with bearer security.
 
+`GET /api/editor/matches/football/:id` returns one football match for editing. The body matches what `POST /api/matches/football` accepts, including `appearances` when stored, plus `status`. A tennis id or an unknown id is HTTP 404 `Unknown match`. No token is HTTP 401 `Invalid token`. OpenAPI marks the path with bearer security.
+
 #### How to get to it (user POV)
 
 - `GET http://localhost:3001/api/editor/matches` with `Authorization: Bearer`. The shape is on `GET /docs-json`.
 - `GET http://localhost:3001/api/editor/matches/tennis/match-sample-qf` with `Authorization: Bearer` returns the seeded draft quarterfinal.
+- `GET http://localhost:3001/api/editor/matches/football/match-sample-league` with `Authorization: Bearer` returns the seeded published league match.
 
 #### Driving it with verify
 
