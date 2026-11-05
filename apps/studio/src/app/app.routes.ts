@@ -30,6 +30,11 @@ export const studioRoutes: Routes = [
   {
     path: '',
     loadChildren: () =>
+      import('./feature/review/review.routes').then((module) => module.reviewRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
       import('./feature/tennis-form/tennis-form.routes').then((module) => module.tennisFormRoutes),
   },
   { path: '**', redirectTo: '' },
