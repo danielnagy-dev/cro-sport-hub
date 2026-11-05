@@ -6,6 +6,7 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { asc, eq } from 'drizzle-orm'
 import { type PgDatabase, type PgQueryResultHKT } from 'drizzle-orm/pg-core'
+import { listFootballResultsForAthlete } from '../features/athletes/list-football-results.js'
 import { listTennisResultsForAthlete } from '../features/athletes/list-tennis-results.js'
 import { readParsed } from './errors.js'
 import { UnknownSportError } from './published-matches.js'
@@ -81,7 +82,8 @@ export async function readPublicAthlete(db: CatalogDb, slug: string): Promise<Pu
       const results = await listTennisResultsForAthlete(db, athlete.id)
       return publicAthleteSchema.parse({ ...profile, sport: 'tennis', results })
     }
-    return publicAthleteSchema.parse({ ...profile, sport: 'football' })
+    const results = await listFootballResultsForAthlete(db, athlete.id)
+    return publicAthleteSchema.parse({ ...profile, sport: 'football', results })
   })
 }
 

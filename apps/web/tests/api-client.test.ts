@@ -31,6 +31,21 @@ const karlo = {
   country: 'HR',
   position: 'Forward',
   clubs: [{ name: 'Sample Home', from: '2025-07-01' }],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 2,
+      assists: 0,
+      yellowCards: 0,
+      redCard: false,
+    },
+  ],
 }
 
 const athleteNames = [{ slug: 'sample-player-a', name: 'Sample Player A' }]
