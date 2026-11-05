@@ -5,11 +5,11 @@ import { expect } from 'vite-plus/test'
 import { firstValueFrom } from 'rxjs'
 import { stubApiInterceptor, stubMatches, stubSports } from './stub-api'
 import {
+  editorAthletesPath,
+  editorCompetitionsPath,
   matchesPath,
   sportsPath,
   StudioApi,
-  editorAthletesPath,
-  editorCompetitionsPath,
   tennisDraftsPath,
 } from './studio-api'
 

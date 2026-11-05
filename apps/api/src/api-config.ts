@@ -16,6 +16,11 @@ export type ApiConfig = {
 
 const databaseProtocols = new Set(['postgresql:', 'postgres:'])
 
+/** True only when `IMPORT_SCHEDULE` is exactly `true`. Every other value, including unset, is off. */
+export function readImportScheduleEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.IMPORT_SCHEDULE === 'true'
+}
+
 export function readApiConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
   return {
     port: readPort(env.PORT),

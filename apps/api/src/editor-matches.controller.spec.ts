@@ -12,6 +12,10 @@ import * as schema from './catalog/schema.js'
 import { EditorMatchesController } from './editor-matches.controller.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { MatchesController } from './matches.controller.js'
+import {
+  createInMemoryPublicReadCacheClient,
+  PUBLIC_READ_CACHE,
+} from './public-read-cache/client.js'
 import { setupOpenApi } from './openapi.js'
 
 const secret = 'test-jwt-secret-that-is-at-least-32'
@@ -100,6 +104,7 @@ describe('editorial match list', () => {
       controllers: [EditorMatchesController, MatchesController],
       providers: [
         { provide: CATALOG_OPENER, useValue: open },
+        { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
         { provide: JWT_SECRET, useValue: secret },
         EditorAuthGuard,
       ],

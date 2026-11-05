@@ -25,6 +25,10 @@
     <p role="status">Draft saved as {{ matchId }}.</p>
     } @if (saveError(); as message) {
     <p id="tennis-save-error" class="field-error" role="alert" tabindex="-1">{{ message }}</p>
+    } @if (submitError(); as message) {
+    <p id="tennis-submit-error" class="field-error" role="alert" tabindex="-1">{{ message }}</p>
+    } @if (matchStatus() === "review") {
+    <p role="status">Status: review</p>
     }
     <form class="tennis-form" (submit)="onSubmit($event)" novalidate>
       <div class="tennis-field">
@@ -187,11 +191,45 @@
         </label>
       </div>
 
-      @if (tennisForm().submitting()) {
+      @for (section of statBlockConfigs; track section.block) {
+      <fieldset class="tennis-stats">
+        <legend>{{ section.legend }}</legend>
+        @for (message of statMessages(section.block); track message) {
+        <p class="field-error">{{ message }}</p>
+        }
+        <div class="tennis-stats-grid">
+          @for (key of statCountKeys; track key) {
+          <div class="tennis-field">
+            <label [for]="section.idPrefix + '-' + key">{{ statCountLabels[key] }}</label>
+            <input
+              [id]="section.idPrefix + '-' + key"
+              type="number"
+              inputmode="numeric"
+              [formField]="statFields(section.block)[key]"
+            />
+          </div>
+          }
+        </div>
+        @if (showPlayerPercentages(section.block)) {
+        <dl class="tennis-percentages">
+          @for (row of percentageRows; track row[1]) {
+          <div>
+            <dt>{{ row[0] }}</dt>
+            <dd>{{ percentageValue(section.block, row[1]) }}</dd>
+          </div>
+          }
+        </dl>
+        }
+      </fieldset>
+      } @if (tennisForm().submitting()) {
       <p role="status">Saving draft.</p>
       }
       <button type="submit" [disabled]="savedId() !== undefined">Save draft</button>
     </form>
-    }
+    @if (canSubmitForReview()) {
+    <button type="button" (click)="onSubmitForReview()">Submit for review</button>
+    } @if (submittingForReview()) {
+    <p role="status">Submitting for review.</p>
+    } }
   </main>
 </div>
