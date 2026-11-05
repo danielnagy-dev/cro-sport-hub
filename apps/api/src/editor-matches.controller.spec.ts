@@ -213,4 +213,41 @@ describe('editorial match list', () => {
     expect(paths['/api/editor/matches'].get.security).toEqual([{ bearer: [] }])
     expect(paths['/api/matches'].get.security).toBeUndefined()
   }, 20_000)
+
+  it('reads a tennis draft and rejects a football id without a token', async () => {
+    const port = await start()
+    const editor = await bearer('editor')
+    const read = await send(port, '/api/editor/matches/tennis/match-sample-qf', editor)
+    expect(read.status).toBe(200)
+    const body = await read.json()
+    expect(body).toMatchObject({
+      id: 'match-sample-qf',
+      status: 'draft',
+      playerAId: 'sample-player-c',
+      playerBId: 'sample-player-d',
+      winnerId: 'sample-player-c',
+      bestOf: 3,
+      score: [
+        [6, 3],
+        [4, 2],
+      ],
+      retired: true,
+    })
+    expect(body).not.toHaveProperty('firstServePct')
+    expect(JSON.stringify(body)).not.toContain('Pct')
+
+    const football = await send(port, '/api/editor/matches/tennis/match-sample-league', editor)
+    expect(football.status).toBe(404)
+    await expect(football.json()).resolves.toMatchObject({ message: 'Unknown match' })
+
+    const missing = await send(port, '/api/editor/matches/tennis/match-sample-qf')
+    expect(missing.status).toBe(401)
+    await expect(missing.json()).resolves.toMatchObject({ message: 'Invalid token' })
+
+    const docs = await send(port, '/docs-json')
+    expect(docs.status).toBe(200)
+    expect((await docs.json()).paths['/api/editor/matches/tennis/{id}'].get.security).toEqual([
+      { bearer: [] },
+    ])
+  }, 20_000)
 })

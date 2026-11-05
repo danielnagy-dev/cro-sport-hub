@@ -5,6 +5,7 @@ import {
   tennisBestOfSchema,
   tennisMatchSchema,
   tennisStatIssues,
+  type EditorTennisDraft,
   type FieldIssue,
   type TennisStatCounts,
 } from '@cro-sport-hub/shared-types'
@@ -98,6 +99,47 @@ export function initialTennisFormModel(): TennisFormModel {
     sets: Array.from({ length: setCount }, emptySetRow),
     playerAStats: emptyStatRow(),
     playerBStats: emptyStatRow(),
+  }
+}
+
+function statRowFromCounts(counts: TennisStatCounts): StatCountModel {
+  return Object.fromEntries(
+    statCountKeys.map((key) => [key, String(counts[key])]),
+  ) as StatCountModel
+}
+
+function setsFromScore(score: EditorTennisDraft['score']): SetRow[] {
+  const rows = Array.from({ length: setCount }, emptySetRow)
+  for (const [index, set] of score.entries()) {
+    if (index >= setCount) break
+    rows[index] = {
+      gamesA: String(set[0]),
+      gamesB: String(set[1]),
+      tiebreak: set.length > 2 ? String(set[2]) : '',
+    }
+  }
+  return rows
+}
+
+/** Maps an editor GET body into the signal form model. */
+export function tennisFormFromDraft(draft: EditorTennisDraft): TennisFormModel {
+  const stats = draft.stats ?? []
+  const statsFor = (athleteId: string): StatCountModel => {
+    const row = stats.find((entry) => entry.athleteId === athleteId)
+    return row === undefined ? emptyStatRow() : statRowFromCounts(row)
+  }
+  return {
+    competitionId: draft.competitionId,
+    date: draft.date,
+    round: draft.round,
+    playerAId: draft.playerAId,
+    playerBId: draft.playerBId,
+    winnerId: draft.winnerId,
+    bestOf: String(draft.bestOf),
+    retired: draft.retired === true,
+    sets: setsFromScore(draft.score),
+    playerAStats: statsFor(draft.playerAId),
+    playerBStats: statsFor(draft.playerBId),
   }
 }
 

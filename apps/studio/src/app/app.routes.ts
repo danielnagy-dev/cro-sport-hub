@@ -30,5 +30,11 @@ export const studioRoutes: Routes = [
       import('./feature/football-form/football-score').then((module) => module.FootballScorePage),
     canActivate: [editorGuard],
   },
+  {
+    path: 'matches/:id/tennis',
+    loadComponent: () =>
+      import('./feature/tennis-form/tennis-score').then((module) => module.TennisScorePage),
+    canActivate: [editorGuard],
+  },
   { path: '**', redirectTo: '' },
 ]

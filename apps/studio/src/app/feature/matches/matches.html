@@ -62,7 +62,11 @@
       <tbody>
         @for (row of store.items(); track row.id) {
         <tr>
-          <td>{{ row.label }}</td>
+          <td>
+            @if (row.sport === 'tennis') {
+            <a [routerLink]="['/matches', row.id, 'tennis']">{{ row.label }}</a>
+            } @else { {{ row.label }} }
+          </td>
           <td>{{ row.sport }}</td>
           <td>{{ row.competition }}</td>
           <td>{{ row.date }}</td>

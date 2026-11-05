@@ -4,6 +4,7 @@ import {
   athleteLookupSchema,
   competitionLookupSchema,
   editorMatchPageSchema,
+  editorTennisDraftSchema,
   matchSchema,
   sportSchema,
   sportSlugSchema,
@@ -11,6 +12,7 @@ import {
   type AthleteLookup,
   type CompetitionLookup,
   type EditorMatchPage,
+  type EditorTennisDraft,
   type Match,
   type MatchSource,
   type Sport,
@@ -28,6 +30,14 @@ export const editorAthletesPath = '/api/editor/athletes'
 export const editorTeamsPath = '/api/editor/teams'
 export const tennisDraftsPath = '/api/matches/tennis'
 export const footballDraftsPath = '/api/matches/football'
+
+export function editorTennisDraftPath(id: string): string {
+  return `/api/editor/matches/tennis/${id}`
+}
+
+export function tennisDraftUpdatePath(id: string): string {
+  return `/api/matches/tennis/${id}`
+}
 
 export function matchSubmitPath(id: string): string {
   return `/api/matches/${id}/submit`
@@ -118,6 +128,18 @@ export class StudioApi {
     return this.http
       .post(tennisDraftsPath, body)
       .pipe(map((response) => parseTennisDraftSaved(response)))
+  }
+
+  updateTennisDraft(id: string, body: unknown): Observable<TennisDraftSaved> {
+    return this.http
+      .put(tennisDraftUpdatePath(id), body)
+      .pipe(map((response) => parseTennisDraftSaved(response)))
+  }
+
+  loadEditorTennisDraft(id: string): Observable<EditorTennisDraft> {
+    return this.http
+      .get(editorTennisDraftPath(id))
+      .pipe(map((response) => editorTennisDraftSchema.parse(response)))
   }
 
   createFootballDraft(body: unknown): Observable<FootballDraftSaved> {
