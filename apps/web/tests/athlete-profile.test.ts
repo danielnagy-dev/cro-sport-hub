@@ -15,6 +15,21 @@ const karlo = {
     { name: 'Sample Home', from: '2025-07-01' },
     { name: 'Sample Town', from: '2023-07-01', to: '2025-06-30' },
   ],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 2,
+      assists: 0,
+      yellowCards: 0,
+      redCard: false,
+    },
+  ],
 }
 
 const playerA = {
