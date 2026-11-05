@@ -44,3 +44,7 @@ Yes. The template signature grows an optional number, position, and caption. No 
 
 - `footballTemplate` with and without `number` and `caption`. Catches a `#undefined` and a caption on the handoff sample.
 - `catalogSlides` on the seeded league appearances. Catches a ring, a passes stat, or a shirt number in the HTML.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/40
