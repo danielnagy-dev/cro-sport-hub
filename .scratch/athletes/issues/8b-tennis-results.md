@@ -4,7 +4,7 @@
 
 **Blocked by:** af1, af3, and af5 (ADR-007, `.scratch/api-features/issues/`). 8a is on main (PR #28). This slice adds a function and `docs/feature-map/api/api.athletes.md` after those land, and it does not extend `Catalog` or the area index.
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 320 counted lines. One sport's join on the published-match select, plus the percentage function that already lives in `libs/shared-types`. Plan 7 was both sports.
 

@@ -4,4 +4,8 @@
 | --- | ------ | ---------------------------------------- | ----------------- | ------------ |
 | api | live   | `GET /api/athletes/{slug}` and `?sport=` | `vp run api#test` | plan item 8a |
 
-`GET /api/athletes/{slug}` returns `slug`, `name`, `sport`, `country`, optional `birthYear` and `position`, and `clubs` (`{ name, from, to? }`, current spell first, names only). `GET /api/athletes?sport=` returns `{ slug, name }[]` sorted by name. Unknown athlete is HTTP 404 `Unknown athlete`. An unknown sport is HTTP 404 `Unknown sport`. No `results` field. The PGLite suite is the proof; `verify:api` needs Docker and does not load the seed.
+`GET /api/athletes/{slug}` returns `slug`, `name`, `sport`, `country`, optional `birthYear` and `position`, and `clubs` (`{ name, from, to? }`, current spell first, names only). `GET /api/athletes?sport=` returns `{ slug, name }[]` sorted by name. Unknown athlete is HTTP 404 `Unknown athlete`. An unknown sport is HTTP 404 `Unknown sport`.
+
+Tennis profiles add `results`: published matches only, newest `match_date` first (`id` breaks ties). Each item has `id`, `competition`, `date`, `round`, `opponent`, `winner` (`athlete` or `opponent`), `bestOf`, `score`, `retired`, optional raw stat counts, and `percentages` from `tennisPercentages` (computed in the API, not stored). No stats row means `percentages: null` and the counts are omitted. Football profiles have no `results` field.
+
+The PGLite suite is the proof; `verify:api --route /api/athletes/sample-player-a` needs Docker and does not load the seed.
