@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { localDevDefaults, readApiConfig } from './api-config.js'
+import { localDevDefaults, readApiConfig, readImportScheduleEnabled } from './api-config.js'
+
+describe('readImportScheduleEnabled', () => {
+  it.each([
+    [undefined, false],
+    ['', false],
+    ['false', false],
+    ['true', true],
+    ['TRUE', false],
+    [' true', false],
+  ] as const)('returns %s when IMPORT_SCHEDULE is %j', (value, enabled) => {
+    expect(readImportScheduleEnabled(value === undefined ? {} : { IMPORT_SCHEDULE: value })).toBe(
+      enabled,
+    )
+  })
+})
 
 describe('readApiConfig', () => {
   it('uses the local Compose defaults when the environment is empty', () => {
