@@ -25,6 +25,21 @@ const karlo = {
     { name: 'Sample Home', from: '2025-07-01' },
     { name: 'Sample Town', from: '2023-07-01', to: '2025-06-30' },
   ],
+  results: [
+    {
+      id: 'match-sample-league',
+      competition: 'Sample League',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      club: 'Sample Home',
+      started: true,
+      minutes: 90,
+      goals: 2,
+      assists: 0,
+      yellowCards: 0,
+      redCard: false,
+    },
+  ],
 }
 const playerA = {
   slug: 'sample-player-a',
@@ -137,7 +152,20 @@ describe('public athletes', () => {
     expect(footballText).not.toContain('sample-home')
     expect(footballText).not.toContain('sample-town')
     expect(footballText).not.toContain('crest')
-    expect(footballer).not.toHaveProperty('results')
+    if (footballer.sport !== 'football') throw new Error('expected football profile')
+    expect(footballer.results).toHaveLength(1)
+    expect(footballer.results[0]?.club).toBe('Sample Home')
+
+    const filip = publicAthleteSchema.parse(await body(port, '/api/athletes/filip-saric'))
+    if (filip.sport !== 'football') throw new Error('expected football profile')
+    expect(filip.results[0]?.yellowCards).toBe(2)
+    expect(filip.results[0]?.redCard).toBe(true)
+
+    const bruno = publicAthleteSchema.parse(await body(port, '/api/athletes/bruno-peric'))
+    if (bruno.sport !== 'football') throw new Error('expected football profile')
+    expect(bruno.results[0]?.minutes).toBe(0)
+    expect(bruno.results[0]?.started).toBe(false)
+    expect(bruno.results[0]?.yellowCards).toBe(1)
 
     const tennis = publicAthleteSchema.parse(await body(port, '/api/athletes/sample-player-a'))
     expect(tennis).toEqual(playerA)

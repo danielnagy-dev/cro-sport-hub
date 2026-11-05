@@ -4,7 +4,7 @@
 
 **Blocked by:** 8b (`.scratch/athletes/issues/8b-tennis-results.md`), so the tennis `results` object is already on the schema this slice extends.
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 **Size:** 300 counted lines. The same shape as 8b, on the appearance table plan 5b already stores. One sport, no new formula.
 
