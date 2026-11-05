@@ -1,9 +1,12 @@
 import {
+  applyDecorators,
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Get,
   Header,
+  HttpCode,
   Inject,
   NotFoundException,
   Param,
@@ -15,7 +18,17 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger'
 import { z } from 'zod'
 import { footballRendererReason } from '@cro-sport-hub/slide-generator'
 import {
@@ -24,17 +37,45 @@ import {
   galleryViewSchema,
   idSchema,
 } from '@cro-sport-hub/shared-types'
-import { EditorAuthGuard } from '../../auth/role.guard.js'
+import { AdminAuthGuard, EditorAuthGuard } from '../../auth/role.guard.js'
 import { catalogDb, CatalogError, type Catalog } from '../../catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module.js'
 import {
   createGallery,
   patchGallerySlideCaption,
   pickPublishedFootballMessage,
+  publishGallery,
   readGallery,
   readGallerySlidePng,
+  rejectGallery,
   renderGalleryPngs,
+  submitGallery,
 } from './gallery.js'
+
+const submittedSchema = z.strictObject({
+  id: idSchema,
+  status: z.literal('review'),
+})
+const rejectedSchema = z.strictObject({
+  id: idSchema,
+  status: z.literal('draft'),
+})
+const publishedSchema = z.strictObject({
+  id: idSchema,
+  status: z.literal('published'),
+})
+
+function galleryWorkflowDocs(summary: string, saved: z.ZodType, conflict: string) {
+  return applyDecorators(
+    ApiOperation({ summary }),
+    ApiParam({ name: 'id', description: 'Gallery id.' }),
+    ApiOkResponse({ description: 'The gallery id and its new status.', standardSchema: saved }),
+    ApiUnauthorizedResponse({ description: 'Invalid token' }),
+    ApiForbiddenResponse({ description: 'Forbidden' }),
+    ApiNotFoundResponse({ description: 'Unknown gallery' }),
+    ApiConflictResponse({ description: conflict }),
+  )
+}
 
 type AuthedRequest = { user?: { id: string } }
 
@@ -47,6 +88,7 @@ function toHttp(error: unknown): unknown {
     }
     return new BadRequestException(error.message)
   }
+  if (error.code === 'conflict') return new ConflictException(error.message)
   if (error.code === 'unknown-ref') return new NotFoundException(error.message)
   return error
 }
@@ -107,6 +149,67 @@ export class GalleryController {
     try {
       await patchGallerySlideCaption(catalogDb(catalog), id, slideIndex, parsed.data.caption)
       return await readGallery(catalogDb(catalog), id)
+    } catch (error) {
+      throw toHttp(error)
+    } finally {
+      await catalog.close()
+    }
+  }
+
+  @Post(':id/submit')
+  @HttpCode(200)
+  @galleryWorkflowDocs(
+    'Submit a draft gallery for review',
+    submittedSchema,
+    'Only a draft gallery can be submitted',
+  )
+  async submit(@Param('id') id: string) {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown gallery')
+    const catalog: Catalog = await this.openCatalog()
+    try {
+      return submittedSchema.parse(await submitGallery(catalogDb(catalog), id))
+    } catch (error) {
+      throw toHttp(error)
+    } finally {
+      await catalog.close()
+    }
+  }
+
+  @Post(':id/reject')
+  @HttpCode(200)
+  @UseGuards(AdminAuthGuard)
+  @galleryWorkflowDocs(
+    'Reject a gallery in review back to draft',
+    rejectedSchema,
+    'Only a gallery in review can be rejected',
+  )
+  async reject(@Param('id') id: string) {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown gallery')
+    const catalog: Catalog = await this.openCatalog()
+    try {
+      return rejectedSchema.parse(await rejectGallery(catalogDb(catalog), id))
+    } catch (error) {
+      throw toHttp(error)
+    } finally {
+      await catalog.close()
+    }
+  }
+
+  @Post(':id/publish')
+  @HttpCode(200)
+  @UseGuards(AdminAuthGuard)
+  @galleryWorkflowDocs(
+    'Publish a gallery in review',
+    publishedSchema,
+    'Only a gallery in review can be published',
+  )
+  async publish(@Param('id') id: string, @Req() request: AuthedRequest) {
+    const actorId = request.user?.id
+    if (actorId === undefined) throw new UnauthorizedException('Invalid token')
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown gallery')
+    const catalog: Catalog = await this.openCatalog()
+    try {
+      return publishedSchema.parse(await publishGallery(catalogDb(catalog), id, actorId))
     } catch (error) {
       throw toHttp(error)
     } finally {

@@ -13,7 +13,7 @@ import { defineConfig } from 'vite-plus'
  */
 export default defineConfig({
   test: {
-    include: ['tools/guards/**/*.test.ts'],
+    include: ['tools/guards/**/*.test.ts', 'tools/verify/**/*.test.ts'],
   },
   fmt: {
     semi: false,
@@ -115,6 +115,7 @@ export default defineConfig({
       'verify:api': { command: 'vpx tools/verify/verify.ts api', cache: false },
       'verify:studio': { command: 'vpx tools/verify/verify.ts studio', cache: false },
       'verify:web': { command: 'vpx tools/verify/verify.ts web', cache: false },
+      'verify:visitor': { command: 'vpx tools/verify/visitor.ts', cache: false },
       'verify:ui': { command: 'vpx tools/verify/verify.ts ui', cache: false },
     },
   },

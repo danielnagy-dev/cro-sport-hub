@@ -5,6 +5,9 @@ import {
   competitionLookupSchema,
   editorMatchPageSchema,
   editorTennisDraftSchema,
+  galleryCreatedSchema,
+  galleryRenderResponseSchema,
+  galleryViewSchema,
   matchSchema,
   sportSchema,
   sportSlugSchema,
@@ -13,6 +16,7 @@ import {
   type CompetitionLookup,
   type EditorMatchPage,
   type EditorTennisDraft,
+  type GalleryView,
   type Match,
   type MatchSource,
   type Sport,
@@ -30,6 +34,15 @@ export const editorAthletesPath = '/api/editor/athletes'
 export const editorTeamsPath = '/api/editor/teams'
 export const tennisDraftsPath = '/api/matches/tennis'
 export const footballDraftsPath = '/api/matches/football'
+export const galleriesPath = '/api/galleries'
+
+export function galleryPath(id: string): string {
+  return `${galleriesPath}/${id}`
+}
+
+export function gallerySlidePath(id: string, index: number): string {
+  return `${galleriesPath}/${id}/slides/${index}`
+}
 
 export function editorTennisDraftPath(id: string): string {
   return `/api/editor/matches/tennis/${id}`
@@ -152,5 +165,31 @@ export class StudioApi {
     return this.http
       .post(matchSubmitPath(id), null)
       .pipe(map((response) => parseMatchSubmitted(response)))
+  }
+
+  createGallery(matchIds: string[]): Observable<{ id: string; slideIndexes: number[] }> {
+    return this.http
+      .post(galleriesPath, { matchIds })
+      .pipe(map((body) => galleryCreatedSchema.parse(body)))
+  }
+
+  readGallery(id: string): Observable<GalleryView> {
+    return this.http.get(galleryPath(id)).pipe(map((body) => galleryViewSchema.parse(body)))
+  }
+
+  patchGallerySlideCaption(id: string, index: number, caption: string): Observable<GalleryView> {
+    return this.http
+      .patch(gallerySlidePath(id, index), { caption })
+      .pipe(map((body) => galleryViewSchema.parse(body)))
+  }
+
+  renderGallery(id: string): Observable<{ slideCount: number }> {
+    return this.http
+      .post(`${galleryPath(id)}/render`, null)
+      .pipe(map((body) => galleryRenderResponseSchema.parse(body)))
+  }
+
+  fetchGallerySlidePng(id: string, index: number): Observable<Blob> {
+    return this.http.get(`${gallerySlidePath(id, index)}.png`, { responseType: 'blob' })
   }
 }

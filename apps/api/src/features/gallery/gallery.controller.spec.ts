@@ -2,14 +2,23 @@ import { type AddressInfo } from 'node:net'
 import { PGlite } from '@electric-sql/pglite'
 import { footballRendererReason } from '@cro-sport-hub/slide-generator'
 import { Test } from '@nestjs/testing'
+import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
 import { SignJWT } from 'jose'
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
-import { EditorAuthGuard, JWT_SECRET } from '../../auth/role.guard.js'
+import { AdminAuthGuard, EditorAuthGuard, JWT_SECRET } from '../../auth/role.guard.js'
 import { openCatalog } from '../../catalog/catalog.js'
+import { type CatalogDb } from '../../catalog/errors.js'
 import { seedCatalog } from '../../catalog/seed.js'
 import * as schema from '../../catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module.js'
+import {
+  createInMemoryPublicReadCacheClient,
+  PUBLIC_READ_CACHE,
+  type PublicReadCacheClient,
+} from '../../public-read-cache/client.js'
+import { publishedMatchesCacheKey } from '../../public-read-cache/published-matches.js'
+import { setupOpenApi } from '../../openapi.js'
 import { GalleryController } from './gallery.controller.js'
 import * as galleryModule from './gallery.js'
 import {
@@ -22,43 +31,97 @@ const secret = 'test-jwt-secret-that-is-at-least-32'
 const pngHeader = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13])
 const realRenderGalleryPngs = galleryModule.renderGalleryPngs
 
+async function bearer(role: string, sub = 'editor-demo'): Promise<string> {
+  const token = await new SignJWT({ role })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(sub)
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .sign(new TextEncoder().encode(secret))
+  return `Bearer ${token}`
+}
+
 describe('gallery routes', () => {
   let close: (() => Promise<void>) | undefined
+  let rows: CatalogDb | undefined
+  let cache: PublicReadCacheClient | undefined
   afterEach(async () => {
     vi.restoreAllMocks()
     await close?.()
+    close = undefined
+    rows = undefined
+    cache = undefined
   })
 
-  it('creates a draft, validates match ids, edits captions, and requires auth', async () => {
+  async function start(withOpenApi = false): Promise<number> {
     const client = new PGlite()
-    const open: CatalogOpener = () => openCatalog(drizzle(client, { schema }))
+    const database = drizzle(client, { schema })
+    rows = database
+    cache = createInMemoryPublicReadCacheClient()
+    const open: CatalogOpener = () => openCatalog(database)
     await seedCatalog(await open())
     const moduleRef = await Test.createTestingModule({
       controllers: [GalleryController],
       providers: [
         { provide: CATALOG_OPENER, useValue: open },
+        { provide: PUBLIC_READ_CACHE, useValue: cache },
         { provide: JWT_SECRET, useValue: secret },
         EditorAuthGuard,
+        AdminAuthGuard,
       ],
     }).compile()
     const app = moduleRef.createNestApplication()
+    if (withOpenApi) setupOpenApi(app)
     await app.listen(0, '127.0.0.1')
     close = async () => {
       await app.close()
       await client.close()
     }
-    const port = (app.getHttpServer().address() as AddressInfo).port
-    const auth = `Bearer ${await new SignJWT({ role: 'editor' }).setProtectedHeader({ alg: 'HS256' }).setSubject('editor-demo').setIssuedAt().setExpirationTime('1h').sign(new TextEncoder().encode(secret))}`
-    const post = async (body: unknown, bearer?: string) => {
-      const response = await fetch(`http://127.0.0.1:${port}/api/galleries`, {
-        method: 'POST',
-        headers: bearer
-          ? { authorization: bearer, 'content-type': 'application/json' }
-          : { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      return { status: response.status, body: await response.json() }
+    return (app.getHttpServer().address() as AddressInfo).port
+  }
+
+  async function send(port: number, method: string, path: string, body?: unknown, token?: string) {
+    const response = await fetch(`http://127.0.0.1:${port}${path}`, {
+      method,
+      headers: {
+        'content-type': 'application/json',
+        ...(token === undefined ? {} : { authorization: token }),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+    const text = await response.text()
+    return { status: response.status, body: text === '' ? undefined : JSON.parse(text) }
+  }
+
+  async function createDraft(port: number, token: string): Promise<string> {
+    const created = await send(
+      port,
+      'POST',
+      '/api/galleries',
+      { matchIds: ['match-sample-league'] },
+      token,
+    )
+    expect(created.status).toBe(201)
+    return created.body.id as string
+  }
+
+  async function stored(id: string) {
+    if (rows === undefined) throw new Error('Expected the test database')
+    const row = (await rows.select().from(schema.galleries).where(eq(schema.galleries.id, id)))[0]
+    if (row === undefined) throw new Error('Expected a gallery row')
+    return {
+      id: row.id,
+      status: row.status,
+      ...(row.reviewedBy === null ? {} : { reviewedBy: row.reviewedBy }),
+      ...(row.publishedAt === null ? {} : { publishedAt: row.publishedAt }),
     }
+  }
+
+  it('creates a draft, validates match ids, edits captions, and requires auth', async () => {
+    const port = await start()
+    const auth = await bearer('editor')
+    const post = async (body: unknown, bearerToken?: string) =>
+      send(port, 'POST', '/api/galleries', body, bearerToken)
     expect(await post({ matchIds: [] }, auth)).toMatchObject({
       status: 400,
       body: { message: pickPublishedFootballMessage },
@@ -98,31 +161,9 @@ describe('gallery routes', () => {
   })
 
   it('stores rendered PNG bytes, serves them with auth, and reports missing Chromium', async () => {
-    const client = new PGlite()
-    const open: CatalogOpener = () => openCatalog(drizzle(client, { schema }))
-    await seedCatalog(await open())
-    const moduleRef = await Test.createTestingModule({
-      controllers: [GalleryController],
-      providers: [
-        { provide: CATALOG_OPENER, useValue: open },
-        { provide: JWT_SECRET, useValue: secret },
-        EditorAuthGuard,
-      ],
-    }).compile()
-    const app = moduleRef.createNestApplication()
-    await app.listen(0, '127.0.0.1')
-    close = async () => {
-      await app.close()
-      await client.close()
-    }
-    const port = (app.getHttpServer().address() as AddressInfo).port
-    const auth = `Bearer ${await new SignJWT({ role: 'editor' }).setProtectedHeader({ alg: 'HS256' }).setSubject('editor-demo').setIssuedAt().setExpirationTime('1h').sign(new TextEncoder().encode(secret))}`
-    const create = await fetch(`http://127.0.0.1:${port}/api/galleries`, {
-      method: 'POST',
-      headers: { authorization: auth, 'content-type': 'application/json' },
-      body: JSON.stringify({ matchIds: ['match-sample-league'] }),
-    })
-    const id = (await create.json()).id as string
+    const port = await start()
+    const auth = await bearer('editor')
+    const id = await createDraft(port, auth)
     const pngUrl = `http://127.0.0.1:${port}/api/galleries/${id}/slides/0.png`
     const renderUrl = `http://127.0.0.1:${port}/api/galleries/${id}/render`
     const beforeRender = await fetch(pngUrl, { headers: { authorization: auth } })
@@ -161,4 +202,100 @@ describe('gallery routes', () => {
     expect(bytes.length).toBeGreaterThan(0)
     expect(Array.from(bytes.subarray(0, 4))).toEqual([137, 80, 78, 71])
   })
+
+  it('submits, rejects, and publishes without touching the public match cache', async () => {
+    const port = await start(true)
+    const editor = await bearer('editor')
+    const admin = await bearer('admin', 'admin-demo')
+    const id = await createDraft(port, editor)
+    const submit = `/api/galleries/${id}/submit`
+    const reject = `/api/galleries/${id}/reject`
+    const publish = `/api/galleries/${id}/publish`
+    const cacheKey = publishedMatchesCacheKey({ limit: 20, offset: 0 })
+    if (cache === undefined) throw new Error('Expected the public read cache')
+    await cache.set(cacheKey, '{}', 60)
+
+    expect(await send(port, 'POST', submit)).toMatchObject({
+      status: 401,
+      body: { message: 'Invalid token' },
+    })
+    expect(await send(port, 'POST', reject, undefined, editor)).toMatchObject({
+      status: 403,
+      body: { message: 'Forbidden' },
+    })
+    expect(await send(port, 'POST', publish, undefined, editor)).toMatchObject({
+      status: 403,
+      body: { message: 'Forbidden' },
+    })
+    expect(await send(port, 'POST', reject, undefined, admin)).toMatchObject({
+      status: 409,
+      body: { message: 'Only a gallery in review can be rejected' },
+    })
+    expect(await send(port, 'POST', publish, undefined, admin)).toMatchObject({
+      status: 409,
+      body: { message: 'Only a gallery in review can be published' },
+    })
+
+    expect(await send(port, 'POST', submit, undefined, editor)).toMatchObject({
+      status: 200,
+      body: { id, status: 'review' },
+    })
+    const reviewing = await stored(id)
+    expect(reviewing).toMatchObject({ id, status: 'review' })
+    expect(reviewing).not.toHaveProperty('reviewedBy')
+    expect(reviewing).not.toHaveProperty('publishedAt')
+    expect(await send(port, 'POST', submit, undefined, editor)).toMatchObject({
+      status: 409,
+      body: { message: 'Only a draft gallery can be submitted' },
+    })
+
+    if (rows === undefined) throw new Error('Expected the test database')
+    await rows
+      .update(schema.galleries)
+      .set({ reviewedBy: 'admin-demo' })
+      .where(eq(schema.galleries.id, id))
+
+    expect(await send(port, 'POST', reject, undefined, admin)).toMatchObject({
+      status: 200,
+      body: { id, status: 'draft' },
+    })
+    const reopened = await stored(id)
+    expect(reopened).toMatchObject({ id, status: 'draft' })
+    expect(reopened).not.toHaveProperty('reviewedBy')
+    expect(reopened).not.toHaveProperty('publishedAt')
+
+    expect(await send(port, 'POST', submit, undefined, admin)).toMatchObject({
+      status: 200,
+      body: { id, status: 'review' },
+    })
+
+    expect(await send(port, 'POST', publish, undefined, admin)).toMatchObject({
+      status: 200,
+      body: { id, status: 'published' },
+    })
+    const published = await stored(id)
+    expect(published).toMatchObject({ id, status: 'published', reviewedBy: 'admin-demo' })
+    expect(published.publishedAt).toMatch(/[+-]\d{2}:\d{2}$/)
+    expect(await cache.get(cacheKey)).toBe('{}')
+    expect(await send(port, 'POST', publish, undefined, admin)).toMatchObject({
+      status: 409,
+      body: { message: 'Only a gallery in review can be published' },
+    })
+
+    expect(
+      await send(port, 'POST', '/api/galleries/gallery-missing/submit', undefined, editor),
+    ).toMatchObject({ status: 404, body: { message: 'Unknown gallery' } })
+    expect(
+      await send(port, 'POST', '/api/galleries/gallery-missing/reject', undefined, admin),
+    ).toMatchObject({ status: 404, body: { message: 'Unknown gallery' } })
+    expect(
+      await send(port, 'POST', '/api/galleries/gallery-missing/publish', undefined, admin),
+    ).toMatchObject({ status: 404, body: { message: 'Unknown gallery' } })
+
+    const docs = await send(port, 'GET', '/docs-json')
+    const paths = docs.body.paths
+    expect(paths['/api/galleries/{id}/submit'].post.security).toEqual([{ bearer: [] }])
+    expect(paths['/api/galleries/{id}/reject'].post.security).toEqual([{ bearer: [] }])
+    expect(paths['/api/galleries/{id}/publish'].post.security).toEqual([{ bearer: [] }])
+  }, 20_000)
 })

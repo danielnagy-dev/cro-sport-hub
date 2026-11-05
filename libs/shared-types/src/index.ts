@@ -105,3 +105,4 @@ export {
   galleryRenderResponseSchema,
   galleryViewSchema,
 } from './gallery.ts'
+export type { GalleryView } from './gallery.ts'

@@ -1,8 +1,8 @@
 # web.home: Latest results home
 
-| App | Status | Entry point (user POV)   | Verify              | Since         |
-| --- | ------ | ------------------------ | ------------------- | ------------- |
-| web | live   | `http://localhost:3000/` | `vp run verify:web` | plan item 18a |
+| App | Status | Entry point (user POV)   | Verify                                                                             | Since         |
+| --- | ------ | ------------------------ | ---------------------------------------------------------------------------------- | ------------- |
+| web | live   | `http://localhost:3000/` | `vp run verify:web`; local visitor walk `vp run verify:visitor` (needs API + seed) | plan item 18a |
 
 The public home page lists the latest published tennis and football results. It keeps the skip link, the header link back to `/`, and the heading `Cro Sport Hub` inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
 
@@ -24,6 +24,7 @@ The public home page lists the latest published tennis and football results. It 
 Preconditions: port 3000 is free. Playwright Chromium is installed. The API is not required for the heading.
 
 - **Open home.** Run `vp run verify:web`. The `Home` row is `pass`, the `main` landmark is visible, and the text `Cro Sport Hub` is visible inside it.
+- **Visitor walk.** Run `vp run verify:visitor` with the API and seed up. The flow opens `/`, follows the tennis nav link, follows Sample Player A, and runs axe on each page. Serious or critical violations fail the run. When the API is down, the athlete link is missing and the task fails.
 - **Cards.** `vp run web#test` renders a fixture page of the seeded final and the seeded league match. A live list needs the API, Docker, and the seed.
 
 #### Gotchas
