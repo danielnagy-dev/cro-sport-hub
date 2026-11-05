@@ -62,6 +62,25 @@ body {
   font-size: 1.25rem;
 }
 
+.shell-nav {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.shell-nav a {
+  color: var(--color-accent-ink);
+}
+
+.shell-nav a:focus-visible,
+.matches-filters select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.shell-nav a[aria-current='page'] {
+  text-decoration: underline;
+}
+
 .shell-session {
   margin-left: auto;
   display: flex;
@@ -173,6 +192,45 @@ main h2 {
 main p {
   margin: 0 0 var(--space-3);
   color: var(--color-muted);
+}
+
+.matches-main {
+  padding: var(--space-5) var(--space-6);
+}
+
+.matches-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.matches-filters select {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  background: var(--color-surface);
+}
+
+.matches-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.matches-table caption,
+.matches-table th,
+.matches-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-top: 1px solid var(--color-line);
+}
+
+.matches-table th {
+  background: var(--color-canvas);
 }
 
 .login {
