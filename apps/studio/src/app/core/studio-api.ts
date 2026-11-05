@@ -7,6 +7,7 @@ import {
   matchSchema,
   sportSchema,
   sportSlugSchema,
+  teamLookupSchema,
   type AthleteLookup,
   type CompetitionLookup,
   type EditorMatchPage,
@@ -15,6 +16,7 @@ import {
   type Sport,
   type SportSlug,
   type Status,
+  type TeamLookup,
 } from '@cro-sport-hub/shared-types'
 import { map, type Observable } from 'rxjs'
 
@@ -23,14 +25,26 @@ export const matchesPath = '/api/matches'
 export const editorMatchesPath = '/api/editor/matches'
 export const editorCompetitionsPath = '/api/editor/competitions'
 export const editorAthletesPath = '/api/editor/athletes'
+export const editorTeamsPath = '/api/editor/teams'
 export const tennisDraftsPath = '/api/matches/tennis'
+export const footballDraftsPath = '/api/matches/football'
 
 export function matchSubmitPath(id: string): string {
   return `/api/matches/${id}/submit`
 }
 
 export type TennisDraftSaved = { id: string; status: 'draft'; sport: 'tennis' }
+export type FootballDraftSaved = { id: string; status: 'draft'; sport: 'football' }
 export type MatchSubmitted = { id: string; status: 'review' }
+
+function parseFootballDraftSaved(body: unknown): FootballDraftSaved {
+  if (typeof body !== 'object' || body === null) throw new Error('Invalid football draft response')
+  const row = body as Record<string, unknown>
+  if (row['status'] !== 'draft' || row['sport'] !== 'football' || typeof row['id'] !== 'string') {
+    throw new Error('Invalid football draft response')
+  }
+  return { id: row['id'], status: 'draft', sport: 'football' }
+}
 
 function parseTennisDraftSaved(body: unknown): TennisDraftSaved {
   if (typeof body !== 'object' || body === null) throw new Error('Invalid tennis draft response')
@@ -96,10 +110,20 @@ export class StudioApi {
       .pipe(map((body) => athleteLookupSchema.array().parse(body)))
   }
 
+  editorTeams(): Observable<TeamLookup[]> {
+    return this.http.get(editorTeamsPath).pipe(map((body) => teamLookupSchema.array().parse(body)))
+  }
+
   createTennisDraft(body: unknown): Observable<TennisDraftSaved> {
     return this.http
       .post(tennisDraftsPath, body)
       .pipe(map((response) => parseTennisDraftSaved(response)))
+  }
+
+  createFootballDraft(body: unknown): Observable<FootballDraftSaved> {
+    return this.http
+      .post(footballDraftsPath, body)
+      .pipe(map((response) => parseFootballDraftSaved(response)))
   }
 
   submitMatch(id: string): Observable<MatchSubmitted> {
