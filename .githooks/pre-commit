@@ -1,7 +1,7 @@
 #!/bin/sh
-# Staged files only. CI runs the same script with no flag from `vp run lint`.
-# Enable once per clone: git config core.hooksPath .githooks
-# The root prepare script sets that on install.
+# Blocks staged files over 5000 estimated tokens (bytes/4); uses index blobs, not the working tree.
+# Same script without --staged runs from `vp run lint` on all tracked files.
+# Hooks path: root `prepare` sets core.hooksPath to .githooks (also: git config core.hooksPath .githooks).
 set -e
 root=$(git rev-parse --show-toplevel)
 cd "$root"
