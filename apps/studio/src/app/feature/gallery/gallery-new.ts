@@ -3,7 +3,7 @@ import { Router } from '@angular/router'
 import type { EditorMatch } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { GalleryApi } from '../../core/gallery-api'
-import { StudioApi } from '../../core/studio-api'
+import { MatchesApi } from '../../core/matches-api'
 import { GalleryShell } from './gallery-shell'
 
 function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] {
@@ -54,7 +54,7 @@ function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] 
   `,
 })
 export class GalleryNewPage {
-  private readonly matches = inject(StudioApi)
+  private readonly matches = inject(MatchesApi)
   private readonly galleries = inject(GalleryApi)
   private readonly router = inject(Router)
   private pending: Subscription | undefined

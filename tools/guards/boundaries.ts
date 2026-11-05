@@ -154,7 +154,7 @@ export function assertBoundarySelfTest(): void {
       new Map([
         ['feature/login/login.ts', ['../../core/auth']],
         ['feature/editor/shell.ts', ['../../core/auth', './editor.store']],
-        ['core/auth.ts', ['./studio-api']],
+        ['core/auth.ts', ['./studio-http']],
         ['feature/login/bad.ts', ['../editor/shell']],
         ['core/bad.ts', ['../feature/login/login']],
       ]),
