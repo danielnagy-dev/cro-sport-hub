@@ -1,5 +1,9 @@
 import { expect } from 'vite-plus/test'
-import { buildTennisDraftBody, initialTennisFormModel, validateTennisDraft } from './draft-body'
+import {
+  buildTennisDraftBody,
+  initialTennisFormModel,
+  validateTennisDraft,
+} from './draft-body'
 
 const matchId = 'match-draft-test'
 
@@ -61,6 +65,55 @@ describe('validateTennisDraft', () => {
     expect(issues.some((issue) => issue.path[0] === 'score')).toBe(true)
     expect(issues.map((issue) => issue.message)).toContain(
       'A 7-6 set needs the tiebreak points scored by the player who lost the set',
+    )
+  })
+})
+
+function validStatStrings(overrides: Partial<Record<string, string>> = {}) {
+  return {
+    aces: '3',
+    doubleFaults: '1',
+    firstServeIn: '6',
+    firstServeTotal: '10',
+    firstServePointsWon: '4',
+    secondServePointsWon: '2',
+    secondServeTotal: '4',
+    breakPointsSaved: '1',
+    breakPointsFaced: '2',
+    breakPointsWon: '2',
+    breakPointsTotal: '4',
+    totalPointsWon: '20',
+    ...overrides,
+  }
+}
+
+describe('tennis draft stats', () => {
+  it('posts raw counts for both players and never a percentage field', () => {
+    const model = filledModel({
+      sets: initialTennisFormModel().sets.map((row, index) => {
+        if (index === 0) return { gamesA: '6', gamesB: '4', tiebreak: '' }
+        if (index === 1) return { gamesA: '6', gamesB: '3', tiebreak: '' }
+        return row
+      }),
+      playerAStats: validStatStrings(),
+      playerBStats: validStatStrings({ aces: '1' }),
+    })
+    expect(validateTennisDraft(model, matchId)).toEqual([])
+    const body = buildTennisDraftBody(model, matchId)
+    expect(body.stats).toHaveLength(2)
+    const first = body.stats?.[0] as Record<string, unknown> | undefined
+    expect(first?.['firstServePct']).toBeUndefined()
+    expect(body.stats?.[0]?.firstServeIn).toBe(6)
+    expect(body.stats?.[1]?.aces).toBe(1)
+  })
+
+  it('reports tennisStatIssues for inconsistent counts', () => {
+    const issues = validateTennisDraft(
+      filledModel({ playerAStats: validStatStrings({ firstServeIn: '11' }) }),
+      matchId,
+    )
+    expect(issues.map((issue) => issue.message)).toContain(
+      'First serves in cannot exceed first serves played',
     )
   })
 })
