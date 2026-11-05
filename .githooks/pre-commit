@@ -1,10 +1,12 @@
 #!/bin/sh
 # Blocks staged files over 5000 estimated tokens (bytes/4); uses index blobs, not the working tree.
 # Same script without --staged runs from `vp run lint` on all tracked files.
+# `vp fmt --check` matches CI format-check. Merge commits use pre-merge-commit; this hook does not run for them.
 # Hooks path: root `prepare` sets core.hooksPath to .githooks (also: git config core.hooksPath .githooks).
 set -e
 root=$(git rev-parse --show-toplevel)
 cd "$root"
+"$root/.githooks/format-check"
 if command -v vpx >/dev/null 2>&1; then
   exec vpx tools/guards/file-size.ts --staged
 fi
