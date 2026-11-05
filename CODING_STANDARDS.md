@@ -8,6 +8,28 @@ TypeScript and JavaScript use single-quoted strings, no semicolons, and trailing
 
 `vp fmt` and `vp run format-check` read the root `fmt` object in `vite.config.ts` (oxfmt). Run `vp fmt` before committing when you touch formatted files. `.githooks/pre-commit` and `.githooks/pre-merge-commit` run `vp fmt --check`.
 
+## Module-level constants
+
+Fixed values at the top level of a module use `UPPER_SNAKE_CASE`. Local variables inside functions stay camelCase.
+
+Object and array constants that are never mutated end with `as const`. Scalar `const` values do not use `as const`; the declaration already narrows the type.
+
+Example (API catalog workflow):
+
+```typescript
+const SUBMIT_CONFLICT = 'Only a draft can be submitted'
+const FILTERS = ['sport', 'status', 'source'] as const
+```
+
+Oxlint has no practical top-level naming rule in this repo, so `tools/guards/module-constants.ts` enforces the shape above. It skips:
+
+- `*.spec.ts`, `*.test.ts`, `**/tests/**`, and `*.stories.*`
+- `app.routes.ts` and package `vite.config.ts` (framework registration and build config)
+- Names ending in `Schema`, `Routes`, or `Token` (Zod schemas, route tables, DI tokens)
+- Initialisers that are calls, `new`, or functions (runtime values, not fixed literals)
+
+Zod schemas stay camelCase even at module scope; only the exclusion applies, not a second naming style.
+
 ## Language and data
 
 Repository language is English. Do not commit secrets or real personal data. Version 1 uses seed and test data only.
@@ -33,7 +55,7 @@ Prefer a deterministic check (lint, pre-commit, or CI) when one is feasible. A w
 | A Linux proc path in source under `apps/`, `libs/`, `tools/`, or the repo root                                                                                 | `tools/guards/check.ts`                                                                                                                                                                               |
 | A file over 5,000 estimated tokens (bytes/4)                                                                                                                   | `tools/guards/file-size.ts`, from `vp run lint`, `vp run guards`, and `.githooks/pre-commit` on staged files. The ignore list and the temporary baseline are in `tools/guards/file-size.config.json`. |
 | A blocked skill, a vendored symlink, a `skills-lock.json` mismatch, a studio import boundary break, or a tools typecheck project missing from the root command | `tools/guards/check.ts`                                                                                                                                                                               |
-| `toThrow` with no message, and the rules listed in `lint.rules`                                                                                                | `vp run lint` (Oxlint, `vite.config.ts`)                                                                                                                                                              |
+| `toThrow` with no message, module-level constant naming and `as const` shape, and the rules listed in `lint.rules`                                             | `vp run lint` (Oxlint, `vite.config.ts`, and `tools/guards/module-constants.ts` via `tools/guards/check.ts`)                                                                                          |
 | Angular template types                                                                                                                                         | `vp run typecheck` (`ngc --noEmit` for `apps/studio`). The shared linter does not typecheck Angular templates.                                                                                        |
 
 A check cannot see these, so they stay written rules:
@@ -41,7 +63,7 @@ A check cannot see these, so they stay written rules:
 - Whether a token estimate or a line estimate is honest (`.cursor/skills/plan/SKILL.md`).
 - Dead prose in markdown. A linter cannot tell a stale sentence from a live rule.
 - An agent merging a pull request (`docs/team.md`).
-- The resolution when two branches append to `apps/studio/src/app/app.routes.ts` or `apps/studio/src/app/core/studio-api.ts`. API features are separate files (`docs/adr/007-api-feature-files.md`). Studio still registers routes and client methods in those two files.
+- The shell route list is one `loadChildren` entry per studio feature, in folder order, in `apps/studio/src/app/app.routes.ts`. Paths live in `apps/studio/src/app/feature/<name>/<name>.routes.ts` (`docs/adr/008-studio-feature-routes.md`). Two features that insert beside each other in that list still share the shell. Studio HTTP clients are one file per feature in `apps/studio/src/app/core/<name>-api.ts` (`docs/adr/009-studio-feature-clients.md`). API features are separate files (`docs/adr/007-api-feature-files.md`).
 
 ## Before writing framework code
 

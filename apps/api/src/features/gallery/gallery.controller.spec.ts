@@ -1,8 +1,9 @@
 import { type AddressInfo } from 'node:net'
 import { PGlite } from '@electric-sql/pglite'
+import { unzipSync } from 'fflate'
 import { footballRendererReason } from '@cro-sport-hub/slide-generator'
 import { Test } from '@nestjs/testing'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
 import { SignJWT } from 'jose'
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
@@ -22,13 +23,16 @@ import { setupOpenApi } from '../../openapi.js'
 import { GalleryController } from './gallery.controller.js'
 import * as galleryModule from './gallery.js'
 import {
+  GALLERY_SLIDES_NOT_RENDERED_MESSAGE,
   matchListedTwiceMessage,
+  ONLY_APPROVED_DOWNLOAD_MESSAGE,
   onlyPublishedFootballMessage,
   pickPublishedFootballMessage,
 } from './gallery.js'
 
 const secret = 'test-jwt-secret-that-is-at-least-32'
 const pngHeader = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13])
+const pngHeaderSecond = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3, 4])
 const realRenderGalleryPngs = galleryModule.renderGalleryPngs
 
 async function bearer(role: string, sub = 'editor-demo'): Promise<string> {
@@ -298,4 +302,72 @@ describe('gallery routes', () => {
     expect(paths['/api/galleries/{id}/reject'].post.security).toEqual([{ bearer: [] }])
     expect(paths['/api/galleries/{id}/publish'].post.security).toEqual([{ bearer: [] }])
   }, 20_000)
+
+  it('downloads a published gallery as an ordered ZIP and rejects other states', async () => {
+    const port = await start(true)
+    const editor = await bearer('editor')
+    const admin = await bearer('admin', 'admin-demo')
+    const id = await createDraft(port, editor)
+    const download = `/api/galleries/${id}/download`
+
+    expect(await send(port, 'GET', download)).toMatchObject({
+      status: 401,
+      body: { message: 'Invalid token' },
+    })
+    expect(await send(port, 'GET', download, undefined, editor)).toMatchObject({
+      status: 409,
+      body: { message: ONLY_APPROVED_DOWNLOAD_MESSAGE },
+    })
+
+    await send(port, 'POST', `/api/galleries/${id}/submit`, undefined, editor)
+    expect(await send(port, 'GET', download, undefined, editor)).toMatchObject({
+      status: 409,
+      body: { message: ONLY_APPROVED_DOWNLOAD_MESSAGE },
+    })
+
+    await send(port, 'POST', `/api/galleries/${id}/publish`, undefined, admin)
+    expect(await send(port, 'GET', download, undefined, editor)).toMatchObject({
+      status: 409,
+      body: { message: GALLERY_SLIDES_NOT_RENDERED_MESSAGE },
+    })
+
+    if (rows === undefined) throw new Error('Expected the test database')
+    const firstSlide = (
+      await rows.select().from(schema.gallerySlides).where(eq(schema.gallerySlides.galleryId, id))
+    )[0]
+    if (firstSlide === undefined) throw new Error('Expected a gallery slide row')
+    await rows.insert(schema.gallerySlides).values({
+      galleryId: id,
+      slideIndex: 1,
+      matchId: firstSlide.matchId,
+      caption: null,
+      payload: firstSlide.payload,
+      png: null,
+    })
+    await rows
+      .update(schema.gallerySlides)
+      .set({ png: Buffer.from(pngHeader) })
+      .where(and(eq(schema.gallerySlides.galleryId, id), eq(schema.gallerySlides.slideIndex, 0)))
+    await rows
+      .update(schema.gallerySlides)
+      .set({ png: Buffer.from(pngHeaderSecond) })
+      .where(and(eq(schema.gallerySlides.galleryId, id), eq(schema.gallerySlides.slideIndex, 1)))
+
+    const zipResponse = await fetch(`http://127.0.0.1:${port}${download}`, {
+      headers: { authorization: editor },
+    })
+    expect(zipResponse.status).toBe(200)
+    expect(zipResponse.headers.get('content-type')).toContain('application/zip')
+    const entries = unzipSync(new Uint8Array(await zipResponse.arrayBuffer()))
+    expect(Object.keys(entries).sort()).toEqual(['01.png', '02.png'])
+    expect(Array.from(entries['01.png'].subarray(0, 4))).toEqual([137, 80, 78, 71])
+    expect(Array.from(entries['02.png'])).toEqual(Array.from(pngHeaderSecond))
+
+    expect(
+      await send(port, 'GET', '/api/galleries/gallery-missing/download', undefined, editor),
+    ).toMatchObject({ status: 404, body: { message: 'Unknown gallery' } })
+
+    const docs = await send(port, 'GET', '/docs-json')
+    expect(docs.body.paths['/api/galleries/{id}/download'].get.security).toEqual([{ bearer: [] }])
+  })
 })

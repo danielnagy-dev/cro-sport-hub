@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { zipSync } from 'fflate'
 import {
   catalogSlides,
   footballRendererReason,
@@ -275,6 +276,15 @@ export async function renderGalleryPngs(
   return parseRecord(galleryRenderResponseSchema, { slideCount: slides.length })
 }
 
+export const ONLY_APPROVED_DOWNLOAD_MESSAGE = 'Only an approved gallery can be downloaded'
+export const GALLERY_SLIDES_NOT_RENDERED_MESSAGE = 'Gallery slides are not rendered'
+
+const ZIP_ENTRY_WIDTH = 2
+
+function zipEntryName(position: number): string {
+  return `${String(position + 1).padStart(ZIP_ENTRY_WIDTH, '0')}.png`
+}
+
 const submitConflict = 'Only a draft gallery can be submitted'
 const rejectConflict = 'Only a gallery in review can be rejected'
 const publishConflict = 'Only a gallery in review can be published'
@@ -349,6 +359,31 @@ export async function publishGallery(
     publishedAt: isoTimestampWithOffset(),
   })
   return { id, status: 'published' }
+}
+
+export async function downloadGalleryZip(db: CatalogDb, galleryId: string): Promise<Buffer> {
+  const header = (
+    await db.select({ status: galleries.status }).from(galleries).where(eq(galleries.id, galleryId))
+  )[0]
+  if (header === undefined) throw new CatalogError('unknown-ref', 'Unknown gallery')
+  if (header.status !== 'published') {
+    throw new CatalogError('conflict', ONLY_APPROVED_DOWNLOAD_MESSAGE)
+  }
+  const rows = await db
+    .select({ png: gallerySlides.png })
+    .from(gallerySlides)
+    .where(eq(gallerySlides.galleryId, galleryId))
+    .orderBy(asc(gallerySlides.slideIndex))
+  for (const row of rows) {
+    if (row.png === null || row.png.length === 0) {
+      throw new CatalogError('conflict', GALLERY_SLIDES_NOT_RENDERED_MESSAGE)
+    }
+  }
+  const files: Record<string, Uint8Array> = {}
+  rows.forEach((row, position) => {
+    files[zipEntryName(position)] = new Uint8Array(row.png as Buffer)
+  })
+  return Buffer.from(zipSync(files))
 }
 
 export async function readGallerySlidePng(

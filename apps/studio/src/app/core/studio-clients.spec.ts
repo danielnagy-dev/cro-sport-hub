@@ -3,25 +3,24 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing'
 import { expect } from 'vite-plus/test'
 import { firstValueFrom } from 'rxjs'
+import { CatalogApi, matchesPath, sportsPath } from './catalog-api'
+import { editorAthletesPath, editorCompetitionsPath, EditorLookupsApi } from './editor-lookups-api'
 import { stubApiInterceptor, stubMatches, stubSports } from './stub-api'
-import {
-  editorAthletesPath,
-  editorCompetitionsPath,
-  matchesPath,
-  sportsPath,
-  StudioApi,
-  tennisDraftsPath,
-} from './studio-api'
+import { TennisApi, tennisDraftsPath } from './tennis-api'
 
-describe('StudioApi', () => {
-  let api: StudioApi
+describe('studio clients', () => {
+  let catalog: CatalogApi
+  let lookups: EditorLookupsApi
+  let tennis: TennisApi
   let http: HttpTestingController
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     })
-    api = TestBed.inject(StudioApi)
+    catalog = TestBed.inject(CatalogApi)
+    lookups = TestBed.inject(EditorLookupsApi)
+    tennis = TestBed.inject(TennisApi)
     http = TestBed.inject(HttpTestingController)
   })
 
@@ -30,8 +29,8 @@ describe('StudioApi', () => {
   })
 
   it('parses sports and matches', async () => {
-    const sports = firstValueFrom(api.sports())
-    const matches = firstValueFrom(api.matches())
+    const sports = firstValueFrom(catalog.sports())
+    const matches = firstValueFrom(catalog.matches())
     http.expectOne(sportsPath).flush(stubSports)
     http.expectOne(matchesPath).flush(stubMatches)
 
@@ -40,7 +39,7 @@ describe('StudioApi', () => {
   })
 
   it('rejects a match list that fails the schema', async () => {
-    const matches = firstValueFrom(api.matches())
+    const matches = firstValueFrom(catalog.matches())
     http.expectOne(matchesPath).flush([{ id: 'bad' }])
 
     await expect(matches).rejects.toThrow(
@@ -49,8 +48,8 @@ describe('StudioApi', () => {
   })
 
   it('parses editor lookups and a tennis draft save response', async () => {
-    const competitions = firstValueFrom(api.editorCompetitions('tennis'))
-    const athletes = firstValueFrom(api.editorAthletes('tennis'))
+    const competitions = firstValueFrom(lookups.editorCompetitions('tennis'))
+    const athletes = firstValueFrom(lookups.editorAthletes('tennis'))
     http
       .expectOne(`${editorCompetitionsPath}?sport=tennis`)
       .flush([{ id: 'comp-sample-cup', name: 'Sample Cup', season: '2026' }])
@@ -63,7 +62,7 @@ describe('StudioApi', () => {
     await expect(athletes).resolves.toEqual([{ id: 'sample-player-a', name: 'Sample Player A' }])
 
     const saved = firstValueFrom(
-      api.createTennisDraft({
+      tennis.createTennisDraft({
         id: 'match-new',
         competitionId: 'comp-sample-cup',
         date: '2026-10-20',
@@ -83,7 +82,7 @@ describe('StudioApi', () => {
   })
 
   it('rejects a tennis draft response that fails the schema', async () => {
-    const saved = firstValueFrom(api.createTennisDraft({ id: 'match-new' }))
+    const saved = firstValueFrom(tennis.createTennisDraft({ id: 'match-new' }))
     http
       .expectOne(tennisDraftsPath)
       .flush({ id: 'match-new', status: 'published', sport: 'tennis' })
@@ -102,10 +101,10 @@ describe('stubApiInterceptor', () => {
   })
 
   it('answers the read endpoints with the stub', async () => {
-    const api = TestBed.inject(StudioApi)
+    const catalog = TestBed.inject(CatalogApi)
 
-    await expect(firstValueFrom(api.sports())).resolves.toEqual(stubSports)
-    await expect(firstValueFrom(api.matches())).resolves.toEqual(stubMatches)
+    await expect(firstValueFrom(catalog.sports())).resolves.toEqual(stubSports)
+    await expect(firstValueFrom(catalog.matches())).resolves.toEqual(stubMatches)
   })
 
   it('leaves every other request for the backend', () => {

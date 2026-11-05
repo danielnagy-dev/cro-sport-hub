@@ -13,8 +13,9 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
 import { AuthStore } from '../../core/auth'
+import { EditorLookupsApi } from '../../core/editor-lookups-api'
 import { FootballApi } from '../../core/football-api'
-import { StudioApi } from '../../core/studio-api'
+import { MatchSubmitApi } from '../../core/match-submit-api'
 import {
   buildFootballDraftBody,
   emptyAppearanceRow,
@@ -25,7 +26,7 @@ import {
   type FootballFormModel,
 } from './draft-body'
 
-const appearanceCountFields = [
+const APPEARANCE_COUNT_FIELDS = [
   ['minutes', 'Minutes'],
   ['goals', 'Goals'],
   ['assists', 'Assists'],
@@ -36,7 +37,7 @@ type LookupState = 'loading' | 'ready' | 'error'
 type FieldKey = keyof Omit<FootballFormModel, 'appearances'>
 type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
-const fields = [
+const FIELDS = [
   ['competitionId', 'competition', 'Competition', 'Choose a competition', 'select'],
   ['date', 'match-date', 'Date', '', 'date'],
   ['round', 'round', 'Round', '', 'text'],
@@ -52,13 +53,14 @@ const fields = [
   templateUrl: './football-score.html',
 })
 export class FootballScorePage {
-  private readonly footballApi = inject(FootballApi)
-  private readonly workflowApi = inject(StudioApi)
+  private readonly lookups = inject(EditorLookupsApi)
+  private readonly football = inject(FootballApi)
+  private readonly submitApi = inject(MatchSubmitApi)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
-  protected readonly fieldConfigs = fields
-  protected readonly appearanceCountFields = appearanceCountFields
+  protected readonly fieldConfigs = FIELDS
+  protected readonly appearanceCountFields = APPEARANCE_COUNT_FIELDS
 
   protected readonly routeMatchId = signal<string | undefined>(undefined)
   protected readonly isEditMode = computed(() => this.routeMatchId() !== undefined)
@@ -222,7 +224,7 @@ export class FootballScorePage {
     this.savedId.set(matchId)
     this.pageLoadState.set('loading')
     try {
-      const draft = await firstValueFrom(this.footballApi.loadEditorFootballDraft(matchId))
+      const draft = await firstValueFrom(this.football.loadEditorFootballDraft(matchId))
       this.model.set(footballFormFromDraft(draft))
       this.matchStatus.set(draft.status)
       this.pageLoadState.set('ready')
@@ -248,9 +250,9 @@ export class FootballScorePage {
     this.lookupStatus.set('loading')
     try {
       const [competitions, teams, athletes] = await Promise.all([
-        firstValueFrom(this.workflowApi.editorCompetitions('football')),
-        firstValueFrom(this.workflowApi.editorTeams()),
-        firstValueFrom(this.workflowApi.editorAthletes('football')),
+        firstValueFrom(this.lookups.editorCompetitions('football')),
+        firstValueFrom(this.lookups.editorTeams()),
+        firstValueFrom(this.lookups.editorAthletes('football')),
       ])
       this.competitions.set(competitionLookupSchema.array().parse(competitions))
       this.teams.set(teamLookupSchema.array().parse(teams))
@@ -271,8 +273,8 @@ export class FootballScorePage {
         try {
           const body = buildFootballDraftBody(this.model(), matchId)
           const saved = this.isEditMode()
-            ? await firstValueFrom(this.footballApi.updateFootballDraft(matchId, body))
-            : await firstValueFrom(this.footballApi.createFootballDraft(body))
+            ? await firstValueFrom(this.football.updateFootballDraft(matchId, body))
+            : await firstValueFrom(this.football.createFootballDraft(body))
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
         } catch {
@@ -289,7 +291,7 @@ export class FootballScorePage {
     this.submitError.set(undefined)
     this.submittingForReview.set(true)
     try {
-      const saved = await firstValueFrom(this.workflowApi.submitMatch(id))
+      const saved = await firstValueFrom(this.submitApi.submitMatch(id))
       this.matchStatus.set(saved.status)
     } catch (error: unknown) {
       if (error instanceof HttpErrorResponse && error.status === 409) {

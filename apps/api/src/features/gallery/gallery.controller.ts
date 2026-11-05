@@ -42,6 +42,7 @@ import { catalogDb, CatalogError, type Catalog } from '../../catalog/catalog.js'
 import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module.js'
 import {
   createGallery,
+  downloadGalleryZip,
   patchGallerySlideCaption,
   pickPublishedFootballMessage,
   publishGallery,
@@ -224,6 +225,29 @@ export class GalleryController {
     const catalog: Catalog = await this.openCatalog()
     try {
       return await renderGalleryPngs(catalogDb(catalog), id)
+    } catch (error) {
+      throw toHttp(error)
+    } finally {
+      await catalog.close()
+    }
+  }
+
+  @Get(':id/download')
+  @Header('Content-Type', 'application/zip')
+  @ApiOperation({ summary: 'Download a published gallery as a ZIP of slide PNGs' })
+  @ApiParam({ name: 'id', description: 'Gallery id.' })
+  @ApiOkResponse({ description: 'ZIP archive with one PNG per slide in slide order.' })
+  @ApiUnauthorizedResponse({ description: 'Invalid token' })
+  @ApiNotFoundResponse({ description: 'Unknown gallery' })
+  @ApiConflictResponse({
+    description: 'Only an approved gallery can be downloaded, or gallery slides are not rendered',
+  })
+  async download(@Param('id') id: string) {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown gallery')
+    const catalog: Catalog = await this.openCatalog()
+    try {
+      const zip = await downloadGalleryZip(catalogDb(catalog), id)
+      return new StreamableFile(zip)
     } catch (error) {
       throw toHttp(error)
     } finally {

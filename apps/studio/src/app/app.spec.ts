@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { of } from 'rxjs'
 import { appConfig } from './app.config'
 import { Shell } from './feature/editor/shell'
-import { StudioApi } from './core/studio-api'
+import { CatalogApi } from './core/catalog-api'
 import { stubSports } from './core/stub-api'
 
 describe('Shell', () => {
@@ -49,7 +49,7 @@ describe('Shell empty list', () => {
       providers: [
         ...appConfig.providers,
         {
-          provide: StudioApi,
+          provide: CatalogApi,
           useValue: {
             sports: () => of(stubSports),
             matches: () => of([]),

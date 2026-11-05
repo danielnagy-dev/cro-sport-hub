@@ -12,7 +12,9 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
 import { AuthStore } from '../../core/auth'
-import { StudioApi } from '../../core/studio-api'
+import { EditorLookupsApi } from '../../core/editor-lookups-api'
+import { MatchSubmitApi } from '../../core/match-submit-api'
+import { TennisApi } from '../../core/tennis-api'
 import {
   buildTennisDraftBody,
   initialTennisFormModel,
@@ -30,7 +32,7 @@ type LookupState = 'loading' | 'ready' | 'error'
 type MatchStatus = Status
 type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
-const percentageRows = [
+const PERCENTAGE_ROWS = [
   ['First serve', 'firstServePct'],
   ['First-serve points won', 'firstServePointsWonPct'],
   ['Second-serve points won', 'secondServePointsWonPct'],
@@ -44,7 +46,9 @@ const percentageRows = [
   templateUrl: './tennis-score.html',
 })
 export class TennisScorePage {
-  private readonly api = inject(StudioApi)
+  private readonly lookups = inject(EditorLookupsApi)
+  private readonly tennis = inject(TennisApi)
+  private readonly submitApi = inject(MatchSubmitApi)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
@@ -77,7 +81,7 @@ export class TennisScorePage {
 
   protected readonly statCountKeys = statCountKeys
   protected readonly statCountLabels = statCountLabels
-  protected readonly percentageRows = percentageRows
+  protected readonly percentageRows = PERCENTAGE_ROWS
 
   protected readonly draftIssues = computed(() =>
     validateTennisDraft(this.model(), this.activeMatchId()),
@@ -139,7 +143,7 @@ export class TennisScorePage {
     this.savedId.set(matchId)
     this.pageLoadState.set('loading')
     try {
-      const draft = await firstValueFrom(this.api.loadEditorTennisDraft(matchId))
+      const draft = await firstValueFrom(this.tennis.loadEditorTennisDraft(matchId))
       this.model.set(tennisFormFromDraft(draft))
       this.matchStatus.set(draft.status)
       this.pageLoadState.set('ready')
@@ -184,7 +188,7 @@ export class TennisScorePage {
 
   protected percentageValue(
     block: 'playerAStats' | 'playerBStats',
-    key: (typeof percentageRows)[number][1],
+    key: (typeof PERCENTAGE_ROWS)[number][1],
   ): string {
     const row = block === 'playerAStats' ? this.model().playerAStats : this.model().playerBStats
     const counts = parseStatCounts(row)
@@ -227,8 +231,8 @@ export class TennisScorePage {
     this.lookupStatus.set('loading')
     try {
       const [competitions, athletes] = await Promise.all([
-        firstValueFrom(this.api.editorCompetitions('tennis')),
-        firstValueFrom(this.api.editorAthletes('tennis')),
+        firstValueFrom(this.lookups.editorCompetitions('tennis')),
+        firstValueFrom(this.lookups.editorAthletes('tennis')),
       ])
       this.competitions.set(competitionLookupSchema.array().parse(competitions))
       this.athletes.set(athleteLookupSchema.array().parse(athletes))
@@ -249,8 +253,8 @@ export class TennisScorePage {
         const body = buildTennisDraftBody(this.model(), matchId)
         try {
           const saved = this.isEditMode()
-            ? await firstValueFrom(this.api.updateTennisDraft(matchId, body))
-            : await firstValueFrom(this.api.createTennisDraft(body))
+            ? await firstValueFrom(this.tennis.updateTennisDraft(matchId, body))
+            : await firstValueFrom(this.tennis.createTennisDraft(body))
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
           return undefined
@@ -269,7 +273,7 @@ export class TennisScorePage {
     this.submitError.set(undefined)
     this.submittingForReview.set(true)
     try {
-      const saved = await firstValueFrom(this.api.submitMatch(id))
+      const saved = await firstValueFrom(this.submitApi.submitMatch(id))
       this.matchStatus.set(saved.status)
     } catch (error: unknown) {
       if (error instanceof HttpErrorResponse && error.status === 409) {

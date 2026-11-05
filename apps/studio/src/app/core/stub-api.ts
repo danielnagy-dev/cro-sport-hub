@@ -1,7 +1,7 @@
 import { HttpResponse, type HttpInterceptorFn } from '@angular/common/http'
 import { matchSchema, sportSchema, type Match, type Sport } from '@cro-sport-hub/shared-types'
 import { of } from 'rxjs'
-import { matchesPath, sportsPath } from './studio-api'
+import { matchesPath, sportsPath } from './catalog-api'
 
 /** Seed rows for the read client. No live API and no personal data. */
 export const stubSports: Sport[] = sportSchema.array().parse([

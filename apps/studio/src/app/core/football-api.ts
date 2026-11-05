@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import { editorFootballDraftSchema, type EditorFootballDraft } from '@cro-sport-hub/shared-types'
-import { map, type Observable } from 'rxjs'
+import type { Observable } from 'rxjs'
+import { StudioHttp } from './studio-http'
 
 export const footballDraftsPath = '/api/matches/football'
 
@@ -26,23 +26,19 @@ function parseFootballDraftSaved(body: unknown): FootballDraftSaved {
 
 @Injectable({ providedIn: 'root' })
 export class FootballApi {
-  private readonly http = inject(HttpClient)
+  private readonly http = inject(StudioHttp)
 
   createFootballDraft(body: unknown): Observable<FootballDraftSaved> {
-    return this.http
-      .post(footballDraftsPath, body)
-      .pipe(map((response) => parseFootballDraftSaved(response)))
+    return this.http.post(footballDraftsPath, body, parseFootballDraftSaved)
   }
 
   updateFootballDraft(id: string, body: unknown): Observable<FootballDraftSaved> {
-    return this.http
-      .put(footballDraftUpdatePath(id), body)
-      .pipe(map((response) => parseFootballDraftSaved(response)))
+    return this.http.put(footballDraftUpdatePath(id), body, parseFootballDraftSaved)
   }
 
   loadEditorFootballDraft(id: string): Observable<EditorFootballDraft> {
-    return this.http
-      .get(editorFootballDraftPath(id))
-      .pipe(map((response) => editorFootballDraftSchema.parse(response)))
+    return this.http.get(editorFootballDraftPath(id), (response) =>
+      editorFootballDraftSchema.parse(response),
+    )
   }
 }

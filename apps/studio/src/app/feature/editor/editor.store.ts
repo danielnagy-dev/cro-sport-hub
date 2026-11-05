@@ -9,7 +9,7 @@ import {
 } from '@ngrx/signals'
 import type { Match, Sport, SportSlug } from '@cro-sport-hub/shared-types'
 import { forkJoin, type Subscription } from 'rxjs'
-import { StudioApi } from '../../core/studio-api'
+import { CatalogApi } from '../../core/catalog-api'
 
 type EditorStatus = 'loading' | 'ready' | 'error'
 
@@ -39,7 +39,7 @@ export const EditorStore = signalStore(
       return store.matches().filter((match) => match.sportId === sport.id)
     }),
   })),
-  withMethods((store, api = inject(StudioApi)) => {
+  withMethods((store, api = inject(CatalogApi)) => {
     let pending: Subscription | undefined
 
     return {

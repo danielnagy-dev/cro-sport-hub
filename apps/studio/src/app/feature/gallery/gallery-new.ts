@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core'
 import { Router } from '@angular/router'
 import type { EditorMatch } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { StudioApi } from '../../core/studio-api'
+import { GalleryApi } from '../../core/gallery-api'
+import { MatchesApi } from '../../core/matches-api'
 import { GalleryShell } from './gallery-shell'
 
 function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] {
@@ -53,7 +54,8 @@ function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] 
   `,
 })
 export class GalleryNewPage {
-  private readonly api = inject(StudioApi)
+  private readonly matches = inject(MatchesApi)
+  private readonly galleries = inject(GalleryApi)
   private readonly router = inject(Router)
   private pending: Subscription | undefined
 
@@ -63,16 +65,18 @@ export class GalleryNewPage {
   protected readonly createStatus = signal<'idle' | 'saving' | 'error'>('idle')
 
   constructor() {
-    this.pending = this.api.editorMatches({ sport: 'football', status: 'published' }).subscribe({
-      next: (page) => {
-        this.rows.set(publishedFootballMatches(page.items))
-        this.loadStatus.set('ready')
-      },
-      error: () => {
-        this.rows.set([])
-        this.loadStatus.set('error')
-      },
-    })
+    this.pending = this.matches
+      .editorMatches({ sport: 'football', status: 'published' })
+      .subscribe({
+        next: (page) => {
+          this.rows.set(publishedFootballMatches(page.items))
+          this.loadStatus.set('ready')
+        },
+        error: () => {
+          this.rows.set([])
+          this.loadStatus.set('error')
+        },
+      })
   }
 
   protected onToggle(id: string, event: Event): void {
@@ -87,7 +91,7 @@ export class GalleryNewPage {
     if (this.selected().length === 0 || this.createStatus() === 'saving') return
     this.createStatus.set('saving')
     this.pending?.unsubscribe()
-    this.pending = this.api.createGallery(this.selected()).subscribe({
+    this.pending = this.galleries.createGallery(this.selected()).subscribe({
       next: ({ id }) => void this.router.navigate(['/galleries', id]),
       error: () => this.createStatus.set('error'),
     })

@@ -4,7 +4,7 @@ import { patchState, signalStore, withHooks, withMethods, withState } from '@ngr
 import type { EditorMatch, MatchSource, SportSlug, Status } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
-import { StudioApi } from '../../core/studio-api'
+import { MatchesApi } from '../../core/matches-api'
 
 type MatchesState = {
   items: EditorMatch[]
@@ -24,7 +24,7 @@ const initialMatchesState: MatchesState = {
 
 const MatchesStore = signalStore(
   withState(initialMatchesState),
-  withMethods((store, api = inject(StudioApi)) => {
+  withMethods((store, api = inject(MatchesApi)) => {
     let pending: Subscription | undefined
 
     function reload(): void {

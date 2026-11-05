@@ -1,7 +1,7 @@
 import type { FootballPerson, FootballSlide } from './football.ts'
 
 /** Round-13 hard limit. A list slide throws above this. */
-const listLimit = 6
+const LIST_LIMIT = 6
 
 /**
  * One tracked appearance in a round. A round is the list heading:
@@ -66,8 +66,8 @@ export function footballSlides(entries: readonly FootballEntry[]): FootballSlide
       slides.push(playerSlide(solo))
       continue
     }
-    for (let start = 0; start < group.length; start += listLimit) {
-      slides.push(listSlide(group.slice(start, start + listLimit)))
+    for (let start = 0; start < group.length; start += LIST_LIMIT) {
+      slides.push(listSlide(group.slice(start, start + LIST_LIMIT)))
     }
   }
   return slides

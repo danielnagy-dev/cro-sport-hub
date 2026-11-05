@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing'
 import { Subject, throwError } from 'rxjs'
 import { EditorStore } from './editor.store'
-import { StudioApi } from '../../core/studio-api'
+import { CatalogApi } from '../../core/catalog-api'
 import { stubMatches, stubSports } from '../../core/stub-api'
 
 describe('EditorStore', () => {
@@ -11,7 +11,7 @@ describe('EditorStore', () => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: StudioApi,
+          provide: CatalogApi,
           useValue: {
             sports: () => sports.asObservable(),
             matches: () => matches.asObservable(),
@@ -44,7 +44,7 @@ describe('EditorStore', () => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: StudioApi,
+          provide: CatalogApi,
           useValue: {
             sports: () => throwError(() => new Error('unavailable')),
             matches: () => throwError(() => new Error('unavailable')),

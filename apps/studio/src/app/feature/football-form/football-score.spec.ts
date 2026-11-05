@@ -9,9 +9,9 @@ import {
   editorAthletesPath,
   editorCompetitionsPath,
   editorTeamsPath,
-  matchSubmitPath,
-} from '../../core/studio-api'
+} from '../../core/editor-lookups-api'
 import { footballDraftsPath, footballDraftUpdatePath } from '../../core/football-api'
+import { matchSubmitPath } from '../../core/match-submit-api'
 import type { AppearanceRowModel, FootballFormModel } from './draft-body'
 import { FootballScorePage } from './football-score'
 
