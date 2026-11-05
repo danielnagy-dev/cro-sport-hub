@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core'
+import { Component, computed, inject, signal } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
+import { HttpErrorResponse } from '@angular/common/http'
 import { RouterLink } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
+  tennisPercentages,
   type AthleteLookup,
   type CompetitionLookup,
 } from '@cro-sport-hub/shared-types'
@@ -13,12 +15,25 @@ import { StudioApi } from '../../core/studio-api'
 import {
   buildTennisDraftBody,
   initialTennisFormModel,
+  isStatBlockEmpty,
   newMatchId,
+  parseStatCounts,
+  statCountKeys,
+  statCountLabels,
   validateTennisDraft,
   type TennisFormModel,
 } from './draft-body'
 
 type LookupState = 'loading' | 'ready' | 'error'
+type MatchStatus = 'draft' | 'review'
+
+const percentageRows = [
+  ['First serve', 'firstServePct'],
+  ['First-serve points won', 'firstServePointsWonPct'],
+  ['Second-serve points won', 'secondServePointsWonPct'],
+  ['Break points saved', 'breakPointsSavedPct'],
+  ['Break points converted', 'breakPointsConvertedPct'],
+] as const
 
 @Component({
   selector: 'app-tennis-score',
@@ -34,14 +49,33 @@ export class TennisScorePage {
   protected readonly athletes = signal<AthleteLookup[]>([])
   protected readonly lookupStatus = signal<LookupState>('loading')
   protected readonly saveError = signal<string | undefined>(undefined)
+  protected readonly submitError = signal<string | undefined>(undefined)
   protected readonly savedId = signal<string | undefined>(undefined)
+  protected readonly matchStatus = signal<MatchStatus | undefined>(undefined)
   protected readonly submitAttempted = signal(false)
+  protected readonly submittingForReview = signal(false)
   protected readonly draftMatchId = newMatchId()
+
+  protected readonly statBlockConfigs = [
+    { block: 'playerAStats', legend: 'Player A stats (raw counts)', idPrefix: 'stat-a' },
+    { block: 'playerBStats', legend: 'Player B stats (raw counts)', idPrefix: 'stat-b' },
+  ] as const
+
+  protected statFields(block: 'playerAStats' | 'playerBStats') {
+    return block === 'playerAStats' ? this.tennisForm.playerAStats : this.tennisForm.playerBStats
+  }
+
+  protected readonly statCountKeys = statCountKeys
+  protected readonly statCountLabels = statCountLabels
+  protected readonly percentageRows = percentageRows
+
+  protected readonly draftIssues = computed(() =>
+    validateTennisDraft(this.model(), this.draftMatchId),
+  )
 
   protected readonly tennisForm = form(this.model, (path) => {
     const locked = () => this.savedId() !== undefined
-    const issueFor = (field: string) =>
-      validateTennisDraft(this.model(), this.draftMatchId).find((entry) => entry.path[0] === field)
+    const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
     const bindIssue = (fieldPath: typeof path.competitionId, field: string) => {
       validate(fieldPath, () => {
         const issue = issueFor(field)
@@ -64,6 +98,10 @@ export class TennisScorePage {
       return issue === undefined ? undefined : { kind: 'schema', message: issue.message }
     })
     disabled(path.sets, { when: locked })
+    for (const key of statCountKeys) {
+      disabled(path.playerAStats[key], { when: locked })
+      disabled(path.playerBStats[key], { when: locked })
+    }
   })
 
   constructor() {
@@ -75,17 +113,47 @@ export class TennisScorePage {
       const tree = field === 'score' ? this.tennisForm.sets() : this.tennisForm[field]()
       if (!tree.touched()) return undefined
     }
-    return validateTennisDraft(this.model(), this.draftMatchId).find(
-      (issue) => issue.path[0] === field,
-    )?.message
+    return this.draftIssues().find((issue) => issue.path[0] === field)?.message
   }
 
   protected showErrors(field: keyof TennisFormModel | 'score'): boolean {
     return this.fieldMessage(field) !== undefined
   }
 
+  protected statMessages(block: 'playerAStats' | 'playerBStats'): readonly string[] {
+    if (!this.submitAttempted()) return []
+    return this.draftIssues()
+      .filter((issue) => issue.path[0] === block)
+      .map((issue) => issue.message)
+  }
+
+  protected showPlayerPercentages(block: 'playerAStats' | 'playerBStats'): boolean {
+    const row = block === 'playerAStats' ? this.model().playerAStats : this.model().playerBStats
+    return !isStatBlockEmpty(row)
+  }
+
+  protected formatPercentage(value: number | null): string {
+    if (value === null) return 'No attempts'
+    const tenths = Math.round(value * 10) / 10
+    return `${Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1)}%`
+  }
+
+  protected percentageValue(
+    block: 'playerAStats' | 'playerBStats',
+    key: (typeof percentageRows)[number][1],
+  ): string {
+    const row = block === 'playerAStats' ? this.model().playerAStats : this.model().playerBStats
+    const counts = parseStatCounts(row)
+    if (counts === undefined) return 'No attempts'
+    return this.formatPercentage(tennisPercentages(counts)[key])
+  }
+
   protected setIndex(index: number): number {
     return index + 1
+  }
+
+  protected canSubmitForReview(): boolean {
+    return this.matchStatus() === 'draft' && !this.submittingForReview()
   }
 
   protected onSubmit(event: Event): void {
@@ -94,6 +162,11 @@ export class TennisScorePage {
     this.submitAttempted.set(true)
     this.tennisForm().markAsTouched()
     void this.send()
+  }
+
+  protected onSubmitForReview(): void {
+    if (this.savedId() === undefined || this.matchStatus() !== 'draft') return
+    void this.sendForReview()
   }
 
   private async loadLookups(): Promise<void> {
@@ -113,7 +186,7 @@ export class TennisScorePage {
 
   private async send(): Promise<void> {
     if (this.tennisForm().submitting()) return
-    if (validateTennisDraft(this.model(), this.draftMatchId).length > 0) return
+    if (this.draftIssues().length > 0) return
     this.saveError.set(undefined)
     const accepted = await submit(this.tennisForm, {
       action: async () => {
@@ -121,6 +194,7 @@ export class TennisScorePage {
         try {
           const saved = await firstValueFrom(this.api.createTennisDraft(body))
           this.savedId.set(saved.id)
+          this.matchStatus.set('draft')
           return undefined
         } catch {
           this.saveError.set('The tennis match could not be saved.')
@@ -129,6 +203,35 @@ export class TennisScorePage {
       },
     })
     if (!accepted || this.saveError() !== undefined) this.focusProblem()
+  }
+
+  private async sendForReview(): Promise<void> {
+    const id = this.savedId()
+    if (id === undefined || this.submittingForReview()) return
+    this.submitError.set(undefined)
+    this.submittingForReview.set(true)
+    try {
+      const saved = await firstValueFrom(this.api.submitMatch(id))
+      this.matchStatus.set(saved.status)
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status === 409) {
+        const body: unknown = error.error
+        let message = 'Only a draft can be submitted'
+        if (
+          typeof body === 'object' &&
+          body !== null &&
+          'message' in body &&
+          typeof body.message === 'string'
+        ) {
+          message = body.message
+        }
+        this.submitError.set(message)
+      } else {
+        this.submitError.set('The match could not be submitted for review.')
+      }
+    } finally {
+      this.submittingForReview.set(false)
+    }
   }
 
   private focusProblem(): void {

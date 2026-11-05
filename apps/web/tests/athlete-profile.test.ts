@@ -1,5 +1,6 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { tennisPercentages } from '@cro-sport-hub/shared-types'
 import { expect, test } from 'vite-plus/test'
 import AthletePage, { generateMetadata } from '../app/athletes/[slug]/page'
 import { athletePath } from '../lib/api-client'
@@ -32,6 +33,21 @@ const karlo = {
   ],
 }
 
+const playerAStats = {
+  aces: 3,
+  doubleFaults: 1,
+  firstServeIn: 6,
+  firstServeTotal: 10,
+  firstServePointsWon: 4,
+  secondServePointsWon: 2,
+  secondServeTotal: 4,
+  breakPointsSaved: 1,
+  breakPointsFaced: 2,
+  breakPointsWon: 2,
+  breakPointsTotal: 4,
+  totalPointsWon: 20,
+}
+
 const playerA = {
   slug: 'sample-player-a',
   name: 'Sample Player A',
@@ -52,9 +68,34 @@ const playerA = {
         [7, 6, 5],
       ],
       retired: false,
-      percentages: null,
+      ...playerAStats,
+      percentages: tennisPercentages(playerAStats),
     },
   ],
+}
+
+const nullPctStats = {
+  aces: 0,
+  doubleFaults: 0,
+  firstServeIn: 0,
+  firstServeTotal: 4,
+  firstServePointsWon: 0,
+  secondServePointsWon: 0,
+  secondServeTotal: 4,
+  breakPointsSaved: 0,
+  breakPointsFaced: 0,
+  breakPointsWon: 0,
+  breakPointsTotal: 0,
+  totalPointsWon: 0,
+}
+
+function statsRow(html: string, label: string): string {
+  const found = html
+    .split('<tr>')
+    .slice(1)
+    .find((part) => part.includes(`>${label}`))
+  if (found === undefined) throw new Error(`Missing row ${label}`)
+  return found
 }
 
 function json(body: unknown, status = 200): Response {
@@ -81,7 +122,7 @@ async function renderAthlete(
   }
 }
 
-test('tennis profile shows the header and no clubs', async () => {
+test('tennis profile shows the header, no clubs, and the published final', async () => {
   const { html, urls } = await renderAthlete('sample-player-a', (path) => {
     if (path === athletePath('sample-player-a')) return json(playerA)
     throw new Error(`unexpected ${path}`)
@@ -90,12 +131,47 @@ test('tennis profile shows the header and no clubs', async () => {
   expect(urls).toEqual([`http://localhost:3001${athletePath('sample-player-a')}`])
   expect(html).toContain('Sample Player A')
   expect(html).toContain('No clubs.')
-  expect(html).not.toContain('Sample Cup')
+  expect(html).toContain('Sample Player A versus Sample Player B')
+  expect(html).toContain('Winner')
+  expect(html).toContain('<sup aria-hidden="true">5</sup>')
+  expect(html).not.toContain('Quarterfinal')
   expect(html).not.toContain('club-sample')
   expect(html).not.toContain('sample-home')
+  expect(statsRow(html, 'First serve')).toContain('>60%</td>')
 })
 
-test('football profile lists club names without ids', async () => {
+test('a null tennis percentage reads as no attempts on the athlete page', async () => {
+  const profile = {
+    ...playerA,
+    results: [
+      {
+        id: 'match-null-pct',
+        competition: 'Sample Cup',
+        date: '2026-10-10',
+        round: 'R1',
+        opponent: 'Sample Player B',
+        winner: 'athlete' as const,
+        bestOf: 3,
+        score: [
+          [6, 4],
+          [6, 3],
+        ],
+        retired: false,
+        ...nullPctStats,
+        percentages: tennisPercentages(nullPctStats),
+      },
+    ],
+  }
+  const { html } = await renderAthlete('sample-player-a', (path) => {
+    if (path === athletePath('sample-player-a')) return json(profile)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(statsRow(html, 'First-serve points won')).toContain('>No attempts</td>')
+  expect(statsRow(html, 'First-serve points won')).not.toContain('>0%</td>')
+})
+
+test('football profile lists club names without ids or a tennis scoreboard', async () => {
   const { html } = await renderAthlete('karlo-brkic', (path) => {
     if (path === athletePath('karlo-brkic')) return json(karlo)
     throw new Error(`unexpected ${path}`)
@@ -108,6 +184,8 @@ test('football profile lists club names without ids', async () => {
   expect(html).toContain('2023-07-01')
   expect(html).not.toContain('club-sample')
   expect(html).not.toContain('sample-town')
+  expect(html).not.toContain('versus')
+  expect(html).not.toContain('Set 1')
 })
 
 test('an unknown slug triggers not found', async () => {
