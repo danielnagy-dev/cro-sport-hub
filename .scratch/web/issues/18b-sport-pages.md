@@ -4,7 +4,7 @@
 
 **Blocked by:** 18a (`.scratch/web/issues/18a-home.md`).
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 **Size:** 280 counted lines. The 18a list component, twice, plus two metadata objects and two header links.
 
@@ -20,10 +20,10 @@ Plan is this note. No architect step. Develop, then the author self-reviews. Dan
 
 ## Acceptance
 
-- [ ] `/tennis` with a fixture page renders the tennis card and does not render Sample Home. `/football` does the opposite.
-- [ ] The home header links to `/tennis` and `/football`.
-- [ ] Each document title names its sport. Neither page sets `og:image`.
-- [ ] A failed fetch on `/football` still returns the heading and `Results are unavailable.`
+- [x] `/tennis` with a fixture page renders the tennis card and does not render Sample Home. `/football` does the opposite.
+- [x] The home header links to `/tennis` and `/football`.
+- [x] Each document title names its sport. Neither page sets `og:image`.
+- [x] A failed fetch on `/football` still returns the heading and `Results are unavailable.`
 
 ## Verification
 
