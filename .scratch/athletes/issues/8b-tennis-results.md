@@ -4,7 +4,7 @@
 
 **Blocked by:** af1, af3, and af5 (ADR-007, `.scratch/api-features/issues/`). 8a is on main (PR #28). This slice adds a function and `docs/feature-map/api/api.athletes.md` after those land, and it does not extend `Catalog` or the area index.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Size:** 320 counted lines. One sport's join on the published-match select, plus the percentage function that already lives in `libs/shared-types`. Plan 7 was both sports.
 
@@ -20,11 +20,11 @@ Plan is this note. The results schema is the architect sketch below; no ADR. Dev
 
 ## Acceptance
 
-- [ ] `GET /api/athletes/sample-player-a` includes the Sample Cup final on `2026-10-18`. The draft quarterfinal on `2026-10-16` is absent. Opponent is Sample Player B, `winner` is `athlete`, the score is 6-4 and 7-6 with tiebreak 5.
-- [ ] `firstServePct` is 60. `firstServePointsWonPct` equals `tennisPercentages` on those counts (4/6, not a stored number).
-- [ ] A stats row whose denominator is 0 returns `null` for that percentage. `null` is not 0.
-- [ ] `GET /api/athletes/karlo-brkic` still has no `results` field.
-- [ ] `/docs-json` documents tennis `results`.
+- [x] `GET /api/athletes/sample-player-a` includes the Sample Cup final on `2026-10-18`. The draft quarterfinal on `2026-10-16` is absent. Opponent is Sample Player B, `winner` is `athlete`, the score is 6-4 and 7-6 with tiebreak 5.
+- [x] `firstServePct` is 60. `firstServePointsWonPct` equals `tennisPercentages` on those counts (4/6, not a stored number).
+- [x] A stats row whose denominator is 0 returns `null` for that percentage. `null` is not 0.
+- [x] `GET /api/athletes/karlo-brkic` still has no `results` field.
+- [x] `/docs-json` documents tennis `results`.
 
 ## Verification
 
@@ -38,3 +38,7 @@ Yes, for the results object on the 8a schema. No ADR. `tennisPercentages` stays 
 
 - `GET /api/athletes/sample-player-a` on the seeded catalog. Catches the draft quarterfinal, a percentage that is not `tennisPercentages`, and a 0 where the denominator was 0.
 - `GET /docs-json`. Catches tennis results missing from OpenAPI.
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/41

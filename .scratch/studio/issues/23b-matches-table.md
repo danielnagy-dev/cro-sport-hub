@@ -4,7 +4,11 @@
 
 **Blocked by:** 23a (`.scratch/editor/issues/23a-editor-match-list.md`). Studio login, `editorGuard`, and the router are on main (plan 22, PR #23).
 
-**Status:** ready-for-agent
+**Status:** claimed
+
+## Comments
+
+- https://github.com/danielnagy-dev/cro-sport-hub/pull/42
 
 **Size:** 320 counted lines. One route, one table, three native filters, and the HTTP tests. Plan 22 was about 941 lines because it included the session and both guards.
 

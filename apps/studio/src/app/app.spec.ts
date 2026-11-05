@@ -47,6 +47,7 @@ describe('Shell empty list', () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [
+        ...appConfig.providers,
         {
           provide: StudioApi,
           useValue: {

@@ -59,8 +59,14 @@ export {
   athleteNameSchema,
   publicAthleteSchema,
   publicClubSpellSchema,
+  publicTennisResultSchema,
 } from './published-athlete.ts'
-export type { AthleteName, PublicAthlete, PublicClubSpell } from './published-athlete.ts'
+export type {
+  AthleteName,
+  PublicAthlete,
+  PublicClubSpell,
+  PublicTennisResult,
+} from './published-athlete.ts'
 
 export {
   evaluateTennisScore,
@@ -75,7 +81,13 @@ export type {
   TennisSetScore,
 } from './tennis-score.ts'
 
-export { tennisMatchStatsSchema, tennisPercentages, tennisStatIssues } from './tennis-stats.ts'
+export {
+  tennisMatchStatsSchema,
+  tennisPercentages,
+  tennisPercentagesSchema,
+  tennisStatCountsSchema,
+  tennisStatIssues,
+} from './tennis-stats.ts'
 export type { TennisMatchStats, TennisPercentages, TennisStatCounts } from './tennis-stats.ts'
 
 export { appearanceIssues, appearanceSchema, footballMatchSchema } from './football.ts'

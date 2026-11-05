@@ -27,9 +27,25 @@ body {
 .shell-header {
   display: flex;
   align-items: center;
+  gap: var(--csh-space-4);
   padding: var(--csh-space-3) var(--csh-space-4);
   background: var(--csh-color-text);
   color: var(--csh-color-on-accent);
+}
+
+.shell-sports {
+  display: flex;
+  align-items: center;
+  gap: var(--csh-space-3);
+  margin-left: auto;
+}
+
+.shell-sport {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: inherit;
+  text-decoration: none;
 }
 
 .shell-home {
@@ -62,12 +78,44 @@ main p {
   list-style: none;
 }
 
+.sport-athletes {
+  margin-bottom: var(--csh-space-4);
+}
+
+.sport-athletes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--csh-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sport-athletes__list a {
+  color: inherit;
+}
+
+.athlete-clubs h2 {
+  margin: var(--csh-space-4) 0 var(--csh-space-2);
+  font-size: 1.125rem;
+}
+
+.athlete-clubs__list {
+  margin: 0;
+  padding-left: var(--csh-space-4);
+}
+
 .skip-link:focus-visible {
   outline: 2px solid var(--csh-color-focus);
   outline-offset: 2px;
 }
 
 .shell-home:focus-visible {
+  outline: 2px solid var(--csh-color-on-accent);
+  outline-offset: 2px;
+}
+
+.shell-sport:focus-visible {
   outline: 2px solid var(--csh-color-on-accent);
   outline-offset: 2px;
 }
