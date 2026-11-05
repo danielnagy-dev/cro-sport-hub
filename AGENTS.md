@@ -24,7 +24,7 @@ Run these from the repository root, after `pnpm install`. When `vp` or `vpx` is 
 
 ## Hard rules
 
-- One topic per pull request. Split before 500 counted lines (`tools/guards/pr-size.ts`; the count is in `.cursor/skills/plan/SKILL.md`). The title is a Conventional Commits subject and becomes the squash subject. The body follows `.github/pull_request_template.md` and becomes the squash commit body. Include `Closes #N`, or Plan item `none` when there is no issue (`docs/agents/issue-tracker.md`). Do not add a ticket file under `.scratch/`, and do not start work from one. Those files are retired history.
+- One topic per pull request. Split before 500 counted lines (`tools/guards/pr-size.ts`; the count is in `.cursor/skills/plan/SKILL.md`). The title is a Conventional Commits subject and becomes the squash subject. The body follows `.github/pull_request_template.md` and becomes the squash commit body. Include `Closes #N`, or Plan item `none` when there is no issue (`docs/agents/issue-tracker.md`). Open work is a GitHub issue only; `tools/guards/no-scratch.ts` blocks the retired local ticket tree.
 - `## Verification` is required. A passing test suite is not that section. A missing section is blocking (`.cursor/skills/review/SKILL.md`). A behaviour change also includes `summary.md` from `.cursor/skills/verify/SKILL.md`. Docs-only: `verify` is `not applicable (no runtime change)`.
 - Before the final push, fetch and merge the latest `origin/main`. No rebase. No force-push. When that merge changes the tree, rerun the checks.
 - Agents do not merge. Daniel squash-merges. That merge is the final gate. Who reviews is the phase in `docs/team.md`.
