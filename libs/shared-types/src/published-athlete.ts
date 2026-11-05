@@ -46,11 +46,29 @@ export const publicTennisResultSchema = z.union([
   }),
 ])
 
-/** Football profiles omit `results`. Tennis profiles include published match rows. */
+const footballResultFields = {
+  id: idSchema,
+  competition: competitionSchema,
+  date: isoDateSchema,
+  round: roundSchema,
+  club: nameSchema,
+  started: z.boolean(),
+  minutes: z.int().min(0).max(130),
+  goals: z.int().min(0).max(30),
+  assists: z.int().min(0).max(30),
+  yellowCards: z.int().min(0).max(2),
+  redCard: z.boolean(),
+}
+
+/** One published football appearance on an athlete profile. Counts match the stored appearance row. */
+export const publicFootballResultSchema = z.strictObject(footballResultFields)
+
+/** Each sport adds published match rows in `results`. */
 export const publicAthleteSchema = z.discriminatedUnion('sport', [
   z.strictObject({
     ...profileFields,
     sport: z.literal('football'),
+    results: z.array(publicFootballResultSchema),
   }),
   z.strictObject({
     ...profileFields,
@@ -68,6 +86,7 @@ export const athleteNameSchema = z.strictObject({
 export const athleteNameListSchema = z.array(athleteNameSchema)
 
 export type PublicClubSpell = z.infer<typeof publicClubSpellSchema>
+export type PublicFootballResult = z.infer<typeof publicFootballResultSchema>
 export type PublicTennisResult = z.infer<typeof publicTennisResultSchema>
 export type PublicAthlete = z.infer<typeof publicAthleteSchema>
 export type AthleteName = z.infer<typeof athleteNameSchema>

@@ -37,7 +37,7 @@ function profileDocs() {
     ApiParam({ name: 'slug', description: 'Athlete slug.' }),
     ApiOkResponse({
       description:
-        'Profile and club names. Tennis bodies include published match results; football bodies have no results field.',
+        'Profile and club names. Published match results are included for tennis and football.',
       standardSchema: publicAthleteSchema,
     }),
     ApiNotFoundResponse({ description: unknownAthleteMessage }),

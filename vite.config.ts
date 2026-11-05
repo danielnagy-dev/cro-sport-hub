@@ -12,6 +12,9 @@ import { defineConfig } from 'vite-plus'
  * `ngc --noEmit`. `typeAware` stays on so lint rules can use types.
  */
 export default defineConfig({
+  test: {
+    include: ['tools/guards/**/*.test.ts'],
+  },
   fmt: {
     semi: false,
     singleQuote: true,
@@ -102,7 +105,7 @@ export default defineConfig({
           '@cro-sport-hub/slide-generator#build',
         ],
       },
-      test: 'vp run -r test',
+      test: 'vp run -r test && vp test',
       build: 'vp run -r build',
       guards: {
         command: 'vpx tools/guards/check.ts && vpx tools/guards/file-size.ts',

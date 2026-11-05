@@ -59,12 +59,14 @@ export {
   athleteNameSchema,
   publicAthleteSchema,
   publicClubSpellSchema,
+  publicFootballResultSchema,
   publicTennisResultSchema,
 } from './published-athlete.ts'
 export type {
   AthleteName,
   PublicAthlete,
   PublicClubSpell,
+  PublicFootballResult,
   PublicTennisResult,
 } from './published-athlete.ts'
 

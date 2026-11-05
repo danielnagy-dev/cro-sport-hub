@@ -21,7 +21,7 @@ The author runs each required check once, from the repository root, and records 
 
 ## Pull requests
 
-- One topic per pull request.
+- One topic per pull request. Split before 500 counted lines (same count as `.cursor/skills/plan/SKILL.md`); CI fails larger pull requests via `tools/guards/pr-size.ts`.
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
 - The description says what changed, why, and how to test it. The description becomes the squash commit body.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
