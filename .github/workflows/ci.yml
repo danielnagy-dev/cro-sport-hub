@@ -69,14 +69,10 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Chromium
-        timeout-minutes: 12
+        timeout-minutes: 5
         run: |
-          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = 'true' ]; then
-            if ! dpkg -s fonts-ipafont-gothic >/dev/null 2>&1; then
-              pnpm exec playwright install-deps chromium
-            fi
-          else
-            pnpm exec playwright install chromium --with-deps
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != 'true' ]; then
+            pnpm exec playwright install chromium
           fi
 
       - name: Verify API
