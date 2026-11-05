@@ -4,9 +4,9 @@ Style, and how to change code when a mistake could happen again. App conventions
 
 ## Style
 
-TypeScript and JavaScript use single-quoted strings, no semicolons, and trailing commas in multi-line lists. JSX attribute strings stay double-quoted (`jsxSingleQuote` default).
+TypeScript and JavaScript use single-quoted strings, no semicolons, and trailing commas in multi-line lists. JSX attribute strings stay double-quoted (`jsxSingleQuote` default). Oxfmt also formats Angular templates, including `@if` control flow.
 
-`vp fmt` and `vp run format-check` read the root `fmt` object in `vite.config.ts` (oxfmt). Run `vp fmt` before pushing when you touch formatted files.
+`vp fmt` and `vp run format-check` read the root `fmt` object in `vite.config.ts` (oxfmt). Run `vp fmt` before committing when you touch formatted files. `.githooks/pre-commit` and `.githooks/pre-merge-commit` run `vp fmt --check`.
 
 ## Language and data
 
@@ -27,7 +27,7 @@ Prefer a deterministic check (lint, pre-commit, or CI) when one is feasible. A w
 
 | Rule                                                                                                                                                           | Check                                                                                                                                                                                                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript and JavaScript quotes, semicolons, and trailing commas                                                                                              | `vp run format-check` (oxfmt, `fmt` in `vite.config.ts`). Oxlint does not check them.                                                                                                                 |
+| TypeScript, JavaScript, and Angular template formatting (quotes, semicolons, trailing commas, control flow)                                                    | `vp fmt --check` via `vp run format-check`, `.githooks/pre-commit`, and `.githooks/pre-merge-commit` (git does not run `pre-commit` for a merge). Oxlint does not check formatting.                   |
 | A pull request over 500 counted lines                                                                                                                          | CI job `ci` runs `vpx tools/guards/pr-size.ts`.                                                                                                                                                       |
 | A `Co-authored-by` line that contains an email                                                                                                                 | `tools/guards/check.ts`, from `vp run lint` and `vp run guards`. `--pr-body` checks the description. The guard cannot stop a hook from writing the trailer.                                           |
 | A Linux proc path in source under `apps/`, `libs/`, `tools/`, or the repo root                                                                                 | `tools/guards/check.ts`                                                                                                                                                                               |
@@ -41,6 +41,7 @@ A check cannot see these, so they stay written rules:
 - Whether a token estimate or a line estimate is honest (`.cursor/skills/plan/SKILL.md`).
 - Dead prose in markdown. A linter cannot tell a stale sentence from a live rule.
 - An agent merging a pull request (`docs/team.md`).
+- The resolution when two branches append to `apps/studio/src/app/app.routes.ts` or `apps/studio/src/app/core/studio-api.ts`. API features are separate files (`docs/adr/007-api-feature-files.md`). Studio still registers routes and client methods in those two files.
 
 ## Before writing framework code
 

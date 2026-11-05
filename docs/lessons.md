@@ -2,6 +2,10 @@
 
 Dated log. The second time a mistake appears, it becomes a check. The corrections ladder is in `CODING_STANDARDS.md`. The order of checks is in `.cursor/rules/lessons.mdc`: lint rule, type, test, verify check, written rule.
 
+## 2026-11-05 — format on the commit, including a merge
+
+`apps/studio/src/app/feature/tennis-form/draft-body.spec.ts` was committed with a wrapped import, then formatted in a follow-up, on #82 and again after the #90 merge. #82 also collapsed an Angular `@if` onto the previous line in `tennis-score.html`. Cause: CI already ran `vp fmt --check`, but the bad commit was replaced by a format commit before a red run remained, and `pre-commit` does not run for merge commits, so the #90 merge landed unformatted. Guard: `.githooks/pre-commit` and `.githooks/pre-merge-commit` run `vp fmt --check`. Where: those hooks and the format row in `CODING_STANDARDS.md`.
+
 ## 2026-10-26 — file size
 
 Agents read whole files, so a file over 5,000 estimated tokens (bytes/4) costs tokens on every later task. Cause: nothing stopped a file from growing. Guard: `tools/guards/file-size.ts` (ignore list and temporary baseline in `tools/guards/file-size.config.json`) in `vp run lint`, `vp run guards`, and `.githooks/pre-commit`. A repeated mistake becomes this automatic check.

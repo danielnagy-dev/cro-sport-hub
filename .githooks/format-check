@@ -1,0 +1,11 @@
+#!/bin/sh
+# Same check as `vp run format-check`. pre-commit and pre-merge-commit both call this.
+# Linux and macOS. No network.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if command -v vp >/dev/null 2>&1; then
+  vp fmt --check
+else
+  "$root/node_modules/.bin/vp" fmt --check
+fi
