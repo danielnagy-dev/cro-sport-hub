@@ -13,7 +13,9 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
 import { AuthStore } from '../../core/auth'
-import { StudioApi } from '../../core/studio-api'
+import { EditorLookupsApi } from '../../core/editor-lookups-api'
+import { FootballApi } from '../../core/football-api'
+import { MatchSubmitApi } from '../../core/match-submit-api'
 import {
   buildFootballDraftBody,
   emptyAppearanceRow,
@@ -49,7 +51,9 @@ const fields = [
   templateUrl: './football-score.html',
 })
 export class FootballScorePage {
-  private readonly api = inject(StudioApi)
+  private readonly lookups = inject(EditorLookupsApi)
+  private readonly football = inject(FootballApi)
+  private readonly submitApi = inject(MatchSubmitApi)
   protected readonly auth = inject(AuthStore)
   protected readonly fieldConfigs = fields
   protected readonly appearanceCountFields = appearanceCountFields
@@ -188,9 +192,9 @@ export class FootballScorePage {
     this.lookupStatus.set('loading')
     try {
       const [competitions, teams, athletes] = await Promise.all([
-        firstValueFrom(this.api.editorCompetitions('football')),
-        firstValueFrom(this.api.editorTeams()),
-        firstValueFrom(this.api.editorAthletes('football')),
+        firstValueFrom(this.lookups.editorCompetitions('football')),
+        firstValueFrom(this.lookups.editorTeams()),
+        firstValueFrom(this.lookups.editorAthletes('football')),
       ])
       this.competitions.set(competitionLookupSchema.array().parse(competitions))
       this.teams.set(teamLookupSchema.array().parse(teams))
@@ -208,7 +212,9 @@ export class FootballScorePage {
       action: async () => {
         try {
           const saved = await firstValueFrom(
-            this.api.createFootballDraft(buildFootballDraftBody(this.model(), this.draftMatchId)),
+            this.football.createFootballDraft(
+              buildFootballDraftBody(this.model(), this.draftMatchId),
+            ),
           )
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
@@ -226,7 +232,7 @@ export class FootballScorePage {
     this.submitError.set(undefined)
     this.submittingForReview.set(true)
     try {
-      const saved = await firstValueFrom(this.api.submitMatch(id))
+      const saved = await firstValueFrom(this.submitApi.submitMatch(id))
       this.matchStatus.set(saved.status)
     } catch (error: unknown) {
       if (error instanceof HttpErrorResponse && error.status === 409) {

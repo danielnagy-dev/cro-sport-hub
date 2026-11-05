@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import type { GalleryView } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { StudioApi } from '../../core/studio-api'
+import { GalleryApi } from '../../core/gallery-api'
 import { GalleryShell } from './gallery-shell'
 
 function captionsFromGallery(gallery: GalleryView): Record<number, string> {
@@ -53,7 +53,7 @@ function captionsFromGallery(gallery: GalleryView): Record<number, string> {
   `,
 })
 export class GalleryPage implements OnDestroy {
-  private readonly api = inject(StudioApi)
+  private readonly api = inject(GalleryApi)
   private readonly route = inject(ActivatedRoute)
   private pending: Subscription | undefined
   private readonly galleryId = this.route.snapshot.paramMap.get('id') ?? ''

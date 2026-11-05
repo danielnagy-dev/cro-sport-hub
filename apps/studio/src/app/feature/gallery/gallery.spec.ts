@@ -5,12 +5,8 @@ import { ActivatedRoute, provideRouter, Router } from '@angular/router'
 import { expect } from 'vite-plus/test'
 import type { EditorMatch, GalleryView } from '@cro-sport-hub/shared-types'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
-import {
-  editorMatchesPath,
-  galleriesPath,
-  galleryPath,
-  gallerySlidePath,
-} from '../../core/studio-api'
+import { galleriesPath, galleryPath, gallerySlidePath } from '../../core/gallery-api'
+import { editorMatchesPath } from '../../core/studio-api'
 import { GalleryNewPage } from './gallery-new'
 import { GalleryPage } from './gallery'
 
