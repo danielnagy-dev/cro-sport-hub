@@ -1,7 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core'
+import { Component, computed, inject, signal, afterNextRender } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
 import { HttpErrorResponse } from '@angular/common/http'
-import { RouterLink } from '@angular/router'
+import { ActivatedRoute, RouterLink, Router } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
@@ -13,10 +13,12 @@ import {
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
 import { AuthStore } from '../../core/auth'
+import { FootballApi } from '../../core/football-api'
 import { StudioApi } from '../../core/studio-api'
 import {
   buildFootballDraftBody,
   emptyAppearanceRow,
+  footballFormFromDraft,
   initialFootballFormModel,
   newMatchId,
   validateFootballDraft,
@@ -32,6 +34,7 @@ const appearanceCountFields = [
 
 type LookupState = 'loading' | 'ready' | 'error'
 type FieldKey = keyof Omit<FootballFormModel, 'appearances'>
+type PageLoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
 const fields = [
   ['competitionId', 'competition', 'Competition', 'Choose a competition', 'select'],
@@ -49,10 +52,17 @@ const fields = [
   templateUrl: './football-score.html',
 })
 export class FootballScorePage {
-  private readonly api = inject(StudioApi)
+  private readonly footballApi = inject(FootballApi)
+  private readonly workflowApi = inject(StudioApi)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
   protected readonly fieldConfigs = fields
   protected readonly appearanceCountFields = appearanceCountFields
+
+  protected readonly routeMatchId = signal<string | undefined>(undefined)
+  protected readonly isEditMode = computed(() => this.routeMatchId() !== undefined)
+  protected readonly pageLoadState = signal<PageLoadState>('loading')
 
   protected readonly model = signal<FootballFormModel>(initialFootballFormModel())
   protected readonly competitions = signal<CompetitionLookup[]>([])
@@ -66,13 +76,17 @@ export class FootballScorePage {
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
   protected readonly draftMatchId = newMatchId()
+  protected readonly activeMatchId = computed(() => this.routeMatchId() ?? this.draftMatchId)
 
   protected readonly draftIssues = computed(() =>
-    validateFootballDraft(this.model(), this.draftMatchId),
+    validateFootballDraft(this.model(), this.activeMatchId()),
   )
 
   protected readonly footballForm = form(this.model, (path) => {
-    const locked = () => this.savedId() !== undefined
+    const locked = () => {
+      if (this.isEditMode()) return this.matchStatus() !== 'draft'
+      return this.savedId() !== undefined
+    }
     const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
     const bind = (fieldPath: (typeof path)[FieldKey], field: FieldKey) => {
       validate(fieldPath, () => {
@@ -97,7 +111,10 @@ export class FootballScorePage {
   })
 
   constructor() {
-    void this.loadLookups()
+    void this.bootLookups()
+    afterNextRender(() => {
+      void this.bootDraft()
+    })
   }
 
   protected formField(key: FieldKey) {
@@ -154,8 +171,13 @@ export class FootballScorePage {
     return this.matchStatus() === 'draft' && !this.submittingForReview()
   }
 
+  protected formEditable(): boolean {
+    if (this.isEditMode()) return this.matchStatus() === 'draft'
+    return this.savedId() === undefined
+  }
+
   protected addAppearance(): void {
-    if (this.savedId() !== undefined) return
+    if (!this.formEditable()) return
     this.model.update((current) => ({
       ...current,
       appearances: [...current.appearances, emptyAppearanceRow()],
@@ -163,7 +185,7 @@ export class FootballScorePage {
   }
 
   protected removeAppearance(index: number): void {
-    if (this.savedId() !== undefined) return
+    if (!this.formEditable()) return
     this.model.update((current) => ({
       ...current,
       appearances: current.appearances.filter((_, rowIndex) => rowIndex !== index),
@@ -172,7 +194,8 @@ export class FootballScorePage {
 
   protected onSubmit(event: Event): void {
     event.preventDefault()
-    if (this.savedId() !== undefined) return
+    if (!this.isEditMode() && this.savedId() !== undefined) return
+    if (this.isEditMode() && this.matchStatus() !== 'draft') return
     this.submitAttempted.set(true)
     this.footballForm().markAsTouched()
     if (this.draftIssues().length > 0) return
@@ -184,13 +207,50 @@ export class FootballScorePage {
     void this.sendForReview()
   }
 
+  private async bootLookups(): Promise<void> {
+    this.pageLoadState.set('loading')
+    await this.loadLookups()
+    if (this.lookupStatus() === 'ready' && this.editMatchId() === undefined) {
+      this.pageLoadState.set('ready')
+    }
+  }
+
+  private async bootDraft(): Promise<void> {
+    const matchId = this.editMatchId()
+    if (matchId === undefined) return
+    this.routeMatchId.set(matchId)
+    this.savedId.set(matchId)
+    this.pageLoadState.set('loading')
+    try {
+      const draft = await firstValueFrom(this.footballApi.loadEditorFootballDraft(matchId))
+      this.model.set(footballFormFromDraft(draft))
+      this.matchStatus.set(draft.status)
+      this.pageLoadState.set('ready')
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.pageLoadState.set('not-found')
+        return
+      }
+      this.pageLoadState.set('error')
+    }
+  }
+
+  private editMatchId(): string | undefined {
+    const fromParam = this.route.snapshot.paramMap.get('id')
+    if (fromParam !== null) return fromParam
+    const match = /^\/matches\/([^/]+)\/football/.exec(this.router.url)
+    const fromUrl = match?.[1]
+    if (fromUrl === undefined || fromUrl === 'new') return undefined
+    return fromUrl
+  }
+
   private async loadLookups(): Promise<void> {
     this.lookupStatus.set('loading')
     try {
       const [competitions, teams, athletes] = await Promise.all([
-        firstValueFrom(this.api.editorCompetitions('football')),
-        firstValueFrom(this.api.editorTeams()),
-        firstValueFrom(this.api.editorAthletes('football')),
+        firstValueFrom(this.workflowApi.editorCompetitions('football')),
+        firstValueFrom(this.workflowApi.editorTeams()),
+        firstValueFrom(this.workflowApi.editorAthletes('football')),
       ])
       this.competitions.set(competitionLookupSchema.array().parse(competitions))
       this.teams.set(teamLookupSchema.array().parse(teams))
@@ -198,18 +258,21 @@ export class FootballScorePage {
       this.lookupStatus.set('ready')
     } catch {
       this.lookupStatus.set('error')
+      this.pageLoadState.set('error')
     }
   }
 
   private async save(): Promise<void> {
     if (this.footballForm().submitting()) return
     this.saveError.set(undefined)
+    const matchId = this.activeMatchId()
     await submit(this.footballForm, {
       action: async () => {
         try {
-          const saved = await firstValueFrom(
-            this.api.createFootballDraft(buildFootballDraftBody(this.model(), this.draftMatchId)),
-          )
+          const body = buildFootballDraftBody(this.model(), matchId)
+          const saved = this.isEditMode()
+            ? await firstValueFrom(this.footballApi.updateFootballDraft(matchId, body))
+            : await firstValueFrom(this.footballApi.createFootballDraft(body))
           this.savedId.set(saved.id)
           this.matchStatus.set('draft')
         } catch {
@@ -226,7 +289,7 @@ export class FootballScorePage {
     this.submitError.set(undefined)
     this.submittingForReview.set(true)
     try {
-      const saved = await firstValueFrom(this.api.submitMatch(id))
+      const saved = await firstValueFrom(this.workflowApi.submitMatch(id))
       this.matchStatus.set(saved.status)
     } catch (error: unknown) {
       if (error instanceof HttpErrorResponse && error.status === 409) {

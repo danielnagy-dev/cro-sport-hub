@@ -37,6 +37,12 @@ export const studioRoutes: Routes = [
     canActivate: [editorGuard],
   },
   {
+    path: 'matches/:id/football',
+    loadComponent: () =>
+      import('./feature/football-form/football-score').then((module) => module.FootballScorePage),
+    canActivate: [editorGuard],
+  },
+  {
     path: 'galleries/new',
     loadComponent: () =>
       import('./feature/gallery/gallery-new').then((module) => module.GalleryNewPage),

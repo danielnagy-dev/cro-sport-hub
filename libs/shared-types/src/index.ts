@@ -57,6 +57,9 @@ export type { EditorMatch, EditorMatchListQuery, EditorMatchPage } from './edito
 export { editorTennisDraftSchema } from './editor-tennis-draft.ts'
 export type { EditorTennisDraft } from './editor-tennis-draft.ts'
 
+export { editorFootballDraftSchema } from './editor-football-draft.ts'
+export type { EditorFootballDraft } from './editor-football-draft.ts'
+
 export {
   athleteNameListSchema,
   athleteNameSchema,

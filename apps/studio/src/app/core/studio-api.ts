@@ -33,7 +33,6 @@ export const editorCompetitionsPath = '/api/editor/competitions'
 export const editorAthletesPath = '/api/editor/athletes'
 export const editorTeamsPath = '/api/editor/teams'
 export const tennisDraftsPath = '/api/matches/tennis'
-export const footballDraftsPath = '/api/matches/football'
 export const galleriesPath = '/api/galleries'
 
 export function galleryPath(id: string): string {
@@ -57,17 +56,7 @@ export function matchSubmitPath(id: string): string {
 }
 
 export type TennisDraftSaved = { id: string; status: 'draft'; sport: 'tennis' }
-export type FootballDraftSaved = { id: string; status: 'draft'; sport: 'football' }
 export type MatchSubmitted = { id: string; status: 'review' }
-
-function parseFootballDraftSaved(body: unknown): FootballDraftSaved {
-  if (typeof body !== 'object' || body === null) throw new Error('Invalid football draft response')
-  const row = body as Record<string, unknown>
-  if (row['status'] !== 'draft' || row['sport'] !== 'football' || typeof row['id'] !== 'string') {
-    throw new Error('Invalid football draft response')
-  }
-  return { id: row['id'], status: 'draft', sport: 'football' }
-}
 
 function parseTennisDraftSaved(body: unknown): TennisDraftSaved {
   if (typeof body !== 'object' || body === null) throw new Error('Invalid tennis draft response')
@@ -153,12 +142,6 @@ export class StudioApi {
     return this.http
       .get(editorTennisDraftPath(id))
       .pipe(map((response) => editorTennisDraftSchema.parse(response)))
-  }
-
-  createFootballDraft(body: unknown): Observable<FootballDraftSaved> {
-    return this.http
-      .post(footballDraftsPath, body)
-      .pipe(map((response) => parseFootballDraftSaved(response)))
   }
 
   submitMatch(id: string): Observable<MatchSubmitted> {

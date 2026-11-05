@@ -24,14 +24,17 @@ import {
 import {
   editorMatchListQuerySchema,
   editorMatchPageSchema,
+  editorFootballDraftSchema,
   editorTennisDraftSchema,
   idSchema,
+  type EditorFootballDraft,
   type EditorMatchListQuery,
   type EditorMatchPage,
   type EditorTennisDraft,
 } from '@cro-sport-hub/shared-types'
 import { EditorAuthGuard } from './auth/role.guard.js'
 import { catalogDb, CatalogError } from './catalog/catalog.js'
+import { readEditorFootballDraft } from './catalog/editor-football-draft.js'
 import { readEditorTennisDraft } from './catalog/editor-tennis-draft.js'
 import { listEditorMatches } from './catalog/editor-matches.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
@@ -79,6 +82,21 @@ function readTennisDocs() {
   )
 }
 
+function readFootballDocs() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: 'Read one football match for editing' }),
+    ApiParam({ name: 'id', description: 'Match id.' }),
+    ApiOkResponse({
+      description: 'Draft body the football POST accepts, plus status.',
+      standardSchema: editorFootballDraftSchema,
+    }),
+    ApiNotFoundResponse({ description: 'Unknown match' }),
+    ApiUnauthorizedResponse({ description: 'Invalid token' }),
+    ApiForbiddenResponse({ description: 'Forbidden' }),
+  )
+}
+
 @ApiTags('matches')
 @UseGuards(EditorAuthGuard)
 @Controller('api/editor')
@@ -95,13 +113,34 @@ export class EditorMatchesController {
   @readTennisDocs()
   readTennis(@Param('id') id: string): Promise<EditorTennisDraft> {
     if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown match')
-    return this.readOne(id)
+    return this.readTennisOne(id)
   }
 
-  private async readOne(id: string): Promise<EditorTennisDraft> {
+  @Get('matches/football/:id')
+  @readFootballDocs()
+  readFootball(@Param('id') id: string): Promise<EditorFootballDraft> {
+    if (!idSchema.safeParse(id).success) throw new NotFoundException('Unknown match')
+    return this.readFootballOne(id)
+  }
+
+  private async readTennisOne(id: string): Promise<EditorTennisDraft> {
     const catalog = await this.openCatalog()
     try {
       return await readEditorTennisDraft(catalogDb(catalog), id)
+    } catch (error) {
+      if (error instanceof CatalogError && error.code === 'unknown-ref') {
+        throw new NotFoundException(error.message)
+      }
+      throw error
+    } finally {
+      await catalog.close()
+    }
+  }
+
+  private async readFootballOne(id: string): Promise<EditorFootballDraft> {
+    const catalog = await this.openCatalog()
+    try {
+      return await readEditorFootballDraft(catalogDb(catalog), id)
     } catch (error) {
       if (error instanceof CatalogError && error.code === 'unknown-ref') {
         throw new NotFoundException(error.message)

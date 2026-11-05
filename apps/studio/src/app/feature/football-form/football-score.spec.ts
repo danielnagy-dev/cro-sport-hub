@@ -2,15 +2,16 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
+import { RouterTestingHarness } from '@angular/router/testing'
 import { expect } from 'vite-plus/test'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import {
   editorAthletesPath,
   editorCompetitionsPath,
   editorTeamsPath,
-  footballDraftsPath,
   matchSubmitPath,
 } from '../../core/studio-api'
+import { footballDraftsPath, footballDraftUpdatePath } from '../../core/football-api'
 import type { AppearanceRowModel, FootballFormModel } from './draft-body'
 import { FootballScorePage } from './football-score'
 
@@ -97,6 +98,7 @@ async function boot(http: HttpTestingController) {
     .flush([{ id: 'athlete-karlo', name: 'Karlo Brkic' }])
   await fixture.whenStable()
   fixture.detectChanges()
+  await fixture.whenStable()
   return fixture
 }
 
@@ -121,7 +123,10 @@ describe('FootballScorePage', () => {
     TestBed.inject(TOKEN_STORE).write(editorBearer())
   })
 
-  afterEach(() => TestBed.inject(HttpTestingController).verify())
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).verify()
+    TestBed.resetTestingModule()
+  })
 
   it('sends a guest to login', async () => {
     TestBed.inject(TOKEN_STORE).clear()
@@ -231,5 +236,107 @@ describe('FootballScorePage', () => {
     fixture.detectChanges()
     expect(root.textContent).toContain('Status: review')
     expect(root.textContent).not.toContain('Submit for review')
+  })
+})
+
+describe('FootballScorePage edit', () => {
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).verify()
+    TestBed.resetTestingModule()
+  })
+
+  async function bootEdit(id: string): Promise<{
+    harness: RouterTestingHarness
+    http: HttpTestingController
+    root: HTMLElement
+    draftRequest: ReturnType<HttpTestingController['expectOne']>
+  }> {
+    await TestBed.configureTestingModule({
+      imports: [FootballScorePage],
+      providers: [
+        provideRouter([{ path: 'matches/:id/football', component: FootballScorePage }]),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: TOKEN_STORE, useValue: tokenStore() },
+      ],
+    }).compileComponents()
+    TestBed.inject(TOKEN_STORE).write(editorBearer())
+    const harness = await RouterTestingHarness.create()
+    await harness.navigateByUrl(`/matches/${id}/football`)
+    await harness.fixture.whenStable()
+    const http = TestBed.inject(HttpTestingController)
+    const root = harness.routeNativeElement as HTMLElement
+    http
+      .expectOne(`${editorCompetitionsPath}?sport=football`)
+      .flush([{ id: 'comp-sample-league', name: 'Sample League', season: '2026' }])
+    http.expectOne(editorTeamsPath).flush([
+      { id: 'club-sample-home', name: 'Sample Home' },
+      { id: 'club-sample-away', name: 'Sample Away' },
+    ])
+    http
+      .expectOne(`${editorAthletesPath}?sport=football`)
+      .flush([{ id: 'athlete-karlo', name: 'Karlo Brkic' }])
+    await harness.fixture.whenStable()
+    const draftRequest = http.expectOne((req) =>
+      req.url.includes(`/api/editor/matches/football/${id}`),
+    )
+    return { harness, http, root, draftRequest }
+  }
+
+  it('loads the draft, fills the form, and saves with PUT without status', async () => {
+    const { harness, http, root, draftRequest } = await bootEdit('match-sample-league')
+    draftRequest.flush({
+      id: 'match-sample-league',
+      competitionId: 'comp-sample-league',
+      date: '2026-10-19',
+      round: 'Matchday 8',
+      homeTeamId: 'club-sample-home',
+      awayTeamId: 'club-sample-away',
+      homeGoals: 2,
+      awayGoals: 1,
+      appearances: [
+        {
+          athleteId: 'karlo-brkic',
+          teamId: 'club-sample-home',
+          started: true,
+          minutes: 90,
+          goals: 2,
+          assists: 0,
+          yellowCards: 0,
+          redCard: false,
+        },
+      ],
+      status: 'draft',
+    })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Edit football match')
+    clickSave(root)
+    await harness.fixture.whenStable()
+    const request = http.expectOne(footballDraftUpdatePath('match-sample-league'))
+    const body = request.request.body as Record<string, unknown>
+    expect(body['status']).toBeUndefined()
+    expect(body['appearances']).toEqual([
+      {
+        athleteId: 'karlo-brkic',
+        teamId: 'club-sample-home',
+        started: true,
+        minutes: 90,
+        goals: 2,
+        assists: 0,
+        yellowCards: 0,
+        redCard: false,
+      },
+    ])
+    request.flush({ id: 'match-sample-league', status: 'draft', sport: 'football' })
+    await harness.fixture.whenStable()
+  })
+
+  it('shows Match not found for an unknown id', async () => {
+    const { harness, http, root, draftRequest } = await bootEdit('match-missing')
+    draftRequest.flush(null, { status: 404, statusText: 'Not Found' })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Match not found')
   })
 })
