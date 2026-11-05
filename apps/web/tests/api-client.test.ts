@@ -1,6 +1,8 @@
 import { expect, test } from 'vite-plus/test'
 import {
   createApiClient,
+  athletePath,
+  athletesBySportPath,
   footballMatchesPath,
   matchesPath,
   sportsPath,
@@ -21,6 +23,17 @@ const match = {
   reviewedBy: 'editor-2',
   publishedAt: '2026-10-18T18:00:00+00:00',
 }
+
+const karlo = {
+  slug: 'karlo-brkic',
+  name: 'Karlo Brkić',
+  sport: 'football' as const,
+  country: 'HR',
+  position: 'Forward',
+  clubs: [{ name: 'Sample Home', from: '2025-07-01' }],
+}
+
+const athleteNames = [{ slug: 'sample-player-a', name: 'Sample Player A' }]
 
 const publishedPage = {
   items: [
@@ -94,4 +107,19 @@ test('rejects a bare Match array', async () => {
   const api = createApiClient({ fetch: fetchImpl })
 
   await expect(api.matches()).rejects.toThrow(/expected object, received array/)
+})
+
+test('parses athlete profile and sport name lists', async () => {
+  const { fetchImpl, calls } = routes({
+    [athletePath('karlo-brkic')]: { body: karlo },
+    [athletesBySportPath('tennis')]: { body: athleteNames },
+  })
+  const api = createApiClient({ fetch: fetchImpl, baseUrl: 'http://localhost:3001' })
+
+  await expect(api.athlete('karlo-brkic')).resolves.toEqual(karlo)
+  await expect(api.athletesBySport('tennis')).resolves.toEqual(athleteNames)
+  expect(calls.map((call) => call.url)).toEqual([
+    'http://localhost:3001/api/athletes/karlo-brkic',
+    'http://localhost:3001/api/athletes?sport=tennis',
+  ])
 })
