@@ -1,6 +1,6 @@
 # Team
 
-Who does what in this repo. The coordinator is the agent that received the request. It splits the work, asks the next role, and tracks status on the `**Status:**` line of `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. It decides whether a separate review agent runs (Phase, below). It does not review the diff and it does not merge.
+Who does what in this repo. The coordinator is the agent that received the request. It splits the work, asks the next role, and tracks status with the `status:claimed` label on the GitHub issue (`docs/agents/issue-tracker.md`). It decides whether a separate review agent runs (Phase, below). It does not review the diff and it does not merge.
 
 UI and UX visual design stays with a designer outside the repo. DevOps joins at deploy time. Neither has a skill here.
 
@@ -61,9 +61,9 @@ A separate agent starts with `custom_mode: "review"` and does not share the impl
 
 ## Flow
 
-1. Plan turns one plan item into a scope and writes it to `.scratch/<feature-slug>/issues/<NN>-<slug>.md` only. The size target lives in the plan skill. The file shape is in `docs/agents/issue-tracker.md`.
+1. Plan turns one plan item into a scope and opens a GitHub issue. The size target lives in the plan skill. The issue shape is in `docs/agents/issue-tracker.md`.
 2. Architect runs when that scope changes structure, shared types, or dependencies. Otherwise skip this step.
-3. Develop implements that scope, runs the checks once, and opens the PR. It updates only that same ticket file. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`. Before the final push, it merges the latest `origin/main` as `AGENTS.md` says (no rebase, no force-push) and reruns the checks when that merge changes the tree.
+3. Develop implements that scope, runs the checks once, and opens the PR. It comments on the issue, labels `status:claimed`, and puts `Closes #N` in the PR body. It does not add a `.scratch` ticket. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`. Before the final push, it merges the latest `origin/main` as `AGENTS.md` says (no rebase, no force-push) and reruns the checks when that merge changes the tree.
 4. The author fills `## Review` in the shape `.cursor/skills/review` specifies. The author leaves that section empty only when the active phase sends a separate agent.
 5. Daniel squash-merges. That merge is the final gate. Agents never merge.
 

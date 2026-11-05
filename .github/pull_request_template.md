@@ -1,10 +1,10 @@
 ## Summary
 
-<!-- What changed and why, in a few sentences. This section is the spec when the ticket file is not on the branch. -->
+<!-- What changed and why, in a few sentences. This section is the spec when the pull request has no GitHub issue. -->
 
 ## Plan item
 
-<!-- Local ticket id and one line, for example `22 studio login` (`.scratch/auth/issues/22-studio-login.md`). Write `none` when there is no plan id. A GitHub issue link is optional. The tracker is the local file. -->
+<!-- GitHub issue, for example `Closes #63` (`[24c] Tennis stats and submit for review`). Write `none` when there is no issue. -->
 
 ## Type of change
 

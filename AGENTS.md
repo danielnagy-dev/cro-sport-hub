@@ -23,10 +23,10 @@ The author runs each required check once, from the repository root, and records 
 
 - One topic per pull request. Split before 500 counted lines (same count as `.cursor/skills/plan/SKILL.md`); CI fails larger pull requests via `tools/guards/pr-size.ts`.
 - Title is a Conventional Commits subject. The title becomes the squash commit subject.
-- The description follows `.github/pull_request_template.md`, in this order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots when the UI changes, Verification, Checklist, and Review. It becomes the squash commit body. `## Summary` is the spec when the ticket file is not on the branch.
+- The description follows `.github/pull_request_template.md`, in this order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots when the UI changes, Verification, Checklist, and Review. It becomes the squash commit body. `## Summary` is the spec when the pull request has no GitHub issue.
 - Do not commit secrets or real personal data. Version 1 uses seed and test data only.
 - No `Co-authored-by` line with an email in a commit message or the PR description. If a hook adds one, strip it before pushing.
-- A pull request edits only its own ticket file, `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. The index is `docs/agents/issue-tracker.md`. It has no status list.
+- The pull request body includes `Closes #N` for the GitHub issue it finishes. Plan item is `none` when there is no issue. Do not add a ticket file under `.scratch/`. The convention is `docs/agents/issue-tracker.md`.
 - Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push). When that merge changes the tree, rerun the checks.
 - Agents do not merge. Daniel squash-merges. That merge is the final gate. Who reviews is the phase in `docs/team.md`.
 
@@ -68,7 +68,7 @@ A review follows `.cursor/skills/review`: one pass, no sub-agents. The vendored 
 
 Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. That covers `grill-me` (X is `grilling`) and `tdd` (X is `codebase-design`).
 
-Issue tracker: local markdown, one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. See `docs/agents/issue-tracker.md`. A ticket file, or the PR `## Summary`, is the spec.
+Issue tracker: GitHub Issues. See `docs/agents/issue-tracker.md`. The issue body, or the PR `## Summary` when there is no issue, is the spec.
 
 Domain docs: ADRs use `docs/adr/template.md` and `NNN` numbers. See `docs/agents/domain.md`. Football slide tokens and layout: `docs/design-system.md` (approved 2026-11-03; hero cell size still open).
 
