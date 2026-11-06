@@ -7,6 +7,7 @@ import { AuthStore } from '../../core/auth'
 import { ReviewApi, type ReviewMatchDetail } from '../../core/review-api'
 
 type LoadStatus = 'loading' | 'ready' | 'not-found' | 'error'
+type MetaRow = { k: string; v: string }
 
 function readConflictMessage(error: HttpErrorResponse, fallback: string): string {
   const body: unknown = error.error
@@ -38,6 +39,36 @@ export class ReviewPage {
   protected readonly showAdminActions = computed(() => {
     const session = this.auth.session()
     return session?.role === 'admin' && this.status() === 'review'
+  })
+
+  protected readonly metaRows = computed((): MetaRow[] => {
+    const d = this.detail()
+    if (d === null) return []
+    const st = this.status()
+    const base: MetaRow[] = [
+      { k: 'Label', v: d.summary.label },
+      { k: 'Sport', v: d.summary.sport },
+      { k: 'Status', v: st ?? '' },
+    ]
+    if (d.kind === 'tennis') {
+      return [
+        ...base,
+        { k: 'Competition', v: d.competition },
+        { k: 'Date', v: d.date },
+        { k: 'Round', v: d.round },
+        { k: 'Players', v: `${d.playerA} vs ${d.playerB}` },
+        { k: 'Winner', v: d.winner },
+        ...(d.retired ? [{ k: 'Outcome', v: 'Retirement' }] : []),
+      ]
+    }
+    return [
+      ...base,
+      { k: 'Competition', v: d.competition },
+      { k: 'Date', v: d.date },
+      { k: 'Round', v: d.round },
+      { k: 'Clubs', v: `${d.homeClub} vs ${d.awayClub}` },
+      { k: 'Score', v: `${d.homeGoals} - ${d.awayGoals}` },
+    ]
   })
 
   constructor() {

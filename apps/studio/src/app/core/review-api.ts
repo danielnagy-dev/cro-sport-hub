@@ -2,34 +2,17 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import type { EditorMatch, SportSlug, Status, TennisSetScore } from '@cro-sport-hub/shared-types'
 import { forkJoin, map, switchMap, throwError, type Observable } from 'rxjs'
-import { FootballApi } from './football-api'
 import { EditorLookupsApi } from './editor-lookups-api'
+import { FootballApi } from './football-api'
 import { MatchesApi } from './matches-api'
 import { StudioHttp } from './studio-http'
 import { TennisApi } from './tennis-api'
 
-export function matchRejectPath(id: string): string {
-  return `/api/matches/${id}/reject`
-}
-
-export function matchPublishPath(id: string): string {
-  return `/api/matches/${id}/publish`
-}
-
+export const matchRejectPath = (id: string) => `/api/matches/${id}/reject`
+export const matchPublishPath = (id: string) => `/api/matches/${id}/publish`
 export type MatchRejected = { id: string; status: 'draft' }
 export type MatchPublished = { id: string; status: 'published' }
 export type ReviewMatchSummary = { id: string; sport: SportSlug; status: Status; label: string }
-type SetRow = { label: string; score: string }
-type AppRow = {
-  athlete: string
-  club: string
-  started: boolean
-  minutes: number
-  goals: number
-  assists: number
-  cardsLabel: string
-}
-
 export type ReviewMatchDetail =
   | {
       kind: 'tennis'
@@ -39,7 +22,7 @@ export type ReviewMatchDetail =
       round: string
       playerA: string
       playerB: string
-      sets: SetRow[]
+      sets: { label: string; score: string }[]
       winner: string
       retired: boolean
     }
@@ -53,7 +36,15 @@ export type ReviewMatchDetail =
       awayClub: string
       homeGoals: number
       awayGoals: number
-      appearances: AppRow[]
+      appearances: {
+        athlete: string
+        club: string
+        started: boolean
+        minutes: number
+        goals: number
+        assists: number
+        cardsLabel: string
+      }[]
     }
 
 function parseReject(body: unknown): MatchRejected {
@@ -82,22 +73,14 @@ function parsePublish(body: unknown): MatchPublished {
   return { id: r['id'], status: 'published' }
 }
 
-function nm<T extends { id: string; name: string }>(rows: readonly T[], id: string): string {
+function nm<T extends { id: string; name: string }>(rows: readonly T[], id: string) {
   return rows.find((x) => x.id === id)?.name ?? id
 }
 
-function setRow(s: TennisSetScore, i: number): SetRow {
-  const [a, b, t] = s
-  return {
-    label: `Set ${i + 1}`,
-    score: t === undefined ? `${a}-${b}` : `${a}-${b} (tiebreak ${t})`,
-  }
-}
-
-function crd(x: { yellowCards: number; redCard: boolean }): string {
-  if (x.yellowCards === 0 && !x.redCard) return '—'
-  return `${x.yellowCards > 0 ? `${x.yellowCards}Y` : ''}${x.redCard ? 'R' : ''}`
-}
+const crd = (x: { yellowCards: number; redCard: boolean }) =>
+  x.yellowCards === 0 && !x.redCard
+    ? '—'
+    : `${x.yellowCards > 0 ? `${x.yellowCards}Y` : ''}${x.redCard ? 'R' : ''}`
 
 @Injectable({ providedIn: 'root' })
 export class ReviewApi {
@@ -142,6 +125,13 @@ export class ReviewApi {
         map(({ d, c, a }) => {
           const pa = nm(a, d.playerAId)
           const pb = nm(a, d.playerBId)
+          const setRow = (s: TennisSetScore, i: number) => {
+            const [x, y, t] = s
+            return {
+              label: `Set ${i + 1}`,
+              score: t === undefined ? `${x}-${y}` : `${x}-${y} (tiebreak ${t})`,
+            }
+          }
           return {
             kind: 'tennis' as const,
             summary,
@@ -164,26 +154,28 @@ export class ReviewApi {
       a: this.lookups.editorAthletes('football'),
       t: this.lookups.editorTeams(),
     }).pipe(
-      map(({ d, c, a, t }) => ({
-        kind: 'football' as const,
-        summary,
-        competition: nm(c, d.competitionId),
-        date: d.date,
-        round: d.round,
-        homeClub: nm(t, d.homeTeamId),
-        awayClub: nm(t, d.awayTeamId),
-        homeGoals: d.homeGoals,
-        awayGoals: d.awayGoals,
-        appearances: (d.appearances ?? []).map((x) => ({
-          athlete: nm(a, x.athleteId),
-          club: nm(t, x.teamId),
-          started: x.started,
-          minutes: x.minutes,
-          goals: x.goals,
-          assists: x.assists,
-          cardsLabel: crd(x),
-        })),
-      })),
+      map(({ d, c, a, t }) => {
+        return {
+          kind: 'football' as const,
+          summary,
+          competition: nm(c, d.competitionId),
+          date: d.date,
+          round: d.round,
+          homeClub: nm(t, d.homeTeamId),
+          awayClub: nm(t, d.awayTeamId),
+          homeGoals: d.homeGoals,
+          awayGoals: d.awayGoals,
+          appearances: (d.appearances ?? []).map((x) => ({
+            athlete: nm(a, x.athleteId),
+            club: nm(t, x.teamId),
+            started: x.started,
+            minutes: x.minutes,
+            goals: x.goals,
+            assists: x.assists,
+            cardsLabel: crd(x),
+          })),
+        }
+      }),
     )
   }
 }

@@ -367,14 +367,12 @@ main .field-error {
 .review-meta {
   margin-bottom: var(--space-4);
 }
-
 .review-meta :is(th, td):first-child {
   width: 8rem;
   font-weight: 600;
   background: var(--color-canvas);
 }
-
-.review-actions {
+p.review-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);

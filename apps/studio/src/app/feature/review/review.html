@@ -25,64 +25,10 @@
     } @else if (detail(); as row) {
     <table class="matches-table review-meta">
       <tbody>
+        @for (m of metaRows(); track m.k) {
         <tr>
-          <th scope="row">Label</th>
-          <td>{{ row.summary.label }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Sport</th>
-          <td>{{ row.summary.sport }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Status</th>
-          <td>{{ status() }}</td>
-        </tr>
-        @if (row.kind === 'tennis') {
-        <tr>
-          <th scope="row">Competition</th>
-          <td>{{ row.competition }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Date</th>
-          <td>{{ row.date }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Round</th>
-          <td>{{ row.round }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Players</th>
-          <td>{{ row.playerA }} vs {{ row.playerB }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Winner</th>
-          <td>{{ row.winner }}</td>
-        </tr>
-        @if (row.retired) {
-        <tr>
-          <th scope="row">Outcome</th>
-          <td>Retirement</td>
-        </tr>
-        } } @else {
-        <tr>
-          <th scope="row">Competition</th>
-          <td>{{ row.competition }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Date</th>
-          <td>{{ row.date }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Round</th>
-          <td>{{ row.round }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Clubs</th>
-          <td>{{ row.homeClub }} vs {{ row.awayClub }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Score</th>
-          <td>{{ row.homeGoals }} - {{ row.awayGoals }}</td>
+          <th scope="row">{{ m.k }}</th>
+          <td>{{ m.v }}</td>
         </tr>
         }
       </tbody>
