@@ -1,5 +1,5 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
-import { TestBed } from '@angular/core/testing'
+import { TestBed, type ComponentFixture } from '@angular/core/testing'
 import { Router } from '@angular/router'
 import { expect } from 'vite-plus/test'
 import { App } from './app'
@@ -47,7 +47,7 @@ function settle(http: HttpTestingController): void {
 
 async function boot(
   token: string | null,
-): Promise<{ router: Router; http: HttpTestingController }> {
+): Promise<{ router: Router; http: HttpTestingController; fixture: ComponentFixture<App> }> {
   await TestBed.configureTestingModule({
     imports: [App],
     providers: [
@@ -60,7 +60,7 @@ async function boot(
   const router = TestBed.inject(Router)
   const http = TestBed.inject(HttpTestingController)
   fixture.detectChanges()
-  return { router, http }
+  return { router, http, fixture }
 }
 
 describe('studioRoutes', () => {
@@ -69,12 +69,26 @@ describe('studioRoutes', () => {
   })
 
   it('keeps each editor path on that feature', async () => {
-    const { router, http } = await boot(editorToken())
+    const { router, http, fixture } = await boot(editorToken())
     for (const path of editorPaths) {
       await router.navigateByUrl(path)
       settle(http)
+      fixture.detectChanges()
+      await fixture.whenStable()
       expect(router.url).toBe(path)
     }
+  })
+
+  it('renders the home shell at / for a signed-in editor', async () => {
+    const { router, http, fixture } = await boot(editorToken())
+    await router.navigateByUrl('/')
+    settle(http)
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(router.url).toBe('/')
+    const root = fixture.nativeElement as HTMLElement
+    expect(root.textContent).toContain('Home')
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Home')
   })
 
   it('opens login for a guest', async () => {
@@ -88,15 +102,21 @@ describe('studioRoutes', () => {
   })
 
   it('sends an unknown path home for an editor', async () => {
-    const { router, http } = await boot(editorToken())
+    const { router, http, fixture } = await boot(editorToken())
     await router.navigateByUrl('/missing')
     settle(http)
+    fixture.detectChanges()
+    await fixture.whenStable()
     expect(router.url).toBe('/')
     await router.navigateByUrl('/matches')
     http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    fixture.detectChanges()
+    await fixture.whenStable()
     expect(document.querySelector('a[href="/admin/competitions"]')).toBeNull()
     await router.navigateByUrl('/admin/competitions')
     settle(http)
-    expect(router.url).toBe('/')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(router.url).toBe('/?admin=1')
   })
 })

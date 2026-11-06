@@ -6,6 +6,7 @@ import { provideRouter, Router } from '@angular/router'
 import { expect } from 'vite-plus/test'
 import { adminGuard, authInterceptor, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { adminImportPath, adminImportRunsPath, type ImportRun } from '../../core/import-admin-api'
+import { formatImportLogIsoForDisplay } from './import-admin-format'
 import { ImportAdminPage } from './import-admin'
 
 @Component({ selector: 'home-probe', template: 'home-page' })
@@ -89,7 +90,10 @@ describe('ImportAdminPage', () => {
   })
 
   it('lists run counts and the error string from the stubbed API', () => {
-    expect(root.textContent).toContain('2026-01-16T11:00:00.000Z')
+    const startedDisplay = formatImportLogIsoForDisplay(failedRun.startedAt)
+    expect(root.textContent).toContain(startedDisplay)
+    expect(root.textContent).not.toContain('2026-01-16T11:00:00.000Z')
+    expect(root.querySelector('time')?.getAttribute('datetime')).toBe('2026-01-16T11:00:00.000Z')
     expect(root.textContent).toContain('0')
     expect(root.textContent).toContain('1')
     expect(root.textContent).toContain('Invalid score on fixture row 3')
@@ -105,7 +109,16 @@ describe('ImportAdminPage', () => {
     run.flush(seededRun)
     http.expectOne(adminImportRunsPath).flush([seededRun, failedRun])
     await fixture.whenStable()
-    expect(root.textContent).toContain('2026-01-15T10:00:00.000Z')
+    const times = [...root.querySelectorAll('time')]
+    expect(times.map((node) => node.getAttribute('datetime'))).toEqual([
+      '2026-01-15T10:00:00.000Z',
+      '2026-01-16T11:00:00.000Z',
+    ])
+    expect(times.map((node) => node.textContent?.trim())).toEqual([
+      formatImportLogIsoForDisplay('2026-01-15T10:00:00.000Z'),
+      formatImportLogIsoForDisplay('2026-01-16T11:00:00.000Z'),
+    ])
+    expect(root.textContent).not.toContain('2026-01-15T10:00:00.000Z')
     expect(root.textContent).toContain('2')
   })
 })
@@ -136,7 +149,7 @@ describe('ImportAdminPage access', () => {
     TestBed.inject(TOKEN_STORE).write(bearer('editor', Math.floor(Date.now() / 1000) + 3600))
     const router = TestBed.inject(Router)
     await router.navigateByUrl('/admin/import')
-    expect(router.url).toBe('/')
+    expect(router.url).toBe('/?admin=1')
   })
 
   it('sends a guest to login', async () => {

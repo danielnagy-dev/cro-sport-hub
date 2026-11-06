@@ -3,12 +3,12 @@ import type { Routes } from '@angular/router'
 export const studioRoutes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./feature/admin/admin.routes').then((module) => module.adminRoutes),
+    loadChildren: () =>
+      import('./feature/editor/editor.routes').then((module) => module.editorRoutes),
   },
   {
     path: '',
-    loadChildren: () =>
-      import('./feature/editor/editor.routes').then((module) => module.editorRoutes),
+    loadChildren: () => import('./feature/admin/admin.routes').then((module) => module.adminRoutes),
   },
   {
     path: '',

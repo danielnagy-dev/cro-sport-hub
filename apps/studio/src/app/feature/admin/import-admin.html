@@ -49,7 +49,9 @@
       <tbody>
         @for (row of rows(); track row.id) {
         <tr>
-          <td>{{ row.startedAt }}</td>
+          <td>
+            <time [attr.datetime]="row.startedAt">{{ importLogDisplayTime(row.startedAt) }}</time>
+          </td>
           <td>{{ row.createdCount }}</td>
           <td>{{ row.updatedCount }}</td>
           <td>{{ row.skippedCount }}</td>
