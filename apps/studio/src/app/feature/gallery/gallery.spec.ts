@@ -12,6 +12,7 @@ import {
   galleryPublishPath,
   galleryRejectPath,
   gallerySlidePath,
+  gallerySubmitPath,
 } from '../../core/gallery-api'
 import { editorMatchesPath } from '../../core/matches-api'
 import { GalleryNewPage } from './gallery-new'
@@ -130,6 +131,7 @@ describe('gallery composer', () => {
     await fixture.whenStable()
     fixture.detectChanges()
     const root = fixture.nativeElement as HTMLElement
+    expect(root.textContent).toContain('Submit for review')
     expect(root.textContent).not.toContain('Reject')
     expect(root.textContent).not.toContain('Download')
     const caption = root.querySelector('#caption-0')
@@ -242,8 +244,42 @@ describe('GalleryPage review and download', () => {
   it('hides admin actions on a draft gallery', async () => {
     await open('admin', galleryView)
     expect(root.textContent).toContain('draft')
+    expect(root.textContent).toContain('Submit for review')
     expect(root.textContent).not.toContain('Reject')
     expect(root.textContent).not.toContain('Publish')
+  })
+
+  it('submits a draft for review and hides the submit button', async () => {
+    await open('editor', galleryView)
+    expect(root.textContent).toContain('Submit for review')
+    clickButton(root, 'Submit for review')
+    const submit = http.expectOne(gallerySubmitPath(galleryId))
+    expect(submit.request.method).toBe('POST')
+    submit.flush({ id: galleryId, status: 'review' })
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain('review')
+    expect(root.textContent).not.toContain('Submit for review')
+  })
+
+  it('shows 409 conflict message from submit', async () => {
+    await open('editor', galleryView)
+    clickButton(root, 'Submit for review')
+    const submit = http.expectOne(gallerySubmitPath(galleryId))
+    submit.flush(
+      { message: 'Only a draft gallery can be submitted' },
+      { status: 409, statusText: 'Conflict' },
+    )
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain('Only a draft gallery can be submitted')
+  })
+
+  it('hides Submit for review when status is review or published', async () => {
+    await open('editor', reviewGallery)
+    expect(root.textContent).not.toContain('Submit for review')
+    await open('editor', publishedGallery)
+    expect(root.textContent).not.toContain('Submit for review')
   })
 
   it('publishes a review gallery and downloads with a bearer token', async () => {
