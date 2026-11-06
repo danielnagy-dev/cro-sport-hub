@@ -36,6 +36,13 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
       } @else if (gallery(); as gallery) {
         <h2>Gallery {{ gallery.id }}</h2>
         <p role="status">Status: {{ gallery.status }}</p>
+        @if (showSubmitForReview()) {
+          <div>
+            <button type="button" [disabled]="actionPending()" (click)="onSubmitForReview()">
+              Submit for review
+            </button>
+          </div>
+        }
         @if (showAdminActions()) {
           <div>
             <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>
@@ -104,6 +111,8 @@ export class GalleryPage implements OnDestroy {
     const session = this.auth.session()
     return session?.role === 'admin' && this.gallery()?.status === 'review'
   })
+
+  protected readonly showSubmitForReview = computed(() => this.gallery()?.status === 'draft')
 
   protected readonly showDownload = computed(() => this.gallery()?.status === 'published')
 
@@ -183,6 +192,20 @@ export class GalleryPage implements OnDestroy {
     return this.previewUrls()[index]
   }
 
+  protected onSubmitForReview(): void {
+    if (!this.showSubmitForReview() || this.actionPending()) return
+    this.actionError.set(undefined)
+    this.actionPending.set(true)
+    this.pending?.unsubscribe()
+    this.pending = this.api.submitGallery(this.galleryId).subscribe({
+      next: (saved) => {
+        this.patchGalleryStatus(saved.status)
+        this.actionPending.set(false)
+      },
+      error: (error: unknown) => this.onActionError(error, 'submit'),
+    })
+  }
+
   protected onReject(): void {
     if (!this.showAdminActions() || this.actionPending()) return
     this.actionError.set(undefined)
@@ -239,21 +262,45 @@ export class GalleryPage implements OnDestroy {
     this.gallery.set({ ...current, status })
   }
 
-  private onActionError(error: unknown, kind: 'reject' | 'publish'): void {
+  private onActionError(error: unknown, kind: 'submit' | 'reject' | 'publish'): void {
     this.actionPending.set(false)
     if (error instanceof HttpErrorResponse && error.status === 409) {
-      const fallback =
-        kind === 'publish'
-          ? 'Only a gallery in review can be published'
-          : 'Only a gallery in review can be rejected'
+      let fallback: string
+      switch (kind) {
+        case 'submit':
+          fallback = 'Only a draft gallery can be submitted'
+          break
+        case 'publish':
+          fallback = 'Only a gallery in review can be published'
+          break
+        case 'reject':
+          fallback = 'Only a gallery in review can be rejected'
+          break
+        default: {
+          const exhaustive: never = kind
+          throw exhaustive
+        }
+      }
       this.actionError.set(readConflictMessage(error, fallback))
       return
     }
-    this.actionError.set(
-      kind === 'publish'
-        ? 'The gallery could not be published.'
-        : 'The gallery could not be rejected.',
-    )
+    let message: string
+    switch (kind) {
+      case 'submit':
+        message = 'The gallery could not be submitted for review.'
+        break
+      case 'publish':
+        message = 'The gallery could not be published.'
+        break
+      case 'reject':
+        message = 'The gallery could not be rejected.'
+        break
+      default: {
+        const exhaustive: never = kind
+        throw exhaustive
+      }
+    }
+    this.actionError.set(message)
   }
 
   private revokePreview(index: number): void {
