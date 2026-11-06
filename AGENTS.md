@@ -16,6 +16,8 @@ Run `vp` from the repository root. Library declaration emit uses the catalog com
 
 Run these from the repository root, after `pnpm install`. When `vp` or `vpx` is not on `PATH`, prefix the command with `pnpm exec`. CI (`.github/workflows/ci.yml`, job `ci`) runs `format-check`, `lint`, `typecheck`, `test`, and `build` in that order, plus `tools/guards/pr-size.ts` on pull requests. Which of those a docs-only change skips: `.cursor/skills/develop/SKILL.md`.
 
+Cloud Agent environments that use `.cursor/environment.json` run `bash .cursor/install-cloud-agent.sh` on `install`. That aligns the default `node` with `.node-version` (nvm when the base image is older), runs `pnpm install --frozen-lockfile`, and runs `pnpm exec playwright install chromium --with-deps`. Login shells prepend `/usr/local/bin` to `PATH` so `pnpm exec vp` matches `verify:doctor` (see `.cursor/skills/verify/SKILL.md`).
+
 - `vp fmt` and `vp run format-check` — oxfmt, root `fmt` in `vite.config.ts`. Style: `CODING_STANDARDS.md`.
 - `vp run lint` — Oxlint, then `tools/guards/check.ts` and `tools/guards/file-size.ts`. `vp run guards` is those guards with the cache off.
 - One package's tests: `vp run <dir>#test`. `<dir>` is the package directory: `api`, `studio`, `web`, `ui`, `shared-types`, `slide-generator`. The task is in that package's `vite.config.ts`.
