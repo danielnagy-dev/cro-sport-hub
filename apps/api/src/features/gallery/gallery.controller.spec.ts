@@ -148,7 +148,7 @@ describe('gallery routes', () => {
       headers: { authorization: auth },
     })
     const gallery = await read.json()
-    expect(gallery.slides).toHaveLength(1)
+    expect(gallery.slides).toHaveLength(2)
     expect(gallery.slides[0].caption).toBe('')
     expect(JSON.stringify(gallery.slides[0].stats)).not.toContain('"number"')
     const patch = (body: unknown) =>
@@ -197,7 +197,7 @@ describe('gallery routes', () => {
     )
     const rendered = await fetch(renderUrl, { method: 'POST', headers: { authorization: auth } })
     expect(rendered.status).toBe(201)
-    expect(await rendered.json()).toEqual({ slideCount: 1 })
+    expect(await rendered.json()).toEqual({ slideCount: 2 })
     expect(JSON.stringify(renderedSlides)).toContain('Sample night')
     const png = await fetch(pngUrl, { headers: { authorization: auth } })
     expect(png.status).toBe(200)
@@ -336,14 +336,6 @@ describe('gallery routes', () => {
       await rows.select().from(schema.gallerySlides).where(eq(schema.gallerySlides.galleryId, id))
     )[0]
     if (firstSlide === undefined) throw new Error('Expected a gallery slide row')
-    await rows.insert(schema.gallerySlides).values({
-      galleryId: id,
-      slideIndex: 1,
-      matchId: firstSlide.matchId,
-      caption: null,
-      payload: firstSlide.payload,
-      png: null,
-    })
     await rows
       .update(schema.gallerySlides)
       .set({ png: Buffer.from(pngHeader) })
