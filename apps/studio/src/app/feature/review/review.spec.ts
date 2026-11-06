@@ -21,11 +21,11 @@ import { matchPublishPath, matchRejectPath } from '../../core/review-api'
 import { editorTennisDraftPath } from '../../core/tennis-api'
 import { ReviewPage } from './review'
 
-const QF = 'match-sample-qf'
-const FBL = 'match-sample-league'
+const quarterfinal = 'match-sample-qf'
+const league = 'match-sample-league'
 
 const listRow: EditorMatch = {
-  id: QF,
+  id: quarterfinal,
   sport: 'tennis',
   competition: 'Sample Cup',
   date: '2026-10-16',
@@ -36,7 +36,7 @@ const listRow: EditorMatch = {
 }
 
 const tennisDraft: EditorTennisDraft = {
-  id: QF,
+  id: quarterfinal,
   competitionId: 'comp-sample-cup',
   date: '2026-10-16',
   round: 'QF',
@@ -54,7 +54,7 @@ const tennisDraft: EditorTennisDraft = {
 const draftTennis: EditorTennisDraft = { ...tennisDraft, status: 'draft' }
 
 const footballDraft: EditorFootballDraft = {
-  id: FBL,
+  id: league,
   competitionId: 'cf',
   date: '2026-10-17',
   round: 'MD1',
@@ -68,69 +68,70 @@ const footballDraft: EditorFootballDraft = {
       teamId: 'h',
       started: true,
       minutes: 90,
-      goals: 1,
+      goals: 0,
       assists: 0,
-      yellowCards: 1,
+      yellowCards: 0,
       redCard: false,
     },
   ],
   status: 'review',
 }
 
-const pg = (items: readonly EditorMatch[]): EditorMatchPage => ({
-  items: [...items],
-  limit: 20,
-  offset: 0,
-  total: items.length,
-})
+function page(items: readonly EditorMatch[]): EditorMatchPage {
+  return { items: [...items], limit: 20, offset: 0, total: items.length }
+}
 
-function mem(): TokenStore {
-  let v: string | null = null
+function memoryStore(): TokenStore {
+  let value: string | null = null
   return {
-    read: () => v,
-    write: (t) => {
-      v = t
+    read: () => value,
+    write: (token) => {
+      value = token
     },
     clear: () => {
-      v = null
+      value = null
     },
   }
 }
 
-const jwt = (role: 'editor' | 'admin') => {
-  const p = btoa(
-    JSON.stringify({ sub: `${role}-demo`, role, exp: Math.floor(Date.now() / 1000) + 3600 }),
-  )
+function bearer(role: 'editor' | 'admin', exp: number): string {
+  const payload = btoa(JSON.stringify({ sub: `${role}-demo`, role, exp }))
     .replaceAll('+', '-')
     .replaceAll('/', '_')
     .replaceAll('=', '')
-  return `ey.${p}.s`
+  return `eyJhbGciOiJIUzI1NiJ9.${payload}.sig`
 }
 
-function btn(r: HTMLElement, lab: string): void {
-  const b = [...r.querySelectorAll('button')].find((n) => n.textContent?.includes(lab))
-  if (b === undefined) throw new Error(lab)
-  b.click()
+function clickButton(root: HTMLElement, label: string): void {
+  const button = [...root.querySelectorAll('button')].find((node) =>
+    node.textContent?.includes(label),
+  )
+  if (button === undefined) throw new Error(`missing ${label}`)
+  button.click()
 }
 
-function ft(h: HttpTestingController, id: string, d: EditorTennisDraft): void {
-  h.expectOne(editorMatchesPath).flush(pg([{ ...listRow, id, sport: 'tennis', status: d.status }]))
-  h.expectNone((q) => q.method === 'GET' && q.url.includes('/matches/football/'))
-  h.expectOne(editorTennisDraftPath(id)).flush(d)
-  h.expectOne((q) => q.url === editorCompetitionsPath && q.params.get('sport') === 'tennis').flush([
-    { id: d.competitionId, name: 'Cup', season: '2026' },
-  ])
-  h.expectOne((q) => q.url === editorAthletesPath && q.params.get('sport') === 'tennis').flush([
-    { id: d.playerAId, name: 'Aname' },
-    { id: d.playerBId, name: 'Bname' },
-  ])
+function flushLoad(http: HttpTestingController, id: string, draft: EditorTennisDraft): void {
+  http
+    .expectOne(editorMatchesPath)
+    .flush(page([{ ...listRow, id, sport: 'tennis', status: draft.status }]))
+  http.expectNone((q) => q.method === 'GET' && q.url.includes('/matches/football/'))
+  http.expectOne(editorTennisDraftPath(id)).flush(draft)
+  http
+    .expectOne((q) => q.url === editorCompetitionsPath && q.params.get('sport') === 'tennis')
+    .flush([{ id: draft.competitionId, name: 'Sample Cup', season: '2026' }])
+  http
+    .expectOne((q) => q.url === editorAthletesPath && q.params.get('sport') === 'tennis')
+    .flush([
+      { id: draft.playerAId, name: 'Sample Player C' },
+      { id: draft.playerBId, name: 'Sample Player D' },
+    ])
 }
 
-function ff(h: HttpTestingController): void {
-  h.expectOne(editorMatchesPath).flush(
-    pg([
+function flushFootball(http: HttpTestingController): void {
+  http.expectOne(editorMatchesPath).flush(
+    page([
       {
-        id: FBL,
+        id: league,
         sport: 'football',
         competition: 'L',
         date: '2026-10-17',
@@ -141,23 +142,23 @@ function ff(h: HttpTestingController): void {
       },
     ]),
   )
-  h.expectNone((q) => q.method === 'GET' && q.url.includes('/matches/tennis/'))
-  h.expectOne(editorFootballDraftPath(FBL)).flush(footballDraft)
-  h.expectOne(
-    (q) => q.url === editorCompetitionsPath && q.params.get('sport') === 'football',
-  ).flush([{ id: 'cf', name: 'League', season: '2026' }])
-  h.expectOne((q) => q.url === editorAthletesPath && q.params.get('sport') === 'football').flush([
-    { id: 'x', name: 'P1' },
-  ])
-  h.expectOne(editorTeamsPath).flush([
+  http.expectNone((q) => q.method === 'GET' && q.url.includes('/matches/tennis/'))
+  http.expectOne(editorFootballDraftPath(league)).flush(footballDraft)
+  http
+    .expectOne((q) => q.url === editorCompetitionsPath && q.params.get('sport') === 'football')
+    .flush([{ id: 'cf', name: 'League', season: '2026' }])
+  http
+    .expectOne((q) => q.url === editorAthletesPath && q.params.get('sport') === 'football')
+    .flush([{ id: 'x', name: 'P1' }])
+  http.expectOne(editorTeamsPath).flush([
     { id: 'h', name: 'Home' },
     { id: 'a', name: 'Away' },
   ])
 }
 
 describe('ReviewPage', () => {
-  let fx: ComponentFixture<ReviewPage>
-  let h: HttpTestingController
+  let fixture: ComponentFixture<ReviewPage>
+  let http: HttpTestingController
   let root: HTMLElement
 
   beforeEach(async () => {
@@ -170,14 +171,16 @@ describe('ReviewPage', () => {
         ]),
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: (k: string) => (k === 'id' ? QF : null) } } },
+          useValue: {
+            snapshot: { paramMap: { get: (key: string) => (key === 'id' ? quarterfinal : null) } },
+          },
         },
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
-        { provide: TOKEN_STORE, useValue: mem() },
+        { provide: TOKEN_STORE, useValue: memoryStore() },
       ],
     }).compileComponents()
-    h = TestBed.inject(HttpTestingController)
+    http = TestBed.inject(HttpTestingController)
   })
 
   afterEach(() => {
@@ -185,54 +188,20 @@ describe('ReviewPage', () => {
     TestBed.resetTestingModule()
   })
 
-  async function open(role: 'editor' | 'admin', d: EditorTennisDraft = tennisDraft): Promise<void> {
-    TestBed.inject(TOKEN_STORE).write(jwt(role))
-    fx = TestBed.createComponent(ReviewPage)
-    fx.detectChanges()
-    ft(h, QF, d)
-    await fx.whenStable()
-    fx.detectChanges()
-    root = fx.nativeElement as HTMLElement
+  async function open(
+    role: 'editor' | 'admin',
+    draft: EditorTennisDraft = tennisDraft,
+  ): Promise<void> {
+    TestBed.inject(TOKEN_STORE).write(bearer(role, Math.floor(Date.now() / 1000) + 3600))
+    fixture = TestBed.createComponent(ReviewPage)
+    fixture.detectChanges()
+    flushLoad(http, quarterfinal, draft)
+    await fixture.whenStable()
+    fixture.detectChanges()
+    root = fixture.nativeElement as HTMLElement
   }
 
-  it('editor sees tennis detail', async () => {
-    await open('editor')
-    expect(root.textContent).toContain(listRow.label)
-    expect(root.textContent).toContain('Set 1')
-    expect(root.textContent).toContain('tiebreak 5')
-    expect(root.textContent).toContain('Winner')
-    expect(root.textContent).toContain('Edit tennis match')
-    expect(root.textContent).not.toContain('Reject')
-  })
-
-  it('football order', async () => {
-    TestBed.resetTestingModule()
-    await TestBed.configureTestingModule({
-      imports: [ReviewPage],
-      providers: [
-        provideRouter([
-          { path: 'matches/:id/review', component: ReviewPage, canActivate: [editorGuard] },
-          { path: 'matches/:id/football', component: class {} },
-        ]),
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: (k: string) => (k === 'id' ? FBL : null) } } },
-        },
-        provideHttpClient(withInterceptors([authInterceptor])),
-        provideHttpClientTesting(),
-        { provide: TOKEN_STORE, useValue: mem() },
-      ],
-    }).compileComponents()
-    h = TestBed.inject(HttpTestingController)
-    TestBed.inject(TOKEN_STORE).write(jwt('editor'))
-    fx = TestBed.createComponent(ReviewPage)
-    fx.detectChanges()
-    ff(h)
-    await fx.whenStable()
-    expect((fx.nativeElement as HTMLElement).textContent).toContain('Home')
-  })
-
-  it('404', async () => {
+  it('shows Match not found for an unknown id', async () => {
     TestBed.resetTestingModule()
     await TestBed.configureTestingModule({
       imports: [ReviewPage],
@@ -244,40 +213,92 @@ describe('ReviewPage', () => {
         },
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
-        { provide: TOKEN_STORE, useValue: mem() },
+        { provide: TOKEN_STORE, useValue: memoryStore() },
       ],
     }).compileComponents()
-    TestBed.inject(TOKEN_STORE).write(jwt('editor'))
-    fx = TestBed.createComponent(ReviewPage)
-    fx.detectChanges()
-    TestBed.inject(HttpTestingController).expectOne(editorMatchesPath).flush(pg([]))
-    await fx.whenStable()
-    expect((fx.nativeElement as HTMLElement).textContent).toContain('Match not found')
+    TestBed.inject(TOKEN_STORE).write(bearer('editor', Math.floor(Date.now() / 1000) + 3600))
+    fixture = TestBed.createComponent(ReviewPage)
+    fixture.detectChanges()
+    const missingHttp = TestBed.inject(HttpTestingController)
+    missingHttp.expectOne(editorMatchesPath).flush(page([]))
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Match not found')
   })
 
-  it('admin flows', async () => {
-    await open('admin', draftTennis)
+  it('hides Reject and Publish for an editor but keeps Edit', async () => {
+    await open('editor')
+    expect(root.textContent).toContain(listRow.label)
+    expect(root.textContent).toContain('Set 1')
+    expect(root.textContent).toContain('tiebreak 5')
+    expect(root.textContent).toContain('Winner')
+    expect(root.textContent).toContain('Edit tennis match')
     expect(root.textContent).not.toContain('Reject')
+    expect(root.textContent).not.toContain('Publish')
+  })
+
+  it('loads football after list without tennis draft', async () => {
+    TestBed.resetTestingModule()
+    await TestBed.configureTestingModule({
+      imports: [ReviewPage],
+      providers: [
+        provideRouter([
+          { path: 'matches/:id/review', component: ReviewPage, canActivate: [editorGuard] },
+          { path: 'matches/:id/football', component: class {} },
+        ]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: { get: (key: string) => (key === 'id' ? league : null) } },
+          },
+        },
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: TOKEN_STORE, useValue: memoryStore() },
+      ],
+    }).compileComponents()
+    http = TestBed.inject(HttpTestingController)
+    TestBed.inject(TOKEN_STORE).write(bearer('editor', Math.floor(Date.now() / 1000) + 3600))
+    fixture = TestBed.createComponent(ReviewPage)
+    fixture.detectChanges()
+    flushFootball(http)
+    await fixture.whenStable()
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Home')
+  })
+
+  it('hides admin actions when the row is not in review', async () => {
+    await open('admin', draftTennis)
+    expect(root.textContent).toContain('draft')
+    expect(root.textContent).not.toContain('Reject')
+    expect(root.textContent).not.toContain('Publish')
+  })
+
+  it('reject and publish for admin', async () => {
     await open('admin')
-    btn(root, 'Reject')
-    h.expectOne(matchRejectPath(QF)).flush({ id: QF, status: 'draft' })
-    await fx.whenStable()
-    fx.detectChanges()
+    clickButton(root, 'Reject')
+    http.expectOne(matchRejectPath(quarterfinal)).flush({ id: quarterfinal, status: 'draft' })
+    await fixture.whenStable()
+    fixture.detectChanges()
     expect(root.textContent).toContain('draft')
     await open('admin')
-    btn(root, 'Publish')
-    h.expectOne(matchPublishPath(QF)).flush({ id: QF, status: 'published' })
-    await fx.whenStable()
-    fx.detectChanges()
+    clickButton(root, 'Publish')
+    http.expectOne(matchPublishPath(quarterfinal)).flush({ id: quarterfinal, status: 'published' })
+    await fixture.whenStable()
+    fixture.detectChanges()
     expect(root.textContent).toContain('published')
+  })
+
+  it('shows a 409 message from publish', async () => {
     await open('admin')
-    btn(root, 'Publish')
-    h.expectOne(matchPublishPath(QF)).flush(
-      { message: 'Only a match in review can be published' },
-      { status: 409, statusText: 'Conflict' },
-    )
-    await fx.whenStable()
-    fx.detectChanges()
+    clickButton(root, 'Publish')
+    http
+      .expectOne(matchPublishPath(quarterfinal))
+      .flush(
+        { message: 'Only a match in review can be published' },
+        { status: 409, statusText: 'Conflict' },
+      )
+    await fixture.whenStable()
+    fixture.detectChanges()
     expect(root.textContent).toContain('Only a match in review can be published')
   })
 })
