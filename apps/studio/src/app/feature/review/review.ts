@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router'
 import type { Status } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
-import { ReviewApi, type ReviewMatchSummary } from '../../core/review-api'
+import { ReviewApi, type ReviewMatchDetail } from '../../core/review-api'
 
 type LoadStatus = 'loading' | 'ready' | 'not-found' | 'error'
 
@@ -30,7 +30,7 @@ export class ReviewPage {
 
   protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
-  protected readonly summary = signal<ReviewMatchSummary | null>(null)
+  protected readonly detail = signal<ReviewMatchDetail | null>(null)
   protected readonly status = signal<Status | undefined>(undefined)
   protected readonly actionError = signal<string | undefined>(undefined)
   protected readonly actionPending = signal(false)
@@ -45,10 +45,10 @@ export class ReviewPage {
       this.loadStatus.set('not-found')
       return
     }
-    this.pending = this.api.loadSummary(this.matchId).subscribe({
+    this.pending = this.api.loadMatchForReview(this.matchId).subscribe({
       next: (row) => {
-        this.summary.set(row)
-        this.status.set(row.status)
+        this.detail.set(row)
+        this.status.set(row.summary.status)
         this.loadStatus.set('ready')
       },
       error: (error: unknown) => {
@@ -71,6 +71,11 @@ export class ReviewPage {
     this.pending = this.api.rejectMatch(this.matchId).subscribe({
       next: (saved) => {
         this.status.set(saved.status)
+        this.detail.update((current) =>
+          current === null
+            ? current
+            : { ...current, summary: { ...current.summary, status: saved.status } },
+        )
         this.actionPending.set(false)
       },
       error: (error: unknown) => this.onActionError(error, 'reject'),
@@ -85,6 +90,11 @@ export class ReviewPage {
     this.pending = this.api.publishMatch(this.matchId).subscribe({
       next: (saved) => {
         this.status.set(saved.status)
+        this.detail.update((current) =>
+          current === null
+            ? current
+            : { ...current, summary: { ...current.summary, status: saved.status } },
+        )
         this.actionPending.set(false)
       },
       error: (error: unknown) => this.onActionError(error, 'publish'),
