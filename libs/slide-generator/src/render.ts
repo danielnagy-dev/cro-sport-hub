@@ -37,7 +37,8 @@ function fontUrl(file: string): string {
   return url
 }
 
-function withFonts(html: string): string {
+/** Embed bundled TTFs as data URLs so `page.setContent` HTML matches PNG render. Exposed for layout tests. */
+export function embedFontsInFootballHtml(html: string): string {
   return html
     .replace("url('../fonts/BigShouldersDisplay.ttf')", fontUrl('BigShouldersDisplay.ttf'))
     .replace("url('../fonts/Archivo.ttf')", fontUrl('Archivo.ttf'))
@@ -59,7 +60,7 @@ export async function renderFootballPngs(
     })
     const pngs: Uint8Array[] = []
     for (const slide of slides) {
-      await page.setContent(withFonts(footballTemplate(slide, options).html), {
+      await page.setContent(embedFontsInFootballHtml(footballTemplate(slide, options).html), {
         waitUntil: 'load',
       })
       const facesReady = await page.evaluate<boolean>(

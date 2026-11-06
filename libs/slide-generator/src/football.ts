@@ -100,7 +100,7 @@ export function footballTemplate(
 }
 
 function listZoom(count: number): number {
-  if (count > 6) throw new Error('A list slide holds at most 6 players')
+  if (count > 4) throw new Error('A list slide holds at most 4 players')
   if (count < 1) throw new Error('A list needs a player')
   if (count >= 4) return 1.15
   return count === 3 ? 1.3 : 1.5

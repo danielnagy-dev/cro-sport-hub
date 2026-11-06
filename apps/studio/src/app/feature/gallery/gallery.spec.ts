@@ -38,7 +38,10 @@ const galleryId = 'gallery-demo'
 const galleryView: GalleryView = {
   id: galleryId,
   status: 'draft',
-  slides: [{ index: 0, matchId: 'match-sample-league', caption: '', stats: [] }],
+  slides: [
+    { index: 0, matchId: 'match-sample-league', caption: '', stats: [] },
+    { index: 1, matchId: 'match-sample-league', caption: '', stats: [] },
+  ],
 }
 const reviewGallery: GalleryView = { ...galleryView, status: 'review' }
 const publishedGallery: GalleryView = { ...galleryView, status: 'published' }
@@ -121,7 +124,7 @@ describe('gallery composer', () => {
     newRoot
       .querySelector('form')
       ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    http.expectOne(galleriesPath).flush({ id: galleryId, slideIndexes: [0] })
+    http.expectOne(galleriesPath).flush({ id: galleryId, slideIndexes: [0, 1] })
     await newFixture.whenStable()
     expect(TestBed.inject(Router).url).toBe(`/galleries/${galleryId}`)
 
@@ -141,10 +144,13 @@ describe('gallery composer', () => {
     clickButton(root, 'Save caption')
     const patch = http.expectOne(gallerySlidePath(galleryId, 0))
     expect(patch.request.body).toEqual({ caption: 'Sample night' })
-    patch.flush({ ...galleryView, slides: [{ ...galleryView.slides[0], caption: 'Sample night' }] })
+    patch.flush({
+      ...galleryView,
+      slides: [{ ...galleryView.slides[0], caption: 'Sample night' }, { ...galleryView.slides[1] }],
+    })
     await fixture.whenStable()
     clickButton(root, 'Preview PNG')
-    http.expectOne(`${galleryPath(galleryId)}/render`).flush({ slideCount: 1 })
+    http.expectOne(`${galleryPath(galleryId)}/render`).flush({ slideCount: 2 })
     const png = http.expectOne(`${gallerySlidePath(galleryId, 0)}.png`)
     expect(png.request.headers.get('Authorization')).toMatch(/^Bearer /)
     png.flush(new Blob(['x'], { type: 'image/png' }))

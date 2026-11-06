@@ -52,13 +52,18 @@ export const leagueAppearances: readonly CatalogAppearance[] = [
   appearance('Bruno Perić', 'Sample Away', 'away', false, 0, 0, 0, 1, false, 'Forward'),
 ]
 
-test('five league appearances become one list slide without a shirt number or donut', () => {
+test('five league appearances split into four list rows then a one-row list slide', () => {
   const slides = footballSlides(catalogSlides(leagueAppearances))
-  expect(slides).toHaveLength(1)
-  const slide = slides[0]
-  expect(slide?.kind).toBe('list')
-  if (slide?.kind !== 'list') return
-  const doc = footballTemplate(slide)
+  expect(slides.map((slide) => slide.kind)).toEqual(['list', 'list'])
+  const listSlide = slides[0]
+  const tailSlide = slides[1]
+  expect(listSlide?.kind).toBe('list')
+  if (listSlide?.kind !== 'list') return
+  expect(listSlide.players).toHaveLength(4)
+  expect(tailSlide?.kind).toBe('list')
+  expect(tailSlide?.kind === 'list' ? tailSlide.players[0]?.name : '').toBe('Bruno Perić')
+  expect(tailSlide?.kind === 'list' ? tailSlide.players : []).toHaveLength(1)
+  const doc = footballTemplate(listSlide)
   expect(doc.html).not.toContain('class="ring"')
   expect(doc.html).not.toContain('stroke-dasharray')
   expect(doc.html).not.toMatch(/<span>#/)
@@ -70,6 +75,7 @@ test('five league appearances become one list slide without a shirt number or do
   expect(doc.html).toContain('Cards</span>')
   expect(doc.html).toContain('>None</span>')
   expect(doc.html).toContain('Forward</span>')
+  expect(doc.html).not.toContain('Perić')
 })
 
 test('Filip maps second yellow cards and a goals hero', () => {
@@ -84,6 +90,7 @@ test('Filip maps second yellow cards and a goals hero', () => {
   const doc = footballTemplate(list)
   expect(doc.html).toContain('Second yellow')
   expect(doc.heroes.map((hero) => hero.key)).toContain('goals')
+  expect(doc.html).toContain('Šarić')
 })
 
 test('Bruno maps no hero and a substitute lineup', () => {
@@ -93,11 +100,10 @@ test('Bruno maps no hero and a substitute lineup', () => {
   expect(entry?.player.hero).toBe('none')
   expect(entry?.player.lineup).toBe('sub')
   const slides = footballSlides(catalogSlides(leagueAppearances))
-  const list = slides[0]
-  if (list?.kind !== 'list') return
-  const brunoRow =
-    footballTemplate(list).html.split('Perić')[1]?.split('<div class="row">')[0] ?? ''
-  expect(brunoRow).not.toContain('kv hero')
+  const tail = slides[1]
+  if (tail?.kind !== 'list') return
+  expect(tail.players[0]?.name).toContain('Perić')
+  expect(footballTemplate(tail).html).not.toContain('kv hero')
 })
 
 test('catalog stats stay text-only', () => {

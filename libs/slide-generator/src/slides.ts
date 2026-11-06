@@ -1,7 +1,7 @@
 import type { FootballPerson, FootballSlide } from './football.ts'
 
-/** Round-13 hard limit. A list slide throws above this. */
-const LIST_LIMIT = 6
+/** Round-13 hard limit: four player rows stay above the footer at 1.15× list zoom (1080×1350). */
+const LIST_LIMIT = 4
 
 /**
  * One tracked appearance in a round. A round is the list heading:
@@ -42,8 +42,8 @@ function listSlide(rows: readonly FootballEntry[]): FootballSlide {
 }
 
 /**
- * A round of one appearance is a player slide. Two to six are one list.
- * A seventh starts another list. The leftover stays a list: it is the same
+ * A round of one appearance is a player slide. Two to four are one list.
+ * A fifth starts another list. The leftover stays a list: it is the same
  * round, not a featured player. There is no cover slide.
  */
 export function footballSlides(entries: readonly FootballEntry[]): FootballSlide[] {
