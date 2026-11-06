@@ -63,6 +63,7 @@ export class TennisScorePage {
   protected readonly saveError = signal<string | undefined>(undefined)
   protected readonly submitError = signal<string | undefined>(undefined)
   protected readonly savedId = signal<string | undefined>(undefined)
+  protected readonly draftSavedThisVisit = signal(false)
   protected readonly matchStatus = signal<MatchStatus | undefined>(undefined)
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
@@ -89,7 +90,7 @@ export class TennisScorePage {
   protected readonly tennisForm = form(this.model, (path) => {
     const locked = () => {
       if (this.isEditMode()) return this.matchStatus() !== 'draft'
-      return this.savedId() !== undefined
+      return this.draftSavedThisVisit()
     }
     const issueFor = (field: string) => this.draftIssues().find((entry) => entry.path[0] === field)
     const bindIssue = (fieldPath: typeof path.competitionId, field: string) => {
@@ -147,7 +148,6 @@ export class TennisScorePage {
     const matchId = this.editMatchId()
     if (matchId === undefined) return
     this.routeMatchId.set(matchId)
-    this.savedId.set(matchId)
     this.pageLoadState.set('loading')
     try {
       const draft = await firstValueFrom(this.tennis.loadEditorTennisDraft(matchId))
@@ -224,7 +224,8 @@ export class TennisScorePage {
   }
 
   protected onSubmitForReview(): void {
-    if (this.savedId() === undefined || this.matchStatus() !== 'draft') return
+    if (this.savedId() === undefined && this.routeMatchId() === undefined) return
+    if (this.matchStatus() !== 'draft') return
     void this.sendForReview()
   }
 
@@ -266,6 +267,7 @@ export class TennisScorePage {
             ? await firstValueFrom(this.tennis.updateTennisDraft(matchId, body))
             : await firstValueFrom(this.tennis.createTennisDraft(body))
           this.savedId.set(saved.id)
+          this.draftSavedThisVisit.set(true)
           this.matchStatus.set('draft')
           return undefined
         } catch {
@@ -278,7 +280,7 @@ export class TennisScorePage {
   }
 
   private async sendForReview(): Promise<void> {
-    const id = this.savedId()
+    const id = this.savedId() ?? this.routeMatchId()
     if (id === undefined || this.submittingForReview()) return
     this.submitError.set(undefined)
     this.submittingForReview.set(true)

@@ -74,6 +74,7 @@ export class FootballScorePage {
   protected readonly saveError = signal<string | undefined>(undefined)
   protected readonly submitError = signal<string | undefined>(undefined)
   protected readonly savedId = signal<string | undefined>(undefined)
+  protected readonly draftSavedThisVisit = signal(false)
   protected readonly matchStatus = signal<Status | undefined>(undefined)
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
@@ -86,7 +87,7 @@ export class FootballScorePage {
 
   protected readonly formLocked = computed(() => {
     if (this.isEditMode()) return this.matchStatus() !== 'draft'
-    return this.savedId() !== undefined
+    return this.draftSavedThisVisit()
   })
 
   protected readonly footballForm = form(this.model, (path) => {
@@ -133,7 +134,6 @@ export class FootballScorePage {
     const matchId = this.editMatchId()
     if (matchId === undefined) return
     this.routeMatchId.set(matchId)
-    this.savedId.set(matchId)
     this.pageLoadState.set('loading')
     try {
       const draft = await firstValueFrom(this.football.loadEditorFootballDraft(matchId))
@@ -242,7 +242,8 @@ export class FootballScorePage {
   }
 
   protected onSubmitForReview(): void {
-    if (this.savedId() === undefined || this.matchStatus() !== 'draft') return
+    if (this.savedId() === undefined && this.routeMatchId() === undefined) return
+    if (this.matchStatus() !== 'draft') return
     void this.sendForReview()
   }
 
@@ -279,6 +280,7 @@ export class FootballScorePage {
             ? await firstValueFrom(this.football.updateFootballDraft(matchId, body))
             : await firstValueFrom(this.football.createFootballDraft(body))
           this.savedId.set(saved.id)
+          this.draftSavedThisVisit.set(true)
           this.matchStatus.set('draft')
         } catch {
           this.saveError.set('The football match could not be saved.')
@@ -289,7 +291,7 @@ export class FootballScorePage {
   }
 
   private async sendForReview(): Promise<void> {
-    const id = this.savedId()
+    const id = this.savedId() ?? this.routeMatchId()
     if (id === undefined || this.submittingForReview()) return
     this.submitError.set(undefined)
     this.submittingForReview.set(true)

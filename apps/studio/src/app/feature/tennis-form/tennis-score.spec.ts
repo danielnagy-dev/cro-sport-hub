@@ -10,7 +10,11 @@ import type { AthleteLookup, CompetitionLookup } from '@cro-sport-hub/shared-typ
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { editorAthletesPath, editorCompetitionsPath } from '../../core/editor-lookups-api'
 import { matchSubmitPath } from '../../core/match-submit-api'
-import { tennisDraftsPath, tennisDraftUpdatePath } from '../../core/tennis-api'
+import {
+  editorTennisDraftPath,
+  tennisDraftsPath,
+  tennisDraftUpdatePath,
+} from '../../core/tennis-api'
 import type { TennisFormModel } from './draft-body'
 import { TennisScorePage } from './tennis-score'
 
@@ -181,7 +185,7 @@ describe('TennisScorePage', () => {
     await fixture.whenStable()
     fixture.detectChanges()
     await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(root.textContent).toContain('match-new-draft')
+    expect(root.textContent).toContain('Draft saved as match-new-draft')
     http.expectNone(tennisDraftsPath)
   })
 
@@ -287,9 +291,7 @@ describe('TennisScorePage edit', () => {
     http.expectOne(`${editorCompetitionsPath}?sport=tennis`).flush(competitions)
     http.expectOne(`${editorAthletesPath}?sport=tennis`).flush(athletes)
     await harness.fixture.whenStable()
-    const draftRequest = http.expectOne((req) =>
-      req.url.includes(`/api/editor/matches/tennis/${id}`),
-    )
+    const draftRequest = http.expectOne(editorTennisDraftPath(id))
     return { harness, http, root, draftRequest }
   }
 
@@ -314,6 +316,8 @@ describe('TennisScorePage edit', () => {
     await harness.fixture.whenStable()
     harness.detectChanges()
     expect(root.textContent).toContain('Edit tennis match')
+    expect(root.textContent).toContain('Status: draft')
+    expect(root.textContent).not.toContain('Draft saved as')
     const round = root.querySelector('#round')
     expect(round instanceof HTMLInputElement ? round.value : '').toBe('QF')
     clickSave(root)
@@ -324,6 +328,33 @@ describe('TennisScorePage edit', () => {
     expect(body['firstServePct']).toBeUndefined()
     request.flush({ id: 'match-sample-qf', status: 'draft', sport: 'tennis' })
     await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Draft saved as match-sample-qf')
+    http.verify()
+    TestBed.resetTestingModule()
+  })
+
+  it('shows published status when opening a published match and no draft saved message', async () => {
+    const { harness, http, root, draftRequest } = await bootEdit('match-sample-final')
+    draftRequest.flush({
+      id: 'match-sample-final',
+      competitionId: 'comp-sample-cup',
+      date: '2026-10-16',
+      round: 'Final',
+      playerAId: 'sample-player-a',
+      playerBId: 'sample-player-b',
+      winnerId: 'sample-player-a',
+      bestOf: 3,
+      score: [
+        [6, 3],
+        [6, 2],
+      ],
+      status: 'published',
+    })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Status: published')
+    expect(root.textContent).not.toContain('Draft saved as')
     http.verify()
     TestBed.resetTestingModule()
   })

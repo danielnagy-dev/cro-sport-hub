@@ -175,7 +175,7 @@ describe('FootballScorePage', () => {
     req.flush({ id: 'match-new-draft', status: 'draft', sport: 'football' })
     await fixture.whenStable()
     fixture.detectChanges()
-    expect(root.textContent).toContain('match-new-draft')
+    expect(root.textContent).toContain('Draft saved as match-new-draft')
   })
 
   it('shows readable appearance club message instead of raw schema text', async () => {
@@ -339,6 +339,8 @@ describe('FootballScorePage edit', () => {
     await harness.fixture.whenStable()
     harness.detectChanges()
     expect(root.textContent).toContain('Edit football match')
+    expect(root.textContent).toContain('Status: draft')
+    expect(root.textContent).not.toContain('Draft saved as')
     const round = root.querySelector('#round')
     expect(round instanceof HTMLInputElement ? round.value : '').toBe('Matchday 8')
     clickSave(root)
@@ -351,6 +353,28 @@ describe('FootballScorePage edit', () => {
     ])
     request.flush({ id: 'match-sample-league', status: 'draft', sport: 'football' })
     await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Draft saved as match-sample-league')
+  })
+
+  it('shows published status when opening a published match and no draft saved message', async () => {
+    const { harness, root, draftRequest } = await bootEdit('match-sample-final')
+    draftRequest.flush({
+      id: 'match-sample-final',
+      competitionId: 'comp-sample-league',
+      date: '2026-10-19',
+      round: 'Final',
+      homeTeamId: 'club-sample-home',
+      awayTeamId: 'club-sample-away',
+      homeGoals: 2,
+      awayGoals: 1,
+      appearances: [],
+      status: 'published',
+    })
+    await harness.fixture.whenStable()
+    harness.detectChanges()
+    expect(root.textContent).toContain('Status: published')
+    expect(root.textContent).not.toContain('Draft saved as')
   })
 
   it('shows Match not found for an unknown id', async () => {
