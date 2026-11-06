@@ -22,10 +22,10 @@ function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] 
       } @else if (loadStatus() === 'error') {
         <p role="alert">The match list could not be loaded.</p>
       } @else {
-        <form (submit)="onCreate($event)">
-          <fieldset>
+        <form class="tennis-form" (submit)="onCreate($event)">
+          <fieldset class="tennis-sets gallery-match-picker">
             <legend>Published football matches</legend>
-            <ul>
+            <ul class="gallery-match-list">
               @for (row of rows(); track row.id) {
                 <li>
                   <label>

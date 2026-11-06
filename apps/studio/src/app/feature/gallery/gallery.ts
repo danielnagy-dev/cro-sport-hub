@@ -35,27 +35,29 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
         <p role="alert">The gallery could not be loaded.</p>
       } @else if (gallery(); as gallery) {
         <h2>Gallery {{ gallery.id }}</h2>
-        <p role="status">Status: {{ gallery.status }}</p>
-        @if (showSubmitForReview()) {
-          <div>
-            <button type="button" [disabled]="actionPending()" (click)="onSubmitForReview()">
-              Submit for review
-            </button>
+        <div class="gallery-toolbar">
+          <p role="status" class="gallery-status">Status: {{ gallery.status }}</p>
+          <div class="gallery-toolbar-actions">
+            @if (showSubmitForReview()) {
+              <button type="button" [disabled]="actionPending()" (click)="onSubmitForReview()">
+                Submit for review
+              </button>
+            }
+            @if (showAdminActions()) {
+              <button type="button" [disabled]="actionPending()" (click)="onReject()">
+                Reject
+              </button>
+              <button type="button" [disabled]="actionPending()" (click)="onPublish()">
+                Publish
+              </button>
+            }
+            @if (showDownload()) {
+              <button type="button" [disabled]="downloadPending()" (click)="onDownload()">
+                Download
+              </button>
+            }
           </div>
-        }
-        @if (showAdminActions()) {
-          <div>
-            <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>
-            <button type="button" [disabled]="actionPending()" (click)="onPublish()">
-              Publish
-            </button>
-          </div>
-        }
-        @if (showDownload()) {
-          <button type="button" [disabled]="downloadPending()" (click)="onDownload()">
-            Download
-          </button>
-        }
+        </div>
         @if (actionError(); as message) {
           <p role="alert">{{ message }}</p>
         }
@@ -63,17 +65,21 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
           <p role="alert">{{ message }}</p>
         }
         @for (slide of gallery.slides; track slide.index) {
-          <section>
+          <section class="gallery-slide">
             <h3>Slide {{ slide.index + 1 }}</h3>
-            <label [for]="'caption-' + slide.index">Caption</label>
-            <input
-              [id]="'caption-' + slide.index"
-              type="text"
-              [value]="captionFor(slide.index)"
-              (input)="setCaption(slide.index, readInput($event))"
-            />
-            <button type="button" (click)="saveCaption(slide.index)">Save caption</button>
-            <button type="button" (click)="preview(slide.index)">Preview PNG</button>
+            <div class="tennis-field">
+              <label [for]="'caption-' + slide.index">Caption</label>
+              <input
+                [id]="'caption-' + slide.index"
+                type="text"
+                [value]="captionFor(slide.index)"
+                (input)="setCaption(slide.index, readInput($event))"
+              />
+            </div>
+            <div class="gallery-slide-actions">
+              <button type="button" (click)="saveCaption(slide.index)">Save caption</button>
+              <button type="button" (click)="preview(slide.index)">Preview PNG</button>
+            </div>
             @if (saveErrorIndex() === slide.index) {
               <p role="alert">The caption could not be saved.</p>
             }
@@ -81,7 +87,9 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
               <p role="alert">The preview could not be loaded.</p>
             }
             @if (previewUrlFor(slide.index); as previewUrl) {
-              <img [src]="previewUrl" alt="Rendered slide preview" />
+              <div class="gallery-slide-preview">
+                <img [src]="previewUrl" alt="Rendered slide preview" />
+              </div>
             }
           </section>
         }

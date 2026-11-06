@@ -23,7 +23,7 @@ import { AuthStore } from '../../core/auth'
           </div>
         }
       </header>
-      <main id="content" tabindex="-1"><ng-content /></main>
+      <main id="content" class="matches-main" tabindex="-1"><ng-content /></main>
     </div>
   `,
 })
