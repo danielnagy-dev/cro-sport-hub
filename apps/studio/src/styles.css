@@ -522,3 +522,59 @@ main .field-error {
     grid-template-columns: 1fr;
   }
 }
+
+/* Issue #124 — studio admin page layout (plan 27d) */
+
+.admin-competitions-main,
+.admin-teams-main,
+.admin-import-main {
+  padding: var(--space-5) var(--space-6);
+}
+
+.admin-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.admin-section-nav a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-section-nav a[aria-current='page'] {
+  text-decoration: underline;
+}
+
+.admin-section-nav a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.admin-competitions-main .tennis-form,
+.admin-teams-main .tennis-form {
+  margin-top: var(--space-6);
+}
+
+.admin-competitions-main .tennis-field .field-error,
+.admin-teams-main .tennis-field .field-error {
+  margin: 0;
+}
+
+.admin-competitions-main .tennis-form > h3,
+.admin-teams-main .tennis-form > h3 {
+  margin: 0 0 var(--space-4);
+  font-size: 1rem;
+}
+
+.admin-competitions-main .review-actions,
+.admin-teams-main .review-actions,
+.admin-import-main .review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+}
