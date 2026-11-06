@@ -371,6 +371,23 @@ main p {
   background: var(--color-canvas);
 }
 
+.matches-main > .matches-table:first-of-type {
+  margin-bottom: var(--space-4);
+}
+
+.matches-main > .matches-table:first-of-type :is(th, td):first-child {
+  width: 8rem;
+  font-weight: 600;
+  background: var(--color-canvas);
+}
+
+.matches-main .review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+}
+
 .login {
   max-width: 24rem;
   margin: var(--space-6) auto;

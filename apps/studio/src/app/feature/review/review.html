@@ -14,8 +14,7 @@
     </div>
     }
   </header>
-
-  <main id="content" class="review-main" tabindex="-1">
+  <main id="content" class="matches-main" tabindex="-1">
     <h2>Review match</h2>
     @if (loadStatus() === 'loading') {
     <p role="status">Loading match.</p>
@@ -23,25 +22,65 @@
     <p role="alert">Match not found</p>
     } @else if (loadStatus() === 'error') {
     <p role="alert">The match could not be loaded.</p>
-    } @else if (summary(); as row) {
-    <dl class="review-summary">
-      <div>
-        <dt>Label</dt>
-        <dd>{{ row.label }}</dd>
-      </div>
-      <div>
-        <dt>Sport</dt>
-        <dd>{{ row.sport }}</dd>
-      </div>
-      <div>
-        <dt>Status</dt>
-        <dd>{{ status() }}</dd>
-      </div>
-    </dl>
-    @if (row.sport === 'tennis') {
-    <p><a [routerLink]="['/matches', row.id, 'tennis']">Edit tennis match</a></p>
+    } @else if (detail(); as row) {
+    <table class="matches-table">
+      <tbody>
+        @for (m of metaRows(); track m.k) {
+        <tr>
+          <th scope="row">{{ m.k }}</th>
+          <td>{{ m.v }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    @if (row.kind === 'tennis') {
+    <table class="matches-table">
+      <thead>
+        <tr>
+          <th scope="col">Set</th>
+          <th scope="col">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (set of row.sets; track $index) {
+        <tr>
+          <td>{{ set.label }}</td>
+          <td>{{ set.score }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
     } @else {
-    <p><a [routerLink]="['/matches', row.id, 'football']">Edit football match</a></p>
+    <table class="matches-table">
+      <thead>
+        <tr>
+          <th scope="col">Athlete</th>
+          <th scope="col">Club</th>
+          <th scope="col">St</th>
+          <th scope="col">Min</th>
+          <th scope="col">G</th>
+          <th scope="col">A</th>
+          <th scope="col">Cards</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of row.appearances; track $index) {
+        <tr>
+          <td>{{ a.athlete }}</td>
+          <td>{{ a.club }}</td>
+          <td>{{ a.started ? 'Y' : 'N' }}</td>
+          <td>{{ a.minutes }}</td>
+          <td>{{ a.goals }}</td>
+          <td>{{ a.assists }}</td>
+          <td>{{ a.cardsLabel }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    } @if (row.summary.sport === 'tennis') {
+    <p><a [routerLink]="['/matches', row.summary.id, 'tennis']">Edit tennis match</a></p>
+    } @else {
+    <p><a [routerLink]="['/matches', row.summary.id, 'football']">Edit football match</a></p>
     } @if (showAdminActions()) {
     <div class="review-actions">
       <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>

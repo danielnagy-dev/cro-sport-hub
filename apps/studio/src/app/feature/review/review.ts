@@ -4,9 +4,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router'
 import type { Status } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
-import { ReviewApi, type ReviewMatchSummary } from '../../core/review-api'
+import { ReviewApi, type ReviewMatchDetail } from '../../core/review-api'
 
 type LoadStatus = 'loading' | 'ready' | 'not-found' | 'error'
+type MetaRow = { k: string; v: string }
 
 function readConflictMessage(error: HttpErrorResponse, fallback: string): string {
   const body: unknown = error.error
@@ -30,7 +31,7 @@ export class ReviewPage {
 
   protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
-  protected readonly summary = signal<ReviewMatchSummary | null>(null)
+  protected readonly detail = signal<ReviewMatchDetail | null>(null)
   protected readonly status = signal<Status | undefined>(undefined)
   protected readonly actionError = signal<string | undefined>(undefined)
   protected readonly actionPending = signal(false)
@@ -40,15 +41,45 @@ export class ReviewPage {
     return session?.role === 'admin' && this.status() === 'review'
   })
 
+  protected readonly metaRows = computed((): MetaRow[] => {
+    const d = this.detail()
+    if (d === null) return []
+    const st = this.status()
+    const base: MetaRow[] = [
+      { k: 'Label', v: d.summary.label },
+      { k: 'Sport', v: d.summary.sport },
+      { k: 'Status', v: st ?? '' },
+    ]
+    if (d.kind === 'tennis') {
+      return [
+        ...base,
+        { k: 'Competition', v: d.competition },
+        { k: 'Date', v: d.date },
+        { k: 'Round', v: d.round },
+        { k: 'Players', v: `${d.playerA} vs ${d.playerB}` },
+        { k: 'Winner', v: d.winner },
+        ...(d.retired ? [{ k: 'Outcome', v: 'Retirement' }] : []),
+      ]
+    }
+    return [
+      ...base,
+      { k: 'Competition', v: d.competition },
+      { k: 'Date', v: d.date },
+      { k: 'Round', v: d.round },
+      { k: 'Clubs', v: `${d.homeClub} vs ${d.awayClub}` },
+      { k: 'Score', v: `${d.homeGoals} - ${d.awayGoals}` },
+    ]
+  })
+
   constructor() {
     if (this.matchId.length === 0) {
       this.loadStatus.set('not-found')
       return
     }
-    this.pending = this.api.loadSummary(this.matchId).subscribe({
+    this.pending = this.api.loadMatchForReview(this.matchId).subscribe({
       next: (row) => {
-        this.summary.set(row)
-        this.status.set(row.status)
+        this.detail.set(row)
+        this.status.set(row.summary.status)
         this.loadStatus.set('ready')
       },
       error: (error: unknown) => {
@@ -71,6 +102,11 @@ export class ReviewPage {
     this.pending = this.api.rejectMatch(this.matchId).subscribe({
       next: (saved) => {
         this.status.set(saved.status)
+        this.detail.update((current) =>
+          current === null
+            ? current
+            : { ...current, summary: { ...current.summary, status: saved.status } },
+        )
         this.actionPending.set(false)
       },
       error: (error: unknown) => this.onActionError(error, 'reject'),
@@ -85,6 +121,11 @@ export class ReviewPage {
     this.pending = this.api.publishMatch(this.matchId).subscribe({
       next: (saved) => {
         this.status.set(saved.status)
+        this.detail.update((current) =>
+          current === null
+            ? current
+            : { ...current, summary: { ...current.summary, status: saved.status } },
+        )
         this.actionPending.set(false)
       },
       error: (error: unknown) => this.onActionError(error, 'publish'),
