@@ -1,11 +1,9 @@
 import { createApiClient } from '../lib/api-client'
 import { buildPublicSitemap } from '../lib/public-sitemap'
+import { SITE_ORIGIN } from '../lib/site-metadata'
 
 /** Local API origin. The sitemap calls it on the server only. */
 const RESULTS_API_ORIGIN = 'http://localhost:3001'
-
-/** Public site origin for absolute sitemap URLs. */
-const SITE_ORIGIN = 'http://localhost:3000'
 
 /** Render on each request so athlete slugs stay current when the API is up. */
 export const dynamic = 'force-dynamic'

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { expect, test } from 'vite-plus/test'
 import HomePage, { metadata } from '../app/page'
 import { matchesPath } from '../lib/api-client'
+import { SITE_NAME } from '../lib/site-metadata'
 
 const league = {
   id: 'match-sample-league',
@@ -113,9 +114,20 @@ test('a draft-shaped Match is not drawn as a card', async () => {
   expect(html).not.toContain('Sample Player')
 })
 
-test('the document title names results and there is no share image', () => {
+test('the document title names results and Open Graph matches the home URL', () => {
   expect(metadata.title).toBe('Tennis and football results · Cro Sport Hub')
   expect(metadata.description).toBe('Latest tennis and football results.')
-  expect(metadata.openGraph).toBeUndefined()
+  expect(metadata.openGraph).toEqual({
+    title: 'Tennis and football results · Cro Sport Hub',
+    description: 'Latest tennis and football results.',
+    type: 'website',
+    url: 'http://localhost:3000/',
+    siteName: SITE_NAME,
+  })
+  expect(metadata.twitter).toEqual({
+    card: 'summary',
+    title: 'Tennis and football results · Cro Sport Hub',
+    description: 'Latest tennis and football results.',
+  })
   expect(JSON.stringify(metadata)).not.toContain('og:image')
 })

@@ -4,7 +4,7 @@
 | --- | ------ | ---------------------- | ----------------------------------------------------- | ------------- |
 | web | live   | `/tennis`, `/football` | `vp run verify:web --route /tennis --route /football` | plan item 18b |
 
-Each sport page server-renders published matches for that sport only. The shared header links to `/tennis` and `/football` with the labels `tennis` and `football`. Both pages reuse the home results list: one `MatchCard` per item, `No published results.` when the page is empty, and `Results are unavailable.` when the fetch fails. The heading inside `main` stays `Cro Sport Hub`. Document titles and descriptions name the sport. There is no Open Graph image.
+Each sport page server-renders published matches for that sport only. The shared header links to `/tennis` and `/football` with the labels `tennis` and `football`. Both pages reuse the home results list: one `MatchCard` per item, `No published results.` when the page is empty, and `Results are unavailable.` when the fetch fails. The heading inside `main` stays `Cro Sport Hub`. Document titles and descriptions name the sport. Open Graph and Twitter summary metadata include the sport path (`/tennis` or `/football`) and standard tags; there is no Open Graph image.
 
 #### Sub-features
 

@@ -3,6 +3,7 @@ import { expect, test } from 'vite-plus/test'
 import FootballPage, { metadata as footballMetadata } from '../app/football/page'
 import TennisPage, { metadata as tennisMetadata } from '../app/tennis/page'
 import { athletesBySportPath, footballMatchesPath, tennisMatchesPath } from '../lib/api-client'
+import { SITE_NAME } from '../lib/site-metadata'
 
 const league = {
   id: 'match-sample-league',
@@ -124,14 +125,36 @@ test('a rejected athlete list still renders match cards', async () => {
   expect(html).not.toContain('href="/athletes/sample-player-a"')
 })
 
-test('sport document titles name the sport and set no share image', () => {
+test('sport document titles name the sport and Open Graph uses each sport path', () => {
   expect(tennisMetadata.title).toBe('Tennis results · Cro Sport Hub')
   expect(tennisMetadata.description).toBe('Latest tennis results.')
-  expect(tennisMetadata.openGraph).toBeUndefined()
+  expect(tennisMetadata.openGraph).toEqual({
+    title: 'Tennis results · Cro Sport Hub',
+    description: 'Latest tennis results.',
+    type: 'website',
+    url: 'http://localhost:3000/tennis',
+    siteName: SITE_NAME,
+  })
+  expect(tennisMetadata.twitter).toEqual({
+    card: 'summary',
+    title: 'Tennis results · Cro Sport Hub',
+    description: 'Latest tennis results.',
+  })
   expect(JSON.stringify(tennisMetadata)).not.toContain('og:image')
 
   expect(footballMetadata.title).toBe('Football results · Cro Sport Hub')
   expect(footballMetadata.description).toBe('Latest football results.')
-  expect(footballMetadata.openGraph).toBeUndefined()
+  expect(footballMetadata.openGraph).toEqual({
+    title: 'Football results · Cro Sport Hub',
+    description: 'Latest football results.',
+    type: 'website',
+    url: 'http://localhost:3000/football',
+    siteName: SITE_NAME,
+  })
+  expect(footballMetadata.twitter).toEqual({
+    card: 'summary',
+    title: 'Football results · Cro Sport Hub',
+    description: 'Latest football results.',
+  })
   expect(JSON.stringify(footballMetadata)).not.toContain('og:image')
 })
