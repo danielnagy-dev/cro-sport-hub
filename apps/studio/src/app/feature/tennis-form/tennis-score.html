@@ -23,14 +23,17 @@
     <p role="alert">Match not found</p>
     } @else if (lookupStatus() === "error" || pageLoadState() === "error") {
     <p role="alert">The form lists could not be loaded.</p>
-    } @else { @if (savedId(); as matchId) {
+    } @else { @if (matchStatus() !== undefined && matchStatus() !== "draft" && matchStatus(); as
+    status) {
+    <p role="status">Status: {{ status }}</p>
+    } @else if (draftSavedThisVisit() && savedId(); as matchId) {
     <p role="status">Draft saved as {{ matchId }}.</p>
+    } @else if (isEditMode() && matchStatus() === "draft") {
+    <p role="status">Status: draft</p>
     } @if (saveError(); as message) {
     <p id="tennis-save-error" class="field-error" role="alert" tabindex="-1">{{ message }}</p>
     } @if (submitError(); as message) {
     <p id="tennis-submit-error" class="field-error" role="alert" tabindex="-1">{{ message }}</p>
-    } @if (matchStatus() === "review") {
-    <p role="status">Status: review</p>
     }
     <form class="tennis-form" (submit)="onSubmit($event)" novalidate>
       <div class="tennis-field">
@@ -226,9 +229,7 @@
       } @if (tennisForm().submitting()) {
       <p role="status">Saving draft.</p>
       }
-      <button type="submit" [disabled]="!isEditMode() && savedId() !== undefined">
-        Save draft
-      </button>
+      <button type="submit" [disabled]="!isEditMode() && draftSavedThisVisit()">Save draft</button>
     </form>
     @if (canSubmitForReview()) {
     <button type="button" (click)="onSubmitForReview()">Submit for review</button>
