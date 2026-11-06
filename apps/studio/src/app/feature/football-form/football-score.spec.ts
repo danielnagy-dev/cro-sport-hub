@@ -16,7 +16,7 @@ import {
   footballDraftUpdatePath,
 } from '../../core/football-api'
 import { matchSubmitPath } from '../../core/match-submit-api'
-import type { AppearanceRowModel, FootballFormModel } from './draft-body'
+import { emptyAppearanceRow, type AppearanceRowModel, type FootballFormModel } from './draft-body'
 import { FootballScorePage } from './football-score'
 
 const valid: FootballFormModel = {
@@ -147,7 +147,16 @@ describe('FootballScorePage', () => {
 
     submit()
     fixture.detectChanges()
-    expect(root.textContent).toContain('Expected an id of 1–64 letters')
+    const emptyText = root.textContent ?? ''
+    expect(emptyText).toContain('Choose a competition.')
+    expect(emptyText).toContain('Enter the match date.')
+    expect(emptyText).toContain('Enter the round.')
+    expect(emptyText).toContain('Choose the home club.')
+    expect(emptyText).toContain('Choose the away club.')
+    expect(emptyText).toContain('Enter the number of goals.')
+    expect(emptyText).not.toContain('Expected an id of 1–64')
+    expect(emptyText).not.toContain('Invalid ISO date')
+    expect(emptyText).not.toContain('Too small: expected string')
     http.expectNone(footballDraftsPath)
 
     model.set({ ...valid, awayTeamId: 'club-sample-home' })
@@ -167,6 +176,26 @@ describe('FootballScorePage', () => {
     await fixture.whenStable()
     fixture.detectChanges()
     expect(root.textContent).toContain('match-new-draft')
+  })
+
+  it('shows readable appearance club message instead of raw schema text', async () => {
+    const http = TestBed.inject(HttpTestingController)
+    const fixture = await boot(http)
+    const root = fixture.nativeElement as HTMLElement
+    modelSignal(fixture).set({
+      ...valid,
+      appearances: [{ ...emptyAppearanceRow(), athleteId: 'athlete-karlo' }],
+    })
+    fixture.detectChanges()
+    ;(fixture.componentInstance as unknown as { onSubmit: (e: Event) => void }).onSubmit(
+      new Event('submit'),
+    )
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const text = root.textContent ?? ''
+    expect(text).toContain('Choose a club.')
+    expect(text).not.toContain('Expected an id of 1–64')
+    http.expectNone(footballDraftsPath)
   })
 
   it('posts one appearance with raw counts and no derived field', async () => {

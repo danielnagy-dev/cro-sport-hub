@@ -27,6 +27,7 @@ import {
   validateTennisDraft,
   type TennisFormModel,
 } from './draft-body'
+import { mapMatchFormValidationMessage } from '../../util/match-form-validation-message'
 
 type LookupState = 'loading' | 'ready' | 'error'
 type MatchStatus = Status
@@ -96,7 +97,11 @@ export class TennisScorePage {
     const bindIssue = (fieldPath: typeof path.competitionId, field: string) => {
       validate(fieldPath, () => {
         const issue = issueFor(field)
-        return issue === undefined ? undefined : { kind: 'schema', message: issue.message }
+        if (issue === undefined) return undefined
+        return {
+          kind: 'schema',
+          message: mapMatchFormValidationMessage(issue.path, issue.message, 'tennis'),
+        }
       })
       disabled(fieldPath, { when: locked })
     }
@@ -112,7 +117,11 @@ export class TennisScorePage {
     disabled(path.retired, { when: locked })
     validate(path.sets, () => {
       const issue = issueFor('score')
-      return issue === undefined ? undefined : { kind: 'schema', message: issue.message }
+      if (issue === undefined) return undefined
+      return {
+        kind: 'schema',
+        message: mapMatchFormValidationMessage(issue.path, issue.message, 'tennis'),
+      }
     })
     disabled(path.sets, { when: locked })
     for (const key of statCountKeys) {
@@ -161,7 +170,10 @@ export class TennisScorePage {
       const tree = field === 'score' ? this.tennisForm.sets() : this.tennisForm[field]()
       if (!tree.touched()) return undefined
     }
-    return this.draftIssues().find((issue) => issue.path[0] === field)?.message
+    const issue = this.draftIssues().find((issue) => issue.path[0] === field)
+    return issue === undefined
+      ? undefined
+      : mapMatchFormValidationMessage(issue.path, issue.message, 'tennis')
   }
 
   protected showErrors(field: keyof TennisFormModel | 'score'): boolean {
@@ -172,7 +184,7 @@ export class TennisScorePage {
     if (!this.submitAttempted()) return []
     return this.draftIssues()
       .filter((issue) => issue.path[0] === block)
-      .map((issue) => issue.message)
+      .map((issue) => mapMatchFormValidationMessage(issue.path, issue.message, 'tennis'))
   }
 
   protected showPlayerPercentages(block: 'playerAStats' | 'playerBStats'): boolean {
