@@ -3,6 +3,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
+import { RouterTestingHarness } from '@angular/router/testing'
 import { expect } from 'vite-plus/test'
 import type { EditorMatch, EditorMatchPage } from '@cro-sport-hub/shared-types'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
@@ -39,6 +40,12 @@ const leagueMatch: EditorMatch = {
   source: 'manual',
   label: 'Sample Home vs Sample Away',
 }
+const reviewFootballMatch: EditorMatch = {
+  ...leagueMatch,
+  id: 'match-in-review',
+  status: 'review',
+  label: 'Review me',
+}
 
 function page(items: readonly EditorMatch[], total?: number): EditorMatchPage {
   return { items: [...items], limit: 20, offset: 0, total: total ?? items.length }
@@ -57,8 +64,9 @@ function memoryStore(): TokenStore {
   }
 }
 
-function bearer(exp: number): string {
-  const payload = btoa(JSON.stringify({ sub: 'editor-demo', role: 'editor', exp }))
+function bearer(role: 'editor' | 'admin', exp: number, sub?: string): string {
+  const id = sub ?? `${role}-demo`
+  const payload = btoa(JSON.stringify({ sub: id, role, exp }))
     .replaceAll('+', '-')
     .replaceAll('/', '_')
     .replaceAll('=', '')
@@ -83,7 +91,7 @@ describe('MatchesPage', () => {
         { provide: TOKEN_STORE, useValue: memoryStore() },
       ],
     }).compileComponents()
-    TestBed.inject(TOKEN_STORE).write(bearer(Math.floor(Date.now() / 1000) + 3600))
+    TestBed.inject(TOKEN_STORE).write(bearer('editor', Math.floor(Date.now() / 1000) + 3600))
   })
 
   afterEach(() => {
@@ -102,12 +110,15 @@ describe('MatchesPage', () => {
     expect(root.textContent).toContain('draft')
 
     pickSelect(root, 'filter-status', 'draft')
+    await fixture.whenStable()
     http.expectOne(`${editorMatchesPath}?status=draft`).flush(page([quarterMatch], 1))
     await fixture.whenStable()
     pickSelect(root, 'filter-status', '')
+    await fixture.whenStable()
     http.expectOne(editorMatchesPath).flush(page([finalMatch, quarterMatch]))
     await fixture.whenStable()
     pickSelect(root, 'filter-sport', 'football')
+    await fixture.whenStable()
     http.expectOne(`${editorMatchesPath}?sport=football`).flush(page([]))
     await fixture.whenStable()
     expect(root.textContent).toContain('No matches.')
@@ -123,6 +134,7 @@ describe('MatchesPage', () => {
     expect(root.textContent).toContain('The match list could not be loaded.')
     expect(root.querySelector('select')).toBeInstanceOf(HTMLSelectElement)
     pickSelect(root, 'filter-status', 'draft')
+    await fixture.whenStable()
     http.expectOne(`${editorMatchesPath}?status=draft`).flush(page([quarterMatch], 1))
     await fixture.whenStable()
     expect(root.textContent).toContain('Sample Player C vs Sample Player D')
@@ -139,6 +151,48 @@ describe('MatchesPage', () => {
     await fixture.whenStable()
     const link = root.querySelector('a[href="/matches/match-sample-league/football"]')
     expect(link?.textContent).toContain('Sample Home vs Sample Away')
+  })
+
+  it('reads sport, status, and source from the URL query string', async () => {
+    const harness = await RouterTestingHarness.create()
+    await harness.navigateByUrl('/matches?sport=tennis&status=draft&source=import')
+    const http = TestBed.inject(HttpTestingController)
+    http.expectOne(`${editorMatchesPath}?sport=tennis&status=draft&source=import`).flush(page([]))
+    await harness.fixture.whenStable()
+  })
+
+  it('shows Admin in the header when the session is admin', async () => {
+    TestBed.inject(TOKEN_STORE).write(bearer('admin', Math.floor(Date.now() / 1000) + 3600))
+    const fixture = TestBed.createComponent(MatchesPage)
+    fixture.detectChanges()
+    const http = TestBed.inject(HttpTestingController)
+    const root = fixture.nativeElement as HTMLElement
+    http.expectOne(editorMatchesPath).flush(page([]))
+    await fixture.whenStable()
+    expect(root.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeInstanceOf(
+      HTMLAnchorElement,
+    )
+  })
+
+  it('does not show Admin in the header for an editor session', async () => {
+    const fixture = TestBed.createComponent(MatchesPage)
+    fixture.detectChanges()
+    const http = TestBed.inject(HttpTestingController)
+    const root = fixture.nativeElement as HTMLElement
+    http.expectOne(editorMatchesPath).flush(page([]))
+    await fixture.whenStable()
+    expect(root.querySelector('a[href="/admin/competitions"]')).toBeNull()
+  })
+
+  it('links a review row to the review route', async () => {
+    const harness = await RouterTestingHarness.create()
+    await harness.navigateByUrl('/matches?status=review')
+    const http = TestBed.inject(HttpTestingController)
+    http.expectOne(`${editorMatchesPath}?status=review`).flush(page([reviewFootballMatch]))
+    await harness.fixture.whenStable()
+    const root = harness.routeNativeElement as HTMLElement
+    const reviewLink = root.querySelector('a[href="/matches/match-in-review/review"]')
+    expect(reviewLink?.textContent?.trim()).toBe('Review')
   })
 })
 
