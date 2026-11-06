@@ -1,13 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
-import type {
-  EditorFootballDraft,
-  EditorMatch,
-  EditorTennisDraft,
-  SportSlug,
-  Status,
-  TennisSetScore,
-} from '@cro-sport-hub/shared-types'
+import type { EditorMatch, SportSlug, Status, TennisSetScore } from '@cro-sport-hub/shared-types'
 import { forkJoin, map, switchMap, throwError, type Observable } from 'rxjs'
 import { FootballApi } from './football-api'
 import { EditorLookupsApi } from './editor-lookups-api'
@@ -25,12 +18,16 @@ export function matchPublishPath(id: string): string {
 
 export type MatchRejected = { id: string; status: 'draft' }
 export type MatchPublished = { id: string; status: 'published' }
-
-export type ReviewMatchSummary = {
-  id: string
-  sport: SportSlug
-  status: Status
-  label: string
+export type ReviewMatchSummary = { id: string; sport: SportSlug; status: Status; label: string }
+type SetRow = { label: string; score: string }
+type AppRow = {
+  athlete: string
+  club: string
+  started: boolean
+  minutes: number
+  goals: number
+  assists: number
+  cardsLabel: string
 }
 
 export type ReviewMatchDetail =
@@ -42,7 +39,7 @@ export type ReviewMatchDetail =
       round: string
       playerA: string
       playerB: string
-      sets: { label: string; score: string }[]
+      sets: SetRow[]
       winner: string
       retired: boolean
     }
@@ -56,51 +53,50 @@ export type ReviewMatchDetail =
       awayClub: string
       homeGoals: number
       awayGoals: number
-      appearances: {
-        athlete: string
-        club: string
-        started: boolean
-        minutes: number
-        goals: number
-        assists: number
-        cardsLabel: string
-      }[]
+      appearances: AppRow[]
     }
 
 function parseReject(body: unknown): MatchRejected {
-  if (typeof body !== 'object' || body === null) throw new Error('Invalid reject response')
-  const row = body as Record<string, unknown>
-  if (typeof row['id'] !== 'string' || row['status'] !== 'draft')
+  const r = body as Record<string, unknown>
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    typeof r['id'] !== 'string' ||
+    r['status'] !== 'draft'
+  ) {
     throw new Error('Invalid reject response')
-  return { id: row['id'], status: 'draft' }
+  }
+  return { id: r['id'], status: 'draft' }
 }
 
 function parsePublish(body: unknown): MatchPublished {
-  if (typeof body !== 'object' || body === null) throw new Error('Invalid publish response')
-  const row = body as Record<string, unknown>
-  if (typeof row['id'] !== 'string' || row['status'] !== 'published') {
+  const r = body as Record<string, unknown>
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    typeof r['id'] !== 'string' ||
+    r['status'] !== 'published'
+  ) {
     throw new Error('Invalid publish response')
   }
-  return { id: row['id'], status: 'published' }
+  return { id: r['id'], status: 'published' }
 }
 
-function name<T extends { id: string; name: string }>(rows: readonly T[], id: string): string {
-  return rows.find((r) => r.id === id)?.name ?? id
+function nm<T extends { id: string; name: string }>(rows: readonly T[], id: string): string {
+  return rows.find((x) => x.id === id)?.name ?? id
 }
 
-function tennisSetLabel(set: TennisSetScore, index: number): { label: string; score: string } {
-  const [a, b, tb] = set
+function setRow(s: TennisSetScore, i: number): SetRow {
+  const [a, b, t] = s
   return {
-    label: `Set ${index + 1}`,
-    score: tb === undefined ? `${a}-${b}` : `${a}-${b} (tiebreak ${tb})`,
+    label: `Set ${i + 1}`,
+    score: t === undefined ? `${a}-${b}` : `${a}-${b} (tiebreak ${t})`,
   }
 }
 
-function cards(a: { yellowCards: number; redCard: boolean }): string {
-  if (a.yellowCards === 0 && !a.redCard) return '—'
-  const yellow = a.yellowCards > 0 ? `${a.yellowCards}Y` : ''
-  const red = a.redCard ? 'R' : ''
-  return yellow + red
+function crd(x: { yellowCards: number; redCard: boolean }): string {
+  if (x.yellowCards === 0 && !x.redCard) return '—'
+  return `${x.yellowCards > 0 ? `${x.yellowCards}Y` : ''}${x.redCard ? 'R' : ''}`
 }
 
 @Injectable({ providedIn: 'root' })
@@ -115,10 +111,9 @@ export class ReviewApi {
     return this.matches.editorMatches().pipe(
       switchMap((page) => {
         const row = page.items.find((item) => item.id === id)
-        if (row === undefined) {
-          return throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }))
-        }
-        return this.detail(row)
+        return row === undefined
+          ? throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }))
+          : this.detail(row)
       }),
     )
   }
@@ -145,22 +140,19 @@ export class ReviewApi {
         a: this.lookups.editorAthletes('tennis'),
       }).pipe(
         map(({ d, c, a }) => {
-          const playerA = name(a, d.playerAId)
-          const playerB = name(a, d.playerBId)
+          const pa = nm(a, d.playerAId)
+          const pb = nm(a, d.playerBId)
           return {
             kind: 'tennis' as const,
             summary,
-            competition: name(c, d.competitionId),
+            competition: nm(c, d.competitionId),
             date: d.date,
             round: d.round,
-            playerA,
-            playerB,
-            sets: d.score.map(tennisSetLabel),
-            winner: (() => {
-              if (d.winnerId === d.playerAId) return playerA
-              if (d.winnerId === d.playerBId) return playerB
-              return name(a, d.winnerId)
-            })(),
+            playerA: pa,
+            playerB: pb,
+            sets: d.score.map(setRow),
+            winner:
+              d.winnerId === d.playerAId ? pa : d.winnerId === d.playerBId ? pb : nm(a, d.winnerId),
             retired: d.retired === true,
           }
         }),
@@ -175,21 +167,21 @@ export class ReviewApi {
       map(({ d, c, a, t }) => ({
         kind: 'football' as const,
         summary,
-        competition: name(c, d.competitionId),
+        competition: nm(c, d.competitionId),
         date: d.date,
         round: d.round,
-        homeClub: name(t, d.homeTeamId),
-        awayClub: name(t, d.awayTeamId),
+        homeClub: nm(t, d.homeTeamId),
+        awayClub: nm(t, d.awayTeamId),
         homeGoals: d.homeGoals,
         awayGoals: d.awayGoals,
         appearances: (d.appearances ?? []).map((x) => ({
-          athlete: name(a, x.athleteId),
-          club: name(t, x.teamId),
+          athlete: nm(a, x.athleteId),
+          club: nm(t, x.teamId),
           started: x.started,
           minutes: x.minutes,
           goals: x.goals,
           assists: x.assists,
-          cardsLabel: cards(x),
+          cardsLabel: crd(x),
         })),
       })),
     )
