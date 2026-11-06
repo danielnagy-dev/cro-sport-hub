@@ -25,6 +25,7 @@ import {
   validateFootballDraft,
   type FootballFormModel,
 } from './draft-body'
+import { mapMatchFormValidationMessage } from '../../util/match-form-validation-message'
 
 const APPEARANCE_COUNT_FIELDS = [
   ['minutes', 'Minutes'],
@@ -95,7 +96,11 @@ export class FootballScorePage {
     const bind = (fieldPath: (typeof path)[FieldKey], field: FieldKey) => {
       validate(fieldPath, () => {
         const issue = issueFor(field)
-        return issue === undefined ? undefined : { kind: 'schema', message: issue.message }
+        if (issue === undefined) return undefined
+        return {
+          kind: 'schema',
+          message: mapMatchFormValidationMessage(issue.path, issue.message, 'football'),
+        }
       })
       disabled(fieldPath, { when: locked })
     }
@@ -186,7 +191,10 @@ export class FootballScorePage {
 
   protected fieldMessage(field: FieldKey): string | undefined {
     if (!this.submitAttempted() && !this.footballForm[field]().touched()) return undefined
-    return this.draftIssues().find((issue) => issue.path[0] === field)?.message
+    const issue = this.draftIssues().find((issue) => issue.path[0] === field)
+    return issue === undefined
+      ? undefined
+      : mapMatchFormValidationMessage(issue.path, issue.message, 'football')
   }
 
   protected showErrors(field: FieldKey): boolean {
@@ -201,7 +209,7 @@ export class FootballScorePage {
         if (index === undefined) return issue.path.length === 1
         return issue.path[1] === String(index)
       })
-      .map((issue) => issue.message)
+      .map((issue) => mapMatchFormValidationMessage(issue.path, issue.message, 'football'))
   }
 
   protected canSubmitForReview(): boolean {

@@ -140,14 +140,24 @@ describe('TennisScorePage', () => {
     TestBed.resetTestingModule()
   })
 
-  it('shows shared-schema messages and sends no request for an empty submit', async () => {
+  it('shows readable messages and sends no request for an empty submit', async () => {
     const { fixture, http, root } = await boot()
     ;(fixture.componentInstance as unknown as { onSubmit: (event: Event) => void }).onSubmit(
       new Event('submit'),
     )
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(root.textContent).toContain('Expected an id of 1–64 letters')
+    const text = root.textContent ?? ''
+    expect(text).toContain('Choose a competition.')
+    expect(text).toContain('Enter the match date.')
+    expect(text).toContain('Enter the round.')
+    expect(text).toContain('Choose player A.')
+    expect(text).toContain('Choose player B.')
+    expect(text).toContain('Choose the winner.')
+    expect(text).toContain('Enter at least one completed set score.')
+    expect(text).not.toContain('Expected an id of 1–64')
+    expect(text).not.toContain('Invalid ISO date')
+    expect(text).not.toContain('Too small: expected string')
     http.expectNone(tennisDraftsPath)
   })
 
