@@ -1,15 +1,15 @@
 import { Component, inject, signal } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
 import { ImportAdminApi, type ImportRun } from '../../core/import-admin-api'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { formatImportLogIsoForDisplay } from './import-admin-format'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
 
 @Component({
   selector: 'app-import-admin',
-  imports: [RouterLink],
+  imports: [RouterLink, StudioSectionHeader],
   templateUrl: './import-admin.html',
 })
 export class ImportAdminPage {
@@ -17,7 +17,6 @@ export class ImportAdminPage {
   private listPending: Subscription | undefined
   private runRequest: Subscription | undefined
 
-  protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
   protected readonly rows = signal<ImportRun[]>([])
   protected readonly runError = signal<string | undefined>(undefined)
@@ -25,10 +24,6 @@ export class ImportAdminPage {
 
   constructor() {
     this.reload()
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
   }
 
   protected importLogDisplayTime(iso: string): string {

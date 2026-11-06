@@ -1,22 +1,5 @@
 <div class="shell">
-  <header class="shell-header">
-    <a class="skip-link" href="#content">Skip to competitions</a>
-    <p class="shell-mark">Cro Sport Hub</p>
-    <h1>Studio</h1>
-    <nav class="shell-nav" aria-label="Studio sections">
-      <a routerLink="/">Home</a>
-      <a routerLink="/matches">Matches</a>
-      @if (auth.session()?.role === 'admin') {
-      <a routerLink="/admin/competitions" aria-current="page">Admin</a>
-      }
-    </nav>
-    @if (auth.session(); as session) {
-    <div class="shell-session">
-      <span>{{ session.id }}</span>
-      <button type="button" (click)="logOut()">Log out</button>
-    </div>
-    }
-  </header>
+  <app-studio-section-header skipLabel="Skip to competitions" />
   <main id="content" class="admin-competitions-main" tabindex="-1">
     <nav class="admin-section-nav" aria-label="Admin sections">
       <a routerLink="/admin/competitions" aria-current="page">Competitions</a>
@@ -65,25 +48,75 @@
     <form (submit)="onSave($event)">
       <h3>{{ editingId() === null ? 'Create competition' : 'Update competition' }}</h3>
       <label for="competition-id">Id</label>
-      <input id="competition-id" [formField]="competitionForm.id" />
+      <input
+        id="competition-id"
+        [formField]="competitionForm.id"
+        [attr.aria-invalid]="competitionFieldError('id') ? 'true' : null"
+        [attr.aria-describedby]="
+          competitionFieldError('id') ? 'competition-id-error' : null
+        "
+      />
+      @if (competitionFieldError('id'); as msg) {
+      <p id="competition-id-error">{{ msg }}</p>
+      }
       <label for="competition-sport">Sport</label>
-      <select id="competition-sport" [formField]="competitionForm.sportId">
+      <select
+        id="competition-sport"
+        [formField]="competitionForm.sportId"
+        [attr.aria-invalid]="competitionFieldError('sportId') ? 'true' : null"
+        [attr.aria-describedby]="
+          competitionFieldError('sportId') ? 'competition-sport-error' : null
+        "
+      >
         <option value="">Choose a sport</option>
         @for (sport of sports(); track sport.id) {
         <option [value]="sport.id">{{ sport.name }}</option>
         }
       </select>
+      @if (competitionFieldError('sportId'); as msg) {
+      <p id="competition-sport-error">{{ msg }}</p>
+      }
       <label for="competition-name">Name</label>
-      <input id="competition-name" [formField]="competitionForm.name" />
+      <input
+        id="competition-name"
+        [formField]="competitionForm.name"
+        [attr.aria-invalid]="competitionFieldError('name') ? 'true' : null"
+        [attr.aria-describedby]="
+          competitionFieldError('name') ? 'competition-name-error' : null
+        "
+      />
+      @if (competitionFieldError('name'); as msg) {
+      <p id="competition-name-error">{{ msg }}</p>
+      }
       <label for="competition-season">Season</label>
-      <input id="competition-season" [formField]="competitionForm.season" />
+      <input
+        id="competition-season"
+        [formField]="competitionForm.season"
+        [attr.aria-invalid]="competitionFieldError('season') ? 'true' : null"
+        [attr.aria-describedby]="
+          competitionFieldError('season') ? 'competition-season-error' : null
+        "
+      />
+      @if (competitionFieldError('season'); as msg) {
+      <p id="competition-season-error">{{ msg }}</p>
+      }
       <label for="competition-level">Level</label>
-      <select id="competition-level" [formField]="competitionForm.level">
+      <select
+        id="competition-level"
+        [formField]="competitionForm.level"
+        [attr.aria-invalid]="competitionFieldError('level') ? 'true' : null"
+        [attr.aria-describedby]="
+          competitionFieldError('level') ? 'competition-level-error' : null
+        "
+      >
         <option value="">Choose a level</option>
         @for (level of levels; track level) {
         <option [value]="level">{{ level }}</option>
         }
       </select>
+      @if (competitionFieldError('level'); as msg) {
+      <p id="competition-level-error">{{ msg }}</p>
+      }
       <button type="submit" [disabled]="savePending()">Save</button>
       @if (editingId() !== null) {
       <button type="button" (click)="loadForm()">Cancel edit</button>

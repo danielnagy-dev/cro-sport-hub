@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, afterNextRender } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
 import { HttpErrorResponse } from '@angular/common/http'
-import { ActivatedRoute, RouterLink, Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
@@ -12,7 +12,7 @@ import {
   type TeamLookup,
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
-import { AuthStore } from '../../core/auth'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { EditorLookupsApi } from '../../core/editor-lookups-api'
 import { FootballApi } from '../../core/football-api'
 import { MatchSubmitApi } from '../../core/match-submit-api'
@@ -50,7 +50,7 @@ const FIELDS = [
 
 @Component({
   selector: 'app-football-score',
-  imports: [FormField, RouterLink],
+  imports: [FormField, StudioSectionHeader],
   templateUrl: './football-score.html',
 })
 export class FootballScorePage {
@@ -59,7 +59,6 @@ export class FootballScorePage {
   private readonly submitApi = inject(MatchSubmitApi)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
-  protected readonly auth = inject(AuthStore)
   protected readonly fieldConfigs = FIELDS
   protected readonly appearanceCountFields = APPEARANCE_COUNT_FIELDS
 
@@ -75,6 +74,7 @@ export class FootballScorePage {
   protected readonly saveError = signal<string | undefined>(undefined)
   protected readonly submitError = signal<string | undefined>(undefined)
   protected readonly savedId = signal<string | undefined>(undefined)
+  protected readonly draftSavedThisVisit = signal(false)
   protected readonly matchStatus = signal<Status | undefined>(undefined)
   protected readonly submitAttempted = signal(false)
   protected readonly submittingForReview = signal(false)
@@ -87,7 +87,7 @@ export class FootballScorePage {
 
   protected readonly formLocked = computed(() => {
     if (this.isEditMode()) return this.matchStatus() !== 'draft'
-    return this.savedId() !== undefined
+    return this.draftSavedThisVisit()
   })
 
   protected readonly footballForm = form(this.model, (path) => {
@@ -134,7 +134,6 @@ export class FootballScorePage {
     const matchId = this.editMatchId()
     if (matchId === undefined) return
     this.routeMatchId.set(matchId)
-    this.savedId.set(matchId)
     this.pageLoadState.set('loading')
     try {
       const draft = await firstValueFrom(this.football.loadEditorFootballDraft(matchId))
@@ -243,7 +242,8 @@ export class FootballScorePage {
   }
 
   protected onSubmitForReview(): void {
-    if (this.savedId() === undefined || this.matchStatus() !== 'draft') return
+    if (this.savedId() === undefined && this.routeMatchId() === undefined) return
+    if (this.matchStatus() !== 'draft') return
     void this.sendForReview()
   }
 
@@ -280,6 +280,7 @@ export class FootballScorePage {
             ? await firstValueFrom(this.football.updateFootballDraft(matchId, body))
             : await firstValueFrom(this.football.createFootballDraft(body))
           this.savedId.set(saved.id)
+          this.draftSavedThisVisit.set(true)
           this.matchStatus.set('draft')
         } catch {
           this.saveError.set('The football match could not be saved.')
@@ -290,7 +291,7 @@ export class FootballScorePage {
   }
 
   private async sendForReview(): Promise<void> {
-    const id = this.savedId()
+    const id = this.savedId() ?? this.routeMatchId()
     if (id === undefined || this.submittingForReview()) return
     this.submitError.set(undefined)
     this.submittingForReview.set(true)

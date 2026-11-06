@@ -7,6 +7,13 @@ import { expect } from 'vite-plus/test'
 import { adminGuard, authInterceptor, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { adminCompetitionPath, adminCompetitionsPath } from '../../core/competitions-admin-api'
 import { sportsPath } from '../../core/catalog-api'
+import {
+  MSG_CHOOSE_LEVEL,
+  MSG_CHOOSE_SPORT,
+  MSG_COMPETITION_ID,
+  MSG_COMPETITION_NAME,
+  MSG_COMPETITION_SEASON,
+} from '../../core/admin-form-messages'
 import { stubSports } from '../../core/stub-api'
 import { CompetitionsAdminPage } from './competitions-admin'
 
@@ -102,6 +109,40 @@ describe('CompetitionsAdminPage', () => {
   afterEach(() => {
     http.verify()
     TestBed.resetTestingModule()
+  })
+
+  it('does not POST when the create form is empty and shows field messages', async () => {
+    ;(fixture.componentInstance as unknown as { loadForm(): void }).loadForm()
+    fixture.detectChanges()
+    ;[...root.querySelectorAll('button')]
+      .find((node) => node.textContent?.includes('Save'))
+      ?.click()
+    http.expectNone(adminCompetitionsPath)
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain(MSG_COMPETITION_ID)
+    expect(root.textContent).toContain(MSG_CHOOSE_SPORT)
+    expect(root.textContent).toContain(MSG_COMPETITION_NAME)
+    expect(root.textContent).toContain(MSG_COMPETITION_SEASON)
+    expect(root.textContent).toContain(MSG_CHOOSE_LEVEL)
+    expect(document.activeElement?.id).toBe('competition-id')
+  })
+
+  it('shows the API message when save returns 400', async () => {
+    ;(fixture.componentInstance as unknown as { loadForm(row: Competition): void }).loadForm(cup)
+    fixture.detectChanges()
+    ;[...root.querySelectorAll('button')]
+      .find((node) => node.textContent?.includes('Save'))
+      ?.click()
+    http
+      .expectOne(adminCompetitionPath(cup.id))
+      .flush(
+        { message: 'Season not allowed', statusCode: 400 },
+        { status: 400, statusText: 'Bad Request' },
+      )
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain('Season not allowed')
   })
 
   it('lists seeded competitions and creates a row', async () => {

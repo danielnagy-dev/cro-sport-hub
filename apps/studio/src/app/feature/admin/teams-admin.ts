@@ -4,7 +4,14 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { RouterLink } from '@angular/router'
 import { teamSchema, type Team } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
+import {
+  focusFirstFieldWithMessages,
+  httpErrorBodyMessage,
+  TEAM_FIELD_IDS,
+  TEAM_FIELD_ORDER,
+  teamFieldMessages,
+} from '../../core/admin-form-messages'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { TeamsAdminApi } from '../../core/teams-admin-api'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
@@ -42,25 +49,15 @@ function modelToBody(model: TeamFormModel): unknown {
   }
 }
 
-function conflictMessage(error: HttpErrorResponse, fallback: string): string {
-  const body: unknown = error.error
-  if (typeof body === 'object' && body !== null && 'message' in body) {
-    const message = body.message
-    if (typeof message === 'string') return message
-  }
-  return fallback
-}
-
 @Component({
   selector: 'app-teams-admin',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, StudioSectionHeader],
   templateUrl: './teams-admin.html',
 })
 export class TeamsAdminPage {
   private readonly api = inject(TeamsAdminApi)
   private listPending: Subscription | undefined
 
-  protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
   protected readonly rows = signal<Team[]>([])
   protected readonly model = signal<TeamFormModel>(emptyForm())
@@ -69,6 +66,7 @@ export class TeamsAdminPage {
   protected readonly deleteError = signal<string | undefined>(undefined)
   protected readonly savePending = signal(false)
   protected readonly submitAttempted = signal(false)
+  protected readonly fieldErrors = signal<Record<string, string>>({})
 
   protected readonly teamForm = form(this.model, (path) => {
     readonly(path.id, { when: () => this.editingId() !== null })
@@ -94,18 +92,28 @@ export class TeamsAdminPage {
     )
     this.saveError.set(undefined)
     this.submitAttempted.set(false)
+    this.fieldErrors.set({})
   }
 
-  protected logOut(): void {
-    this.auth.logOut()
+  protected teamFieldError(
+    key: 'id' | 'slug' | 'name' | 'shortName' | 'country',
+  ): string | undefined {
+    if (!this.submitAttempted()) return undefined
+    return this.fieldErrors()[key]
   }
 
   protected onSave(event: Event): void {
     event.preventDefault()
     this.submitAttempted.set(true)
     this.saveError.set(undefined)
+    this.fieldErrors.set({})
     const parsed = teamSchema.safeParse(modelToBody(this.model()))
-    if (!parsed.success) return
+    if (!parsed.success) {
+      const messages = teamFieldMessages(this.model(), parsed.error)
+      this.fieldErrors.set(messages)
+      focusFirstFieldWithMessages(TEAM_FIELD_ORDER, messages, TEAM_FIELD_IDS)
+      return
+    }
     if (this.savePending()) return
     this.savePending.set(true)
     const editing = this.editingId()
@@ -120,8 +128,8 @@ export class TeamsAdminPage {
       },
       error: (error: unknown) => {
         this.savePending.set(false)
-        if (error instanceof HttpErrorResponse && error.status === 409) {
-          this.saveError.set(conflictMessage(error, 'That record is already stored'))
+        if (error instanceof HttpErrorResponse && (error.status === 400 || error.status === 409)) {
+          this.saveError.set(httpErrorBodyMessage(error, 'The club could not be saved.'))
           return
         }
         this.saveError.set('The club could not be saved.')
@@ -137,7 +145,7 @@ export class TeamsAdminPage {
       next: () => this.reload(),
       error: (error: unknown) => {
         if (error instanceof HttpErrorResponse && error.status === 409) {
-          this.deleteError.set(conflictMessage(error, 'Team is in use'))
+          this.deleteError.set(httpErrorBodyMessage(error, 'Team is in use'))
           return
         }
         this.deleteError.set('The club could not be deleted.')
