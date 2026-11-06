@@ -48,15 +48,59 @@
     <form (submit)="onSave($event)">
       <h3>{{ editingId() === null ? 'Create club' : 'Update club' }}</h3>
       <label for="team-id">Id</label>
-      <input id="team-id" [formField]="teamForm.id" />
+      <input
+        id="team-id"
+        [formField]="teamForm.id"
+        [attr.aria-invalid]="teamFieldError('id') ? 'true' : null"
+        [attr.aria-describedby]="teamFieldError('id') ? 'team-id-error' : null"
+      />
+      @if (teamFieldError('id'); as msg) {
+      <p id="team-id-error">{{ msg }}</p>
+      }
       <label for="team-slug">Slug</label>
-      <input id="team-slug" [formField]="teamForm.slug" />
+      <input
+        id="team-slug"
+        [formField]="teamForm.slug"
+        [attr.aria-invalid]="teamFieldError('slug') ? 'true' : null"
+        [attr.aria-describedby]="teamFieldError('slug') ? 'team-slug-error' : null"
+      />
+      @if (teamFieldError('slug'); as msg) {
+      <p id="team-slug-error">{{ msg }}</p>
+      }
       <label for="team-name">Name</label>
-      <input id="team-name" [formField]="teamForm.name" />
+      <input
+        id="team-name"
+        [formField]="teamForm.name"
+        [attr.aria-invalid]="teamFieldError('name') ? 'true' : null"
+        [attr.aria-describedby]="teamFieldError('name') ? 'team-name-error' : null"
+      />
+      @if (teamFieldError('name'); as msg) {
+      <p id="team-name-error">{{ msg }}</p>
+      }
       <label for="team-short-name">Short name</label>
-      <input id="team-short-name" [formField]="teamForm.shortName" />
+      <input
+        id="team-short-name"
+        [formField]="teamForm.shortName"
+        [attr.aria-invalid]="teamFieldError('shortName') ? 'true' : null"
+        [attr.aria-describedby]="
+          teamFieldError('shortName') ? 'team-short-name-error' : null
+        "
+      />
+      @if (teamFieldError('shortName'); as msg) {
+      <p id="team-short-name-error">{{ msg }}</p>
+      }
       <label for="team-country">Country</label>
-      <input id="team-country" [formField]="teamForm.country" />
+      <input
+        id="team-country"
+        [formField]="teamForm.country"
+        [attr.aria-invalid]="teamFieldError('country') ? 'true' : null"
+        [attr.aria-describedby]="
+          teamFieldError('country') ? 'team-country-error' : null
+        "
+      />
+      @if (teamFieldError('country'); as msg) {
+      <p id="team-country-error">{{ msg }}</p>
+      }
       <button type="submit" [disabled]="savePending()">Save</button>
       @if (editingId() !== null) {
       <button type="button" (click)="loadForm()">Cancel edit</button>
