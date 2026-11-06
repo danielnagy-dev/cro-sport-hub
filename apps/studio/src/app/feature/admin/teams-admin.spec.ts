@@ -199,6 +199,6 @@ describe('TeamsAdminPage access', () => {
     TestBed.inject(TOKEN_STORE).write(bearer('editor', Math.floor(Date.now() / 1000) + 3600))
     const router = TestBed.inject(Router)
     await router.navigateByUrl('/admin/teams')
-    expect(router.url).toBe('/')
+    expect(router.url).toBe('/?admin=1')
   })
 })
