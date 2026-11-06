@@ -154,7 +154,11 @@ function allow(roles: readonly Role[]): CanActivateFn {
     auth.dropIfExpired()
     const session = auth.session()
     if (session === null) return router.createUrlTree(['/login'])
-    return roles.includes(session.role) ? true : router.createUrlTree(['/'])
+    if (roles.includes(session.role)) return true
+    const isAdminOnlyRoute = roles.length === 1 && roles[0] === 'admin'
+    return isAdminOnlyRoute
+      ? router.createUrlTree(['/'], { queryParams: { admin: '1' }, queryParamsHandling: 'merge' })
+      : router.createUrlTree(['/'])
   }
 }
 

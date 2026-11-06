@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
 import { ImportAdminApi, type ImportRun } from '../../core/import-admin-api'
+import { formatImportLogIsoForDisplay } from './import-admin-format'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
 
@@ -28,6 +29,10 @@ export class ImportAdminPage {
 
   protected logOut(): void {
     this.auth.logOut()
+  }
+
+  protected importLogDisplayTime(iso: string): string {
+    return formatImportLogIsoForDisplay(iso)
   }
 
   protected onRunNow(): void {

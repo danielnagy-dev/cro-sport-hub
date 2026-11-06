@@ -200,7 +200,7 @@ describe('role guards', () => {
     await harness.navigateByUrl('/')
     expect(harness.routeNativeElement?.textContent).toContain('home-page')
     await harness.navigateByUrl('/admin')
-    expect(TestBed.inject(Router).url).toBe('/')
+    expect(TestBed.inject(Router).url).toBe('/?admin=1')
     await harness.navigateByUrl('/login')
     expect(TestBed.inject(Router).url).toBe('/')
   })
