@@ -32,7 +32,7 @@ function entry(
         awayScore: 0,
         side: 'home',
       },
-      stats: [{ key: 'minutes', label: 'Minute', value: '90’' }],
+      stats: [{ key: 'minutes', label: 'MINUTE', value: '90’' }],
     },
   }
 }
@@ -97,8 +97,8 @@ const LIST_SAMPLE_PLAYERS: FootballEntry['player'][] = [
     lineup: 'start',
     fixture: { home: 'Fiorentina', away: 'Como', homeScore: 1, awayScore: 3, side: 'away' },
     stats: [
-      { key: 'minutes', label: 'Minute', value: '90’' },
-      { key: 'assists', label: 'Asistencije', value: '1' },
+      { key: 'minutes', label: 'MINUTE', value: '90’' },
+      { key: 'assists', label: 'ASIST.', value: '1' },
       { key: 'key_passes', label: 'Ključna dodavanja', value: '3' },
       { key: 'passes', label: 'Dodavanja', accurate: 38, total: 45 },
       { key: 'shots', label: 'Udarci', value: '1' },
@@ -113,7 +113,7 @@ const LIST_SAMPLE_PLAYERS: FootballEntry['player'][] = [
     lineup: 'start',
     fixture: { home: 'Juventus', away: 'Lazio', homeScore: 1, awayScore: 1, side: 'away' },
     stats: [
-      { key: 'minutes', label: 'Minute', value: '90’' },
+      { key: 'minutes', label: 'MINUTE', value: '90’' },
       { key: 'passes', label: 'Dodavanja', accurate: 46, total: 50 },
       { key: 'yellow', label: 'Žuti karton', value: '1' },
     ],
@@ -126,9 +126,9 @@ const LIST_SAMPLE_PLAYERS: FootballEntry['player'][] = [
     lineup: 'start',
     fixture: { home: 'Milan', away: 'Atalanta', homeScore: 3, awayScore: 2, side: 'home' },
     stats: [
-      { key: 'minutes', label: 'Minute', value: '90’' },
-      { key: 'goals', label: 'Golovi', value: '1' },
-      { key: 'assists', label: 'Asistencije', value: '1' },
+      { key: 'minutes', label: 'MINUTE', value: '90’' },
+      { key: 'goals', label: 'GOLOVI', value: '1' },
+      { key: 'assists', label: 'ASIST.', value: '1' },
       { key: 'shots', label: 'Udarci', value: '3', onTarget: '2' },
       { key: 'key_passes', label: 'Ključna dodavanja', value: '4' },
       { key: 'passes', label: 'Dodavanja', accurate: 67, total: 72 },
@@ -143,8 +143,8 @@ const LIST_SAMPLE_PLAYERS: FootballEntry['player'][] = [
     lineup: 'sub',
     fixture: { home: 'Milan', away: 'Atalanta', homeScore: 3, awayScore: 2, side: 'away' },
     stats: [
-      { key: 'minutes', label: 'Minute', value: '32’' },
-      { key: 'goals', label: 'Golovi', value: '1' },
+      { key: 'minutes', label: 'MINUTE', value: '32’' },
+      { key: 'goals', label: 'GOLOVI', value: '1' },
       { key: 'shots', label: 'Udarci', value: '2' },
       { key: 'passes', label: 'Dodavanja', accurate: 16, total: 20 },
     ],
@@ -157,7 +157,7 @@ const LIST_SAMPLE_PLAYERS: FootballEntry['player'][] = [
     lineup: 'start',
     fixture: { home: 'Osasuna', away: 'Real Madrid', homeScore: 0, awayScore: 2, side: 'away' },
     stats: [
-      { key: 'minutes', label: 'Minute', value: '90’' },
+      { key: 'minutes', label: 'MINUTE', value: '90’' },
       { key: 'passes', label: 'Dodavanja', accurate: 58, total: 64 },
       { key: 'key_passes', label: 'Ključna dodavanja', value: '2' },
     ],
