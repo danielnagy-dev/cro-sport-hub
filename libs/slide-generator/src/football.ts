@@ -4,6 +4,7 @@
  * List passes are text ("84%" over "38/45"). There is no list donut.
  */
 import { injectCaption } from './caption.ts'
+import { FOOTBALL_SLIDE_CSS } from './football-slide-css.ts'
 export const slideWidth = 1080
 export const slideHeight = 1350
 export const designRound = '13-interim' as const
@@ -11,6 +12,13 @@ export const designRound = '13-interim' as const
 /** Cap height / em, Big Shoulders Display weight 800, from the bundled face. */
 const CAP = 0.81
 const HERO_KEYS = ['goals', 'assists', 'saves', 'rating'] as const
+/** English card wording from catalog snapshots before #132. */
+const CARD_VALUE_LEGACY: Record<string, string> = {
+  None: 'Bez kartona',
+  Yellow: 'Žuti',
+  'Second yellow': 'Drugi žuti',
+  Red: 'Crveni',
+}
 
 export type Colourway = 'navy' | 'red' | 'light'
 export type FootballStatInput = {
@@ -129,12 +137,40 @@ function prepare(input: readonly FootballStatInput[]): Stat[] {
     }
   }
   if (shots?.onTarget) shots.label = 'Udarci (u okvir)'
+  for (const stat of merged) {
+    if (stat.key === 'cards') {
+      stat.value = CARD_VALUE_LEGACY[stat.value] ?? stat.value
+    }
+  }
   return merged.slice(0, 8)
 }
 
 function amount(value: string): number {
   const match = /\d+(?:[.,]\d+)?/.exec(value)
   return match ? Number(match[0].replace(',', '.')) : 0
+}
+
+function slideStatLabel(stat: Stat): string {
+  switch (stat.key) {
+    case 'goals':
+      return 'GOLOVI'
+    case 'assists':
+      return 'ASIST.'
+    case 'minutes':
+      return 'MINUTE'
+    case 'cards':
+      return 'KARTONI'
+    case 'shots':
+      return stat.onTarget !== undefined ? 'Udarci (u okvir)' : 'Udarci'
+    case 'passes':
+      return 'Dodavanja'
+    case 'key_passes':
+      return 'Klj. dod.'
+    case 'yellow':
+      return 'Žuti'
+    default:
+      return stat.label
+  }
 }
 
 function pickHero(
@@ -201,7 +237,7 @@ function playerGrid(
     const spec = noHero(stats.length)
     const tiles = stats.map((stat, index) => {
       const edge = `${index % spec.cols === 0 ? ' c0' : ''}${index < spec.cols ? ' r0' : ''}`
-      return `<div class="tile${edge}" style="font-size:${spec.value}px">${lab(stat.label)}${val(stat, person, true)}</div>`
+      return `<div class="tile${edge}" style="font-size:${spec.value}px">${lab(slideStatLabel(stat))}${val(stat, person, true)}</div>`
     })
     return `<div class="grid" style="grid-template-columns:repeat(${spec.cols},1fr)">${tiles.join('')}</div>`
   }
@@ -212,10 +248,10 @@ function playerGrid(
   const fontPx =
     options.heroFontPx ?? (rows === 2 ? twoRow(value, 0.82, 16, 1.1, 18, 20, 12) : value * 1.4)
   heroes.push({ key: hero.key, fontPx })
-  const heroTile = `<div class="tile hero c0 r0" style="grid-row:1 / span ${rows};grid-column:1">${lab(hero.label)}${val(hero, person, true, fontPx)}</div>`
+  const heroTile = `<div class="tile hero c0 r0" style="grid-row:1 / span ${rows};grid-column:1">${lab(slideStatLabel(hero))}${val(hero, person, true, fontPx)}</div>`
   const tiles = rest.map((stat, index) => {
     const row = Math.floor(index / cols) + 1
-    return `<div class="tile${row === 1 ? ' r0' : ''}" style="grid-row:${row};grid-column:${(index % cols) + 2};font-size:${value}px">${lab(stat.label)}${val(stat, person, true)}</div>`
+    return `<div class="tile${row === 1 ? ' r0' : ''}" style="grid-row:${row};grid-column:${(index % cols) + 2};font-size:${value}px">${lab(slideStatLabel(stat))}${val(stat, person, true)}</div>`
   })
   return `<div class="grid" style="grid-template-columns:1.3fr repeat(${cols},1fr)">${heroTile}${tiles.join('')}</div>`
 }
@@ -234,10 +270,7 @@ function rowWidth(count: number, hero: boolean): number {
 
 function listLabel(stat: Stat): string {
   if (stat.onTarget) return 'Udarci (okv.)'
-  if (stat.key === 'assists') return 'Asist.'
-  if (stat.key === 'key_passes') return 'Klj. dod.'
-  if (stat.key === 'yellow') return 'Žuti'
-  return stat.label
+  return slideStatLabel(stat)
 }
 
 type RowPlan = {
@@ -369,7 +402,7 @@ function page(
   kind: FootballSlide['kind'],
 ): string {
   const note = colourway === 'navy' ? '' : '<!-- colourway not re-reviewed since v1 -->'
-  return `<!doctype html><html lang="hr"><head><meta charset="utf-8"><style>${CSS}</style></head><body><article class="s ${kind}" data-design="${designRound}" data-kind="${kind}" data-colourway="${colourway}" style="${COLOURS[colourway]};width:${slideWidth}px;height:${slideHeight}px">${note}<div class="tex"></div><div class="content">${body}</div><footer class="brand"><span class="mk"></span><b>${esc(brand)}</b></footer></article></body></html>`
+  return `<!doctype html><html lang="hr"><head><meta charset="utf-8"><style>${FOOTBALL_SLIDE_CSS}</style></head><body><article class="s ${kind}" data-design="${designRound}" data-kind="${kind}" data-colourway="${colourway}" style="${COLOURS[colourway]};width:${slideWidth}px;height:${slideHeight}px">${note}<div class="tex"></div><div class="content">${body}</div><footer class="brand"><span class="mk"></span><b>${esc(brand)}</b></footer></article></body></html>`
 }
 
 function esc(value: string): string {
@@ -382,12 +415,3 @@ const HOME = icon('M3.5 11.5L12 4.5l8.5 7M6 9.8V19.5h12V9.8M10 19.5v-5h4v5')
 const AWAY = icon(
   'M12 2.8c.9 0 1.5.9 1.5 2.2v4.6l7 4.1v2.1l-7-2.1v4.1l2.2 1.7v1.7L12 20.2l-3.7 1v-1.7l2.2-1.7v-4.1l-7 2.1v-2.1l7-4.1V5c0-1.3.6-2.2 1.5-2.2z',
 )
-const CSS =
-  "@font-face{font-family:BS;src:url('../fonts/BigShouldersDisplay.ttf');font-weight:100 900}@font-face{font-family:AR;src:url('../fonts/Archivo.ttf');font-weight:100 900;font-stretch:62% 125%}" +
-  '*{margin:0;padding:0;box-sizing:border-box}.s{position:relative;overflow:hidden;color:var(--fg);font-family:AR;background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 35%,var(--bg2) 100%)}.tex{position:absolute;inset:0;background:repeating-conic-gradient(var(--texture) 0 25%,transparent 0 50%) 0 0/24px 24px}.content{position:absolute;left:72px;right:72px;top:72px;bottom:184px}' +
-  '.brand{position:absolute;left:72px;bottom:72px;display:flex;align-items:center;gap:16px}.mk{width:40px;height:40px;background:repeating-conic-gradient(var(--red) 0 25%,#fff 0 50%) 0 0/20px 20px}.brand b{font:800 32px/1 BS;letter-spacing:.04em;text-transform:uppercase}.meta{display:flex;align-items:center;gap:16px;font:700 20px/1.1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase}.meta i{width:8px;height:8px;background:var(--red)}.dim{color:var(--dim)}' +
-  '.name{font-family:BS;text-transform:uppercase;font-size:192px}.player .fn,.list .fn{display:block;font-weight:700;color:var(--fnc)}.player .fn{font-size:.58em;line-height:.92}.list .name{font-size:56px;font-weight:800}.list .fn{font-size:.5em}.ln{display:block;font-weight:900;line-height:.9}.list .ln{font-weight:800;line-height:1}.acc .fn{margin-bottom:.2em}' +
-  '.id{display:flex;align-items:center;gap:14px;color:var(--dim);font:700 28px/1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;margin-top:24px}.id i{width:6px;height:6px;background:var(--mute)}.list .id{font-size:22px;margin-top:12px}.match{display:flex;align-items:baseline;gap:14px;margin-top:48px;font:500 25px/1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.list .match{margin-top:12px;font-size:20px}.match b{font:900 1.45em/1 BS}.list .match b{font-size:1.02em}.w{color:var(--win)}.l{color:var(--loss)}.d{color:var(--fg)}.vs{font-size:.8em}.opp{display:inline-flex;align-items:center;gap:6px}.vi{width:1em;height:1em}' +
-  '.grid{display:grid;margin-top:40px}.tile,.kv{border-left:1px solid var(--rule);border-top:1px solid var(--rule);padding:18px 28px 20px;display:flex;flex-direction:column;gap:12px}.kv{padding:7px 14px 9px;gap:8px}.c0{border-left:0;padding-left:0}.r0{border-top:0}.lab{display:flex;align-items:center;gap:8px;color:var(--dim);font:700 16px/1.1 AR;font-stretch:88%;letter-spacing:.06em;text-transform:uppercase}.kv .lab{font-size:12px}.lab i{width:6px;height:6px;background:var(--mark)}.kv .lab i{width:5px;height:5px}.tight{letter-spacing:.01em}' +
-  '.num,.pass{font:800 1em/.82 BS;color:var(--fg)}.kv .num,.kv .pass{font-size:34px;line-height:1}.hero .num{line-height:1}.ot{font-size:.56em;color:var(--dim)}.pass{display:flex;align-items:center;justify-content:space-between}.pass.text{flex-direction:column;align-items:flex-start}.frac{font-size:.36em;color:var(--dim)}.kv .frac{font:700 12px/1 AR}.kv .pass.text{gap:4px}.ring{position:relative;width:.8em;height:.8em}.rg{width:100%;height:100%}.pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.24em}' +
-  '.block{zoom:var(--list-zoom)}.block .meta{zoom:calc(1 / var(--list-zoom))}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:36px;align-items:start;padding:16px 0;border-bottom:1px solid var(--rule)}.sg{display:grid}'

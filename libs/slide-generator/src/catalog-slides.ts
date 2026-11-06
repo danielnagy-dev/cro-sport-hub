@@ -23,10 +23,10 @@ export type CatalogAppearance = {
 }
 
 function cardText(yellowCards: number, redCard: boolean): string {
-  if (yellowCards === 2) return 'Second yellow'
-  if (yellowCards === 1 && !redCard) return 'Yellow'
-  if (redCard && yellowCards !== 2) return 'Red'
-  return 'None'
+  if (yellowCards === 2) return 'Drugi žuti'
+  if (yellowCards === 1 && !redCard) return 'Žuti'
+  if (redCard && yellowCards !== 2) return 'Crveni'
+  return 'Bez kartona'
 }
 
 function heroKey(goals: number, assists: number): FootballPerson['hero'] {
@@ -47,10 +47,10 @@ function mapAppearance(row: CatalogAppearance): FootballEntry {
       side: row.side,
     },
     stats: [
-      { key: 'goals', label: 'Goals', value: String(row.goals) },
-      { key: 'assists', label: 'Assists', value: String(row.assists) },
-      { key: 'minutes', label: 'Minutes', value: String(row.minutes) },
-      { key: 'cards', label: 'Cards', value: cardText(row.yellowCards, row.redCard) },
+      { key: 'goals', label: 'GOLOVI', value: String(row.goals) },
+      { key: 'assists', label: 'ASIST.', value: String(row.assists) },
+      { key: 'minutes', label: 'MINUTE', value: String(row.minutes) },
+      { key: 'cards', label: 'KARTONI', value: cardText(row.yellowCards, row.redCard) },
     ],
     hero: heroKey(row.goals, row.assists),
     lineup: row.started ? 'start' : 'sub',
