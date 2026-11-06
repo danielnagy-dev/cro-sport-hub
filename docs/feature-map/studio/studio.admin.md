@@ -12,4 +12,4 @@ An admin reads fixture import runs at `/admin/import` from `GET /api/admin/impor
 
 #### How to get to it (user POV)
 
-- Log in as `admin-demo`, then open `/admin/competitions`, `/admin/teams`, or `/admin/import`, or choose **Admin** in the header (teams page) and use the admin section nav between competitions, teams, and import.
+- Log in as `admin-demo`, then open `/admin/competitions`, `/admin/teams`, or `/admin/import`, or choose **Admin** in the studio section header and use the admin section nav between competitions, teams, and import.

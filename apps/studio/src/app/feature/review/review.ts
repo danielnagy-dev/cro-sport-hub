@@ -5,6 +5,7 @@ import type { Status } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
 import { ReviewApi, type ReviewMatchDetail } from '../../core/review-api'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 
 type LoadStatus = 'loading' | 'ready' | 'not-found' | 'error'
 type MetaRow = { k: string; v: string }
@@ -20,7 +21,7 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
 
 @Component({
   selector: 'app-review',
-  imports: [RouterLink],
+  imports: [RouterLink, StudioSectionHeader],
   templateUrl: './review.html',
 })
 export class ReviewPage {
@@ -88,10 +89,6 @@ export class ReviewPage {
         )
       },
     })
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
   }
 
   protected onReject(): void {

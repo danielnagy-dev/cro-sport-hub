@@ -1,0 +1,25 @@
+<header class="shell-header">
+  <a class="skip-link" href="#content">{{ skipLabel() }}</a>
+  <p class="shell-mark">Cro Sport Hub</p>
+  <h1>Studio</h1>
+  <nav class="shell-nav" aria-label="Studio sections">
+    <a routerLink="/" [attr.aria-current]="ariaHome()">Home</a>
+    <a routerLink="/matches" [attr.aria-current]="ariaMatches()">Matches</a>
+    <a
+      routerLink="/matches"
+      [queryParams]="{ status: 'review' }"
+      [attr.aria-current]="ariaReviewQueue()"
+      >Review queue</a
+    >
+    <a routerLink="/galleries/new" [attr.aria-current]="ariaGalleries()">Galleries</a>
+    @if (auth.session()?.role === 'admin') {
+    <a routerLink="/admin/competitions" [attr.aria-current]="ariaAdmin()">Admin</a>
+    }
+  </nav>
+  @if (auth.session(); as session) {
+  <div class="shell-session">
+    <span>{{ session.id }}</span>
+    <button type="button" (click)="logOut()">Log out</button>
+  </div>
+  }
+</header>

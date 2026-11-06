@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, afterNextRender } from '@angular/core'
 import { form, FormField, disabled, readonly, submit, validate } from '@angular/forms/signals'
 import { HttpErrorResponse } from '@angular/common/http'
-import { ActivatedRoute, RouterLink, Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import {
   athleteLookupSchema,
   competitionLookupSchema,
@@ -12,7 +12,7 @@ import {
   type TeamLookup,
 } from '@cro-sport-hub/shared-types'
 import { firstValueFrom } from 'rxjs'
-import { AuthStore } from '../../core/auth'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { EditorLookupsApi } from '../../core/editor-lookups-api'
 import { FootballApi } from '../../core/football-api'
 import { MatchSubmitApi } from '../../core/match-submit-api'
@@ -50,7 +50,7 @@ const FIELDS = [
 
 @Component({
   selector: 'app-football-score',
-  imports: [FormField, RouterLink],
+  imports: [FormField, StudioSectionHeader],
   templateUrl: './football-score.html',
 })
 export class FootballScorePage {
@@ -59,7 +59,6 @@ export class FootballScorePage {
   private readonly submitApi = inject(MatchSubmitApi)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
-  protected readonly auth = inject(AuthStore)
   protected readonly fieldConfigs = FIELDS
   protected readonly appearanceCountFields = APPEARANCE_COUNT_FIELDS
 
