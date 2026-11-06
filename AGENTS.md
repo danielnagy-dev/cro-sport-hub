@@ -14,7 +14,7 @@ Run `vp` from the repository root. Library declaration emit uses the catalog com
 
 ## Commands
 
-Run these from the repository root, after `pnpm install`. When `vp` or `vpx` is not on `PATH`, prefix the command with `pnpm exec`. CI (`.github/workflows/ci.yml`, job `ci`) runs `format-check`, `lint`, `typecheck`, `test`, and `build` in that order, plus `tools/guards/pr-size.ts` on pull requests. Which of those a docs-only change skips: `.cursor/skills/develop/SKILL.md`.
+Run these from the repository root, after `pnpm install`. When `vp` or `vpx` is not on `PATH`, prefix the command with `pnpm exec`. CI (`.github/workflows/ci.yml`, job `ci`) runs `format-check`, `lint`, `typecheck`, `test`, and `build` in that order, plus `tools/guards/pr-size.ts` on pull requests. After a squash merge to `main`, `.github/workflows/close-linked-issues.yml` closes still-open issues referenced with closing keywords in the merged PR body (GitHub often misses this when the squash commit drops the description). Which of those a docs-only change skips: `.cursor/skills/develop/SKILL.md`.
 
 - `vp fmt` and `vp run format-check` — oxfmt, root `fmt` in `vite.config.ts`. Style: `CODING_STANDARDS.md`.
 - `vp run lint` — Oxlint, then `tools/guards/check.ts` and `tools/guards/file-size.ts`. `vp run guards` is those guards with the cache off.
