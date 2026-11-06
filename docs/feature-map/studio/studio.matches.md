@@ -4,7 +4,7 @@
 | ------ | ------ | ------------------------------- | ---------------------------------------- | ------------- |
 | studio | live   | `http://localhost:4200/matches` | `vp run studio#test` and `verify:studio` | plan item 23b |
 
-After login, `/matches` loads `GET /api/editor/matches` with the stored bearer. Three native `<select>` filters (sport, status, source) each include an All option; changing a filter reloads the list. The table caption is `Editorial match list`. Columns are label, sport, competition, date, round, status, and source. An empty page shows `No matches.` A failed load shows `The match list could not be loaded.` and leaves the filters enabled. A tennis row links to `/matches/<id>/tennis`. A football row is a label. The home shell at `/` still uses the stub (`studio.shell`).
+After login, `/matches` loads `GET /api/editor/matches` with the stored bearer. Three native `<select>` filters (sport, status, source) each include an All option; changing a filter updates the URL query string (`sport`, `status`, `source`) and reloads the list so a refresh keeps the same filter. The table caption is `Editorial match list`. Columns are label, sport, competition, date, round, status, source, and actions. An empty page shows `No matches.` A failed load shows `The match list could not be loaded.` and leaves the filters enabled. A tennis row links to `/matches/<id>/tennis`. A football row links to `/matches/<id>/football`. A row in `review` shows a **Review** link to `/matches/<id>/review`.
 
 #### How to get to it (user POV)
 
@@ -21,4 +21,3 @@ Preconditions: port 4200 is free. Playwright Chromium is installed. The verify C
 #### Gotchas
 
 - Filter query params are `sport`, `status`, and `source`. Omitting them lists every sport and status, including drafts.
-- The shell stub on `/` is unchanged; only this route calls the editorial API.

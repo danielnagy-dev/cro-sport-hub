@@ -4,13 +4,13 @@
 | ------ | ------ | ------------------------------------ | -------------------- | ---------------------------------------------------- |
 | studio | live   | `http://localhost:4200/` after login | `vp run studio#test` | plan items for the studio skeleton (formerly GH #34) |
 
-The studio home route is `http://localhost:4200/`. It shows the shell header (Cro Sport Hub, Studio, session, log out) and the home view: links to **Matches**, **New gallery**, and for admins **Admin**. Match lists and filters live on `/matches` ([studio.matches](studio.matches.md)).
+The studio home route is `http://localhost:4200/`. Every signed-in route uses the same section header (Cro Sport Hub, Studio, **Home**, **Matches**, **Review queue** → `/matches?status=review`, **Galleries** → `/galleries/new`, and **Admin** for admins → `/admin/competitions`, plus session and log out). The home view lists shortcuts: **Matches**, **Review queue**, **New gallery**, and for admins **Admin**. Match lists and filters live on `/matches` ([studio.matches](studio.matches.md)).
 
 An editor who opens an admin-only URL (for example `/admin/competitions`) is redirected to `/` with `?admin=1`; the home view shows a short message that admin pages need an admin login.
 
 #### Sub-features
 
-- `studio.shell-header` shows the Studio heading and the skip link.
+- `studio.shell-header` is `StudioSectionHeader` in `apps/studio/src/app/core/studio-section-header.ts` (skip link, mark, **Studio** heading, section nav, session).
 - `studio.shell-home` shows role-based shortcuts on `/`.
 
 #### How to get to it (user POV)

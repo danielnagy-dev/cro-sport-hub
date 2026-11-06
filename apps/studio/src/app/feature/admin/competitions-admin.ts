@@ -9,8 +9,8 @@ import {
   type Sport,
 } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
 import { CatalogApi } from '../../core/catalog-api'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { CompetitionsAdminApi } from '../../core/competitions-admin-api'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
@@ -50,7 +50,7 @@ function conflictMessage(error: HttpErrorResponse, fallback: string): string {
 
 @Component({
   selector: 'app-competitions-admin',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, StudioSectionHeader],
   templateUrl: './competitions-admin.html',
 })
 export class CompetitionsAdminPage {
@@ -59,7 +59,6 @@ export class CompetitionsAdminPage {
   private listPending: Subscription | undefined
   private sportsPending: Subscription | undefined
 
-  protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
   protected readonly rows = signal<Competition[]>([])
   protected readonly sports = signal<Sport[]>([])
@@ -102,10 +101,6 @@ export class CompetitionsAdminPage {
     )
     this.saveError.set(undefined)
     this.submitAttempted.set(false)
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
   }
 
   protected onSave(event: Event): void {

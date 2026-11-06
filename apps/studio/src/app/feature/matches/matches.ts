@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core'
-import { RouterLink } from '@angular/router'
-import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals'
+import { Component, DestroyRef, inject } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router'
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals'
 import type { EditorMatch, MatchSource, SportSlug, Status } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
 import { MatchesApi } from '../../core/matches-api'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 
 type MatchesState = {
   items: EditorMatch[]
@@ -20,6 +21,21 @@ const initialMatchesState: MatchesState = {
   status: '',
   source: '',
   loadStatus: 'loading',
+}
+
+function parseSportParam(value: string | null): SportSlug | '' {
+  if (value === 'tennis' || value === 'football') return value
+  return ''
+}
+
+function parseStatusParam(value: string | null): Status | '' {
+  if (value === 'draft' || value === 'review' || value === 'published') return value
+  return ''
+}
+
+function parseSourceParam(value: string | null): MatchSource | '' {
+  if (value === 'manual' || value === 'import') return value
+  return ''
 }
 
 const MatchesStore = signalStore(
@@ -46,24 +62,15 @@ const MatchesStore = signalStore(
     }
 
     return {
-      setSport(value: SportSlug | ''): void {
-        patchState(store, { sport: value })
-        reload()
-      },
-      setStatus(value: Status | ''): void {
-        patchState(store, { status: value })
-        reload()
-      },
-      setSource(value: MatchSource | ''): void {
-        patchState(store, { source: value })
+      syncFromQuery(params: ParamMap): void {
+        patchState(store, {
+          sport: parseSportParam(params.get('sport')),
+          status: parseStatusParam(params.get('status')),
+          source: parseSourceParam(params.get('source')),
+        })
         reload()
       },
     }
-  }),
-  withHooks({
-    onInit(store) {
-      store.setSport(store.sport())
-    },
   }),
 )
 
@@ -74,22 +81,36 @@ function readSelectValue(event: Event): string {
 
 @Component({
   selector: 'app-matches',
-  imports: [RouterLink],
+  imports: [RouterLink, StudioSectionHeader],
   templateUrl: './matches.html',
   providers: [MatchesStore],
 })
 export class MatchesPage {
   protected readonly store = inject(MatchesStore)
-  protected readonly auth = inject(AuthStore)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly destroyRef = inject(DestroyRef)
+
+  constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.store.syncFromQuery(params)
+    })
+  }
 
   protected onFilter(kind: 'sport' | 'status' | 'source', event: Event): void {
     const value = readSelectValue(event)
-    if (kind === 'sport') this.store.setSport(value as SportSlug | '')
-    if (kind === 'status') this.store.setStatus(value as Status | '')
-    if (kind === 'source') this.store.setSource(value as MatchSource | '')
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
+    const sport: SportSlug | '' = kind === 'sport' ? (value as SportSlug | '') : this.store.sport()
+    const status: Status | '' = kind === 'status' ? (value as Status | '') : this.store.status()
+    const source: MatchSource | '' =
+      kind === 'source' ? (value as MatchSource | '') : this.store.source()
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        sport: sport === '' ? undefined : sport,
+        status: status === '' ? undefined : status,
+        source: source === '' ? undefined : source,
+      },
+      replaceUrl: true,
+    })
   }
 }

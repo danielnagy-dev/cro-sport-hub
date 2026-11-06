@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { RouterLink } from '@angular/router'
 import { teamSchema, type Team } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { TeamsAdminApi } from '../../core/teams-admin-api'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
@@ -53,14 +53,13 @@ function conflictMessage(error: HttpErrorResponse, fallback: string): string {
 
 @Component({
   selector: 'app-teams-admin',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, StudioSectionHeader],
   templateUrl: './teams-admin.html',
 })
 export class TeamsAdminPage {
   private readonly api = inject(TeamsAdminApi)
   private listPending: Subscription | undefined
 
-  protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
   protected readonly rows = signal<Team[]>([])
   protected readonly model = signal<TeamFormModel>(emptyForm())
@@ -94,10 +93,6 @@ export class TeamsAdminPage {
     )
     this.saveError.set(undefined)
     this.submitAttempted.set(false)
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
   }
 
   protected onSave(event: Event): void {
