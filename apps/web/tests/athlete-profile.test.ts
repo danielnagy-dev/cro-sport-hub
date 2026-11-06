@@ -5,6 +5,7 @@ import { expect, test } from 'vite-plus/test'
 import AthletePage, { generateMetadata } from '../app/athletes/[slug]/page'
 import { athletePath } from '../lib/api-client'
 import { AthleteUnavailableMain } from '../lib/athlete-view'
+import { SITE_NAME } from '../lib/site-metadata'
 
 const karlo = {
   slug: 'karlo-brkic',
@@ -279,6 +280,19 @@ test('document title is the athlete name', async () => {
       generateMetadata({ params: Promise.resolve({ slug: 'sample-player-a' }) }),
     ).resolves.toEqual({
       title: 'Sample Player A · Cro Sport Hub',
+      description: 'Published results and profile for Sample Player A.',
+      openGraph: {
+        title: 'Sample Player A · Cro Sport Hub',
+        description: 'Published results and profile for Sample Player A.',
+        type: 'website',
+        url: 'http://localhost:3000/athletes/sample-player-a',
+        siteName: SITE_NAME,
+      },
+      twitter: {
+        card: 'summary',
+        title: 'Sample Player A · Cro Sport Hub',
+        description: 'Published results and profile for Sample Player A.',
+      },
     })
   } finally {
     globalThis.fetch = previous

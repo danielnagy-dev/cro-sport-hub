@@ -4,7 +4,7 @@
 | --- | ------ | ------------------------ | ---------------------------------------------------------------------------------- | ------------- |
 | web | live   | `http://localhost:3000/` | `vp run verify:web`; local visitor walk `vp run verify:visitor` (needs API + seed) | plan item 18a |
 
-The public home page lists the latest published tennis and football results. It keeps the skip link, the header link back to `/`, and the heading `Cro Sport Hub` inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
+The public home page lists the latest published tennis and football results. It keeps the skip link, the header link back to `/`, and the heading `Cro Sport Hub` inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. Open Graph and Twitter summary metadata use the public site origin with `og:title`, `og:description`, `og:type` (`website`), `og:url`, and `og:site_name`. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
 
 #### Sub-features
 
