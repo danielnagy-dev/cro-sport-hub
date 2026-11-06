@@ -23,7 +23,7 @@
     } @else if (loadStatus() === 'error') {
     <p role="alert">The match could not be loaded.</p>
     } @else if (detail(); as row) {
-    <table class="matches-table review-meta">
+    <table class="matches-table">
       <tbody>
         @for (m of metaRows(); track m.k) {
         <tr>
@@ -82,10 +82,10 @@
     } @else {
     <p><a [routerLink]="['/matches', row.summary.id, 'football']">Edit football match</a></p>
     } @if (showAdminActions()) {
-    <p class="review-actions">
+    <div class="review-actions">
       <button type="button" [disabled]="actionPending()" (click)="onReject()">Reject</button>
       <button type="button" [disabled]="actionPending()" (click)="onPublish()">Publish</button>
-    </p>
+    </div>
     } @if (actionError(); as message) {
     <p role="alert">{{ message }}</p>
     } }
