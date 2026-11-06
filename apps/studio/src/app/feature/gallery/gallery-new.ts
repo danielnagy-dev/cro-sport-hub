@@ -14,7 +14,7 @@ function publishedFootballMatches(items: readonly EditorMatch[]): EditorMatch[] 
   selector: 'app-gallery-new',
   imports: [GalleryShell],
   template: `
-    <app-gallery-shell skipLabel="Skip to match picker" galleriesCurrent="page">
+    <app-gallery-shell skipLabel="Skip to match picker">
       <h2>New gallery</h2>
       <p>Pick published football matches. Each match becomes one slide.</p>
       @if (loadStatus() === 'loading') {

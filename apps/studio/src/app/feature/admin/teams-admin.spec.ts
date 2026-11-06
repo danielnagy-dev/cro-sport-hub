@@ -12,6 +12,13 @@ import {
   TOKEN_STORE,
   type TokenStore,
 } from '../../core/auth'
+import {
+  MSG_TEAM_COUNTRY,
+  MSG_TEAM_ID,
+  MSG_TEAM_NAME,
+  MSG_TEAM_SHORT_NAME,
+  MSG_TEAM_SLUG,
+} from '../../core/admin-form-messages'
 import { adminTeamPath, adminTeamsPath } from '../../core/teams-admin-api'
 import { TeamsAdminPage } from './teams-admin'
 
@@ -122,6 +129,37 @@ describe('TeamsAdminPage', () => {
   afterEach(() => {
     http.verify()
     TestBed.resetTestingModule()
+  })
+
+  it('does not POST when the create form is empty and shows field messages', async () => {
+    ;(fixture.componentInstance as unknown as { loadForm(): void }).loadForm()
+    fixture.detectChanges()
+    ;[...root.querySelectorAll('button')]
+      .find((node) => node.textContent?.includes('Save'))
+      ?.click()
+    http.expectNone(adminTeamsPath)
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain(MSG_TEAM_ID)
+    expect(root.textContent).toContain(MSG_TEAM_SLUG)
+    expect(root.textContent).toContain(MSG_TEAM_NAME)
+    expect(root.textContent).toContain(MSG_TEAM_SHORT_NAME)
+    expect(root.textContent).toContain(MSG_TEAM_COUNTRY)
+    expect(document.activeElement?.id).toBe('team-id')
+  })
+
+  it('shows the API message when save returns 400', async () => {
+    ;(fixture.componentInstance as unknown as { loadForm(row: Team): void }).loadForm(home)
+    fixture.detectChanges()
+    ;[...root.querySelectorAll('button')]
+      .find((node) => node.textContent?.includes('Save'))
+      ?.click()
+    http
+      .expectOne(adminTeamPath(home.id))
+      .flush({ message: 'Slug taken', statusCode: 400 }, { status: 400, statusText: 'Bad Request' })
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(root.textContent).toContain('Slug taken')
   })
 
   it('lists seeded clubs and creates a row with a football sport id', async () => {

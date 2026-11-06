@@ -476,6 +476,11 @@ main .field-error {
   margin-top: var(--space-6);
 }
 
+.admin-competitions-main .tennis-field .field-error,
+.admin-teams-main .tennis-field .field-error {
+  margin: 0;
+}
+
 .admin-competitions-main .tennis-form > h3,
 .admin-teams-main .tennis-form > h3 {
   margin: 0 0 var(--space-4);

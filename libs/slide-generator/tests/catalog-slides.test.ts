@@ -68,12 +68,12 @@ test('five league appearances split into four list rows then a one-row list slid
   expect(doc.html).not.toContain('stroke-dasharray')
   expect(doc.html).not.toMatch(/<span>#/)
   expect(doc.html).toContain('Brkić')
-  expect(doc.html).toContain('Goals</span>')
+  expect(doc.html).toContain('GOLOVI</span>')
   expect(doc.html).toContain('>2</span>')
-  expect(doc.html).toContain('Minutes</span>')
+  expect(doc.html).toContain('MINUTE</span>')
   expect(doc.html).toMatch(/<span class="num"[^>]*>90/)
-  expect(doc.html).toContain('Cards</span>')
-  expect(doc.html).toContain('>None</span>')
+  expect(doc.html).toContain('KARTONI</span>')
+  expect(doc.html).toContain('>Bez kartona</span>')
   expect(doc.html).toContain('Forward</span>')
   expect(doc.html).not.toContain('Perić')
 })
@@ -82,13 +82,13 @@ test('Filip maps second yellow cards and a goals hero', () => {
   const filip = leagueAppearances[3]
   if (filip === undefined) throw new Error('missing filip fixture')
   const entry = catalogSlides([filip])[0]
-  expect(entry?.player.stats.find((stat) => stat.key === 'cards')?.value).toBe('Second yellow')
+  expect(entry?.player.stats.find((stat) => stat.key === 'cards')?.value).toBe('Drugi žuti')
   expect(entry?.player.hero).toBe('goals')
   const slides = footballSlides(catalogSlides(leagueAppearances))
   const list = slides[0]
   if (list?.kind !== 'list') return
   const doc = footballTemplate(list)
-  expect(doc.html).toContain('Second yellow')
+  expect(doc.html).toContain('Drugi žuti')
   expect(doc.heroes.map((hero) => hero.key)).toContain('goals')
   expect(doc.html).toContain('Šarić')
 })

@@ -9,8 +9,15 @@ import {
   type Sport,
 } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
-import { AuthStore } from '../../core/auth'
+import {
+  COMPETITION_FIELD_IDS,
+  COMPETITION_FIELD_ORDER,
+  competitionFieldMessages,
+  focusFirstFieldWithMessages,
+  httpErrorBodyMessage,
+} from '../../core/admin-form-messages'
 import { CatalogApi } from '../../core/catalog-api'
+import { StudioSectionHeader } from '../../core/studio-section-header'
 import { CompetitionsAdminApi } from '../../core/competitions-admin-api'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
@@ -39,18 +46,9 @@ function modelToBody(model: CompetitionFormModel): unknown {
   }
 }
 
-function conflictMessage(error: HttpErrorResponse, fallback: string): string {
-  const body: unknown = error.error
-  if (typeof body === 'object' && body !== null && 'message' in body) {
-    const message = body.message
-    if (typeof message === 'string') return message
-  }
-  return fallback
-}
-
 @Component({
   selector: 'app-competitions-admin',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, StudioSectionHeader],
   templateUrl: './competitions-admin.html',
 })
 export class CompetitionsAdminPage {
@@ -59,7 +57,6 @@ export class CompetitionsAdminPage {
   private listPending: Subscription | undefined
   private sportsPending: Subscription | undefined
 
-  protected readonly auth = inject(AuthStore)
   protected readonly loadStatus = signal<LoadStatus>('loading')
   protected readonly rows = signal<Competition[]>([])
   protected readonly sports = signal<Sport[]>([])
@@ -69,6 +66,7 @@ export class CompetitionsAdminPage {
   protected readonly deleteError = signal<string | undefined>(undefined)
   protected readonly savePending = signal(false)
   protected readonly submitAttempted = signal(false)
+  protected readonly fieldErrors = signal<Record<string, string>>({})
   protected readonly levels = LEVELS
 
   protected readonly competitionForm = form(this.model, (path) => {
@@ -87,6 +85,13 @@ export class CompetitionsAdminPage {
     return this.sports().find((sport) => sport.id === sportId)?.name ?? sportId
   }
 
+  protected competitionFieldError(
+    key: 'id' | 'sportId' | 'name' | 'season' | 'level',
+  ): string | undefined {
+    if (!this.submitAttempted()) return undefined
+    return this.fieldErrors()[key]
+  }
+
   protected loadForm(row?: Competition): void {
     this.editingId.set(row?.id ?? null)
     this.model.set(
@@ -102,18 +107,21 @@ export class CompetitionsAdminPage {
     )
     this.saveError.set(undefined)
     this.submitAttempted.set(false)
-  }
-
-  protected logOut(): void {
-    this.auth.logOut()
+    this.fieldErrors.set({})
   }
 
   protected onSave(event: Event): void {
     event.preventDefault()
     this.submitAttempted.set(true)
     this.saveError.set(undefined)
+    this.fieldErrors.set({})
     const parsed = competitionSchema.safeParse(modelToBody(this.model()))
-    if (!parsed.success) return
+    if (!parsed.success) {
+      const messages = competitionFieldMessages(this.model(), parsed.error)
+      this.fieldErrors.set(messages)
+      focusFirstFieldWithMessages(COMPETITION_FIELD_ORDER, messages, COMPETITION_FIELD_IDS)
+      return
+    }
     if (this.savePending()) return
     this.savePending.set(true)
     const editing = this.editingId()
@@ -128,8 +136,8 @@ export class CompetitionsAdminPage {
       },
       error: (error: unknown) => {
         this.savePending.set(false)
-        if (error instanceof HttpErrorResponse && error.status === 409) {
-          this.saveError.set(conflictMessage(error, 'That record is already stored'))
+        if (error instanceof HttpErrorResponse && (error.status === 400 || error.status === 409)) {
+          this.saveError.set(httpErrorBodyMessage(error, 'The competition could not be saved.'))
           return
         }
         this.saveError.set('The competition could not be saved.')
@@ -145,7 +153,7 @@ export class CompetitionsAdminPage {
       next: () => this.reload(),
       error: (error: unknown) => {
         if (error instanceof HttpErrorResponse && error.status === 409) {
-          this.deleteError.set(conflictMessage(error, 'Competition is in use'))
+          this.deleteError.set(httpErrorBodyMessage(error, 'Competition is in use'))
           return
         }
         this.deleteError.set('The competition could not be deleted.')
