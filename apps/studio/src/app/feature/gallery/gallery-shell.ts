@@ -7,7 +7,7 @@ import { StudioSectionHeader } from '../../core/studio-section-header'
   template: `
     <div class="shell">
       <app-studio-section-header [skipLabel]="skipLabel()" />
-      <main id="content" tabindex="-1"><ng-content /></main>
+      <main id="content" class="matches-main" tabindex="-1"><ng-content /></main>
     </div>
   `,
 })
