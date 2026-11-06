@@ -25,7 +25,9 @@
     </nav>
     <h2>Import log</h2>
     <p>Runs use the server fixture. There is no file upload or schedule control on this page.</p>
-    <button type="button" [disabled]="runBusy()" (click)="onRunNow()">Run now</button>
+    <div class="review-actions">
+      <button type="button" [disabled]="runBusy()" (click)="onRunNow()">Run now</button>
+    </div>
     @if (runError(); as message) {
     <p role="alert">{{ message }}</p>
     } @if (loadStatus() === 'loading') {
@@ -33,7 +35,7 @@
     } @else if (loadStatus() === 'error') {
     <p role="alert">The import log could not be loaded.</p>
     } @else {
-    <table>
+    <table class="matches-table">
       <caption>
         Fixture import runs, newest first
       </caption>

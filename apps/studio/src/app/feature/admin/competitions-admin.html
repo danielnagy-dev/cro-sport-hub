@@ -29,7 +29,7 @@
     } @else if (loadStatus() === 'error') {
     <p role="alert">The competition list could not be loaded.</p>
     } @else {
-    <table>
+    <table class="matches-table">
       <caption>
         Admin competition list
       </caption>
@@ -62,32 +62,45 @@
       </tbody>
     </table>
     }
-    <form (submit)="onSave($event)">
+    <form class="tennis-form" (submit)="onSave($event)">
       <h3>{{ editingId() === null ? 'Create competition' : 'Update competition' }}</h3>
-      <label for="competition-id">Id</label>
-      <input id="competition-id" [formField]="competitionForm.id" />
-      <label for="competition-sport">Sport</label>
-      <select id="competition-sport" [formField]="competitionForm.sportId">
-        <option value="">Choose a sport</option>
-        @for (sport of sports(); track sport.id) {
-        <option [value]="sport.id">{{ sport.name }}</option>
+      <div class="tennis-field">
+        <label for="competition-id">Id</label>
+        <input id="competition-id" [formField]="competitionForm.id" />
+      </div>
+      <div class="tennis-field">
+        <label for="competition-sport">Sport</label>
+        <select id="competition-sport" [formField]="competitionForm.sportId">
+          <option value="">Choose a sport</option>
+          @for (sport of sports(); track sport.id) {
+          <option [value]="sport.id">{{ sport.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="tennis-field">
+        <label for="competition-name">Name</label>
+        <input id="competition-name" [formField]="competitionForm.name" />
+      </div>
+      <div class="tennis-field">
+        <label for="competition-season">Season</label>
+        <input id="competition-season" [formField]="competitionForm.season" />
+      </div>
+      <div class="tennis-field">
+        <label for="competition-level">Level</label>
+        <select id="competition-level" [formField]="competitionForm.level">
+          <option value="">Choose a level</option>
+          @for (level of levels; track level) {
+          <option [value]="level">{{ level }}</option>
+          }
+        </select>
+      </div>
+      <div class="review-actions">
+        <button type="submit" [disabled]="savePending()">Save</button>
+        @if (editingId() !== null) {
+        <button type="button" (click)="loadForm()">Cancel edit</button>
         }
-      </select>
-      <label for="competition-name">Name</label>
-      <input id="competition-name" [formField]="competitionForm.name" />
-      <label for="competition-season">Season</label>
-      <input id="competition-season" [formField]="competitionForm.season" />
-      <label for="competition-level">Level</label>
-      <select id="competition-level" [formField]="competitionForm.level">
-        <option value="">Choose a level</option>
-        @for (level of levels; track level) {
-        <option [value]="level">{{ level }}</option>
-        }
-      </select>
-      <button type="submit" [disabled]="savePending()">Save</button>
-      @if (editingId() !== null) {
-      <button type="button" (click)="loadForm()">Cancel edit</button>
-      } @if (saveError(); as message) {
+      </div>
+      @if (saveError(); as message) {
       <p role="alert">{{ message }}</p>
       }
     </form>

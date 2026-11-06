@@ -29,7 +29,7 @@
     } @else if (loadStatus() === 'error') {
     <p role="alert">The team list could not be loaded.</p>
     } @else {
-    <table>
+    <table class="matches-table">
       <caption>
         Admin football club list
       </caption>
@@ -62,22 +62,35 @@
       </tbody>
     </table>
     }
-    <form (submit)="onSave($event)">
+    <form class="tennis-form" (submit)="onSave($event)">
       <h3>{{ editingId() === null ? 'Create club' : 'Update club' }}</h3>
-      <label for="team-id">Id</label>
-      <input id="team-id" [formField]="teamForm.id" />
-      <label for="team-slug">Slug</label>
-      <input id="team-slug" [formField]="teamForm.slug" />
-      <label for="team-name">Name</label>
-      <input id="team-name" [formField]="teamForm.name" />
-      <label for="team-short-name">Short name</label>
-      <input id="team-short-name" [formField]="teamForm.shortName" />
-      <label for="team-country">Country</label>
-      <input id="team-country" [formField]="teamForm.country" />
-      <button type="submit" [disabled]="savePending()">Save</button>
-      @if (editingId() !== null) {
-      <button type="button" (click)="loadForm()">Cancel edit</button>
-      } @if (saveError(); as message) {
+      <div class="tennis-field">
+        <label for="team-id">Id</label>
+        <input id="team-id" [formField]="teamForm.id" />
+      </div>
+      <div class="tennis-field">
+        <label for="team-slug">Slug</label>
+        <input id="team-slug" [formField]="teamForm.slug" />
+      </div>
+      <div class="tennis-field">
+        <label for="team-name">Name</label>
+        <input id="team-name" [formField]="teamForm.name" />
+      </div>
+      <div class="tennis-field">
+        <label for="team-short-name">Short name</label>
+        <input id="team-short-name" [formField]="teamForm.shortName" />
+      </div>
+      <div class="tennis-field">
+        <label for="team-country">Country</label>
+        <input id="team-country" [formField]="teamForm.country" />
+      </div>
+      <div class="review-actions">
+        <button type="submit" [disabled]="savePending()">Save</button>
+        @if (editingId() !== null) {
+        <button type="button" (click)="loadForm()">Cancel edit</button>
+        }
+      </div>
+      @if (saveError(); as message) {
       <p role="alert">{{ message }}</p>
       }
     </form>
