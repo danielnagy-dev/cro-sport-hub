@@ -7,9 +7,9 @@
       "competitionId": "comp-sample-cup",
       "date": "2026-10-21",
       "round": "Semi-final",
-      "playerAId": "sample-player-a",
-      "playerBId": "sample-player-b",
-      "winnerId": "sample-player-a",
+      "playerAId": "sample-player-e",
+      "playerBId": "sample-player-f",
+      "winnerId": "sample-player-e",
       "bestOf": 3,
       "score": [
         [6, 4],

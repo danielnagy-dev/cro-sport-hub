@@ -79,6 +79,20 @@ function readSelectValue(event: Event): string {
   return target instanceof HTMLSelectElement ? target.value : ''
 }
 
+const MATCH_ROW_DATE = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
+
+function formatSourceLabel(source: MatchSource): string {
+  if (source === 'import') return 'Import'
+  return 'Manual'
+}
+
+/** Secondary line under the match label so duplicate titles stay distinguishable. */
+export function formatMatchRowMeta(match: EditorMatch): string {
+  const date = new Date(`${match.date}T12:00:00`)
+  const dateLabel = MATCH_ROW_DATE.format(date)
+  return `${dateLabel} · ${match.competition} · ${formatSourceLabel(match.source)}`
+}
+
 @Component({
   selector: 'app-matches',
   imports: [RouterLink, StudioSectionHeader],
@@ -86,6 +100,7 @@ function readSelectValue(event: Event): string {
   providers: [MatchesStore],
 })
 export class MatchesPage {
+  protected readonly formatMatchRowMeta = formatMatchRowMeta
   protected readonly store = inject(MatchesStore)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
