@@ -50,11 +50,14 @@
         @for (row of store.items(); track row.id) {
         <tr>
           <td>
-            @if (row.sport === 'tennis') {
-            <a [routerLink]="['/matches', row.id, 'tennis']">{{ row.label }}</a>
-            } @else if (row.sport === 'football') {
-            <a [routerLink]="['/matches', row.id, 'football']">{{ row.label }}</a>
-            } @else { {{ row.label }} }
+            <div class="match-label-cell">
+              @if (row.sport === 'tennis') {
+              <a [routerLink]="['/matches', row.id, 'tennis']">{{ row.label }}</a>
+              } @else if (row.sport === 'football') {
+              <a [routerLink]="['/matches', row.id, 'football']">{{ row.label }}</a>
+              } @else { {{ row.label }} }
+              <p class="match-row-meta">{{ formatMatchRowMeta(row) }}</p>
+            </div>
           </td>
           <td>{{ row.sport }}</td>
           <td>{{ row.competition }}</td>

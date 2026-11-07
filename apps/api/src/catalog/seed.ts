@@ -48,7 +48,9 @@ const playerA = tennisPlayer('a', 'Sample Player A')
 const playerB = tennisPlayer('b', 'Sample Player B')
 const playerC = tennisPlayer('c', 'Sample Player C')
 const playerD = tennisPlayer('d', 'Sample Player D')
-export const seedTennisAthletes = [playerA, playerB, playerC, playerD]
+const playerE = tennisPlayer('e', 'Sample Player E')
+const playerF = tennisPlayer('f', 'Sample Player F')
+export const seedTennisAthletes = [playerA, playerB, playerC, playerD, playerE, playerF]
 
 const karlo = footballer('karlo-brkic', 'Karlo Brkić', 'Forward')
 const filip = footballer('filip-saric', 'Filip Šarić', 'Right back')
