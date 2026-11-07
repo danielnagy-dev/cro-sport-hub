@@ -40,6 +40,14 @@ Install workspace dependencies:
 vp install
 ```
 
+Build the shared React UI library once per clone (and again after you change `libs/ui`):
+
+```bash
+vp run ui#build
+```
+
+The public site imports `@cro-sport-hub/ui` from its published `dist/` output. `vp run web#dev` does not build workspace packages, so missing `dist/` files return HTTP 500 until you run the command above.
+
 Load the fictional catalog and hash demo passwords onto the seeded users:
 
 ```bash
