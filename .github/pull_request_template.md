@@ -1,6 +1,14 @@
-## Summary
+## Problem
 
-<!-- What changed and why, in a few sentences. This section is the spec when the pull request has no GitHub issue. -->
+<!-- What was wrong or missing. Open with this, not a file list. When there is no GitHub issue, this section is the spec (`docs/agents/issue-tracker.md`). -->
+
+## Fix
+
+<!-- What you changed and why, in plain language. Top-level paths belong under Changes, not here. -->
+
+## How it was tested
+
+<!-- Before opening the PR: reproduce the bug and show it fixed, or run the relevant test(s). List commands and results, or before/after repro steps. UI: attach screenshots when possible (cloud agents: PR artifacts). Anything not verified: name it and why (e.g. `verify:api` needs Docker on a cloud VM). Docs-only runtime proof: write `docs-only, not run`. Behaviour changes: paste each `summary.md` from `artifacts/verify/` here or under Verification, with screenshots. -->
 
 ## Plan item
 
@@ -23,17 +31,9 @@
 
 <!-- Every top-level path the diff touches. -->
 
-## How to test
-
-<!-- Steps a reviewer can run. For docs or config, say which files to read. -->
-
-## Screenshots
-
-<!-- UI only. Before and after, or the paths under `artifacts/verify/`. Write `not applicable` when nothing visual changed. Cloud agents attach files as artifacts. -->
-
 ## Verification
 
-<!-- Results table from the develop skill (Check, Result). Then `summary.md` for each verify target, screenshots, and anything not verified, with the reason. Docs or config only: `not applicable (no runtime change)` plus the table. One line under the table: `final push: origin/main already contained` or `final push: merged origin/main and reran the checks`. -->
+<!-- Results table from the develop skill (Check, Result). Docs or config only: `not applicable (no runtime change)` for the verify row, plus the table. One line under the table: `final push: origin/main already contained` or `final push: merged origin/main and reran the checks`. -->
 
 ## Checklist
 
@@ -47,4 +47,4 @@
 
 ## Review
 
-<!-- The author fills this. Report from `.cursor/skills/review`: first line `ready` or `changes needed`, then Majors, then at most five nits, and Fixes when the self-review edited the tree. Leave this empty only when a separate agent will run. Nits never block. Daniel squash-merges. -->
+<!-- The author fills this. Report from `.cursor/skills/review`: first line `ready` or `changes needed`, then Majors, then at most five nits, and Fixes when the self-review edited the tree. Leave this empty only when a separate agent will run. Nits never block. Daniel squash-merges. Agents never merge. -->

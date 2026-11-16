@@ -6,16 +6,16 @@ UI and UX visual design stays with a designer outside the repo. DevOps joins at 
 
 ## Roles
 
-| Role        | Where                                                              | Does                                                             | Does not                                             |
-| ----------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- | ---------------------------------------------------- |
-| Coordinator | the agent that received the request                                | dispatches, orders, tracks, decides the review gate              | review the diff, merge                               |
-| Plan        | `.cursor/skills/plan`                                              | one PR scope, acceptance, verification, order                    | implement                                            |
-| Architect   | `.cursor/skills/architect`                                         | boundaries, shared types, ADRs, signatures                       | implement the feature                                |
-| Develop     | `.cursor/skills/develop`                                           | the scoped change, the checks once, the PR text, and `## Review` | merge                                                |
-| Review      | `.cursor/skills/review`. A separate agent only when Phase says so. | diff, the author's results, verdict, findings                    | rerun the author's checks, write feature code, merge |
-| Designer    | a person, outside the repo                                         | visual UI and UX                                                 | a skill in this repo                                 |
-| DevOps      | later, at deploy time                                              | hosting and the release pipeline                                 | a skill in this repo                                 |
-| Daniel      | the maintainer                                                     | squash-merges. That merge is the final gate.                     | review on the agent's behalf                         |
+| Role        | Where                                                              | Does                                                                         | Does not                                             |
+| ----------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Coordinator | the agent that received the request                                | dispatches, orders, tracks, decides the review gate                          | review the diff, merge                               |
+| Plan        | `.cursor/skills/plan`                                              | one PR scope, acceptance, verification, order                                | implement                                            |
+| Architect   | `.cursor/skills/architect`                                         | boundaries, shared types, ADRs, signatures                                   | implement the feature                                |
+| Develop     | `.cursor/skills/develop`                                           | proof before the PR, the checks once, problem-first PR text, and `## Review` | merge                                                |
+| Review      | `.cursor/skills/review`. A separate agent only when Phase says so. | diff, the author's results, verdict, findings                                | rerun the author's checks, write feature code, merge |
+| Designer    | a person, outside the repo                                         | visual UI and UX                                                             | a skill in this repo                                 |
+| DevOps      | later, at deploy time                                              | hosting and the release pipeline                                             | a skill in this repo                                 |
+| Daniel      | the maintainer                                                     | squash-merges. That merge is the final gate.                                 | review on the agent's behalf                         |
 
 ## Shared skills
 
@@ -63,7 +63,7 @@ A separate agent starts with `custom_mode: "review"` and does not share the impl
 
 1. Plan turns one plan item into a scope and opens a GitHub issue. The size target lives in the plan skill. The issue shape is in `docs/agents/issue-tracker.md`.
 2. Architect runs when that scope changes structure, shared types, or dependencies. Otherwise skip this step.
-3. Develop implements that scope, runs the checks once, and opens the PR with `Closes #N` in the body (that link is the claim; no issue comment or label). It does not add a local ticket markdown file. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`. Before the final push, it merges the latest `origin/main` as `AGENTS.md` says (no rebase, no force-push) and reruns the checks when that merge changes the tree.
+3. Develop implements that scope, proves the change, runs the checks once, and opens the PR with `Closes #N` in the body (that link is the claim; no issue comment or label). The description leads with `## Problem` and `## How it was tested` (`.github/pull_request_template.md`). It does not add a local ticket markdown file. The results table is under `## Verification`. Which commands run is in `.cursor/skills/develop/SKILL.md`. Before the final push, it merges the latest `origin/main` as `AGENTS.md` says (no rebase, no force-push) and reruns the checks when that merge changes the tree.
 4. The author fills `## Review` in the shape `.cursor/skills/review` specifies. The author leaves that section empty only when the active phase sends a separate agent.
 5. Daniel squash-merges. That merge is the final gate. Agents never merge.
 

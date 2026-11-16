@@ -26,7 +26,7 @@ Cloud Agent environments that use `.cursor/environment.json` run `bash .cursor/i
 
 ## Hard rules
 
-- One topic per pull request. Split before 500 counted lines (`tools/guards/pr-size.ts`; the count is in `.cursor/skills/plan/SKILL.md`). The title is a Conventional Commits subject and becomes the squash subject. The body follows `.github/pull_request_template.md` and becomes the squash commit body. Include `Closes #N`, or Plan item `none` when there is no issue (`docs/agents/issue-tracker.md`). Open work is a GitHub issue only; the spec is the issue body. Pick the next open issue whose `## Blocked by` section lists only closed issues (every `#N` there is merged, or the section says there is no open blocker such as `none`). Text after that line (for example `Already merged, no issue: 12a.`) is history only. `tools/guards/no-scratch.ts` blocks the retired local ticket tree and a tracked plan index.
+- One topic per pull request. Split before 500 counted lines (`tools/guards/pr-size.ts`; the count is in `.cursor/skills/plan/SKILL.md`). The title is a Conventional Commits subject and becomes the squash subject. The body follows `.github/pull_request_template.md` and becomes the squash commit body. Open with `## Problem` and `## How it was tested`, not a file list; proof before opening the PR is in `.cursor/skills/develop/SKILL.md` (Proof). Include `Closes #N`, or Plan item `none` when there is no issue (`docs/agents/issue-tracker.md`). Open work is a GitHub issue only; the spec is the issue body. Pick the next open issue whose `## Blocked by` section lists only closed issues (every `#N` there is merged, or the section says there is no open blocker such as `none`). Text after that line (for example `Already merged, no issue: 12a.`) is history only. `tools/guards/no-scratch.ts` blocks the retired local ticket tree and a tracked plan index.
 - `## Verification` is required. A passing test suite is not that section. A missing section is blocking (`.cursor/skills/review/SKILL.md`). A behaviour change also includes `summary.md` from `.cursor/skills/verify/SKILL.md`. Docs-only: `verify` is `not applicable (no runtime change)`.
 - Before the final push, fetch and merge the latest `origin/main`. No rebase. No force-push. When that merge changes the tree, rerun the checks.
 - Agents do not merge. Daniel squash-merges. That merge is the final gate. Who reviews is the phase in `docs/team.md`.
@@ -42,7 +42,7 @@ Cloud Agent environments that use `.cursor/environment.json` run `bash .cursor/i
 Each repo role skill is a mode. Read and follow `.cursor/skills/<name>/SKILL.md` for the whole run. A cloud agent can be launched with a Cursor custom mode set to that skill name (`plan`, `develop`, `review`, and the others below). Custom modes are an account setting. When they are unavailable, tell the agent to follow the matching skill file.
 
 - **plan** — Scoping work, ordering the next pull request, or turning one plan item into a GitHub issue (`docs/agents/issue-tracker.md`). Does not implement. `.cursor/skills/plan/SKILL.md`.
-- **develop** — One `ready-for-agent` issue, one pull request. Runs the checks once, fills `## Verification`, and ends with the self-review in `## Review`. Does not merge. `.cursor/skills/develop/SKILL.md`.
+- **develop** — One `ready-for-agent` issue, one pull request. Proves the change before opening the PR, runs the checks once, fills `## Verification`, and ends with the self-review in `## Review`. Does not merge. `.cursor/skills/develop/SKILL.md`.
 - **review** — The author self-review at the end of develop, or a separate agent only when `docs/team.md` says so. One pass. Verdict in `## Review`. Does not rerun the author's checks. `.cursor/skills/review/SKILL.md`.
 - **architect** — A new module, dependency, public type in `libs/shared-types`, or an app boundary. Does not implement. `.cursor/skills/architect/SKILL.md`.
 - **verify** — Smoke proof before a pull request that touches a runtime app or library, or when asked for proof. `vp run verify:<target>`. `.cursor/skills/verify/SKILL.md`.
@@ -57,7 +57,7 @@ Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `d
 
 Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. `grill-me` is `grilling`. `tdd` is `codebase-design`.
 
-The issue body, or the pull request `## Summary` when there is no issue, is the spec (`docs/agents/issue-tracker.md`). ADRs: `docs/agents/domain.md`.
+The issue body, or the pull request `## Problem` when there is no issue, is the spec (`docs/agents/issue-tracker.md`). ADRs: `docs/agents/domain.md`.
 
 `next dev` writes `apps/web/AGENTS.md` with a `<!-- BEGIN:nextjs-agent-rules -->` block when it detects a coding agent. Commit that file as is.
 

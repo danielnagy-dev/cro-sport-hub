@@ -25,6 +25,8 @@ Implement the scoped PR. Do not widen it. Do not merge. Run the checks once, and
 
 ## Proof
 
+Before opening the pull request, prove the change works: reproduce the bug and show it fixed, or run the relevant test(s). For visible UI changes, attach a screenshot when possible. If something could not be verified (for example `verify:api` needs Docker, which cloud VMs lack), say so explicitly under `## How it was tested`. Docs-only changes skip runtime build and test; write `docs-only, not run` there and still run the checks this diff requires (below).
+
 Run each check once, from the root, and put a results table under `## Verification`. Columns are Check and Result (`pass`, `fail`, or `not run`, with the reason). Rows: `format-check`, `lint`, `guards`, `pr-body`, `typecheck`, `test`, `build`, `verify`.
 
 Every pull request:
@@ -44,7 +46,7 @@ Behaviour changes also paste `summary.md` in `## Verification`.
 
 ## Pull request
 
-Fill `.github/pull_request_template.md` in section order: Summary, Plan item, Type of change, Size, Changes, How to test, Screenshots (or `not applicable`), Verification (the results table), Checklist, and Review. Fill `## Review` in this run, in the shape `.cursor/skills/review/SKILL.md` specifies. Leave it empty only when a separate agent will run.
+The pull request description follows `.github/pull_request_template.md`. Lead with the problem and how you tested the fix, not a file list. Section order: Problem, Fix, How it was tested, Plan item, Type of change, Size, Changes, Verification (the results table), Checklist, and Review. Fill `## Review` in this run, in the shape `.cursor/skills/review/SKILL.md` specifies. Leave it empty only when a separate agent will run.
 
 The title is a Conventional Commits subject. It becomes the squash subject.
 

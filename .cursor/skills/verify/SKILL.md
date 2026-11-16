@@ -63,7 +63,7 @@ Readiness timeout is 120 seconds, and 180 seconds for studio. Three HTTP 503s fr
 
 ## 5. Report in the PR
 
-Paste `summary.md` into the PR description under `## Verification`, and attach the screenshots (cloud agents: as artifacts). List anything you could not verify and why. Never claim a route was verified through a different route.
+Paste `summary.md` into the PR description under `## How it was tested` and/or `## Verification`, and attach the screenshots (cloud agents: as artifacts). List anything you could not verify and why. Never claim a route was verified through a different route.
 
 ## 6. Keep the map honest
 
