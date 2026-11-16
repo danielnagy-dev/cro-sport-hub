@@ -5,7 +5,32 @@ import type { GalleryView } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
 import { GalleryApi } from '../../core/gallery-api'
+import { MatchesApi } from '../../core/matches-api'
 import { GalleryShell } from './gallery-shell'
+
+const GALLERY_HEADING_FALLBACK = 'Gallery'
+
+function uniqueMatchIds(slides: GalleryView['slides']): string[] {
+  const seen = new Set<string>()
+  const ids: string[] = []
+  for (const slide of slides) {
+    if (seen.has(slide.matchId)) continue
+    seen.add(slide.matchId)
+    ids.push(slide.matchId)
+  }
+  return ids
+}
+
+function galleryHeadingTitle(
+  slides: GalleryView['slides'],
+  labelsById: Record<string, string>,
+): string {
+  const labels = uniqueMatchIds(slides)
+    .map((id) => labelsById[id])
+    .filter((label): label is string => label !== undefined && label.length > 0)
+  if (labels.length === 0) return GALLERY_HEADING_FALLBACK
+  return `Gallery: ${labels.join(', ')}`
+}
 
 function captionsFromGallery(gallery: GalleryView): Record<number, string> {
   const captions: Record<number, string> = {}
@@ -34,7 +59,8 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
       } @else if (loadStatus() === 'error') {
         <p role="alert">The gallery could not be loaded.</p>
       } @else if (gallery(); as gallery) {
-        <h2>Gallery {{ gallery.id }}</h2>
+        <h2>{{ headingTitle() }}</h2>
+        <p class="gallery-status">{{ gallery.id }}</p>
         <div class="gallery-toolbar">
           <p role="status" class="gallery-status">Status: {{ gallery.status }}</p>
           <div class="gallery-toolbar-actions">
@@ -99,12 +125,19 @@ function readConflictMessage(error: HttpErrorResponse, fallback: string): string
 })
 export class GalleryPage implements OnDestroy {
   private readonly api = inject(GalleryApi)
+  private readonly matches = inject(MatchesApi)
   private readonly route = inject(ActivatedRoute)
   private pending: Subscription | undefined
   private readonly galleryId = this.route.snapshot.paramMap.get('id') ?? ''
 
   protected readonly auth = inject(AuthStore)
   protected readonly gallery = signal<GalleryView | null>(null)
+  protected readonly matchLabelsById = signal<Record<string, string>>({})
+  protected readonly headingTitle = computed(() => {
+    const current = this.gallery()
+    if (current === null) return GALLERY_HEADING_FALLBACK
+    return galleryHeadingTitle(current.slides, this.matchLabelsById())
+  })
   protected readonly captions = signal<Record<number, string>>({})
   protected readonly previewUrls = signal<Record<number, string>>({})
   protected readonly loadStatus = signal<'loading' | 'ready' | 'not-found' | 'error'>('loading')
@@ -134,6 +167,7 @@ export class GalleryPage implements OnDestroy {
         this.gallery.set(value)
         this.captions.set(captionsFromGallery(value))
         this.loadStatus.set('ready')
+        this.loadMatchLabels()
       },
       error: (error: unknown) => {
         this.loadStatus.set(
@@ -146,6 +180,18 @@ export class GalleryPage implements OnDestroy {
   ngOnDestroy(): void {
     this.pending?.unsubscribe()
     for (const index of Object.keys(this.previewUrls()).map(Number)) this.revokePreview(index)
+  }
+
+  private loadMatchLabels(): void {
+    this.pending?.unsubscribe()
+    this.pending = this.matches.editorMatches().subscribe({
+      next: (page) => {
+        const labels: Record<string, string> = {}
+        for (const row of page.items) labels[row.id] = row.label
+        this.matchLabelsById.set(labels)
+      },
+      error: () => this.matchLabelsById.set({}),
+    })
   }
 
   protected captionFor(index: number): string {

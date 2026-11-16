@@ -75,6 +75,10 @@ function clickButton(root: HTMLElement, label: string): void {
   button.click()
 }
 
+function flushMatchLabels(http: HttpTestingController, items: EditorMatch[] = [league]): void {
+  http.expectOne(editorMatchesPath).flush({ items, limit: 20, offset: 0, total: items.length })
+}
+
 describe('gallery composer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -131,6 +135,7 @@ describe('gallery composer', () => {
     const fixture = TestBed.createComponent(GalleryPage)
     fixture.detectChanges()
     http.expectOne(galleryPath(galleryId)).flush(galleryView)
+    flushMatchLabels(http)
     await fixture.whenStable()
     fixture.detectChanges()
     const root = fixture.nativeElement as HTMLElement
@@ -201,15 +206,35 @@ describe('GalleryPage review and download', () => {
     TestBed.resetTestingModule()
   })
 
-  async function open(role: 'editor' | 'admin', row: GalleryView = reviewGallery): Promise<void> {
+  async function open(
+    role: 'editor' | 'admin',
+    row: GalleryView = reviewGallery,
+    matchRows: EditorMatch[] = [league],
+  ): Promise<void> {
     TestBed.inject(TOKEN_STORE).write(bearer(role, Math.floor(Date.now() / 1000) + 3600))
     fixture = TestBed.createComponent(GalleryPage)
     fixture.detectChanges()
     http.expectOne(galleryPath(galleryId)).flush(row)
+    flushMatchLabels(http, matchRows)
     await fixture.whenStable()
     fixture.detectChanges()
     root = fixture.nativeElement as HTMLElement
   }
+
+  it('shows the match label in the heading with the id as secondary text', async () => {
+    await open('editor', galleryView)
+    const heading = root.querySelector('h2')
+    expect(heading?.textContent?.trim()).toBe('Gallery: Sample Home vs Sample Away')
+    expect(root.textContent).toContain(galleryId)
+    expect(heading?.textContent).not.toContain(galleryId)
+  })
+
+  it('falls back to Gallery when match labels are unavailable', async () => {
+    await open('editor', galleryView, [])
+    const heading = root.querySelector('h2')
+    expect(heading?.textContent?.trim()).toBe('Gallery')
+    expect(root.textContent).toContain(galleryId)
+  })
 
   it('shows Gallery not found for an unknown id', async () => {
     TestBed.resetTestingModule()
