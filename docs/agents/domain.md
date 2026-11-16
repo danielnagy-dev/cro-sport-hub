@@ -10,8 +10,8 @@ Do not number files `0001-slug.md`. Do not use a one-paragraph ADR.
 
 ## Glossary
 
-`GLOSSARY.md` does not exist yet. Proceed silently. Do not create it and do not flag the absence.
+Canonical domain terms live in [`GLOSSARY.md`](../../GLOSSARY.md) at the repository root. Agents and skills should use its English identifiers in code and docs and its Croatian column when matching slide or design copy.
 
 ## Words
 
-Use terms already in `docs/` and the code. When a glossary exists, use its terms.
+Use terms from `GLOSSARY.md` first, then existing `docs/` and code. Do not introduce synonyms listed in the glossary’s “Synonyms to avoid” table.
