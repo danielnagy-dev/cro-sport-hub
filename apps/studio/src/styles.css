@@ -381,6 +381,19 @@ main p {
   background: var(--color-canvas);
 }
 
+.match-label-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.match-row-meta {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
 .matches-main .review-actions {
   display: flex;
   flex-wrap: wrap;

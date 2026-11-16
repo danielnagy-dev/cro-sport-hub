@@ -108,6 +108,8 @@ describe('editor lookup routes', () => {
         { id: 'sample-player-b', name: 'Sample Player B' },
         { id: 'sample-player-c', name: 'Sample Player C' },
         { id: 'sample-player-d', name: 'Sample Player D' },
+        { id: 'sample-player-e', name: 'Sample Player E' },
+        { id: 'sample-player-f', name: 'Sample Player F' },
       ],
     })
     expect(await send(port, '/api/editor/competitions?sport=football', editor)).toEqual({

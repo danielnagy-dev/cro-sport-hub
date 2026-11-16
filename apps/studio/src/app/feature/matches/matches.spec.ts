@@ -8,7 +8,7 @@ import { expect } from 'vite-plus/test'
 import type { EditorMatch, EditorMatchPage } from '@cro-sport-hub/shared-types'
 import { authInterceptor, editorGuard, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { editorMatchesPath } from '../../core/matches-api'
-import { MatchesPage } from './matches'
+import { formatMatchRowMeta, MatchesPage } from './matches'
 
 const finalMatch: EditorMatch = {
   id: 'match-sample-final',
@@ -182,6 +182,33 @@ describe('MatchesPage', () => {
     http.expectOne(editorMatchesPath).flush(page([]))
     await fixture.whenStable()
     expect(root.querySelector('a[href="/admin/competitions"]')).toBeNull()
+  })
+
+  it('shows distinct secondary lines when two rows share the same label', async () => {
+    const sharedLabel = 'Sample Player A vs Sample Player B'
+    const seededFinal: EditorMatch = { ...finalMatch, label: sharedLabel }
+    const importedSemi: EditorMatch = {
+      ...finalMatch,
+      id: 'match-import-cup',
+      date: '2026-10-21',
+      round: 'Semi-final',
+      status: 'draft',
+      source: 'import',
+      label: sharedLabel,
+    }
+    const fixture = TestBed.createComponent(MatchesPage)
+    fixture.detectChanges()
+    const http = TestBed.inject(HttpTestingController)
+    const root = fixture.nativeElement as HTMLElement
+    http.expectOne(editorMatchesPath).flush(page([seededFinal, importedSemi]))
+    await fixture.whenStable()
+    const metaLines = [...root.querySelectorAll('.match-row-meta')].map((node) =>
+      node.textContent?.trim(),
+    )
+    expect(metaLines).toHaveLength(2)
+    expect(metaLines[0]).toBe(formatMatchRowMeta(seededFinal))
+    expect(metaLines[1]).toBe(formatMatchRowMeta(importedSemi))
+    expect(metaLines[0]).not.toBe(metaLines[1])
   })
 
   it('links a review row to the review route', async () => {
