@@ -1,6 +1,6 @@
 # Issue tracker: GitHub Issues
 
-Open work is a GitHub issue on [danielnagy-dev/cro-sport-hub](https://github.com/danielnagy-dev/cro-sport-hub/issues). The issue body is the spec. A pull request `## Summary` is the spec only when the pull request has no issue.
+Open work is a GitHub issue on [danielnagy-dev/cro-sport-hub](https://github.com/danielnagy-dev/cro-sport-hub/issues). The issue body is the spec. A pull request `## Problem` is the spec only when the pull request has no issue.
 
 The retired local-markdown ticket tree is gone. Do not recreate it.
 

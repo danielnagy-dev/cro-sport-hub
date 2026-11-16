@@ -20,7 +20,7 @@ This file is the pass, and it wins over the vendored `code-review` skill. The pa
 
 ## Read
 
-Read this file, the PR body, and the GitHub issue named by `Closes #N` (`gh issue view <number> --repo danielnagy-dev/cro-sport-hub`). When the PR has no issue, the spec is the PR `## Summary` (`docs/agents/issue-tracker.md`). Then:
+Read this file, the PR body, and the GitHub issue named by `Closes #N` (`gh issue view <number> --repo danielnagy-dev/cro-sport-hub`). When the PR has no issue, the spec is the PR `## Problem` (`docs/agents/issue-tracker.md`). Then:
 
 ```bash
 git diff --numstat origin/main...HEAD
@@ -60,7 +60,8 @@ That git command is not a suite rerun. Run one further command only when a hunk 
 
 Majors:
 
-- A missing `## Verification` section. A failed reported result. Quote the command and the first error.
+- A missing `## Problem`, `## Fix`, or `## How it was tested` section. A behaviour change with no proof in those sections or under `## Verification`. A failed reported result. Quote the command and the first error.
+- A missing `## Verification` section or results table.
 - Counted size past the split line at 500. Over the 300 target, and at or under 500, is a nit.
 - `## Changes` misses a top-level path from `git diff --stat origin/main...HEAD`.
 - A `Co-authored-by` line in the PR body or in `git log origin/main..HEAD` contains an email.
