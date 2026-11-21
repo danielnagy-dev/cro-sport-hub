@@ -241,7 +241,7 @@ export const lineupEntries = pgTable(
 export const publishSlotClocks = pgTable('publish_slot_clocks', {
   id: text('id').primaryKey(),
   label: text('label').notNull(),
-  clockTime: time('clock_time', { mode: 'string' }).notNull(),
+  clockTime: time('clock_time').notNull(),
   sortOrder: integer('sort_order').notNull(),
   active: boolean('active').notNull(),
 })
