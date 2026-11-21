@@ -4,6 +4,7 @@ name: Metadata
 # Assignee stays human/empty by default: GitHub Apps often cannot be assignees.
 # Prefer CI author + requested reviewer. Optional assign of MAINTAINER is off
 # unless workflow_dispatch assign_maintainer=true or repo var ASSIGN_MAINTAINER=true.
+# Never request MAINTAINER as reviewer when the PR author is MAINTAINER (self-review).
 
 on:
   issues:
@@ -81,14 +82,16 @@ jobs:
             ASSIGN=true
           fi
 
+          AUTHOR=""
           if [ "$KIND" = "issue" ]; then
-            gh issue view "$NUMBER" --json title,body,id > /tmp/target.json
+            gh issue view "$NUMBER" --json title,body,id,author > /tmp/target.json
           else
-            gh pr view "$NUMBER" --json title,body,id > /tmp/target.json
+            gh pr view "$NUMBER" --json title,body,id,author > /tmp/target.json
           fi
           jq -r .title /tmp/target.json > /tmp/title.txt
           jq -r '.body // ""' /tmp/target.json > /tmp/body.txt
           NODE_ID=$(jq -r .id /tmp/target.json)
+          AUTHOR=$(jq -r '.author.login // ""' /tmp/target.json)
 
           {
             echo "kind=$KIND"
@@ -96,6 +99,7 @@ jobs:
             echo "dry_run=$DRY_RUN"
             echo "assign=$ASSIGN"
             echo "node_id=$NODE_ID"
+            echo "author=$AUTHOR"
           } >> "$GITHUB_OUTPUT"
 
       - name: Infer metadata
@@ -118,6 +122,7 @@ jobs:
           NUMBER: ${{ steps.target.outputs.number }}
           NODE_ID: ${{ steps.target.outputs.node_id }}
           ASSIGN: ${{ steps.target.outputs.assign }}
+          AUTHOR: ${{ steps.target.outputs.author }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
@@ -126,8 +131,9 @@ jobs:
           AREAS=$(jq -r '.areas | join(" ")' "$META")
           ISSUE_TYPE=$(jq -r '.issueType // empty' "$META")
           READY=$(jq -r '.readyForAgent' "$META")
+          TYPE_LABELS=$(jq -r '.typeLabels | join(" ")' "$META")
 
-          echo "areas=$AREAS issueType=$ISSUE_TYPE readyForAgent=$READY dry_run=$DRY_RUN assign=$ASSIGN"
+          echo "areas=$AREAS issueType=$ISSUE_TYPE readyForAgent=$READY typeLabels=$TYPE_LABELS dry_run=$DRY_RUN assign=$ASSIGN author=$AUTHOR"
 
           add_labels() {
             local labels=("$@")
@@ -156,6 +162,11 @@ jobs:
           if [ "$KIND" = "issue" ] && [ "$READY" = "true" ]; then
             LABEL_ARGS+=("status:ready-for-agent")
           fi
+          if [ "$KIND" = "pr" ]; then
+            for type_label in $TYPE_LABELS; do
+              LABEL_ARGS+=("$type_label")
+            done
+          fi
           add_labels "${LABEL_ARGS[@]+"${LABEL_ARGS[@]}"}"
 
           if [ "$KIND" = "issue" ] && [ -n "$ISSUE_TYPE" ]; then
@@ -181,11 +192,18 @@ jobs:
           fi
 
           if [ "$KIND" = "pr" ]; then
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "dry-run: would request reviewer $MAINTAINER"
+            if [ "$AUTHOR" = "$MAINTAINER" ]; then
+              echo "Skipping reviewer request: PR author '$AUTHOR' equals MAINTAINER (self-review forbidden)."
+            elif [ "$DRY_RUN" = "true" ]; then
+              echo "dry-run: would request reviewer $MAINTAINER (author=$AUTHOR)"
             else
-              gh pr edit "$NUMBER" --add-reviewer "$MAINTAINER" || \
-                echo "Could not request reviewer $MAINTAINER (already requested or insufficient permission)"
+              if ! OUT=$(gh pr edit "$NUMBER" --add-reviewer "$MAINTAINER" 2>&1); then
+                echo "$OUT"
+                echo "::error::Failed to request reviewer $MAINTAINER on PR #$NUMBER (author=$AUTHOR)"
+                exit 1
+              fi
+              echo "$OUT"
+              echo "Requested reviewer $MAINTAINER on PR #$NUMBER (author=$AUTHOR)"
             fi
           fi
 
