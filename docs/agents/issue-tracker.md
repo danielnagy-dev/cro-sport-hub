@@ -40,13 +40,26 @@ When cutting a multi-slice phase: create the parent first (umbrella), then each 
 
 Metadata, applied when the issue is opened (humans via `gh`, or `.github/workflows/metadata.yml`):
 
-- `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
-- **Native Issue Type** (`Task`, `Bug`, or `Feature`). Prefer Issue Type over `type:*` labels on issues. Do not add `type:feature`, `type:bug`, or `type:task` on new issues. Pull requests have no Issue Types; skip `type:*` on PRs unless a title clearly needs one.
+- `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`. Conventional Commits scopes and path cues such as `docs`, `agents`, `ci`, and `ops` map to `area:docs`.
+- **Native Issue Type** (`Task`, `Bug`, or `Feature`) on issues only. Prefer Issue Type over `type:*` labels on issues. Do not add `type:feature`, `type:bug`, or `type:task` on issues.
+- **PR-only `type:*` labels** from the Conventional Commits type: `docs` / `ci` / `chore` → `type:task`, `feat` → `type:feature`, `fix` → `type:bug`. Colors `C5DEF5`, `A2EEEF`, `D73A4A`.
 - `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`. The metadata Action is conservative and skips this label when Size is missing or unclear. Never apply it to umbrella parents.
 
-Create a missing `area:*` or `status:*` label with that color, then apply it. Size stays in the body. There is no `size:S`, `size:M`, or `size:L` label. `status:blocked` and `status:needs-decision` are not used. Ask Daniel before an issue is ready when a decision is still open.
+Create a missing `area:*`, `status:*`, or PR `type:*` label with that color, then apply it. Size stays in the body. There is no `size:S`, `size:M`, or `size:L` label. `status:blocked` and `status:needs-decision` are not used. Ask Daniel before an issue is ready when a decision is still open.
 
-Assignee stays a human (or empty). GitHub Apps often cannot be assignees; do not invent a bot user. The metadata Action leaves assignee empty by default and requests reviewer `danielnagy-dev` on PRs. Optional assign of that maintainer is off unless `ASSIGN_MAINTAINER=true` (repo variable) or `workflow_dispatch` `assign_maintainer=true`.
+**Label hygiene.** Prefer `area:*` + `status:*` + PR-only `type:*`. Treat GitHub default labels (`bug`, `enhancement`, …) and `track:*` as legacy — do not auto-add them; optional cleanup later.
+
+Assignee stays a human (or empty). GitHub Apps often cannot be assignees; do not invent a bot user. The metadata Action leaves assignee empty by default and requests reviewer `danielnagy-dev` on PRs when the author is not that maintainer. Optional assign of that maintainer is off unless `ASSIGN_MAINTAINER=true` (repo variable) or `workflow_dispatch` `assign_maintainer=true`.
+
+### Solo maintainer + required reviews
+
+PRs authored as `danielnagy-dev` cannot request him as reviewer (GitHub forbids self-review). Options:
+
+- **(A)** Leave “Do not allow bypassing the above settings” **unchecked** so an admin can merge after self-check.
+- **(B)** Prefer agent/bot-authored PRs when the forge supports it so Daniel can Approve.
+- **(C)** A second human reviewer.
+
+Assignee cannot be Cursor App for most cases — use empty assignee + `status:claimed`, or the PR author.
 
 ### Branch protection (Daniel, UI only)
 
