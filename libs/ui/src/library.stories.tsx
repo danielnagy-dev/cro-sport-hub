@@ -14,6 +14,7 @@ function Gallery() {
         <Badge>Neutral</Badge>
         <Badge tone="tennis">Tennis</Badge>
         <Badge tone="football">Football</Badge>
+        <Badge tone="basketball">Basketball</Badge>
       </div>
       <SportTabs
         value={sport}
@@ -21,6 +22,7 @@ function Gallery() {
         panels={{
           tennis: 'Sample tennis results',
           football: 'Sample football results',
+          basketball: 'Sample basketball results',
         }}
       />
       <AthleteHeader

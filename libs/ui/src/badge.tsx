@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type BadgeTone = 'neutral' | 'tennis' | 'football'
+export type BadgeTone = 'neutral' | 'tennis' | 'football' | 'basketball'
 
 export type BadgeProps = {
   tone?: BadgeTone

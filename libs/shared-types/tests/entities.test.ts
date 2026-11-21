@@ -2,14 +2,19 @@ import { expect, test } from 'vite-plus/test'
 import {
   appearanceIssues,
   appearanceSchema,
+  appearanceStatusSchema,
   athleteSchema,
   athleteTeamSchema,
   cardTypeSchema,
   competitionSchema,
+  creatorKindSchema,
   footballMatchSchema,
   matchSchema,
+  networkSchema,
+  publishSlotStatusSchema,
   roleSchema,
   sportSchema,
+  sportSlugSchema,
   statusSchema,
   teamSchema,
 } from '../src/index.ts'
@@ -19,15 +24,45 @@ test('parses the shared enums and rejects values outside them', () => {
   expect(statusSchema.safeParse('approved').success).toBe(false)
   expect(roleSchema.parse('editor')).toBe('editor')
   expect(roleSchema.safeParse('viewer').success).toBe(false)
+  expect(sportSlugSchema.parse('tennis')).toBe('tennis')
+  expect(sportSlugSchema.parse('football')).toBe('football')
+  expect(sportSlugSchema.parse('basketball')).toBe('basketball')
+  expect(sportSlugSchema.safeParse('handball').success).toBe(false)
   expect(sportSchema.parse({ id: 'sport-tennis', slug: 'tennis', name: 'Tennis' }).slug).toBe(
     'tennis',
   )
   expect(
-    sportSchema.safeParse({ id: 'sport-x', slug: 'basketball', name: 'Basketball' }).success,
-  ).toBe(false)
+    sportSchema.parse({ id: 'sport-basketball', slug: 'basketball', name: 'Basketball' }).slug,
+  ).toBe('basketball')
   expect(cardTypeSchema.parse('yellow')).toBe('yellow')
   expect(cardTypeSchema.parse('red')).toBe('red')
   expect(cardTypeSchema.safeParse('blue').success).toBe(false)
+})
+
+test('parses editorial appearance, publish-slot, network, and creator enums', () => {
+  expect(appearanceStatusSchema.parse('scheduled')).toBe('scheduled')
+  expect(appearanceStatusSchema.parse('in_progress')).toBe('in_progress')
+  expect(appearanceStatusSchema.parse('completed')).toBe('completed')
+  expect(appearanceStatusSchema.parse('cancelled')).toBe('cancelled')
+  expect(appearanceStatusSchema.safeParse('draft').success).toBe(false)
+
+  expect(publishSlotStatusSchema.parse('planned')).toBe('planned')
+  expect(publishSlotStatusSchema.parse('waiting_for_data')).toBe('waiting_for_data')
+  expect(publishSlotStatusSchema.parse('ready_for_review')).toBe('ready_for_review')
+  expect(publishSlotStatusSchema.parse('approved')).toBe('approved')
+  expect(publishSlotStatusSchema.parse('published')).toBe('published')
+  expect(publishSlotStatusSchema.parse('skipped')).toBe('skipped')
+  expect(publishSlotStatusSchema.parse('error')).toBe('error')
+  expect(publishSlotStatusSchema.safeParse('draft').success).toBe(false)
+
+  expect(networkSchema.parse('instagram')).toBe('instagram')
+  expect(networkSchema.parse('facebook')).toBe('facebook')
+  expect(networkSchema.parse('x')).toBe('x')
+  expect(networkSchema.safeParse('tiktok').success).toBe(false)
+
+  expect(creatorKindSchema.parse('bot')).toBe('bot')
+  expect(creatorKindSchema.parse('manual')).toBe('manual')
+  expect(creatorKindSchema.safeParse('import').success).toBe(false)
 })
 
 test('parses athletes, clubs, club spells, and competitions', () => {
