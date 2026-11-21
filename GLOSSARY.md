@@ -21,7 +21,7 @@ Canonical vocabulary for **Cro Sport Hub**. Use these English identifiers in cod
 | Studio                 | —                             | Angular editorial app: matches, review, galleries, admin.                | `apps/studio`                              |
 | Web (public site)      | javna web stranica (informal) | Next.js site for published results and athlete profiles.                 | `apps/web`                                 |
 | API                    | —                             | NestJS HTTP API and catalog persistence.                                 | `apps/api`                                 |
-| Catalog                | —                             | Postgres schema, migrations, and read/write layer for all domain tables. | `apps/api/src/catalog/`, SQL `0001`–`0009` |
+| Catalog                | —                             | Postgres schema, migrations, and read/write layer for all domain tables. | `apps/api/src/catalog/`, SQL `0001`–`0010` |
 | `libs/shared-types`    | —                             | Zod schemas and types shared across apps.                                | `libs/shared-types/src/`                   |
 | `libs/ui`              | —                             | Shared React components for web and Storybook.                           | `libs/ui/src/`                             |
 | `libs/slide-generator` | —                             | Football slide HTML/CSS and PNG rendering (1080×1350).                   | `libs/slide-generator/src/`                |
@@ -80,6 +80,9 @@ Canonical vocabulary for **Cro Sport Hub**. Use these English identifiers in cod
 | Appearance            | nastup                | Scheduled or completed participation (athlete or national team).           | Table `appearances`, ADR-010 / ADR-011          |
 | Match appearance      | nastup (match path)   | Legacy football player-in-match stats row (expand–contract until Phase H). | Table `match_appearances`, `appearanceSchema`   |
 | Lineup entry          | sastav                | Who played on an Appearance, with jsonb stats.                             | Table `lineup_entries`, ADR-011                 |
+| PublishSlot           | —                     | Timed social-publish bucket for a day (clock from settings).               | Table `publish_slots`, ADR-010                  |
+| NetworkPost           | —                     | Per-network copy and status for Instagram, Facebook, or X.                 | Table `network_posts`, ADR-010                  |
+| Source                | —                     | Provenance URL plus fetch time attached to drafted data.                   | Table `sources`, `appearance_sources`, ADR-010  |
 | Started               | —                     | Whether the athlete was in the starting lineup.                            | `match_appearances.started`, `lineup_entries`   |
 | Minutes               | minute                | Minutes played (0–130); zero minutes restricts goals/assists/start flags.  | Slides label `MINUTE`                           |
 | Goals                 | golovi                | Goals scored in the match.                                                 | Slides label `GOLOVI`                           |

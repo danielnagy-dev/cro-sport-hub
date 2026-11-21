@@ -45,6 +45,20 @@ export type PublishSlotStatus = z.infer<typeof publishSlotStatusSchema>
 export const networkSchema = z.enum(['instagram', 'facebook', 'x'])
 export type Network = z.infer<typeof networkSchema>
 
+/**
+ * Per-network post lifecycle (ADR-010 NetworkPost).
+ * Narrower than publish-slot status: no `waiting_for_data`.
+ */
+export const networkPostStatusSchema = z.enum([
+  'planned',
+  'ready_for_review',
+  'approved',
+  'published',
+  'skipped',
+  'error',
+])
+export type NetworkPostStatus = z.infer<typeof networkPostStatusSchema>
+
 /** Who drafted a row for audit (ADR-010). */
 export const creatorKindSchema = z.enum(['bot', 'manual'])
 export type CreatorKind = z.infer<typeof creatorKindSchema>
