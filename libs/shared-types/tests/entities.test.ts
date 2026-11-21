@@ -10,6 +10,7 @@ import {
   creatorKindSchema,
   footballMatchSchema,
   matchSchema,
+  networkPostStatusSchema,
   networkSchema,
   publishSlotStatusSchema,
   roleSchema,
@@ -59,6 +60,14 @@ test('parses editorial appearance, publish-slot, network, and creator enums', ()
   expect(networkSchema.parse('facebook')).toBe('facebook')
   expect(networkSchema.parse('x')).toBe('x')
   expect(networkSchema.safeParse('tiktok').success).toBe(false)
+
+  expect(networkPostStatusSchema.parse('planned')).toBe('planned')
+  expect(networkPostStatusSchema.parse('ready_for_review')).toBe('ready_for_review')
+  expect(networkPostStatusSchema.parse('approved')).toBe('approved')
+  expect(networkPostStatusSchema.parse('published')).toBe('published')
+  expect(networkPostStatusSchema.parse('skipped')).toBe('skipped')
+  expect(networkPostStatusSchema.parse('error')).toBe('error')
+  expect(networkPostStatusSchema.safeParse('waiting_for_data').success).toBe(false)
 
   expect(creatorKindSchema.parse('bot')).toBe('bot')
   expect(creatorKindSchema.parse('manual')).toBe('manual')

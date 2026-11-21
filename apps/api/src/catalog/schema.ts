@@ -7,6 +7,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  time,
   timestamp,
 } from 'drizzle-orm/pg-core'
 
@@ -235,4 +236,54 @@ export const lineupEntries = pgTable(
     stats: jsonb('stats').notNull(),
   },
   (table) => [primaryKey({ columns: [table.appearanceId, table.athleteId] })],
+)
+
+export const publishSlotClocks = pgTable('publish_slot_clocks', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  clockTime: time('clock_time').notNull(),
+  sortOrder: integer('sort_order').notNull(),
+  active: boolean('active').notNull(),
+})
+
+export const publishSlots = pgTable('publish_slots', {
+  id: text('id').primaryKey(),
+  slotDate: date('slot_date', { mode: 'string' }).notNull(),
+  slotClockId: text('slot_clock_id').notNull(),
+  status: text('status').notNull(),
+  slideOrder: jsonb('slide_order').notNull(),
+  creatorKind: text('creator_kind').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+})
+
+export const networkPosts = pgTable('network_posts', {
+  id: text('id').primaryKey(),
+  publishSlotId: text('publish_slot_id').notNull(),
+  network: text('network').notNull(),
+  bodyText: text('body_text').notNull(),
+  status: text('status').notNull(),
+  externalPostId: text('external_post_id'),
+  creatorKind: text('creator_kind').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+})
+
+export const sources = pgTable('sources', {
+  id: text('id').primaryKey(),
+  url: text('url').notNull(),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'string' }).notNull(),
+  creatorKind: text('creator_kind').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
+})
+
+export const appearanceSources = pgTable(
+  'appearance_sources',
+  {
+    appearanceId: text('appearance_id').notNull(),
+    sourceId: text('source_id').notNull(),
+    fieldPath: text('field_path'),
+    disagrees: boolean('disagrees').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.appearanceId, table.sourceId] })],
 )

@@ -134,12 +134,53 @@ $rename$`,
         "SELECT column_name FROM information_schema.columns WHERE table_name = 'athletes' AND column_name = 'club_name'",
       )
       expect(clubName.rows).toHaveLength(1)
+
+      const publishTables = await client.query(
+        `SELECT tablename FROM pg_tables
+         WHERE tablename IN (
+           'publish_slot_clocks', 'publish_slots', 'network_posts',
+           'sources', 'appearance_sources'
+         )
+         ORDER BY tablename`,
+      )
+      expect(publishTables.rows.map((row) => (row as { tablename: string }).tablename)).toEqual([
+        'appearance_sources',
+        'network_posts',
+        'publish_slot_clocks',
+        'publish_slots',
+        'sources',
+      ])
+
+      const clocks = await client.query(
+        `SELECT id, clock_time::text AS clock_time, sort_order
+         FROM publish_slot_clocks
+         WHERE id IN ('slot-clock-1530', 'slot-clock-2200')
+         ORDER BY sort_order`,
+      )
+      expect(clocks.rows).toEqual([
+        { id: 'slot-clock-1530', clock_time: '15:30:00', sort_order: 1 },
+        { id: 'slot-clock-2200', clock_time: '22:00:00', sort_order: 2 },
+      ])
+
+      const slotStatus = await client.query(
+        `SELECT pg_get_constraintdef(oid) AS def
+         FROM pg_constraint
+         WHERE conname = 'publish_slots_status'`,
+      )
+      expect((slotStatus.rows[0] as { def: string }).def).toContain('waiting_for_data')
+      const networkStatus = await client.query(
+        `SELECT pg_get_constraintdef(oid) AS def
+         FROM pg_constraint
+         WHERE conname = 'network_posts_status'`,
+      )
+      expect((networkStatus.rows[0] as { def: string }).def).toContain('ready_for_review')
+      expect((networkStatus.rows[0] as { def: string }).def).not.toContain('waiting_for_data')
     } finally {
       await catalog.close()
     }
   })
 
-  it('reopens the catalog after 0009 without failing', async () => {
+  it('reopens the catalog after 0010 without failing', async () => {
     const client = new PGlite()
     const db = drizzle(client, { schema })
     try {
@@ -148,14 +189,29 @@ $rename$`,
       const second = await openCatalog(db, { close: () => client.close() })
       try {
         const tables = await client.query(
-          "SELECT tablename FROM pg_tables WHERE tablename IN ('match_appearances', 'appearances', 'national_teams', 'lineup_entries') ORDER BY tablename",
+          `SELECT tablename FROM pg_tables
+           WHERE tablename IN (
+             'match_appearances', 'appearances', 'national_teams', 'lineup_entries',
+             'publish_slot_clocks', 'publish_slots', 'network_posts',
+             'sources', 'appearance_sources'
+           )
+           ORDER BY tablename`,
         )
         expect(tables.rows.map((row) => (row as { tablename: string }).tablename)).toEqual([
+          'appearance_sources',
           'appearances',
           'lineup_entries',
           'match_appearances',
           'national_teams',
+          'network_posts',
+          'publish_slot_clocks',
+          'publish_slots',
+          'sources',
         ])
+        const clocks = await client.query(
+          "SELECT count(*)::int AS n FROM publish_slot_clocks WHERE id IN ('slot-clock-1530', 'slot-clock-2200')",
+        )
+        expect((clocks.rows[0] as { n: number }).n).toBe(2)
       } finally {
         await second.close()
       }
@@ -165,12 +221,22 @@ $rename$`,
     }
   })
 
-  it('loads 0009 as statements that include the rename DO block', () => {
+  it('loads 0009 and 0010 statements from the catalog directory', () => {
     const statements = sqlMigrationStatements(catalogDir)
     expect(statements.some((statement) => statement.startsWith('DO $rename$'))).toBe(true)
     expect(
       statements.some((statement) =>
         statement.includes('CREATE TABLE IF NOT EXISTS national_teams'),
+      ),
+    ).toBe(true)
+    expect(
+      statements.some((statement) =>
+        statement.includes('CREATE TABLE IF NOT EXISTS publish_slot_clocks'),
+      ),
+    ).toBe(true)
+    expect(
+      statements.some((statement) =>
+        statement.includes('CREATE TABLE IF NOT EXISTS network_posts'),
       ),
     ).toBe(true)
   })
