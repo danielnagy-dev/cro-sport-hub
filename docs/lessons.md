@@ -98,9 +98,17 @@ The pre-launch foundation exception in this note was retired later the same day.
 
 PRs #8 and #9 both conflicted on `docs/agents/issue-tracker.md` after #7 merged. Cause: the status table and the plan notes lived in one file, so every pull request edited it.
 
-Guard: one GitHub issue per plan item (`docs/agents/issue-tracker.md`), titled `[<id>] <title>`. A pull request references `Closes #N`. The local-markdown layout from mattpocock/skills `issue-tracker-local.md` at `5beb35b040e3de97e54fa9e386d7e42d15c295c2` was retired in favour of GitHub Issues. The index does not list items. Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push) and rerun the checks when that merge changes the tree. A merge that does not change the tree leaves the recorded results in place, so checks still run once. Where: `docs/agents/issue-tracker.md`, `.cursor/skills/plan`, `.cursor/skills/develop`, `.cursor/skills/review`, `AGENTS.md`, `docs/team.md`, and the short form in `.cursor/rules/lessons.mdc`.
+Guard: one GitHub issue per plan item (`docs/agents/issue-tracker.md`). Titles are human-readable; optional plan id lives in Notes (legacy `[<id>]` titles may remain until retitled). Medium/large work prefers a parent + sub-issues. A pull request references `Closes #N`. The local-markdown layout from mattpocock/skills `issue-tracker-local.md` at `5beb35b040e3de97e54fa9e386d7e42d15c295c2` was retired in favour of GitHub Issues. The index does not list items. Before the final push, fetch and merge the latest `origin/main` (no rebase, no force-push) and rerun the checks when that merge changes the tree. A merge that does not change the tree leaves the recorded results in place, so checks still run once. Where: `docs/agents/issue-tracker.md`, `.cursor/skills/plan`, `.cursor/skills/develop`, `.cursor/skills/review`, `AGENTS.md`, `docs/team.md`, and the short form in `.cursor/rules/lessons.mdc`.
 
 No `plan:list` script. A script would restate the directory and need a task plus a typecheck entry. A guard that a branch edited only its own ticket file needs the plan id, and the diff does not carry one. A ban on tables in the index misses a bullet list and rejects a legitimate table. Structure removes the shared list, so there is nothing left for a check to police.
+
+## 2026-11-21 — duplicate issues after a successful create
+
+Agents cutting rewrite B1/C1 ran `gh issue create` (or equivalent) again after success and opened duplicates (#166 of #165, #168 of #167). Cause: create was treated as retryable when the first response was slow or the run resumed.
+
+Guard: written rule in `docs/agents/issue-tracker.md` and `.cursor/skills/plan/SKILL.md` — search by human title and parent before create; never retry create after success; record the returned number once. Prefer parent + sub-issues for multi-slice phases so umbrellas and children are distinct.
+
+No new check: success is an agent step against the GitHub API, not a repo file a lint can see.
 
 ## 2026-10-25 — empty `toThrow`
 
