@@ -13,6 +13,7 @@ import * as schema from './schema.js'
 
 const tennis = { id: 'sport-tennis', slug: 'tennis', name: 'Tennis' }
 const football = { id: 'sport-football', slug: 'football', name: 'Football' }
+const basketball = { id: 'sport-basketball', slug: 'basketball', name: 'Basketball' }
 const competition = {
   id: 'comp-city',
   sportId: 'sport-tennis',
@@ -191,14 +192,14 @@ async function withMemory(check: (catalog: Catalog) => Promise<void>): Promise<v
 }
 
 describe('v1 catalog', () => {
-  it('seeds tennis and football once', async () => {
+  it('seeds tennis, football, and basketball once', async () => {
     const client = new PGlite()
     const first = await openMemory(client)
     try {
       const second = await openMemory(client, false)
       expect(await first.read('sport', 'sport-tennis')).toEqual(tennis)
       expect(await second.read('sport', 'sport-football')).toEqual(football)
-      expect(await second.read('sport', 'sport-basketball')).toBeUndefined()
+      expect(await second.read('sport', 'sport-basketball')).toEqual(basketball)
       await second.close()
     } finally {
       await first.close()

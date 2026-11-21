@@ -10,7 +10,7 @@ import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { CatalogError, parseRecord, readParsed } from './errors.js'
 import * as schema from './schema.js'
 
-const { appearances, footballMatches, matches } = schema
+const { footballMatches, matchAppearances, matches } = schema
 type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
 type DraftAppearanceRow = NonNullable<EditorFootballDraft['appearances']>[number]
@@ -54,8 +54,8 @@ export async function readEditorFootballDraft(
     })
     const appearanceRows = await db
       .select()
-      .from(appearances)
-      .where(eq(appearances.matchId, matchId))
+      .from(matchAppearances)
+      .where(eq(matchAppearances.matchId, matchId))
     const lines = appearanceRows.map((row) =>
       draftAppearance(
         parseRecord(appearanceSchema, {

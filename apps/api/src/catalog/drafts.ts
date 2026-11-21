@@ -14,7 +14,7 @@ import { CatalogError, invalidRecord, parseRecord, type CatalogDb } from './erro
 import { competitionSport, matchSlug, sportIdFor, writeRecord } from './records.js'
 import * as schema from './schema.js'
 
-const { appearances, footballMatches, matches, tennisMatches, tennisMatchStats } = schema
+const { footballMatches, matchAppearances, matches, tennisMatches, tennisMatchStats } = schema
 
 const DRAFT_HEADER = {
   id: idSchema,
@@ -113,7 +113,7 @@ async function persistDraft(
         await database.delete(tennisMatchStats).where(eq(tennisMatchStats.matchId, header.id))
         await database.delete(tennisMatches).where(eq(tennisMatches.matchId, header.id))
       } else {
-        await database.delete(appearances).where(eq(appearances.matchId, header.id))
+        await database.delete(matchAppearances).where(eq(matchAppearances.matchId, header.id))
         await database.delete(footballMatches).where(eq(footballMatches.matchId, header.id))
       }
     }
