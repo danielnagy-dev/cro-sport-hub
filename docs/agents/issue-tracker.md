@@ -36,14 +36,14 @@ Otherwise create **one** issue with this body:
 
 **Title:** human-readable, no required `[<id>]` prefix. Existing issues may keep a legacy prefix until retitled; new issues should not add one.
 
-When cutting a multi-slice phase: create the parent first (umbrella), then each child, then link sub-issues. Do not mark the parent ready-for-agent.
+When cutting a multi-slice phase: create the parent first (umbrella), then **all known children in that same plan pass**, then link sub-issues. Only the next unblocked, sized children get `status:ready-for-agent`; the rest stay open with `## Blocked by` filled. Add a later child only when discovery or an ADR unlocks a slice that was not known at parent create. Do not invent speculative children for later phases. Do not mark the parent ready-for-agent.
 
 Metadata, applied when the issue is opened (humans via `gh`, or `.github/workflows/metadata.yml`):
 
 - `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`. Conventional Commits scopes and path cues such as `docs`, `agents`, `ci`, and `ops` map to `area:docs`.
 - **Native Issue Type** (`Task`, `Bug`, or `Feature`) on issues only. Prefer Issue Type over `type:*` labels on issues. Do not add `type:feature`, `type:bug`, or `type:task` on issues.
 - **PR-only `type:*` labels** from the Conventional Commits type: `docs` / `ci` / `chore` → `type:task`, `feat` → `type:feature`, `fix` → `type:bug`. Colors `C5DEF5`, `A2EEEF`, `D73A4A`.
-- `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`. The metadata Action is conservative and skips this label when Size is missing or unclear. Never apply it to umbrella parents.
+- `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met **and** `## Blocked by` lists no `#N`. Color `0E8A16`. The metadata Action is conservative and skips this label when Size is missing or unclear, when Size says not ready / umbrella, or when Blocked by names an issue. Never apply it to umbrella parents.
 
 Create a missing `area:*`, `status:*`, or PR `type:*` label with that color, then apply it. Size stays in the body. There is no `size:S`, `size:M`, or `size:L` label. `status:blocked` and `status:needs-decision` are not used. Ask Daniel before an issue is ready when a decision is still open.
 
