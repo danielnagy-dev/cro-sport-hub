@@ -110,6 +110,12 @@ Guard: written rule in `docs/agents/issue-tracker.md` and `.cursor/skills/plan/S
 
 No new check: success is an agent step against the GitHub API, not a repo file a lint can see.
 
+## 2026-11-22 — ready-for-agent on blocked children
+
+Cutting known Phase C children under #170 in one pass created #185/#186. The metadata Action applied `status:ready-for-agent` because Size had a number ≤400, ignoring open `#N` blockers and “not ready-for-agent” wording. Cause: `inferReadyForAgent` only checked Size/Goal/Acceptance.
+
+Guard: `tools/gh-metadata/infer-metadata.ts` skips ready when `## Blocked by` contains `#N`, when Size says not ready-for-agent, or when Size is an umbrella. Written rule: cut all known children at parent create; only unblocked sized children get the label (`docs/agents/issue-tracker.md`, `.cursor/skills/plan/SKILL.md`).
+
 ## 2026-10-25 — empty `toThrow`
 
 A failure proof with no expected error showed up a third time. The first was a short substring in the plan-item 21a review. The second was the vendored-skill guard self-test, fixed by comparing the full line. This time `rejects.toThrow()` took no argument, so any throw would pass. Cause: the matcher was used as a boolean. Guard: Oxlint `vitest/require-to-throw-message` in the root `vite.config.ts` (plugin `vitest`, Oxlint 1.89.0). It errors when `toThrow` or `rejects.toThrow` has no argument, including imports from `vite-plus/test`. `apps/studio/src/app/studio-api.spec.ts` now expects the Zod message. Origin PR #4 still has a bare `rejects.toThrow()` in `apps/web/tests/api-client.test.ts` and is not on `main`; that file needs an expected error once both pull requests merge.

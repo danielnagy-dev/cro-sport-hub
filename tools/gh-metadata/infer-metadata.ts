@@ -208,15 +208,20 @@ function inferIssueType(titleText: string, bodyText: string): IssueTypeName {
 /**
  * Conservative ready-for-agent: require a Size section with a numeric estimate
  * at or under 400 (corrected), plus Goal and Acceptance headings.
- * Skip when unsure.
+ * Skip when unsure, when `## Blocked by` lists `#N`, or when Size says not ready.
  */
 function inferReadyForAgent(bodyText: string): boolean {
   if (!/^##\s+Size\b/im.test(bodyText)) return false
   if (!/^##\s+Goal\b/im.test(bodyText)) return false
   if (!/^##\s+Acceptance criteria\b/im.test(bodyText)) return false
 
+  const blockedSection = extractSection(bodyText, 'Blocked by')
+  if (blockedSection !== null && /#\d+/.test(blockedSection)) return false
+
   const sizeSection = extractSection(bodyText, 'Size')
   if (!sizeSection) return false
+  if (/not\s+(?:`?status:)?ready-for-agent/i.test(sizeSection)) return false
+  if (/\bumbrella\b/i.test(sizeSection)) return false
 
   const corrected = sizeSection.match(/corrected[^0-9]{0,40}(~?\s*)(\d{2,4})\b/i)
   const anyNumber = sizeSection.match(/\b(\d{2,4})\b/)
