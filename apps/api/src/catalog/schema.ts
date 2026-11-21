@@ -7,6 +7,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
 } from 'drizzle-orm/pg-core'
 
 const bytea = customType<{ data: Buffer | null; driverData: unknown }>({
@@ -60,6 +61,7 @@ export const athletes = pgTable('athletes', {
   birthYear: integer('birth_year'),
   position: text('position'),
   photoUrl: text('photo_url'),
+  clubName: text('club_name'),
 })
 
 export const athleteTeams = pgTable(
@@ -174,8 +176,8 @@ export const importRuns = pgTable('import_runs', {
   error: text('error').notNull(),
 })
 
-export const appearances = pgTable(
-  'appearances',
+export const matchAppearances = pgTable(
+  'match_appearances',
   {
     matchId: text('match_id').notNull(),
     matchSport: text('match_sport').notNull(),
@@ -190,4 +192,47 @@ export const appearances = pgTable(
     redCard: boolean('red_card').notNull(),
   },
   (table) => [primaryKey({ columns: [table.matchId, table.athleteId] })],
+)
+
+export const nationalTeams = pgTable('national_teams', {
+  id: text('id').primaryKey(),
+  sportId: text('sport_id').notNull(),
+  sportSlug: text('sport_slug').notNull(),
+  slug: text('slug').notNull(),
+  name: text('name').notNull(),
+  selection: text('selection').notNull(),
+  ageBand: text('age_band').notNull(),
+  sex: text('sex'),
+  country: text('country').notNull(),
+})
+
+export const appearances = pgTable('appearances', {
+  id: text('id').primaryKey(),
+  sportId: text('sport_id').notNull(),
+  sportSlug: text('sport_slug').notNull(),
+  competitionId: text('competition_id').notNull(),
+  athleteId: text('athlete_id'),
+  athleteSport: text('athlete_sport'),
+  nationalTeamId: text('national_team_id'),
+  opponentLabel: text('opponent_label').notNull(),
+  startsAt: timestamp('starts_at', { withTimezone: true, mode: 'string' }).notNull(),
+  endsAt: timestamp('ends_at', { withTimezone: true, mode: 'string' }),
+  status: text('status').notNull(),
+  result: jsonb('result'),
+  creatorKind: text('creator_kind').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+})
+
+export const lineupEntries = pgTable(
+  'lineup_entries',
+  {
+    appearanceId: text('appearance_id').notNull(),
+    athleteId: text('athlete_id').notNull(),
+    athleteSport: text('athlete_sport').notNull(),
+    started: boolean('started').notNull(),
+    minutes: integer('minutes'),
+    stats: jsonb('stats').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.appearanceId, table.athleteId] })],
 )

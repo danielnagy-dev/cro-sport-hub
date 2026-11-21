@@ -21,7 +21,7 @@ Canonical vocabulary for **Cro Sport Hub**. Use these English identifiers in cod
 | Studio                 | —                             | Angular editorial app: matches, review, galleries, admin.                | `apps/studio`                              |
 | Web (public site)      | javna web stranica (informal) | Next.js site for published results and athlete profiles.                 | `apps/web`                                 |
 | API                    | —                             | NestJS HTTP API and catalog persistence.                                 | `apps/api`                                 |
-| Catalog                | —                             | Postgres schema, migrations, and read/write layer for all domain tables. | `apps/api/src/catalog/`, SQL `0001`–`0008` |
+| Catalog                | —                             | Postgres schema, migrations, and read/write layer for all domain tables. | `apps/api/src/catalog/`, SQL `0001`–`0009` |
 | `libs/shared-types`    | —                             | Zod schemas and types shared across apps.                                | `libs/shared-types/src/`                   |
 | `libs/ui`              | —                             | Shared React components for web and Storybook.                           | `libs/ui/src/`                             |
 | `libs/slide-generator` | —                             | Football slide HTML/CSS and PNG rendering (1080×1350).                   | `libs/slide-generator/src/`                |
@@ -30,12 +30,13 @@ Canonical vocabulary for **Cro Sport Hub**. Use these English identifiers in cod
 
 | English (canonical) | Croatian (where used)    | Definition                                                             | Where                                                     |
 | ------------------- | ------------------------ | ---------------------------------------------------------------------- | --------------------------------------------------------- |
-| Sport               | sport                    | Top-level discipline; v1 is `tennis` or `football`.                    | Table `sports`, `sportSlugSchema`                         |
+| Sport               | sport                    | Top-level discipline; v1 is `tennis`, `football`, or `basketball`.     | Table `sports`, `sportSlugSchema`                         |
 | Competition         | natjecanje               | Named tournament or league season slice editors attach to every match. | Table `competitions`, `competitionSchema`                 |
 | Season              | sezona                   | Season label on a competition row (text, not a separate table).        | `competitions.season`, `seasonSchema`                     |
 | Competition level   | —                        | `domestic` or `international` on a competition.                        | `competitionLevelSchema`                                  |
-| Team                | klub, momčad (slides)    | Football club record: name, slug, crest; not national teams in v1.     | Table `teams`, `teamSchema`; slides `FootballPerson.club` |
-| Athlete             | sportaš / igrač (slides) | Person who plays tennis or football; has slug and optional position.   | Table `athletes`, `athleteSchema`                         |
+| Team                | klub, momčad (slides)    | Football club record: name, slug, crest; not a national selection.     | Table `teams`, `teamSchema`; slides `FootballPerson.club` |
+| NationalTeam        | reprezentacija           | National selection / age band as an Appearance participant.            | Table `national_teams`, ADR-010 / ADR-011                 |
+| Athlete             | sportaš / igrač (slides) | Person who plays tennis, football, or basketball; optional club label. | Table `athletes`, `athleteSchema`, `athletes.club_name`   |
 | Athlete–team spell  | klub (history)           | Date-bounded membership linking a football athlete to a team.          | Table `athlete_teams`, `athleteTeamSchema`                |
 | User                | —                        | Studio account with `editor` or `admin` role.                          | Table `users`, `roleSchema`                               |
 | Slug                | —                        | URL-safe public identifier for athletes (and team slugs in catalog).   | `slugSchema`, `/athletes/{slug}`                          |
@@ -72,20 +73,22 @@ Canonical vocabulary for **Cro Sport Hub**. Use these English identifiers in cod
 
 ## Football
 
-| English (canonical)   | Croatian (where used) | Definition                                                                | Where                                           |
-| --------------------- | --------------------- | ------------------------------------------------------------------------- | ----------------------------------------------- |
-| Football match        | nogometna utakmica    | Extension row: home/away team ids and goal counts; draws allowed.         | Table `football_matches`, `footballMatchSchema` |
-| Home team / Away team | domaćin / gost        | The two clubs in a fixture.                                               | `home_team_id`, `away_team_id`                  |
-| Appearance            | nastup                | One athlete's participation in a football match with minutes and stats.   | Table `appearances`, `appearanceSchema`         |
-| Started               | —                     | Whether the athlete was in the starting lineup.                           | `appearances.started`                           |
-| Minutes               | minute                | Minutes played (0–130); zero minutes restricts goals/assists/start flags. | Slides label `MINUTE`                           |
-| Goals                 | golovi                | Goals scored in the match.                                                | Slides label `GOLOVI`                           |
-| Assists               | asistencije           | Assists in the match.                                                     | Slides label `ASIST.`                           |
-| Yellow card           | žuti karton           | Count 0–2 on an appearance.                                               | `yellow_cards`, slide `Žuti`                    |
-| Red card              | crveni karton         | Sending-off flag; two yellows use separate fields.                        | `red_card`, slide `Crveni`                      |
-| Second yellow         | drugi žuti            | UI label when `yellowCards >= 2` (includes sending-off display).          | `appearances-table.tsx`, `CARD_VALUE_LEGACY`    |
-| Position              | pozicija              | Free-text role on athlete or slide (e.g. `napadač`, `desni bek`).         | `athletes.position`, slide HTML                 |
-| Card (enum)           | karton                | Display enum `yellow` \| `red`; not a DB column on appearances.           | `cardTypeSchema`                                |
+| English (canonical)   | Croatian (where used) | Definition                                                                 | Where                                           |
+| --------------------- | --------------------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
+| Football match        | nogometna utakmica    | Extension row: home/away team ids and goal counts; draws allowed.          | Table `football_matches`, `footballMatchSchema` |
+| Home team / Away team | domaćin / gost        | The two clubs in a fixture.                                                | `home_team_id`, `away_team_id`                  |
+| Appearance            | nastup                | Scheduled or completed participation (athlete or national team).           | Table `appearances`, ADR-010 / ADR-011          |
+| Match appearance      | nastup (match path)   | Legacy football player-in-match stats row (expand–contract until Phase H). | Table `match_appearances`, `appearanceSchema`   |
+| Lineup entry          | sastav                | Who played on an Appearance, with jsonb stats.                             | Table `lineup_entries`, ADR-011                 |
+| Started               | —                     | Whether the athlete was in the starting lineup.                            | `match_appearances.started`, `lineup_entries`   |
+| Minutes               | minute                | Minutes played (0–130); zero minutes restricts goals/assists/start flags.  | Slides label `MINUTE`                           |
+| Goals                 | golovi                | Goals scored in the match.                                                 | Slides label `GOLOVI`                           |
+| Assists               | asistencije           | Assists in the match.                                                      | Slides label `ASIST.`                           |
+| Yellow card           | žuti karton           | Count 0–2 on an appearance.                                                | `yellow_cards`, slide `Žuti`                    |
+| Red card              | crveni karton         | Sending-off flag; two yellows use separate fields.                         | `red_card`, slide `Crveni`                      |
+| Second yellow         | drugi žuti            | UI label when `yellowCards >= 2` (includes sending-off display).           | `appearances-table.tsx`, `CARD_VALUE_LEGACY`    |
+| Position              | pozicija              | Free-text role on athlete or slide (e.g. `napadač`, `desni bek`).          | `athletes.position`, slide HTML                 |
+| Card (enum)           | karton                | Display enum `yellow` \| `red`; not a DB column on appearances.            | `cardTypeSchema`                                |
 
 ## Galleries and slides
 

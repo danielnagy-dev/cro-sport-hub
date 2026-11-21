@@ -29,11 +29,11 @@ import {
 import * as schema from './schema.js'
 
 const {
-  appearances,
   athleteTeams,
   athletes,
   competitions,
   footballMatches,
+  matchAppearances,
   matches,
   sports,
   teams,
@@ -70,7 +70,7 @@ async function insertRow(run: () => Promise<unknown>): Promise<void> {
 }
 
 function knownSlug(slug: string | undefined, missing: string): SportSlug {
-  if (slug === 'tennis' || slug === 'football') return slug
+  if (slug === 'tennis' || slug === 'football' || slug === 'basketball') return slug
   throw new CatalogError('unknown-ref', missing)
 }
 
@@ -218,7 +218,9 @@ export async function writeRecord(
         throw new CatalogError('invalid', 'The appearance club is one of the two sides')
       }
       return insertRow(() =>
-        db.insert(appearances).values({ ...row, matchSport: 'football', athleteSport: 'football' }),
+        db
+          .insert(matchAppearances)
+          .values({ ...row, matchSport: 'football', athleteSport: 'football' }),
       )
     }
     default: {
@@ -260,8 +262,13 @@ async function readMatchRow(
     if (kind === 'appearance') {
       const rows = await db
         .select()
-        .from(appearances)
-        .where(and(eq(appearances.matchId, key.matchId), eq(appearances.athleteId, key.athleteId)))
+        .from(matchAppearances)
+        .where(
+          and(
+            eq(matchAppearances.matchId, key.matchId),
+            eq(matchAppearances.athleteId, key.athleteId),
+          ),
+        )
       const row = rows[0]
       return row === undefined
         ? undefined
@@ -339,7 +346,8 @@ export async function readRecord(
   const rows = await db.select().from(table).where(eq(table.id, key))
   const row = rows[0]
   if (row === undefined) return undefined
-  const hidden = kind === 'team' || kind === 'athlete' ? ['sportSlug'] : []
+  const hidden =
+    kind === 'athlete' ? ['sportSlug', 'clubName'] : kind === 'team' ? ['sportSlug'] : []
   const parsed = ID_PARSERS[kind].safeParse(publicRow(row, hidden))
   if (!parsed.success) return invalidRecord(parsed.error)
   return parsed.data

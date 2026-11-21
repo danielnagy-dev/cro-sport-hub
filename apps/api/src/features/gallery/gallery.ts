@@ -21,12 +21,12 @@ import { CatalogError, parseRecord, type CatalogDb } from '../../catalog/errors.
 import * as schema from '../../catalog/schema.js'
 
 const {
-  appearances,
   athletes,
   competitions,
   footballMatches,
   galleries,
   gallerySlides,
+  matchAppearances,
   matches,
   teams,
 } = schema
@@ -59,24 +59,24 @@ async function loadMatchAppearances(db: CatalogDb, matchId: string) {
       awayTeam: awaySide.name,
       homeGoals: footballMatches.homeGoals,
       awayGoals: footballMatches.awayGoals,
-      teamId: appearances.teamId,
-      started: appearances.started,
-      minutes: appearances.minutes,
-      goals: appearances.goals,
-      assists: appearances.assists,
-      yellowCards: appearances.yellowCards,
-      redCard: appearances.redCard,
-      athleteId: appearances.athleteId,
+      teamId: matchAppearances.teamId,
+      started: matchAppearances.started,
+      minutes: matchAppearances.minutes,
+      goals: matchAppearances.goals,
+      assists: matchAppearances.assists,
+      yellowCards: matchAppearances.yellowCards,
+      redCard: matchAppearances.redCard,
+      athleteId: matchAppearances.athleteId,
     })
-    .from(appearances)
-    .innerJoin(matches, eq(matches.id, appearances.matchId))
+    .from(matchAppearances)
+    .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
     .innerJoin(competitions, eq(competitions.id, matches.competitionId))
     .innerJoin(footballMatches, eq(footballMatches.matchId, matches.id))
-    .innerJoin(athletes, eq(athletes.id, appearances.athleteId))
-    .innerJoin(teams, eq(teams.id, appearances.teamId))
+    .innerJoin(athletes, eq(athletes.id, matchAppearances.athleteId))
+    .innerJoin(teams, eq(teams.id, matchAppearances.teamId))
     .innerJoin(homeSide, eq(homeSide.id, footballMatches.homeTeamId))
     .innerJoin(awaySide, eq(awaySide.id, footballMatches.awayTeamId))
-    .where(eq(appearances.matchId, matchId))
+    .where(eq(matchAppearances.matchId, matchId))
   return rows
     .sort(
       (left, right) =>

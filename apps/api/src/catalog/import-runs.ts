@@ -16,7 +16,7 @@ import { CatalogError, invalidRecord, parseRecord, type Catalog, type CatalogDb 
 import { readRecord, sportIdFor, writeRecord } from './records.js'
 import * as schema from './schema.js'
 
-const { appearances, footballMatches, importRuns, matches, tennisMatches } = schema
+const { footballMatches, importRuns, matchAppearances, matches, tennisMatches } = schema
 
 const headerSchema = z.strictObject({
   id: idSchema,
@@ -128,7 +128,10 @@ async function unchanged(db: CatalogDb, matchId: string, row: FixtureRow): Promi
   if (stored.homeGoals !== row.detail.homeGoals || stored.awayGoals !== row.detail.awayGoals) {
     return false
   }
-  const lines = await db.select().from(appearances).where(eq(appearances.matchId, matchId))
+  const lines = await db
+    .select()
+    .from(matchAppearances)
+    .where(eq(matchAppearances.matchId, matchId))
   return pack(lines) === pack(row.appearances)
 }
 
@@ -174,7 +177,7 @@ async function writeImport(
         .update(footballMatches)
         .set({ homeGoals: row.detail.homeGoals, awayGoals: row.detail.awayGoals })
         .where(eq(footballMatches.matchId, matchId))
-      await database.delete(appearances).where(eq(appearances.matchId, matchId))
+      await database.delete(matchAppearances).where(eq(matchAppearances.matchId, matchId))
     }
     for (const line of row.appearances) {
       await writeRecord(database, 'appearance', { ...line, matchId })
