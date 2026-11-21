@@ -13,14 +13,29 @@ export {
 export type { FieldIssue } from './common.ts'
 
 export {
+  appearanceStatusSchema,
   cardTypeSchema,
   competitionLevelSchema,
+  creatorKindSchema,
   matchSourceSchema,
+  networkSchema,
+  publishSlotStatusSchema,
   roleSchema,
   sportSlugSchema,
   statusSchema,
 } from './enums.ts'
-export type { CardType, CompetitionLevel, MatchSource, Role, SportSlug, Status } from './enums.ts'
+export type {
+  AppearanceStatus,
+  CardType,
+  CompetitionLevel,
+  CreatorKind,
+  MatchSource,
+  Network,
+  PublishSlotStatus,
+  Role,
+  SportSlug,
+  Status,
+} from './enums.ts'
 
 export { sportSchema } from './sport.ts'
 export type { Sport } from './sport.ts'

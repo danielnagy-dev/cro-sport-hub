@@ -1,11 +1,16 @@
 import type { SportSlug } from '@cro-sport-hub/shared-types'
 
 /** v1 sports, in tab order. */
-export const sportOrder = ['tennis', 'football'] as const satisfies readonly SportSlug[]
+export const sportOrder = [
+  'tennis',
+  'football',
+  'basketball',
+] as const satisfies readonly SportSlug[]
 
 export const sportLabel: Record<SportSlug, string> = {
   tennis: 'Tennis',
   football: 'Football',
+  basketball: 'Basketball',
 }
 
 /** Next tab for this key. Arrow keys select that sport; other keys are ignored. */

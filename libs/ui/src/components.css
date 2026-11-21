@@ -15,7 +15,8 @@
 }
 
 .csh-badge--tennis,
-.csh-badge--football {
+.csh-badge--football,
+.csh-badge--basketball {
   color: var(--csh-color-on-accent);
 }
 
@@ -25,6 +26,11 @@
 
 .csh-badge--football {
   background: var(--csh-color-football);
+}
+
+/* Token colour lands with rewrite.B1 (#167); class is ready for SportSlug. */
+.csh-badge--basketball {
+  background: var(--csh-color-basketball);
 }
 
 .csh-sport-tabs {

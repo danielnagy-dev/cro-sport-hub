@@ -8,8 +8,8 @@ export type Status = z.infer<typeof statusSchema>
 export const roleSchema = z.enum(['editor', 'admin'])
 export type Role = z.infer<typeof roleSchema>
 
-/** The two v1 sports. `Sport` is the entity; this is the slug enum. */
-export const sportSlugSchema = z.enum(['tennis', 'football'])
+/** ADR-010 v1 sports. `Sport` is the entity; this is the slug enum. */
+export const sportSlugSchema = z.enum(['tennis', 'football', 'basketball'])
 export type SportSlug = z.infer<typeof sportSlugSchema>
 
 /**
@@ -24,3 +24,27 @@ export type MatchSource = z.infer<typeof matchSourceSchema>
 
 export const competitionLevelSchema = z.enum(['domestic', 'international'])
 export type CompetitionLevel = z.infer<typeof competitionLevelSchema>
+
+/** Editorial appearance lifecycle (ADR-010). */
+export const appearanceStatusSchema = z.enum(['scheduled', 'in_progress', 'completed', 'cancelled'])
+export type AppearanceStatus = z.infer<typeof appearanceStatusSchema>
+
+/** Publish-slot lifecycle for social buckets (ADR-010). */
+export const publishSlotStatusSchema = z.enum([
+  'planned',
+  'waiting_for_data',
+  'ready_for_review',
+  'approved',
+  'published',
+  'skipped',
+  'error',
+])
+export type PublishSlotStatus = z.infer<typeof publishSlotStatusSchema>
+
+/** Social networks that receive NetworkPosts. */
+export const networkSchema = z.enum(['instagram', 'facebook', 'x'])
+export type Network = z.infer<typeof networkSchema>
+
+/** Who drafted a row for audit (ADR-010). */
+export const creatorKindSchema = z.enum(['bot', 'manual'])
+export type CreatorKind = z.infer<typeof creatorKindSchema>
