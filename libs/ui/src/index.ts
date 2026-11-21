@@ -27,3 +27,15 @@ export type {
   KitTone,
   KitVariant,
 } from './variant-contract.ts'
+export { Button } from './button.tsx'
+export type { ButtonProps } from './button.tsx'
+export { StatusPill } from './status-pill.tsx'
+export type { StatusPillProps } from './status-pill.tsx'
+export { TextField } from './text-field.tsx'
+export type { TextFieldProps } from './text-field.tsx'
+export { Drawer } from './drawer.tsx'
+export type { DrawerProps } from './drawer.tsx'
+export { DataTable } from './data-table.tsx'
+export type { DataTableColumn, DataTableProps } from './data-table.tsx'
+export { FilterBar } from './filter-bar.tsx'
+export type { FilterBarProps } from './filter-bar.tsx'
