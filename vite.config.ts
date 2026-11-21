@@ -98,7 +98,7 @@ export default defineConfig({
       },
       typecheck: {
         command:
-          'vp run -r typecheck && tsc --noEmit -p tools/verify/tsconfig.json && tsc --noEmit -p tools/guards/tsconfig.json',
+          'vp run -r typecheck && tsc --noEmit -p tools/verify/tsconfig.json && tsc --noEmit -p tools/guards/tsconfig.json && tsc --noEmit -p tools/gh-metadata/tsconfig.json',
         dependsOn: [
           '@cro-sport-hub/shared-types#build',
           '@cro-sport-hub/ui#build',

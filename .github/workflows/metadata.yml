@@ -1,0 +1,206 @@
+name: Metadata
+
+# Automate board metadata on issue/PR open.
+# Assignee stays human/empty by default: GitHub Apps often cannot be assignees.
+# Prefer CI author + requested reviewer. Optional assign of MAINTAINER is off
+# unless workflow_dispatch assign_maintainer=true or repo var ASSIGN_MAINTAINER=true.
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: Target kind
+        required: true
+        type: choice
+        options: [issue, pr]
+      number:
+        description: Issue or pull request number
+        required: true
+        type: string
+      dry_run:
+        description: Print planned changes only
+        required: false
+        type: boolean
+        default: true
+      assign_maintainer:
+        description: Assign MAINTAINER (default off)
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  MAINTAINER: danielnagy-dev
+
+jobs:
+  apply:
+    name: apply-metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+
+      - name: Resolve target
+        id: target
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            KIND="${{ inputs.kind }}"
+            NUMBER="${{ inputs.number }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+            ASSIGN="${{ inputs.assign_maintainer }}"
+          elif [ "${{ github.event_name }}" = "issues" ]; then
+            KIND=issue
+            NUMBER="${{ github.event.issue.number }}"
+            DRY_RUN=false
+            ASSIGN=false
+          else
+            KIND=pr
+            NUMBER="${{ github.event.pull_request.number }}"
+            DRY_RUN=false
+            ASSIGN=false
+          fi
+
+          if [ "${{ vars.ASSIGN_MAINTAINER }}" = "true" ]; then
+            ASSIGN=true
+          fi
+
+          if [ "$KIND" = "issue" ]; then
+            gh issue view "$NUMBER" --json title,body,id > /tmp/target.json
+          else
+            gh pr view "$NUMBER" --json title,body,id > /tmp/target.json
+          fi
+          jq -r .title /tmp/target.json > /tmp/title.txt
+          jq -r '.body // ""' /tmp/target.json > /tmp/body.txt
+          NODE_ID=$(jq -r .id /tmp/target.json)
+
+          {
+            echo "kind=$KIND"
+            echo "number=$NUMBER"
+            echo "dry_run=$DRY_RUN"
+            echo "assign=$ASSIGN"
+            echo "node_id=$NODE_ID"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Infer metadata
+        id: infer
+        run: |
+          set -euo pipefail
+          # Inference only; no network. Dry-run uses the same path.
+          # Node strip-types avoids a full pnpm install for this Action.
+          node --experimental-strip-types tools/gh-metadata/infer-metadata.ts \
+            --kind "${{ steps.target.outputs.kind }}" \
+            --title-file /tmp/title.txt \
+            --body-file /tmp/body.txt > /tmp/metadata.json
+          cat /tmp/metadata.json
+
+      - name: Apply metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ steps.target.outputs.dry_run }}
+          KIND: ${{ steps.target.outputs.kind }}
+          NUMBER: ${{ steps.target.outputs.number }}
+          NODE_ID: ${{ steps.target.outputs.node_id }}
+          ASSIGN: ${{ steps.target.outputs.assign }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          META=/tmp/metadata.json
+          AREAS=$(jq -r '.areas | join(" ")' "$META")
+          ISSUE_TYPE=$(jq -r '.issueType // empty' "$META")
+          READY=$(jq -r '.readyForAgent' "$META")
+
+          echo "areas=$AREAS issueType=$ISSUE_TYPE readyForAgent=$READY dry_run=$DRY_RUN assign=$ASSIGN"
+
+          add_labels() {
+            local labels=("$@")
+            if [ "${#labels[@]}" -eq 0 ]; then
+              return 0
+            fi
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "dry-run: would add labels: ${labels[*]}"
+              return 0
+            fi
+            local args=()
+            for label in "${labels[@]}"; do
+              args+=(--add-label "$label")
+            done
+            if [ "$KIND" = "issue" ]; then
+              gh issue edit "$NUMBER" "${args[@]}"
+            else
+              gh pr edit "$NUMBER" "${args[@]}"
+            fi
+          }
+
+          LABEL_ARGS=()
+          for area in $AREAS; do
+            LABEL_ARGS+=("area:$area")
+          done
+          if [ "$KIND" = "issue" ] && [ "$READY" = "true" ]; then
+            LABEL_ARGS+=("status:ready-for-agent")
+          fi
+          add_labels "${LABEL_ARGS[@]+"${LABEL_ARGS[@]}"}"
+
+          if [ "$KIND" = "issue" ] && [ -n "$ISSUE_TYPE" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "dry-run: would set Issue Type=$ISSUE_TYPE"
+            else
+              TYPE_ID=$(gh api graphql \
+                -H 'GraphQL-Features: issue_types' \
+                -f query='query($owner:String!,$name:String!){repository(owner:$owner,name:$name){issueTypes(first:20){nodes{id name}}}}' \
+                -f owner="$OWNER" \
+                -f name="$REPO" \
+                --jq ".data.repository.issueTypes.nodes[] | select(.name==\"$ISSUE_TYPE\") | .id")
+              if [ -z "$TYPE_ID" ]; then
+                echo "No Issue Type named $ISSUE_TYPE; skipping type set"
+              else
+                gh api graphql \
+                  -H 'GraphQL-Features: issue_types' \
+                  -f query='mutation($issueId:ID!,$issueTypeId:ID!){updateIssueIssueType(input:{issueId:$issueId,issueTypeId:$issueTypeId}){issue{number issueType{name}}}}' \
+                  -f issueId="$NODE_ID" \
+                  -f issueTypeId="$TYPE_ID"
+              fi
+            fi
+          fi
+
+          if [ "$KIND" = "pr" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "dry-run: would request reviewer $MAINTAINER"
+            else
+              gh pr edit "$NUMBER" --add-reviewer "$MAINTAINER" || \
+                echo "Could not request reviewer $MAINTAINER (already requested or insufficient permission)"
+            fi
+          fi
+
+          if [ "$ASSIGN" = "true" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "dry-run: would assign $MAINTAINER"
+            else
+              if [ "$KIND" = "issue" ]; then
+                gh issue edit "$NUMBER" --add-assignee "$MAINTAINER" || \
+                  echo "Could not assign $MAINTAINER"
+              else
+                gh pr edit "$NUMBER" --add-assignee "$MAINTAINER" || \
+                  echo "Could not assign $MAINTAINER"
+              fi
+            fi
+          else
+            echo "Assignee left empty (default). CI author + reviewer cover ownership."
+          fi

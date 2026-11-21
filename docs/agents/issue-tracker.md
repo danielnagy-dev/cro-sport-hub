@@ -21,13 +21,24 @@ Otherwise `gh issue create` with this body:
 
 Title: `[<id>] <title>`. Keep an existing plan id such as `4b`. A new id continues the sequence the area already uses.
 
-Labels, applied when the issue is opened:
+Metadata, applied when the issue is opened (humans via `gh`, or `.github/workflows/metadata.yml`):
 
 - `area:<area>` matches the historical area folders (`web`, `studio`, `gallery`, `cache`, and the rest). Color `1D76DB`.
-- `type:feature`, `type:bug`, or `type:task`. Colors `A2EEEF`, `D73A4A`, `C5DEF5`.
-- `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`.
+- **Native Issue Type** (`Task`, `Bug`, or `Feature`). Prefer Issue Type over `type:*` labels on issues. Do not add `type:feature`, `type:bug`, or `type:task` on new issues. Pull requests have no Issue Types; skip `type:*` on PRs unless a title clearly needs one.
+- `status:ready-for-agent` only when the size gate in `.cursor/skills/plan/SKILL.md` is met. Color `0E8A16`. The metadata Action is conservative and skips this label when Size is missing or unclear.
 
-Create a missing label with that color, then apply it. Size stays in the body. There is no `size:S`, `size:M`, or `size:L` label. `status:blocked` and `status:needs-decision` are not used. Ask Daniel before an issue is ready when a decision is still open.
+Create a missing `area:*` or `status:*` label with that color, then apply it. Size stays in the body. There is no `size:S`, `size:M`, or `size:L` label. `status:blocked` and `status:needs-decision` are not used. Ask Daniel before an issue is ready when a decision is still open.
+
+Assignee stays a human (or empty). GitHub Apps often cannot be assignees; do not invent a bot user. The metadata Action leaves assignee empty by default and requests reviewer `danielnagy-dev` on PRs. Optional assign of that maintainer is off unless `ASSIGN_MAINTAINER=true` (repo variable) or `workflow_dispatch` `assign_maintainer=true`.
+
+### Branch protection (Daniel, UI only)
+
+Actions cannot replace branch protection. In GitHub: **Settings → Branches → Branch protection rules** for `main`:
+
+1. Require a pull request before merging.
+2. Require at least 1 approving review.
+3. Require status checks to pass (include the `ci` job from `.github/workflows/ci.yml`).
+4. Do not allow auto-merge as a substitute for review.
 
 Do not add a status list to this file.
 
