@@ -111,4 +111,5 @@ export const storyProof: Record<string, string> = {
   'results-tennis-stats--percentages': '66.7%',
   'results-appearances--table': 'Second yellow',
   'tokens--swatches': 'Kit tokens',
+  'primitives--gallery': 'Kit primitives',
 }
