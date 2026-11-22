@@ -3,10 +3,8 @@
  *
  * Naming: `<surface>.<role>` with kebab segments
  * (`nav.pocetna`, `chrome.log-out`, `sportasi.lead`).
- * Surfaces this catalog owns: `nav`, `chrome`, each empty-screen id
- * (`pocetna`, `sportasi`, `objave`, `postavke`), and `shell-home` (retired
- * editor stub). Stable string ids — do not rename casually; a later locale
- * file uses the same keys.
+ * Surfaces: `nav`, `chrome`, empty-screen ids, `postavke`, `publish-drawer`, `shell-home`.
+ * Stable string ids — do not rename casually; a later locale file uses the same keys.
  */
 export const MESSAGE_KEYS = [
   'nav.pocetna',
@@ -47,6 +45,11 @@ export const MESSAGE_KEYS = [
   'postavke.network.instagram',
   'postavke.network.facebook',
   'postavke.network.x',
+  'publish-drawer.title',
+  'publish-drawer.preview',
+  'publish-drawer.approve',
+  'publish-drawer.slide-order',
+  'publish-drawer.error-approve',
 ] as const
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number]
