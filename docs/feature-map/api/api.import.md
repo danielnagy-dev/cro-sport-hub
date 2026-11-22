@@ -22,7 +22,7 @@ Shapes on `GET /docs-json` no longer include an `import` tag. Swagger UI is `/do
 #### Driving it with verify
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. Import and admin paths must be absent.
-- **Behaviour.** Controller, PGLite HTTP suite, and schedule service are gone (#267). Remaining API tests must pass without `apps/api/src/features/import/` or `import.controller.ts`. Catalog `import.spec.ts` still covers `runImport` helpers.
+- **Behaviour.** Controller, PGLite HTTP suite, and schedule service are gone (#267). Remaining API tests must pass without `apps/api/src/features/import/` or `import.controller.ts`. Catalog `import.spec.ts` and `import-fixture.json` are deleted (#313); `runImport` helpers remain until the writer-delete sibling.
 
 #### Gotchas
 
