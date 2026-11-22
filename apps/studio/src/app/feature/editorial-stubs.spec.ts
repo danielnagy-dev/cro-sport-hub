@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing'
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router'
 import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
+import { appConfig } from '../app.config'
 import { appearancesPath, sampleAppearance } from '../core/appearances-api'
 import { authInterceptor, TOKEN_STORE, type TokenStore } from '../core/auth'
 import { t } from '../core/messages'
@@ -13,10 +14,9 @@ import {
   publishSlotsPath,
   samplePublishSlot,
 } from '../core/publish-slots-api'
+import { startOfLocalDay } from './editorial-day'
 import { ObjavePage } from './objave/objave'
 import { editorialDayIso, PocetnaPage } from './pocetna/pocetna'
-import { SportasiPage } from './sportasi/sportasi'
-import { startOfLocalDay } from './editorial-day'
 
 const HOUR = 60 * 60
 
@@ -49,23 +49,23 @@ describe('editorial stubs', () => {
     sessionStorage.clear()
   })
 
-  it.each([
-    [SportasiPage as Type<unknown>, t('sportasi.title'), t('sportasi.lead')],
-    [ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')],
-  ] as const)('renders %s', async (Page, heading, copy) => {
-    await TestBed.configureTestingModule({
-      imports: [Page],
-      providers: [
-        ...appConfig.providers,
-        { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
-      ],
-    }).compileComponents()
-    const fixture = TestBed.createComponent(Page)
-    await fixture.whenStable()
-    const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
-    expect(root.textContent).toContain(copy)
-  })
+  it.each([[ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')]] as const)(
+    'renders %s',
+    async (Page, heading, copy) => {
+      await TestBed.configureTestingModule({
+        imports: [Page],
+        providers: [
+          ...appConfig.providers,
+          { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
+        ],
+      }).compileComponents()
+      const fixture = TestBed.createComponent(Page)
+      await fixture.whenStable()
+      const root = fixture.nativeElement as HTMLElement
+      expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
+      expect(root.textContent).toContain(copy)
+    },
+  )
 
   it('renders Početna and the admin-only message', async () => {
     await TestBed.configureTestingModule({
