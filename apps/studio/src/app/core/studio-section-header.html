@@ -1,17 +1,17 @@
 <header class="shell-header">
   <a class="skip-link" href="#content">{{ skipLabel() }}</a>
   <p class="shell-mark">Cro Sport Hub</p>
-  <h1>Studio</h1>
-  <nav class="shell-nav" aria-label="Studio sections">
-    <a routerLink="/pocetna" [attr.aria-current]="ariaPocetna()">Početna</a>
-    <a routerLink="/sportasi" [attr.aria-current]="ariaSportasi()">Sportaši</a>
-    <a routerLink="/objave" [attr.aria-current]="ariaObjave()">Objave</a>
-    <a routerLink="/postavke" [attr.aria-current]="ariaPostavke()">Postavke</a>
+  <h1>{{ heading }}</h1>
+  <nav class="shell-nav" [attr.aria-label]="navAria">
+    <a routerLink="/pocetna" [attr.aria-current]="ariaPocetna()">{{ navPocetna }}</a>
+    <a routerLink="/sportasi" [attr.aria-current]="ariaSportasi()">{{ navSportasi }}</a>
+    <a routerLink="/objave" [attr.aria-current]="ariaObjave()">{{ navObjave }}</a>
+    <a routerLink="/postavke" [attr.aria-current]="ariaPostavke()">{{ navPostavke }}</a>
   </nav>
   @if (auth.session(); as session) {
   <div class="shell-session">
     <span>{{ session.id }}</span>
-    <button type="button" (click)="logOut()">Log out</button>
+    <button type="button" (click)="logOut()">{{ logOutLabel }}</button>
   </div>
   }
 </header>

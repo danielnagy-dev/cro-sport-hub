@@ -1,4 +1,5 @@
 import { Component } from '@angular/core'
+import { t } from '../../core/messages'
 import { StudioSectionHeader } from '../../core/studio-section-header'
 
 @Component({
@@ -6,4 +7,8 @@ import { StudioSectionHeader } from '../../core/studio-section-header'
   imports: [StudioSectionHeader],
   templateUrl: './postavke.html',
 })
-export class PostavkePage {}
+export class PostavkePage {
+  protected readonly skipLabel = t('postavke.skip')
+  protected readonly title = t('postavke.title')
+  protected readonly lead = t('postavke.lead')
+}
