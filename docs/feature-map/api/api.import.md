@@ -4,7 +4,7 @@
 | --- | ------- | ------------------------ | ----------------- | ------------- |
 | api | retired | `POST /api/admin/import` | `vp run api#test` | plan item 14a |
 
-**Retired (Phase H / #267).** Import Nest controller, controller specs, schedule service, and feature module (`features/import/`) are deleted. Folder auto-load no longer registers an ImportModule, so `POST /api/admin/import` and `GET /api/admin/import/runs` are gone. OpenAPI no longer documents live `import` or `admin` tags. Catalog `runImport` / fixture helpers remain for later bot draft work (Phase J) and #186. Studio import UI is already retired (`studio.admin`).
+**Retired (Phase H / #267, writers #318).** Import Nest controller, controller specs, schedule service, and feature module (`features/import/`) are deleted. Folder auto-load no longer registers an ImportModule, so `POST /api/admin/import` and `GET /api/admin/import/runs` are gone. OpenAPI no longer documents live `import` or `admin` tags. Catalog match-import writers (`import-runs.ts`: `runImport`, `listImportRuns`, `readImportFixture`, `bindCatalog`) are deleted; the catalog package no longer re-exports them. Phase J builds a new bot ingest path. The `import_runs` table remains until a later drop. Studio import UI is already retired (`studio.admin`).
 
 Historical behaviour: `POST /api/admin/import` ran the JSON fixture shipped in the repo and returned an import run (`id`, counts, timestamps, and `error` when a row failed validation). `GET /api/admin/import/runs` listed runs, newest first. Both routes were admin only. An admin sent `Authorization: Bearer`. No token was HTTP 401 `Invalid token`. An editor was HTTP 403 `Forbidden`. New rows were `draft` with `source: import` and a `sourceRef`. A later run with the same `sourceRef` updated score or appearances only when the stored row was still `draft`. A `review` or `published` row with that `sourceRef` was skipped and not modified. Imported rows did not appear on `GET /api/matches`.
 
@@ -22,7 +22,7 @@ Shapes on `GET /docs-json` no longer include an `import` tag. Swagger UI is `/do
 #### Driving it with verify
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. Import and admin paths must be absent.
-- **Behaviour.** Controller, PGLite HTTP suite, and schedule service are gone (#267). Remaining API tests must pass without `apps/api/src/features/import/` or `import.controller.ts`. Catalog `import.spec.ts` and `import-fixture.json` are deleted (#313); `runImport` helpers remain until the writer-delete sibling.
+- **Behaviour.** Controller, PGLite HTTP suite, and schedule service are gone (#267). Remaining API tests must pass without `apps/api/src/features/import/` or `import.controller.ts`. Catalog `import.spec.ts` and `import-fixture.json` are deleted (#313). Catalog `import-runs.ts` writers and public re-exports are deleted (#318); Phase J owns the next ingest path.
 
 #### Gotchas
 

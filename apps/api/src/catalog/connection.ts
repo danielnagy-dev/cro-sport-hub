@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { bindCatalog } from './import-runs.js'
 import { CatalogError, type Catalog, type CatalogDb, type CatalogErrorCode } from './errors.js'
 import { readRecord, writeRecord } from './records.js'
 import { sqlMigrationStatements } from './migrations.js'
@@ -56,7 +55,6 @@ export async function openCatalog(
       return closing
     },
   }
-  bindCatalog(catalog, db)
   catalogDatabases.set(catalog, db)
   return catalog
 }
