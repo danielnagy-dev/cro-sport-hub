@@ -3,6 +3,14 @@
 
   <main id="content" class="home-main" tabindex="-1">
     <h2>Objave</h2>
+    <csh-ui-filter-bar
+      [dayLabel]="dayLabel()"
+      [sport]="sport"
+      [athlete]="athlete"
+      [status]="status"
+      (previousDay)="onPreviousDay()"
+      (nextDay)="onNextDay()"
+    />
     <p class="home-lead">Red objava — uskoro.</p>
   </main>
 </div>

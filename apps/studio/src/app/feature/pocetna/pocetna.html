@@ -3,6 +3,14 @@
 
   <main id="content" class="home-main" tabindex="-1">
     <h2>Početna</h2>
+    <csh-ui-filter-bar
+      [dayLabel]="dayLabel()"
+      [sport]="sport"
+      [athlete]="athlete"
+      [status]="status"
+      (previousDay)="onPreviousDay()"
+      (nextDay)="onNextDay()"
+    />
     @if (showAdminOnlyMessage()) {
     <p class="home-admin-only" role="status">Admin stranice zahtijevaju admin prijavu.</p>
     }
