@@ -1,22 +1,26 @@
 # api.match-drafts: Save tennis and football drafts
 
-| App | Status | Entry point (user POV)                   | Verify            | Since        |
-| --- | ------ | ---------------------------------------- | ----------------- | ------------ |
-| api | live   | `POST/PUT /api/matches/tennis,/football` | `vp run api#test` | plan item 11 |
+| App | Status  | Entry point (user POV)                   | Verify            | Since        |
+| --- | ------- | ---------------------------------------- | ----------------- | ------------ |
+| api | retired | `POST/PUT /api/matches/tennis,/football` | `vp run api#test` | plan item 11 |
 
-**Phase H / #261.** Controller unit spec (`match-drafts.controller.spec.ts`) deleted. Controllers and match-workflow stay until #262; editor-matches until #263/#264; public `matches` until Phase I; table drop is #186. Studio match/form/review clients are already retired.
+**Retired (Phase H / #261–#262).** Controller unit spec deleted (#261). Nest controllers `match-drafts.controller.ts` / `match-workflow.controller.ts` and feature modules `features/match-drafts/` / `features/match-workflow/` deleted (#262). Folder auto-load no longer registers those modules, so draft write and submit/reject/publish HTTP surfaces are gone. Editor-matches stays until #263/#264; public `matches` until Phase I; catalog draft writers and table drop are #186. Studio match/form/review clients are already retired. OpenAPI `matches` tag no longer advertises draft saves or review transitions.
 
-`POST /api/matches/tennis` and `POST /api/matches/football` create a match. `PUT` on that path plus an id replaces one. Both force `status: draft`. An editor or admin sends `Authorization: Bearer`. No token is 401. Any other signed role is 403. The public `GET` routes stay open. Tennis takes a set score and optional raw stat counts. Football takes a score and optional appearances. Percentage fields are rejected. The response is `{ id, status: "draft", sport }`.
+Historical behaviour: `POST /api/matches/tennis` and `POST /api/matches/football` created a match. `PUT` on that path plus an id replaced one. Both forced `status: draft`. An editor or admin sent `Authorization: Bearer`. No token was 401. Any other signed role was 403. The public `GET` routes stayed open. Tennis took a set score and optional raw stat counts. Football took a score and optional appearances. Percentage fields were rejected. The response was `{ id, status: "draft", sport }`.
 
 #### How to get to it (user POV)
 
-- `POST http://localhost:3001/api/matches/tennis` or `/api/matches/football` with a bearer token. `PUT` adds the match id. Shapes are on `GET /docs-json`.
+HTTP routes are retired. Former routes (for history):
+
+- `POST http://localhost:3001/api/matches/tennis` or `/api/matches/football` with a bearer token. `PUT` added the match id.
+
+Shapes on `GET /docs-json` no longer document those draft write paths. Swagger UI is `/docs`.
 
 #### Driving it with verify
 
-The verify CLI only sends GET, so `vp run verify:api` proves the public reads and `/docs`. The match-drafts controller PGLite HTTP suite was removed in #261. Controllers and routes remain until later H children.
+`vp run verify:api` proves the public reads and `/docs`. The match-drafts controller PGLite HTTP suite was removed in #261. Remaining API tests must pass without `match-drafts.controller.ts`, `match-workflow.controller.ts`, or their feature modules.
 
 #### Gotchas
 
-- A new draft is not on the public list. Editing a published match returns it to draft and removes it from that list.
-- `JWT_SECRET` is read on the draft route, not at boot. An edit replaces stats and appearances.
+- Catalog `saveDraft` helpers and seed/test draft rows remain until #186. A draft is still not on the public list.
+- `JWT_SECRET` was read on the draft route, not at boot. An edit replaced stats and appearances.
