@@ -263,7 +263,7 @@ describe('ReviewPage', () => {
     fixture.detectChanges()
     flushFootball(http)
     await fixture.whenStable()
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Home')
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Početna')
   })
 
   it('hides admin actions when the row is not in review', async () => {

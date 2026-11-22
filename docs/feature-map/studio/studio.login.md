@@ -9,7 +9,7 @@
 #### How to get to it (user POV)
 
 - Open `http://localhost:4200/login`, or open `/` with no session.
-- Dev `ng serve` proxies `/api` to `http://localhost:3001`. The home list is still the stub (`studio.shell`).
+- Dev `ng serve` proxies `/api` to `http://localhost:3001`. After login the home route is Početna (`studio.pocetna`).
 
 #### Driving it with verify
 

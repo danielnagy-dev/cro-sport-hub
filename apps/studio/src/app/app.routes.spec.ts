@@ -8,7 +8,10 @@ import { TOKEN_STORE, type TokenStore } from './core/auth'
 import { editorMatchesPath } from './core/matches-api'
 
 const editorPaths = [
-  '/',
+  '/pocetna',
+  '/sportasi',
+  '/objave',
+  '/postavke',
   '/matches',
   '/matches/new/tennis',
   '/matches/new/football',
@@ -79,21 +82,41 @@ describe('studioRoutes', () => {
     }
   })
 
-  it('renders the home shell at / for a signed-in editor', async () => {
+  it('opens the four editorial stubs for a signed-in editor', async () => {
+    const { router, http, fixture } = await boot(editorToken())
+    for (const [path, heading] of [
+      ['/pocetna', 'Početna'],
+      ['/sportasi', 'Sportaši'],
+      ['/objave', 'Objave'],
+      ['/postavke', 'Postavke'],
+    ] as const) {
+      await router.navigateByUrl(path)
+      settle(http)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      expect(router.url).toBe(path)
+      const root = fixture.nativeElement as HTMLElement
+      expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
+    }
+  })
+
+  it('redirects / to Početna for a signed-in editor', async () => {
     const { router, http, fixture } = await boot(editorToken())
     await router.navigateByUrl('/')
     settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(router.url).toBe('/')
+    expect(router.url).toBe('/pocetna')
     const root = fixture.nativeElement as HTMLElement
-    expect(root.textContent).toContain('Home')
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Home')
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Početna')
   })
 
   it('opens login for a guest', async () => {
     const guest = await boot(null)
     await guest.router.navigateByUrl('/login')
+    settle(guest.http)
+    expect(guest.router.url).toBe('/login')
+    await guest.router.navigateByUrl('/sportasi')
     settle(guest.http)
     expect(guest.router.url).toBe('/login')
     await guest.router.navigateByUrl('/admin/competitions')
@@ -107,16 +130,16 @@ describe('studioRoutes', () => {
     settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(router.url).toBe('/')
+    expect(router.url).toBe('/pocetna')
     await router.navigateByUrl('/matches')
     http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(document.querySelector('a[href="/admin/competitions"]')).toBeNull()
+    expect(document.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
     await router.navigateByUrl('/admin/competitions')
     settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(router.url).toBe('/?admin=1')
+    expect(router.url).toBe('/pocetna?admin=1')
   })
 })
