@@ -4,6 +4,8 @@
 | --- | ------ | --------------------------------------------------------------------- | ------------------- | ----------- |
 | api | live   | `POST /api/galleries`, captions, render, PNG, submit, reject, publish | `vp run verify:api` | plan #52–54 |
 
+**Phase H / #258.** Controller unit spec (`gallery.controller.spec.ts`) deleted. Controller, service, and module remain until #259/#260; shared gallery types until #268; table drop is #186. Studio gallery UI is already retired (`studio.gallery`).
+
 Editors and admins create draft football galleries from published match ids, read the draft, and patch slide captions. `POST /api/galleries/:id/render` rasterizes stored slides (caption included) with the slide-generator Chromium renderer and saves PNG bytes on each row. A later render overwrites bytes. The JSON body is `{ slideCount }`. Unknown gallery is HTTP 404 `Unknown gallery`. When Chromium is not installed, render is HTTP 503 with the message from `footballRendererReason` and no bytes are written. The football list template paginates after **four** appearances in one round so rows stay above the brand footer at 1080×1350; further appearances in that round continue on additional **list** slides (a lone fifth row is still `kind: "list"` with one player).
 
 New editorial callers render slides from an ordered appearance payload without a gallery entity: `slidesFromAppearance` / `renderAppearancePngs` on `@cro-sport-hub/slide-generator` (ADR-003 Phase G). The payload includes `sportSlug`: football keeps the round-13 template; tennis and basketball use intentional text-forward MVP placeholders (1080×1350) until a design pass. Gallery create still maps match appearances through `catalogSlides` + `footballSlides`. ZIP download stays the retired gallery path (ADR-006 / Phase H).
@@ -33,7 +35,7 @@ Shapes are on `GET /docs-json`. Swagger UI is `/docs`.
 Preconditions: same as `api.health`. Migrations run on the first request.
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. It does not call render or download PNG bytes.
-- **Behaviour.** The PGLite HTTP suite in `apps/api` covers create, caption, render (stubbed renderer when Chromium is present), PNG bytes, missing Chromium, auth, submit, reject, publish (including that publish does not clear `pub:v1:` cache keys), and ZIP download of published galleries with rendered slides.
+- **Behaviour.** The gallery controller PGLite HTTP suite was removed in #258. Controllers and routes remain until later H children.
 
 #### Gotchas
 
