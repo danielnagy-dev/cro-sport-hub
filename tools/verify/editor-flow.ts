@@ -60,14 +60,14 @@ async function studioLogin(
   await page.getByLabel('User id').fill(userId)
   await page.getByLabel('Password').fill(password)
   await page.getByRole('button', { name: 'Log in' }).click()
-  await page.getByRole('navigation', { name: 'Studio sections' }).waitFor({
+  await page.getByRole('navigation', { name: 'Odjeljci studija' }).waitFor({
     state: 'visible',
     timeout: 30_000,
   })
 }
 
 async function studioLogOut(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Log out' }).click()
+  await page.getByRole('button', { name: 'Odjava' }).click()
   await page.getByRole('heading', { name: 'Log in' }).waitFor({ state: 'visible', timeout: 15_000 })
 }
 

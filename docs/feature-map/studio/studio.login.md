@@ -4,7 +4,7 @@
 | ------ | ------ | ----------------------------- | ---------------------- | ------------ |
 | studio | live   | `http://localhost:4200/login` | `vp run verify:studio` | plan item 22 |
 
-`/login` posts `{ id, password }` to `POST /api/login` and stores the JWT for the browser tab. Log out is in the studio header. An editor or an admin can open `/`. `adminGuard` allows only an admin and is not attached to a page yet. A guest or an expired token lands on `/login`. The form labels User id and Password and announces errors. The studio reads `sub`, `role`, and `exp` and does not check the signature.
+`/login` posts `{ id, password }` to `POST /api/login` and stores the JWT for the browser tab. **Odjava** is in the studio header. An editor or an admin can open `/`. `adminGuard` allows only an admin and is not attached to a page yet. A guest or an expired token lands on `/login`. The form labels User id and Password and announces errors. The studio reads `sub`, `role`, and `exp` and does not check the signature.
 
 #### How to get to it (user POV)
 

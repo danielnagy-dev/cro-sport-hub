@@ -2,7 +2,7 @@
   <app-studio-section-header />
 
   <main id="content" class="home-main" tabindex="-1">
-    <h2>Početna</h2>
+    <h2>{{ title }}</h2>
     <csh-ui-filter-bar
       [dayLabel]="dayLabel()"
       [sport]="sport"
@@ -12,8 +12,8 @@
       (nextDay)="onNextDay()"
     />
     @if (showAdminOnlyMessage()) {
-    <p class="home-admin-only" role="status">Admin stranice zahtijevaju admin prijavu.</p>
+    <p class="home-admin-only" role="status">{{ adminOnly }}</p>
     }
-    <p class="home-lead">Uređivački početni zaslon — uskoro.</p>
+    <p class="home-lead">{{ lead }}</p>
   </main>
 </div>

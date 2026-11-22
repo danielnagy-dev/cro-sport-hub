@@ -1,4 +1,5 @@
 import { Component, computed, signal } from '@angular/core'
+import { t } from '../../core/messages'
 import { StudioSectionHeader } from '../../core/studio-section-header'
 import { CshUiFilterBar } from '../../layout/ui-kit/filter-bar'
 import type { KitStatus, KitTone } from '../../layout/ui-kit/kit-variants'
@@ -10,6 +11,10 @@ import { editorialDayLabel, shiftEditorialDay, startOfLocalDay } from '../editor
   templateUrl: './objave.html',
 })
 export class ObjavePage {
+  protected readonly skipLabel = t('objave.skip')
+  protected readonly title = t('objave.title')
+  protected readonly lead = t('objave.lead')
+
   protected readonly day = signal(startOfLocalDay())
   protected readonly dayLabel = computed(() => editorialDayLabel(this.day()))
   protected readonly sport: KitTone = 'tennis'

@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router, RouterLink } from '@angular/router'
 import { filter, map, startWith } from 'rxjs'
 import { AuthStore } from './auth'
+import { t } from './messages'
 
 type StudioNavSection = 'pocetna' | 'sportasi' | 'objave' | 'postavke'
 
@@ -29,7 +30,15 @@ export class StudioSectionHeader {
   private readonly router = inject(Router)
   protected readonly auth = inject(AuthStore)
 
-  readonly skipLabel = input('Skip to content')
+  readonly skipLabel = input(t('chrome.skip'))
+
+  protected readonly heading = t('chrome.heading')
+  protected readonly logOutLabel = t('chrome.log-out')
+  protected readonly navAria = t('chrome.nav-aria')
+  protected readonly navPocetna = t('nav.pocetna')
+  protected readonly navSportasi = t('nav.sportasi')
+  protected readonly navObjave = t('nav.objave')
+  protected readonly navPostavke = t('nav.postavke')
 
   private readonly section = toSignal(
     this.router.events.pipe(

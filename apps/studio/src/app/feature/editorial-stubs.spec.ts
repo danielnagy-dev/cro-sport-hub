@@ -1,9 +1,11 @@
+import { type Type } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { ActivatedRoute, convertToParamMap } from '@angular/router'
 import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
 import { appConfig } from '../app.config'
 import { TOKEN_STORE, type TokenStore } from '../core/auth'
+import { t } from '../core/messages'
 import { ObjavePage } from './objave/objave'
 import { PocetnaPage } from './pocetna/pocetna'
 import { PostavkePage } from './postavke/postavke'
@@ -41,9 +43,9 @@ describe('editorial stubs', () => {
   })
 
   it.each([
-    [SportasiPage, 'Sportaši', 'Popis sportaša — uskoro.'],
-    [ObjavePage, 'Objave', 'Red objava — uskoro.'],
-    [PostavkePage, 'Postavke', 'Postavke studija — uskoro.'],
+    [SportasiPage as Type<unknown>, t('sportasi.title'), t('sportasi.lead')],
+    [ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')],
+    [PostavkePage as Type<unknown>, t('postavke.title'), t('postavke.lead')],
   ] as const)('renders %s', async (Page, heading, copy) => {
     await TestBed.configureTestingModule({
       imports: [Page],
@@ -74,9 +76,7 @@ describe('editorial stubs', () => {
     const fixture = TestBed.createComponent(PocetnaPage)
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Početna')
-    expect(root.querySelector('.home-admin-only')?.textContent).toContain(
-      'Admin stranice zahtijevaju admin prijavu.',
-    )
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe(t('pocetna.title'))
+    expect(root.querySelector('.home-admin-only')?.textContent).toContain(t('pocetna.admin-only'))
   })
 })

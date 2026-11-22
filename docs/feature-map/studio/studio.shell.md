@@ -10,13 +10,13 @@ An editor who opens an admin-only URL (for example `/admin/competitions`) is red
 
 #### Sub-features
 
-- `studio.shell-header` is `StudioSectionHeader` in `apps/studio/src/app/core/studio-section-header.ts` (skip link, mark, **Studio** heading, section nav, session).
-- `studio.shell-home` is the retired home stub in `feature/editor/shell`: no Matches / Review queue / New gallery / Admin shortcuts; a short lead points editors at the header nav. It is not registered in `app.routes.ts` (Početna owns `/`).
+- `studio.shell-header` is `StudioSectionHeader` in `apps/studio/src/app/core/studio-section-header.ts` (skip link, mark, **Studio** heading, section nav, session). Nav labels, heading, skip default, log out, and nav aria-label resolve through `apps/studio/src/app/core/messages/` (`t(key)` + HR map). Key naming: `<surface>.<role>` kebab segments (`nav.pocetna`, `chrome.log-out`).
+- `studio.shell-home` is the retired home stub in `feature/editor/shell`: no Matches / Review queue / New gallery / Admin shortcuts; a short lead points editors at the header nav (`shell-home.lead` in the catalog). It is not registered in `app.routes.ts` (Početna owns `/`).
 
 #### How to get to it (user POV)
 
 - Log in at `http://localhost:4200/login`, then go to `http://localhost:4200/` (redirects to Početna) or choose **Početna** in the header.
-- Log out returns to `/login`.
+- **Odjava** returns to `/login`.
 
 #### Driving it with verify
 

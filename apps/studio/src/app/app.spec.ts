@@ -4,6 +4,7 @@ import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
 import { appConfig } from './app.config'
 import { TOKEN_STORE, type TokenStore } from './core/auth'
+import { t } from './core/messages'
 import { Shell } from './feature/editor/shell'
 
 const HOUR = 60 * 60
@@ -56,14 +57,19 @@ describe('Shell home', () => {
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
 
-    expect(root.querySelector('h1')?.textContent).toContain('Studio')
+    expect(root.querySelector('h1')?.textContent).toContain(t('chrome.heading'))
     expect(root.textContent).toContain('Cro Sport Hub')
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Početna')
-    expect(root.textContent).toContain('Odaberite odjeljak u navigaciji iznad.')
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe(t('pocetna.title'))
+    expect(root.textContent).toContain(t('shell-home.lead'))
     const navLabels = [...root.querySelectorAll('nav.shell-nav a')].map((el) =>
       el.textContent?.trim(),
     )
-    expect(navLabels).toEqual(['Početna', 'Sportaši', 'Objave', 'Postavke'])
+    expect(navLabels).toEqual([
+      t('nav.pocetna'),
+      t('nav.sportasi'),
+      t('nav.objave'),
+      t('nav.postavke'),
+    ])
     expect(root.querySelector('main a[href="/matches"]')).toBeNull()
     expect(root.querySelector('main a[href="/galleries/new"]')).toBeNull()
     expect(root.querySelector('main a[href="/admin/competitions"]')).toBeNull()
@@ -113,8 +119,6 @@ describe('Shell home', () => {
     const fixture = TestBed.createComponent(Shell)
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelector('.home-admin-only')?.textContent).toContain(
-      'Admin stranice zahtijevaju admin prijavu.',
-    )
+    expect(root.querySelector('.home-admin-only')?.textContent).toContain(t('pocetna.admin-only'))
   })
 })

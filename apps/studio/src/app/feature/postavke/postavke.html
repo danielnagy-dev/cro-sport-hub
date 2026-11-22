@@ -1,8 +1,8 @@
 <div class="shell">
-  <app-studio-section-header skipLabel="Preskoči na postavke" />
+  <app-studio-section-header [skipLabel]="skipLabel" />
 
   <main id="content" class="home-main" tabindex="-1">
-    <h2>Postavke</h2>
-    <p class="home-lead">Postavke studija — uskoro.</p>
+    <h2>{{ title }}</h2>
+    <p class="home-lead">{{ lead }}</p>
   </main>
 </div>
