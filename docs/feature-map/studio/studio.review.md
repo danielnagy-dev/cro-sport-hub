@@ -1,13 +1,15 @@
 # studio.review: Review, reject, and publish
 
-| App    | Status | Entry point (user POV)                     | Verify                                                             | Since         |
-| ------ | ------ | ------------------------------------------ | ------------------------------------------------------------------ | ------------- |
-| studio | live   | `http://localhost:4200/matches/:id/review` | `vp run studio#test`, `verify:studio --route`, and `verify:editor` | plan item 26a |
+| App    | Status   | Entry point (user POV)                                          | Verify               | Since                          |
+| ------ | -------- | --------------------------------------------------------------- | -------------------- | ------------------------------ |
+| studio | retiring | `http://localhost:4200/matches/:id/review` (route unregistered) | `vp run studio#test` | plan item 26a; Phase H (`H5a`) |
 
-After login, `/matches/:id/review` resolves the row from `GET /api/editor/matches`, then loads only `GET /api/editor/matches/<sport>/:id` (no cross-sport draft). Lookups: `GET /api/editor/competitions`, `GET /api/editor/athletes`, and for football `GET /api/editor/teams`. The page shows label, sport, status, and sport-specific fields: tennis — competition, date, round, players, each set (tiebreak text), winner, retirement; football — same meta, clubs, score, appearances (incl. cards). Edit links to `/matches/:id/tennis` or `/matches/:id/football`. Admin + `review`: Reject `POST /api/matches/:id/reject`, Publish `POST /api/matches/:id/publish`. Editor sees details and Edit only. Success updates status; HTTP 409 shows API message; not-in-review hides actions; unknown id → `Match not found`.
+**Retired (H5a):** `apps/studio/src/app/feature/review/review.spec.ts` is deleted. The `/matches/:id/review` route is unregistered in `app.routes.ts` (#240); deep links hit the `**` → Početna redirect and do not lazy-load this module. Feature sources (`review.ts`, `review.html`, `review.routes.ts`) and `core/review-api.ts` remain on disk until H5b (#250).
+
+Historical behaviour (while the folder remains): after login, `/matches/:id/review` resolved the row from `GET /api/editor/matches`, then loaded only `GET /api/editor/matches/<sport>/:id` (no cross-sport draft). Lookups: `GET /api/editor/competitions`, `GET /api/editor/athletes`, and for football `GET /api/editor/teams`. The page showed label, sport, status, and sport-specific fields: tennis — competition, date, round, players, each set (tiebreak text), winner, retirement; football — same meta, clubs, score, appearances (incl. cards). Edit linked to `/matches/:id/tennis` or `/matches/:id/football`. Admin + `review`: Reject `POST /api/matches/:id/reject`, Publish `POST /api/matches/:id/publish`. Editor saw details and Edit only. Success updated status; HTTP 409 showed API message; not-in-review hid actions; unknown id → `Match not found`.
 
 #### Driving it with verify
 
-- **Anonymous.** `vp run verify:studio --route /matches/match-sample-final/review` redirects to login without a session.
-- **Proof.** `vp run studio#test` stubs HTTP (list-first, lookups, tennis/football order, admin/editor, reject/publish/409).
-- **End-to-end.** `vp run verify:editor` starts the API, studio, and web, signs in with `EDITOR_DEMO_PASSWORD` and `ADMIN_DEMO_PASSWORD`, saves a tennis draft with sample players, submits, publishes, and expects those players on the public home page. Not in default CI. Needs Docker Compose and both demo passwords in the environment.
+- **Anonymous / deep link.** `vp run verify:studio --route /matches/match-sample-final/review` no longer loads the review feature; the path redirects toward Početna (then login without a session).
+- **Proof.** Studio unit coverage for this page lived in the deleted `review.spec.ts`. Remaining Studio tests must pass without that file.
+- **End-to-end.** Legacy `vp run verify:editor` match-draft publish flow is out of Phase H; editorial publish is Početna / Objave (Phase F/G).
