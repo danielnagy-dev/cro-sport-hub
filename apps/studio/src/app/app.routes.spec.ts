@@ -5,13 +5,10 @@ import { expect } from 'vite-plus/test'
 import { App } from './app'
 import { appConfig } from './app.config'
 import { TOKEN_STORE, type TokenStore } from './core/auth'
-import { editorMatchesPath } from './core/matches-api'
 
-const editorPaths = [
-  '/pocetna',
-  '/sportasi',
-  '/objave',
-  '/postavke',
+const editorPaths = ['/pocetna', '/sportasi', '/objave', '/postavke', '/novi-nastup']
+
+const retiredPaths = [
   '/matches',
   '/matches/new/tennis',
   '/matches/new/football',
@@ -20,6 +17,9 @@ const editorPaths = [
   '/matches/match-sample-qf/review',
   '/galleries/new',
   '/galleries/gallery-demo',
+  '/admin/competitions',
+  '/admin/teams',
+  '/admin/import',
 ]
 
 function editorToken(): string {
@@ -141,16 +141,17 @@ describe('studioRoutes', () => {
     await fixture.whenStable()
     settle(http)
     expect(router.url).toBe('/pocetna')
-    await router.navigateByUrl('/matches')
-    fixture.detectChanges()
-    await fixture.whenStable()
-    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
-    settle(http)
+  })
+
+  it('redirects retired match gallery review and admin paths to Početna', async () => {
+    const { router, http, fixture } = await boot(editorToken())
+    for (const path of retiredPaths) {
+      await router.navigateByUrl(path)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      settle(http)
+      expect(router.url).toBe('/pocetna')
+    }
     expect(document.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
-    await router.navigateByUrl('/admin/competitions')
-    fixture.detectChanges()
-    await fixture.whenStable()
-    settle(http)
-    expect(router.url).toBe('/pocetna?admin=1')
   })
 })

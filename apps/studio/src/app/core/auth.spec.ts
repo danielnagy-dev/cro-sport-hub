@@ -7,7 +7,7 @@ import { RouterTestingHarness } from '@angular/router/testing'
 import { expect, vi } from 'vite-plus/test'
 import { App } from '../app'
 import { appConfig } from '../app.config'
-import { editorMatchesPath } from './matches-api'
+import { appearancesPath } from './appearances-api'
 import {
   adminGuard,
   AuthStore,
@@ -19,6 +19,7 @@ import {
   TOKEN_STORE,
   type TokenStore,
 } from './auth'
+import { publishSlotsNextPath, publishSlotsPath } from './publish-slots-api'
 
 @Component({ selector: 'login-probe', template: 'login-page' })
 class LoginProbe {}
@@ -232,15 +233,22 @@ describe('session redirect', () => {
     const router = TestBed.inject(Router)
     const http = TestBed.inject(HttpTestingController)
     fixture.detectChanges()
-    await router.navigateByUrl('/matches')
-    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    await router.navigateByUrl('/pocetna')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    const now = new Date()
+    const dayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    http.expectOne(publishSlotsNextPath).flush('none', { status: 404, statusText: 'Not Found' })
+    http.expectOne(`${publishSlotsPath}?day=${dayIso}`).flush([])
+    http.expectOne(`${appearancesPath}?day=${dayIso}&sportSlug=tennis`).flush([])
     fixture.detectChanges()
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(router.url).toBe('/matches')
+    expect(router.url).toBe('/pocetna')
     expect(root.textContent).toContain('editor-demo')
 
     TestBed.inject(AuthStore).logOut()
+    fixture.detectChanges()
     await fixture.whenStable()
     expect(TestBed.inject(Router).url).toBe('/login')
     expect(root.textContent).toContain('Log in')
