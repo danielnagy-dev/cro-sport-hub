@@ -58,10 +58,10 @@ describe('PocetnaPage FilterBar', () => {
     return fixture.nativeElement as HTMLElement
   }
 
-  it('renders the FilterBar host', async () => {
+  it('renders the FilterBar host and Pregledaj harness', async () => {
     const root = await mount()
     expect(root.querySelector('csh-ui-filter-bar')).not.toBeNull()
-    expect(root.querySelector('.csh-filter-bar')).not.toBeNull()
+    expect(root.textContent).toContain('Pregledaj')
   })
 
   it('updates the day label from previous and next without HTTP', async () => {

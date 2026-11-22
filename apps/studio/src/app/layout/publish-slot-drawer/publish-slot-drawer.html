@@ -1,0 +1,62 @@
+<csh-ui-drawer [title]="title" [open]="open()" (closed)="onClosed()">
+  @if (summary(); as info) {
+  <div>
+    <p>
+      <span>{{ info.date }} · {{ info.clock }}</span>
+      @if (statusPill(); as status) {
+      <csh-ui-status-pill [status]="status">{{ info.status }}</csh-ui-status-pill>
+      }
+      <span>{{ info.n }} slides</span>
+    </p>
+    <section [attr.aria-label]="title">
+      @for (network of networks; track network) {
+      <csh-ui-text-field
+        [label]="labels[network]"
+        [fieldId]="'publish-network-' + network"
+        [name]="network"
+        [value]="texts()[network]"
+        (valueChange)="onText(network, $event)"
+      />
+      }
+    </section>
+    <section [attr.aria-label]="slideOrderLabel">
+      <h3>{{ slideOrderLabel }}</h3>
+      <ol>
+        @for (slideId of working()?.slideOrder ?? []; track slideId; let i = $index) {
+        <li>
+          <span>{{ slideId }}</span>
+          <button
+            cshUiButton
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label="Pomakni gore"
+            [disabled]="i === 0 || busy()"
+            (click)="moveSlide(i, -1)"
+          >
+            ↑
+          </button>
+          <button
+            cshUiButton
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label="Pomakni dolje"
+            [disabled]="i === (working()?.slideOrder.length ?? 0) - 1 || busy()"
+            (click)="moveSlide(i, 1)"
+          >
+            ↓
+          </button>
+        </li>
+        }
+      </ol>
+    </section>
+    @if (error(); as message) {
+    <p role="alert">{{ message }}</p>
+    }
+    <button cshUiButton type="button" tone="football" [disabled]="busy()" (click)="approve()">
+      {{ approveLabel }}
+    </button>
+  </div>
+  }
+</csh-ui-drawer>
