@@ -1,14 +1,14 @@
 # api.gallery: Draft galleries, captions, render, PNG bytes, and review workflow
 
-| App | Status       | Entry point (user POV)                                                | Verify              | Since       |
-| --- | ------------ | --------------------------------------------------------------------- | ------------------- | ----------- |
-| api | HTTP retired | `POST /api/galleries`, captions, render, PNG, submit, reject, publish | `vp run verify:api` | plan #52–54 |
+| App | Status  | Entry point (user POV)                                                | Verify              | Since       |
+| --- | ------- | --------------------------------------------------------------------- | ------------------- | ----------- |
+| api | retired | `POST /api/galleries`, captions, render, PNG, submit, reject, publish | `vp run verify:api` | plan #52–54 |
 
-**Phase H / #259.** Gallery Nest controller and feature module deleted (`gallery.controller.ts`, `gallery.module.ts`). Folder auto-load no longer registers a GalleryModule, so `/api/galleries` is gone. Service `gallery.ts` remains until #260; shared gallery types until #268; table drop is #186. Studio gallery UI is already retired (`studio.gallery`). Controller unit specs were removed in #258.
+**Retired (Phase H / #258–#260).** Gallery Nest controller and feature module deleted (#259). Controller unit specs removed (#258). Domain service `gallery.ts` and the `apps/api/src/features/gallery/` folder deleted (#260). Folder auto-load no longer registers a GalleryModule, so `/api/galleries` is gone. Shared gallery types remain until #268; catalog `galleries` / `gallery_slides` table drop is #186. Studio gallery UI is already retired (`studio.gallery`).
 
-Editors and admins previously created draft football galleries from published match ids, read the draft, and patched slide captions. `POST /api/galleries/:id/render` rasterized stored slides (caption included) with the slide-generator Chromium renderer and saved PNG bytes on each row. A later render overwrote bytes. The JSON body was `{ slideCount }`. Unknown gallery was HTTP 404 `Unknown gallery`. When Chromium was not installed, render was HTTP 503 with the message from `footballRendererReason` and no bytes were written. The football list template paginates after **four** appearances in one round so rows stay above the brand footer at 1080×1350; further appearances in that round continue on additional **list** slides (a lone fifth row is still `kind: "list"` with one player).
+Historical behaviour: editors and admins created draft football galleries from published match ids, read the draft, and patched slide captions. `POST /api/galleries/:id/render` rasterized stored slides (caption included) with the slide-generator Chromium renderer and saved PNG bytes on each row. A later render overwrote bytes. The JSON body was `{ slideCount }`. Unknown gallery was HTTP 404 `Unknown gallery`. When Chromium was not installed, render was HTTP 503 with the message from `footballRendererReason` and no bytes were written. The football list template paginates after **four** appearances in one round so rows stay above the brand footer at 1080×1350; further appearances in that round continue on additional **list** slides (a lone fifth row is still `kind: "list"` with one player).
 
-New editorial callers render slides from an ordered appearance payload without a gallery entity: `slidesFromAppearance` / `renderAppearancePngs` on `@cro-sport-hub/slide-generator` (ADR-003 Phase G). The payload includes `sportSlug`: football keeps the round-13 template; tennis and basketball use intentional text-forward MVP placeholders (1080×1350) until a design pass. Gallery create still maps match appearances through `catalogSlides` + `footballSlides` in the remaining service. ZIP download was the retired gallery path (ADR-006 / Phase H).
+New editorial callers render slides from an ordered appearance payload without a gallery entity: `slidesFromAppearance` / `renderAppearancePngs` on `@cro-sport-hub/slide-generator` (ADR-003 Phase G). The payload includes `sportSlug`: football keeps the round-13 template; tennis and basketball use intentional text-forward MVP placeholders (1080×1350) until a design pass. ZIP download was the retired gallery path (ADR-006 / Phase H).
 
 `GET /api/galleries/:id/slides/:index.png` returned `image/png` for one rendered slide. The caller sent `Authorization: Bearer`. There was no public image URL. A slide with no PNG bytes was HTTP 404 `Slide is not rendered`. Missing or invalid bearer token was HTTP 401 `Invalid token` on render and on the PNG route.
 
@@ -18,7 +18,7 @@ New editorial callers render slides from an ordered appearance payload without a
 
 #### How to get to it (user POV)
 
-HTTP routes are retired. Service helpers in `apps/api/src/features/gallery/gallery.ts` remain until #260. Former routes (for history):
+HTTP routes and the gallery service are retired. Former routes (for history):
 
 - Create: `POST http://localhost:3001/api/galleries` with `{ "matchIds": ["…"] }`.
 - Read: `GET http://localhost:3001/api/galleries/{id}`.
@@ -37,10 +37,10 @@ Shapes on `GET /docs-json` no longer include a `galleries` tag. Swagger UI is `/
 Preconditions: same as `api.health`. Migrations run on the first request.
 
 - **OpenAPI.** `vp run verify:api` saves `openapi.json`. Gallery paths must be absent.
-- **Behaviour.** Controller and PGLite HTTP suite are gone (#258–#259). Service remains until #260.
+- **Behaviour.** Controller, PGLite HTTP suite, and domain service are gone (#258–#260). Remaining API tests must pass without `apps/api/src/features/gallery/`.
 
 #### Gotchas
 
 - Render needed Playwright Chromium (`vp exec playwright install chromium`). CI often skipped byte assertions when the binary was absent.
-- Caption text is stored separately from the slide JSON; render merges the caption into the HTML passed to the template.
-- PNG bytes live in the catalog database, not on a CDN or static path.
+- Caption text was stored separately from the slide JSON; render merged the caption into the HTML passed to the template.
+- PNG bytes lived in the catalog database, not on a CDN or static path. Table drop is #186.
