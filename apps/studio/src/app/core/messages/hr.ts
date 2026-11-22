@@ -40,4 +40,9 @@ export const hrMessages = {
   'postavke.network.instagram': 'Instagram',
   'postavke.network.facebook': 'Facebook',
   'postavke.network.x': 'X',
+  'publish-drawer.title': 'Objava',
+  'publish-drawer.preview': 'Pregledaj',
+  'publish-drawer.approve': 'Odobri i objavi',
+  'publish-drawer.slide-order': 'Redoslijed slajdova',
+  'publish-drawer.error-approve': 'Odobravanje termina nije uspjelo.',
 } as const satisfies MessageMap

@@ -15,5 +15,10 @@
     <p class="home-admin-only" role="status">{{ adminOnly }}</p>
     }
     <p class="home-lead">{{ lead }}</p>
+    <p>
+      <button cshUiButton type="button" (click)="openDrawer()">{{ previewLabel }}</button>
+    </p>
   </main>
 </div>
+
+<csh-publish-slot-drawer [open]="drawerOpen()" [slot]="harnessSlot" (closed)="closeDrawer()" />
