@@ -1,10 +1,10 @@
 import { HttpParams } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import {
-  appearanceStatusSchema,
   creatorKindSchema,
   idSchema,
   sportSlugSchema,
+  textSchema,
   timestampSchema,
   type AppearanceStatus,
   type CreatorKind,
@@ -14,8 +14,19 @@ import type { Observable } from 'rxjs'
 import { StudioHttp } from './studio-http'
 
 export const appearancesPath = '/api/editor/appearances'
+export function appearanceLineupPath(id: string): string {
+  return `${appearancesPath}/${id}/lineup`
+}
 
-export type Appearance = {
+export type EditorAppearance = {
+  id: string
+  sportSlug: SportSlug
+  opponentLabel: string
+  startsAt: string
+  creatorKind: CreatorKind
+}
+
+export type AppearanceWriteBody = {
   id: string
   sportId: string
   sportSlug: SportSlug
@@ -25,96 +36,50 @@ export type Appearance = {
   nationalTeamId?: string
   opponentLabel: string
   startsAt: string
-  endsAt?: string
   status: AppearanceStatus
-  result?: Record<string, unknown>
   creatorKind: CreatorKind
-  createdAt: string
-  updatedAt: string
 }
 
-export type AppearanceListQuery = {
-  day: string
-  sportSlug?: SportSlug
+export type LineupWriteBody = {
+  athleteId: string
+  athleteSport: SportSlug
+  started: boolean
+  stats: Record<string, unknown>
 }
 
-const rec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
-
-export function parseAppearance(value: unknown): Appearance {
-  if (!rec(value) || typeof value['opponentLabel'] !== 'string') {
-    throw new Error('Invalid appearance')
-  }
-  const athleteId = value['athleteId']
-  const athleteSport = value['athleteSport']
-  const nationalTeamId = value['nationalTeamId']
-  const endsAt = value['endsAt']
-  const result = value['result']
+function parseAppearance(body: unknown): EditorAppearance {
+  if (typeof body !== 'object' || body === null) throw new Error('Invalid appearance response')
+  const row = body as Record<string, unknown>
   return {
-    id: idSchema.parse(value['id']),
-    sportId: idSchema.parse(value['sportId']),
-    sportSlug: sportSlugSchema.parse(value['sportSlug']),
-    competitionId: idSchema.parse(value['competitionId']),
-    ...(typeof athleteId === 'string' ? { athleteId: idSchema.parse(athleteId) } : {}),
-    ...(typeof athleteSport === 'string'
-      ? { athleteSport: sportSlugSchema.parse(athleteSport) }
-      : {}),
-    ...(typeof nationalTeamId === 'string'
-      ? { nationalTeamId: idSchema.parse(nationalTeamId) }
-      : {}),
-    opponentLabel: value['opponentLabel'],
-    startsAt: timestampSchema.parse(value['startsAt']),
-    ...(typeof endsAt === 'string' ? { endsAt: timestampSchema.parse(endsAt) } : {}),
-    status: appearanceStatusSchema.parse(value['status']),
-    ...(rec(result) ? { result } : {}),
-    creatorKind: creatorKindSchema.parse(value['creatorKind']),
-    createdAt: timestampSchema.parse(value['createdAt']),
-    updatedAt: timestampSchema.parse(value['updatedAt']),
+    id: idSchema.parse(row['id']),
+    sportSlug: sportSlugSchema.parse(row['sportSlug']),
+    opponentLabel: textSchema(120).parse(row['opponentLabel']),
+    startsAt: timestampSchema.parse(row['startsAt']),
+    creatorKind: creatorKindSchema.parse(row['creatorKind']),
   }
 }
-
-export const sampleAppearance: Appearance = parseAppearance({
-  id: 'appearance-sample-tennis',
-  sportId: 'sport-tennis',
-  sportSlug: 'tennis',
-  competitionId: 'comp-sample-cup',
-  athleteId: 'sample-player-a',
-  athleteSport: 'tennis',
-  opponentLabel: 'Sample Rival',
-  startsAt: '2026-11-22T14:00:00.000Z',
-  status: 'scheduled',
-  creatorKind: 'manual',
-  createdAt: '2026-11-22T12:00:00.000Z',
-  updatedAt: '2026-11-22T12:00:00.000Z',
-})
-
-export const sampleNationalTeamAppearance: Appearance = parseAppearance({
-  id: 'appearance-sample-football-nt',
-  sportId: 'sport-football',
-  sportSlug: 'football',
-  competitionId: 'comp-sample-league',
-  nationalTeamId: 'nt-croatia-football',
-  opponentLabel: 'Sample Neighbours',
-  startsAt: '2026-11-22T19:45:00.000Z',
-  status: 'scheduled',
-  creatorKind: 'manual',
-  createdAt: '2026-11-22T12:00:00.000Z',
-  updatedAt: '2026-11-22T12:00:00.000Z',
-})
 
 @Injectable({ providedIn: 'root' })
 export class AppearancesApi {
   private readonly http = inject(StudioHttp)
 
-  list(query: AppearanceListQuery): Observable<Appearance[]> {
-    let params = new HttpParams().set('day', query.day)
-    if (query.sportSlug !== undefined) params = params.set('sportSlug', query.sportSlug)
+  list(query: { day: string; sportSlug: SportSlug }): Observable<EditorAppearance[]> {
+    const params = new HttpParams().set('day', query.day).set('sportSlug', query.sportSlug)
     return this.http.get(
       appearancesPath,
       (body) => {
-        if (!Array.isArray(body)) throw new Error('Invalid appearance list')
+        if (!Array.isArray(body)) throw new Error('Invalid appearance list response')
         return body.map(parseAppearance)
       },
       params,
     )
+  }
+
+  create(body: AppearanceWriteBody): Observable<EditorAppearance> {
+    return this.http.post(appearancesPath, body, parseAppearance)
+  }
+
+  createLineup(appearanceId: string, body: LineupWriteBody): Observable<unknown> {
+    return this.http.post(appearanceLineupPath(appearanceId), body, (r) => r)
   }
 }

@@ -1,0 +1,78 @@
+<div class="shell">
+  <app-studio-section-header skipLabel="Preskoči na obrazac" />
+  <main id="content" class="tennis-main" tabindex="-1">
+    <h2>Novi nastup</h2>
+    <form class="tennis-form" (submit)="onSubmit($event)">
+      <div class="tennis-field">
+        <label for="novi-sport">Sport</label>
+        <select id="novi-sport" [value]="model().sportSlug" (change)="onSportSelect($event)">
+          <option value="">Odaberite sport</option>
+          @for (sport of sports; track sport) {
+          <option [value]="sport">{{ sport }}</option>
+          }
+        </select>
+      </div>
+      @if (sportSlug()) {
+      <div class="tennis-field">
+        <label for="novi-competition">Natjecanje</label>
+        <select id="novi-competition" [formField]="noviForm.competitionId">
+          <option value="">Odaberite natjecanje</option>
+          @for (row of competitions(); track row.id) {
+          <option [value]="row.id">{{ row.name }} ({{ row.season }})</option>
+          }
+        </select>
+      </div>
+      <div class="tennis-field">
+        <label for="novi-opponent">Protivnik</label>
+        <input id="novi-opponent" type="text" [formField]="noviForm.opponentLabel" />
+      </div>
+      <div class="tennis-field">
+        <label for="novi-starts">Početak</label>
+        <input id="novi-starts" type="datetime-local" [formField]="noviForm.startsAtLocal" />
+      </div>
+      @if (teamParticipant()) {
+      <div class="tennis-field">
+        <label for="novi-participant">Sudionik</label>
+        <select
+          id="novi-participant"
+          [value]="model().participantKind"
+          (change)="onParticipantKindSelect($event)"
+        >
+          <option value="athlete">Sportaš</option>
+          <option value="national-team">Reprezentacija</option>
+        </select>
+      </div>
+      } @if (showAthlete()) {
+      <div class="tennis-field">
+        <label for="novi-athlete">Sportaš</label>
+        <select id="novi-athlete" [formField]="noviForm.athleteId">
+          <option value="">Odaberite sportaša</option>
+          @for (row of athletes(); track row.id) {
+          <option [value]="row.id">{{ row.name }}</option>
+          }
+        </select>
+      </div>
+      } @if (showNationalTeam()) {
+      <div class="tennis-field">
+        <label for="novi-national-team">Reprezentacija</label>
+        <select id="novi-national-team" [formField]="noviForm.nationalTeamId">
+          <option value="">Odaberite reprezentaciju</option>
+          @for (row of nationalTeams(); track row.id) {
+          <option [value]="row.id">{{ row.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="tennis-field">
+        <label for="novi-lineup">Sastav ids (opcionalno)</label>
+        <input id="novi-lineup" type="text" [formField]="noviForm.lineupCsv" />
+      </div>
+      }
+      <button type="submit" [disabled]="saving()">Spremi nastup</button>
+      } @if (savedId(); as id) {
+      <p role="status">Spremljeno: {{ id }} (creatorKind: manual). Popis: {{ listed().length }}.</p>
+      } @if (saveError(); as err) {
+      <p role="alert">{{ err }}</p>
+      }
+    </form>
+  </main>
+</div>
