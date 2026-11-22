@@ -9,7 +9,6 @@ import { t } from '../core/messages'
 import { ObjavePage } from './objave/objave'
 import { PocetnaPage } from './pocetna/pocetna'
 import { PostavkePage } from './postavke/postavke'
-import { SportasiPage } from './sportasi/sportasi'
 
 const HOUR = 60 * 60
 
@@ -43,7 +42,6 @@ describe('editorial stubs', () => {
   })
 
   it.each([
-    [SportasiPage as Type<unknown>, t('sportasi.title'), t('sportasi.lead')],
     [ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')],
     [PostavkePage as Type<unknown>, t('postavke.title'), t('postavke.lead')],
   ] as const)('renders %s', async (Page, heading, copy) => {

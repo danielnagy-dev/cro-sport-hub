@@ -1,8 +1,90 @@
 <div class="shell">
-  <app-studio-section-header [skipLabel]="skipLabel" />
-
-  <main id="content" class="home-main" tabindex="-1">
-    <h2>{{ title }}</h2>
-    <p class="home-lead">{{ lead }}</p>
+  <app-studio-section-header [skipLabel]="m.skip" />
+  <main id="content" class="matches-main" tabindex="-1">
+    <h2>{{ m.title }}</h2>
+    <div class="matches-filters">
+      <label for="filter-sport">{{ m.filterSport }}</label>
+      <select id="filter-sport" (change)="onSportFilter($event)">
+        @for (option of sports; track option) {
+        <option [value]="option" [selected]="sport() === option">{{ sportLabel[option] }}</option>
+        }
+      </select>
+    </div>
+    @if (loadStatus() === 'loading') {
+    <p role="status">{{ m.loading }}</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">{{ m.loadError }}</p>
+    } @else {
+    <table class="matches-table">
+      <caption>
+        {{ m.title }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Ime</th>
+          <th scope="col">Slug</th>
+          <th scope="col">Država</th>
+          <th scope="col">Radnje</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ row.slug }}</td>
+          <td>{{ row.country }}</td>
+          <td>
+            <button type="button" (click)="loadForm(row)">Uredi</button>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="4">{{ m.empty }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+    <form class="tennis-form" (submit)="onSave($event)">
+      <h3>{{ editingId() === null ? m.create : m.update }}</h3>
+      <div class="tennis-field">
+        <label for="athlete-id">Id</label>
+        <input id="athlete-id" [formField]="athleteForm.id" />
+      </div>
+      <div class="tennis-field">
+        <label for="athlete-slug">Slug</label>
+        <input id="athlete-slug" [formField]="athleteForm.slug" />
+      </div>
+      <div class="tennis-field">
+        <label for="athlete-name">Ime</label>
+        <input id="athlete-name" [formField]="athleteForm.name" />
+      </div>
+      <div class="tennis-field">
+        <label for="athlete-sport">Sport</label>
+        <select id="athlete-sport" [formField]="athleteForm.sport">
+          @for (option of sports; track option) {
+          <option [value]="option">{{ sportLabel[option] }}</option>
+          }
+        </select>
+      </div>
+      <div class="tennis-field">
+        <label for="athlete-country">Država</label>
+        <input id="athlete-country" [formField]="athleteForm.country" />
+      </div>
+      @if (submitAttempted() && fieldErrors(); as errors) {
+      <ul role="alert">
+        @for (key of ['id', 'slug', 'name', 'sportId', 'country']; track key) { @if (errors[key]; as
+        msg) {
+        <li>{{ msg }}</li>
+        } }
+      </ul>
+      } @if (saveError(); as message) {
+      <p role="alert">{{ message }}</p>
+      }
+      <div class="review-actions">
+        <button type="submit" [disabled]="savePending()">{{ m.save }}</button>
+        <button type="button" (click)="loadForm()">{{ m.neu }}</button>
+      </div>
+    </form>
   </main>
 </div>
