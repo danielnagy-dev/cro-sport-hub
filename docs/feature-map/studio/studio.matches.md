@@ -1,23 +1,9 @@
 # studio.matches: Matches list with filters
 
-| App    | Status | Entry point (user POV)          | Verify                                   | Since         |
-| ------ | ------ | ------------------------------- | ---------------------------------------- | ------------- |
-| studio | live   | `http://localhost:4200/matches` | `vp run studio#test` and `verify:studio` | plan item 23b |
+| App    | Status  | Entry point (user POV) | Verify               | Since         |
+| ------ | ------- | ---------------------- | -------------------- | ------------- |
+| studio | retired | n/a (unregistered)     | `vp run studio#test` | plan item 23b |
 
-After login, `/matches` loads `GET /api/editor/matches` with the stored bearer. Three native `<select>` filters (sport, status, source) each include an All option; changing a filter updates the URL query string (`sport`, `status`, `source`) and reloads the list so a refresh keeps the same filter. The table caption is `Editorial match list`. Columns are label, sport, competition, date, round, status, source, and actions. An empty page shows `No matches.` A failed load shows `The match list could not be loaded.` and leaves the filters enabled. A tennis row links to `/matches/<id>/tennis`. A football row links to `/matches/<id>/football`. A row in `review` shows a **Review** link to `/matches/<id>/review`.
+**Retired (Phase H).** Routes unregistered in `app.routes.ts` (#240). Unit tests for the list (`matches.spec.ts`) are removed (#241). Feature folder sources (`matches.ts` / `matches.html` / `matches.routes.ts`) and `matches-api` remain on disk until sibling delete tickets (#242 / later). Deep links to `/matches` hit the shell `**` redirect to Početna and do not lazy-load this module.
 
-#### How to get to it (user POV)
-
-- Log in at `http://localhost:4200/login`, then open `http://localhost:4200/matches` or choose **Matches** in the studio header.
-- Dev `ng serve` proxies `/api` to `http://localhost:3001`.
-
-#### Driving it with verify
-
-Preconditions: port 4200 is free. Playwright Chromium is installed. The verify CLI does not create a session.
-
-- **Anonymous run.** `vp run verify:studio --route /matches` opens `/login` because `editorGuard` blocks the table.
-- **Proof.** `vp run studio#test` stubs the HTTP call and covers filters, empty and error states, keyboard focus on the selects and table, and a guest redirect.
-
-#### Gotchas
-
-- Filter query params are `sport`, `status`, and `source`. Omitting them lists every sport and status, including drafts.
+Formerly: after login, `/matches` loaded `GET /api/editor/matches` with sport / status / source filters, an editorial table, and links into tennis-form, football-form, and review.
