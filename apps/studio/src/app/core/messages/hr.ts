@@ -23,4 +23,9 @@ export const hrMessages = {
   'postavke.skip': 'Preskoči na postavke',
   'postavke.title': 'Postavke',
   'postavke.lead': 'Postavke studija — uskoro.',
+  'publish-drawer.title': 'Objava',
+  'publish-drawer.preview': 'Pregledaj',
+  'publish-drawer.approve': 'Odobri i objavi',
+  'publish-drawer.slide-order': 'Redoslijed slajdova',
+  'publish-drawer.error-approve': 'Odobravanje termina nije uspjelo.',
 } as const satisfies MessageMap
