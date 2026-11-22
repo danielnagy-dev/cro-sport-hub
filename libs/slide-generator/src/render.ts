@@ -74,3 +74,28 @@ export async function renderFootballPngs(
     await browser.close()
   }
 }
+
+/**
+ * Rasterize ready HTML documents at 1080×1350. Used by tennis/basketball MVP
+ * slides that do not embed the round-13 fonts. Empty input skips Chromium.
+ */
+export async function renderHtmlPngs(htmlDocuments: readonly string[]): Promise<Uint8Array[]> {
+  if (htmlDocuments.length === 0) return []
+  const reason = footballRendererReason()
+  if (reason !== undefined) throw new Error(reason)
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage({
+      viewport: { width: slideWidth, height: slideHeight },
+      deviceScaleFactor: 1,
+    })
+    const pngs: Uint8Array[] = []
+    for (const html of htmlDocuments) {
+      await page.setContent(html, { waitUntil: 'load' })
+      pngs.push(await page.screenshot({ type: 'png' }))
+    }
+    return pngs
+  } finally {
+    await browser.close()
+  }
+}
