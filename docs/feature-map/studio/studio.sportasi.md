@@ -1,7 +1,7 @@
-# studio.sportasi: Athletes list stub
+# studio.sportasi: Athletes list and create/update
 
 | App    | Status | Entry point (user POV)           | Verify                                   | Since |
 | ------ | ------ | -------------------------------- | ---------------------------------------- | ----- |
-| studio | live   | `http://localhost:4200/sportasi` | `vp run studio#test` and `verify:studio` | #199  |
+| studio | live   | `http://localhost:4200/sportasi` | `vp run studio#test` and `verify:studio` | #216  |
 
-Empty Sportaši placeholder behind `editorGuard`. Title, lead, and skip label from `core/messages` (`sportasi.*`). No API client (Phase F). Guest → `/login`.
+Editor list/create/update on `GET|POST|PUT /api/editor/tracked-athletes` with `?sport=` filter (`core/editor-athletes-api.ts`). Guest → `/login`.

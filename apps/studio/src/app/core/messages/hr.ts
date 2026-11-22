@@ -16,7 +16,7 @@ export const hrMessages = {
   'shell-home.lead': 'Odaberite odjeljak u navigaciji iznad.',
   'sportasi.skip': 'Preskoči na popis sportaša',
   'sportasi.title': 'Sportaši',
-  'sportasi.lead': 'Popis sportaša — uskoro.',
+  'sportasi.lead': 'Nema sportaša za odabrani sport.',
   'objave.skip': 'Preskoči na objave',
   'objave.title': 'Objave',
   'objave.lead': 'Red objava — uskoro.',
