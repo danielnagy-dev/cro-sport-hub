@@ -10,6 +10,7 @@ import {
   samplePublishSlot,
   type PublishSlot,
 } from '../../core/publish-slots-api'
+import { sampleSlidePreviews, slidePreviewsPath } from '../../core/slide-preview-api'
 import { PublishSlotDrawer } from './publish-slot-drawer'
 
 @Component({
@@ -41,7 +42,7 @@ describe('PublishSlotDrawer', () => {
   })
   afterEach(() => http.verify())
 
-  it('opens without route change, patches order/text, approves', async () => {
+  it('opens with previews, patches order/text, approves', async () => {
     const fixture = TestBed.createComponent(Host)
     const router = TestBed.inject(Router)
     const before = router.url
@@ -51,8 +52,12 @@ describe('PublishSlotDrawer', () => {
     fixture.componentInstance.open.set(true)
     fixture.detectChanges()
     await fixture.whenStable()
+    http.expectOne(slidePreviewsPath(samplePublishSlot.id)).flush(sampleSlidePreviews)
+    await fixture.whenStable()
+    fixture.detectChanges()
     expect(router.url).toBe(before)
     expect(root.querySelector('.csh-drawer')?.getAttribute('role')).toBe('dialog')
+    expect(root.querySelectorAll('iframe').length).toBe(2)
 
     const ig = root.querySelector('#publish-network-instagram')
     if (!(ig instanceof HTMLInputElement)) throw new Error('missing IG')
@@ -83,6 +88,8 @@ describe('PublishSlotDrawer', () => {
     await fixture.whenStable()
     const approved = { ...patched, status: 'approved' as const }
     http.expectOne(publishSlotApprovePath(samplePublishSlot.id)).flush(approved)
+    await fixture.whenStable()
+    http.expectOne(slidePreviewsPath(samplePublishSlot.id)).flush(sampleSlidePreviews)
     await fixture.whenStable()
     expect(fixture.componentInstance.lastApproved).toEqual(approved)
 

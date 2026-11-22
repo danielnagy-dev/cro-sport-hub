@@ -12,6 +12,7 @@ import {
   samplePublishSlot,
   type PublishSlot,
 } from '../../core/publish-slots-api'
+import { sampleSlidePreviews, slidePreviewsPath } from '../../core/slide-preview-api'
 import { shiftEditorialDay, startOfLocalDay } from '../editorial-day'
 import { editorialDayIso, PocetnaPage } from './pocetna'
 
@@ -132,6 +133,10 @@ describe('PocetnaPage dashboard', () => {
     )
     if (!(postButton instanceof HTMLButtonElement)) throw new Error('missing post row')
     postButton.click()
+    fixture.detectChanges()
+    await fixture.whenStable()
+    http.expectOne(slidePreviewsPath(samplePublishSlot.id)).flush(sampleSlidePreviews)
+    await fixture.whenStable()
     fixture.detectChanges()
     expect(router.url).toBe(before)
     expect(root.querySelector('csh-ui-drawer')).not.toBeNull()

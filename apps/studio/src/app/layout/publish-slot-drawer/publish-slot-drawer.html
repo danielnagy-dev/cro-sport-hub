@@ -47,11 +47,18 @@
           >
             ↓
           </button>
+          @if (frameUrl(slideId); as src) {
+          <div class="csh-slide-preview">
+            <iframe [src]="src" [title]="slidePreviewLabel + ' ' + slideId" sandbox></iframe>
+          </div>
+          }
         </li>
         }
       </ol>
     </section>
-    @if (error(); as message) {
+    @if (previewError(); as previewMessage) {
+    <p role="alert">{{ previewMessage }}</p>
+    } @if (error(); as message) {
     <p role="alert">{{ message }}</p>
     }
     <button cshUiButton type="button" tone="football" [disabled]="busy()" (click)="approve()">

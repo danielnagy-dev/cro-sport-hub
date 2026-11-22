@@ -62,5 +62,7 @@ export const hrMessages = {
   'publish-drawer.preview': 'Pregledaj',
   'publish-drawer.approve': 'Odobri i objavi',
   'publish-drawer.slide-order': 'Redoslijed slajdova',
+  'publish-drawer.slide-preview': 'Pregled slajda',
   'publish-drawer.error-approve': 'Odobravanje termina nije uspjelo.',
+  'publish-drawer.error-preview': 'Učitavanje pregleda slajdova nije uspjelo.',
 } as const satisfies MessageMap

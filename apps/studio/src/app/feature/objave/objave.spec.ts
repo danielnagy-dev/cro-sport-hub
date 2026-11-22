@@ -6,6 +6,7 @@ import { expect } from 'vite-plus/test'
 import { authInterceptor, TOKEN_STORE, type TokenStore } from '../../core/auth'
 import { t } from '../../core/messages'
 import { publishSlotsPath, samplePublishSlot, type PublishSlot } from '../../core/publish-slots-api'
+import { sampleSlidePreviews, slidePreviewsPath } from '../../core/slide-preview-api'
 import { ObjavePage } from './objave'
 
 function bearer(): string {
@@ -132,6 +133,9 @@ describe('ObjavePage', () => {
     open.click()
     fixture.detectChanges()
     await fixture.whenStable()
+    http.expectOne(slidePreviewsPath(samplePublishSlot.id)).flush(sampleSlidePreviews)
+    await fixture.whenStable()
+    fixture.detectChanges()
 
     expect(router.url).toBe(before)
     expect(root.querySelector('.csh-drawer')?.getAttribute('role')).toBe('dialog')

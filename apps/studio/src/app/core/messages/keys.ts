@@ -67,7 +67,9 @@ export const MESSAGE_KEYS = [
   'publish-drawer.preview',
   'publish-drawer.approve',
   'publish-drawer.slide-order',
+  'publish-drawer.slide-preview',
   'publish-drawer.error-approve',
+  'publish-drawer.error-preview',
 ] as const
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number]
