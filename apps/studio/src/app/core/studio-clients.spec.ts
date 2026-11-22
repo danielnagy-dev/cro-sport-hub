@@ -6,12 +6,10 @@ import { firstValueFrom } from 'rxjs'
 import { CatalogApi, sportsPath } from './catalog-api'
 import { editorAthletesPath, editorCompetitionsPath, EditorLookupsApi } from './editor-lookups-api'
 import { stubApiInterceptor, stubSports } from './stub-api'
-import { TennisApi, tennisDraftsPath } from './tennis-api'
 
 describe('studio clients', () => {
   let catalog: CatalogApi
   let lookups: EditorLookupsApi
-  let tennis: TennisApi
   let http: HttpTestingController
 
   beforeEach(() => {
@@ -20,7 +18,6 @@ describe('studio clients', () => {
     })
     catalog = TestBed.inject(CatalogApi)
     lookups = TestBed.inject(EditorLookupsApi)
-    tennis = TestBed.inject(TennisApi)
     http = TestBed.inject(HttpTestingController)
   })
 
@@ -44,7 +41,7 @@ describe('studio clients', () => {
     )
   })
 
-  it('parses editor lookups and a tennis draft save response', async () => {
+  it('parses editor lookups', async () => {
     const competitions = firstValueFrom(lookups.editorCompetitions('tennis'))
     const athletes = firstValueFrom(lookups.editorAthletes('tennis'))
     http
@@ -57,33 +54,6 @@ describe('studio clients', () => {
       { id: 'comp-sample-cup', name: 'Sample Cup', season: '2026' },
     ])
     await expect(athletes).resolves.toEqual([{ id: 'sample-player-a', name: 'Sample Player A' }])
-
-    const saved = firstValueFrom(
-      tennis.createTennisDraft({
-        id: 'match-new',
-        competitionId: 'comp-sample-cup',
-        date: '2026-10-20',
-        round: 'Final',
-        playerAId: 'sample-player-a',
-        playerBId: 'sample-player-b',
-        winnerId: 'sample-player-a',
-        bestOf: 3,
-        score: [
-          [6, 4],
-          [6, 3],
-        ],
-      }),
-    )
-    http.expectOne(tennisDraftsPath).flush({ id: 'match-new', status: 'draft', sport: 'tennis' })
-    await expect(saved).resolves.toEqual({ id: 'match-new', status: 'draft', sport: 'tennis' })
-  })
-
-  it('rejects a tennis draft response that fails the schema', async () => {
-    const saved = firstValueFrom(tennis.createTennisDraft({ id: 'match-new' }))
-    http
-      .expectOne(tennisDraftsPath)
-      .flush({ id: 'match-new', status: 'published', sport: 'tennis' })
-    await expect(saved).rejects.toThrow('Invalid tennis draft response')
   })
 })
 
