@@ -1,6 +1,5 @@
 import {
   boolean,
-  customType,
   date,
   integer,
   jsonb,
@@ -10,22 +9,6 @@ import {
   time,
   timestamp,
 } from 'drizzle-orm/pg-core'
-
-const bytea = customType<{ data: Buffer | null; driverData: unknown }>({
-  dataType() {
-    return 'bytea'
-  },
-  fromDriver(value: unknown): Buffer | null {
-    if (value === null || value === undefined) return null
-    if (Buffer.isBuffer(value)) return value
-    if (value instanceof Uint8Array) return Buffer.from(value)
-    if (typeof value === 'string') return Buffer.from(value, 'hex')
-    return Buffer.from(value as ArrayBuffer)
-  },
-  toDriver(value: Buffer | null): Buffer | null {
-    return value
-  },
-})
 
 export const sports = pgTable('sports', {
   id: text('id').primaryKey(),
@@ -142,30 +125,6 @@ export const footballMatches = pgTable('football_matches', {
   homeGoals: integer('home_goals').notNull(),
   awayGoals: integer('away_goals').notNull(),
 })
-
-export const galleries = pgTable('galleries', {
-  id: text('id').primaryKey(),
-  status: text('status').notNull(),
-  createdBy: text('created_by').notNull(),
-  reviewedBy: text('reviewed_by'),
-  publishedAt: text('published_at'),
-  createdAt: text('created_at').notNull(),
-})
-
-export const gallerySlides = pgTable(
-  'gallery_slides',
-  {
-    galleryId: text('gallery_id')
-      .notNull()
-      .references(() => galleries.id),
-    slideIndex: integer('slide_index').notNull(),
-    matchId: text('match_id').notNull(),
-    caption: text('caption'),
-    payload: jsonb('payload').notNull(),
-    png: bytea('png'),
-  },
-  (table) => [primaryKey({ columns: [table.galleryId, table.slideIndex] })],
-)
 
 export const importRuns = pgTable('import_runs', {
   id: text('id').primaryKey(),

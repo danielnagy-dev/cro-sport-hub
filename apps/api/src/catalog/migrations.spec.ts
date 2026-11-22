@@ -175,12 +175,19 @@ $rename$`,
       )
       expect((networkStatus.rows[0] as { def: string }).def).toContain('ready_for_review')
       expect((networkStatus.rows[0] as { def: string }).def).not.toContain('waiting_for_data')
+
+      const galleryTables = await client.query(
+        `SELECT tablename FROM pg_tables
+         WHERE tablename IN ('galleries', 'gallery_slides')
+         ORDER BY tablename`,
+      )
+      expect(galleryTables.rows).toHaveLength(0)
     } finally {
       await catalog.close()
     }
   })
 
-  it('reopens the catalog after 0010 without failing', async () => {
+  it('reopens the catalog after 0011 without failing', async () => {
     const client = new PGlite()
     const db = drizzle(client, { schema })
     try {
@@ -212,6 +219,12 @@ $rename$`,
           "SELECT count(*)::int AS n FROM publish_slot_clocks WHERE id IN ('slot-clock-1530', 'slot-clock-2200')",
         )
         expect((clocks.rows[0] as { n: number }).n).toBe(2)
+        const galleryTables = await client.query(
+          `SELECT tablename FROM pg_tables
+           WHERE tablename IN ('galleries', 'gallery_slides')
+           ORDER BY tablename`,
+        )
+        expect(galleryTables.rows).toHaveLength(0)
       } finally {
         await second.close()
       }
@@ -221,7 +234,7 @@ $rename$`,
     }
   })
 
-  it('loads 0009 and 0010 statements from the catalog directory', () => {
+  it('loads 0009, 0010, and 0011 statements from the catalog directory', () => {
     const statements = sqlMigrationStatements(catalogDir)
     expect(statements.some((statement) => statement.startsWith('DO $rename$'))).toBe(true)
     expect(
@@ -239,5 +252,11 @@ $rename$`,
         statement.includes('CREATE TABLE IF NOT EXISTS network_posts'),
       ),
     ).toBe(true)
+    expect(
+      statements.some((statement) => statement === 'DROP TABLE IF EXISTS gallery_slides'),
+    ).toBe(true)
+    expect(statements.some((statement) => statement === 'DROP TABLE IF EXISTS galleries')).toBe(
+      true,
+    )
   })
 })
