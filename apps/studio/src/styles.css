@@ -532,7 +532,6 @@ main .field-error {
 
 /* Issue #124 — studio admin page layout (plan 27d) */
 
-.admin-competitions-main,
 .admin-teams-main {
   padding: var(--space-5) var(--space-6);
 }
@@ -560,23 +559,19 @@ main .field-error {
   outline-offset: 2px;
 }
 
-.admin-competitions-main .tennis-form,
 .admin-teams-main .tennis-form {
   margin-top: var(--space-6);
 }
 
-.admin-competitions-main .tennis-field .field-error,
 .admin-teams-main .tennis-field .field-error {
   margin: 0;
 }
 
-.admin-competitions-main .tennis-form > h3,
 .admin-teams-main .tennis-form > h3 {
   margin: 0 0 var(--space-4);
   font-size: 1rem;
 }
 
-.admin-competitions-main .review-actions,
 .admin-teams-main .review-actions {
   display: flex;
   flex-wrap: wrap;

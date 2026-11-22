@@ -3,12 +3,6 @@ import { adminGuard } from '../../core/auth'
 
 export const adminRoutes: Routes = [
   {
-    path: 'admin/competitions',
-    loadComponent: () =>
-      import('./competitions-admin').then((module) => module.CompetitionsAdminPage),
-    canActivate: [adminGuard],
-  },
-  {
     path: 'admin/teams',
     loadComponent: () => import('./teams-admin').then((module) => module.TeamsAdminPage),
     canActivate: [adminGuard],
