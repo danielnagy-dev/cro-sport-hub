@@ -1,11 +1,25 @@
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core'
+import { Component, computed, inject, input, OnDestroy, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import type { GalleryView } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { AuthStore } from '../../core/auth'
 import { GalleryApi } from '../../core/gallery-api'
-import { GalleryShell } from './gallery-shell'
+import { StudioSectionHeader } from '../../core/studio-section-header'
+
+@Component({
+  selector: 'app-gallery-shell',
+  imports: [StudioSectionHeader],
+  template: `
+    <div class="shell">
+      <app-studio-section-header [skipLabel]="skipLabel()" />
+      <main id="content" class="matches-main" tabindex="-1"><ng-content /></main>
+    </div>
+  `,
+})
+class GalleryShell {
+  readonly skipLabel = input('Skip to content')
+}
 
 function captionsFromGallery(gallery: GalleryView): Record<number, string> {
   const captions: Record<number, string> = {}
