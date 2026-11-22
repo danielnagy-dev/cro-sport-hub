@@ -30,6 +30,23 @@ export const MESSAGE_KEYS = [
   'postavke.skip',
   'postavke.title',
   'postavke.lead',
+  'postavke.clocks-heading',
+  'postavke.clock-label',
+  'postavke.clock-time',
+  'postavke.clock-active',
+  'postavke.save',
+  'postavke.save-success',
+  'postavke.save-error',
+  'postavke.load-error',
+  'postavke.loading',
+  'postavke.clock-time-invalid',
+  'postavke.accounts-heading',
+  'postavke.accounts-lead',
+  'postavke.login-checked',
+  'postavke.login-unchecked',
+  'postavke.network.instagram',
+  'postavke.network.facebook',
+  'postavke.network.x',
 ] as const
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number]

@@ -8,7 +8,6 @@ import { TOKEN_STORE, type TokenStore } from '../core/auth'
 import { t } from '../core/messages'
 import { ObjavePage } from './objave/objave'
 import { PocetnaPage } from './pocetna/pocetna'
-import { PostavkePage } from './postavke/postavke'
 
 const HOUR = 60 * 60
 
@@ -41,23 +40,23 @@ describe('editorial stubs', () => {
     sessionStorage.clear()
   })
 
-  it.each([
-    [ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')],
-    [PostavkePage as Type<unknown>, t('postavke.title'), t('postavke.lead')],
-  ] as const)('renders %s', async (Page, heading, copy) => {
-    await TestBed.configureTestingModule({
-      imports: [Page],
-      providers: [
-        ...appConfig.providers,
-        { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
-      ],
-    }).compileComponents()
-    const fixture = TestBed.createComponent(Page)
-    await fixture.whenStable()
-    const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
-    expect(root.textContent).toContain(copy)
-  })
+  it.each([[ObjavePage as Type<unknown>, t('objave.title'), t('objave.lead')]] as const)(
+    'renders %s',
+    async (Page, heading, copy) => {
+      await TestBed.configureTestingModule({
+        imports: [Page],
+        providers: [
+          ...appConfig.providers,
+          { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
+        ],
+      }).compileComponents()
+      const fixture = TestBed.createComponent(Page)
+      await fixture.whenStable()
+      const root = fixture.nativeElement as HTMLElement
+      expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
+      expect(root.textContent).toContain(copy)
+    },
+  )
 
   it('renders Početna and the admin-only message', async () => {
     await TestBed.configureTestingModule({
