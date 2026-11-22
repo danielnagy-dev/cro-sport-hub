@@ -27,7 +27,11 @@
       <tbody>
         @for (row of rows(); track row.id) {
         <tr>
-          <td>{{ row.name }}</td>
+          <td>
+            <a [routerLink]="['/sportasi', row.id]" [queryParams]="{ sport: sport() }"
+              >{{ row.name }}</a
+            >
+          </td>
           <td>{{ row.slug }}</td>
           <td>{{ row.country }}</td>
           <td>

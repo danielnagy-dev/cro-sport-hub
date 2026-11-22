@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { Component, DestroyRef, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { form, FormField, readonly } from '@angular/forms/signals'
-import { ActivatedRoute, ParamMap, Router } from '@angular/router'
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router'
 import { athleteSchema, type SportSlug } from '@cro-sport-hub/shared-types'
 import type { Subscription } from 'rxjs'
 import { focusFirstFieldWithMessages, httpErrorBodyMessage } from '../../core/admin-form-messages'
@@ -53,7 +53,7 @@ function fieldMessages(model: FormModel): Record<string, string> {
 
 @Component({
   selector: 'app-sportasi',
-  imports: [FormField, StudioSectionHeader],
+  imports: [FormField, RouterLink, StudioSectionHeader],
   templateUrl: './sportasi.html',
 })
 export class SportasiPage {

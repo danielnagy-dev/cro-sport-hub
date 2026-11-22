@@ -59,20 +59,24 @@ function parseAppearance(body: unknown): EditorAppearance {
   }
 }
 
+function parseAppearanceList(body: unknown): EditorAppearance[] {
+  if (!Array.isArray(body)) throw new Error('Invalid appearance list response')
+  return body.map(parseAppearance)
+}
+
 @Injectable({ providedIn: 'root' })
 export class AppearancesApi {
   private readonly http = inject(StudioHttp)
 
   list(query: { day: string; sportSlug: SportSlug }): Observable<EditorAppearance[]> {
     const params = new HttpParams().set('day', query.day).set('sportSlug', query.sportSlug)
-    return this.http.get(
-      appearancesPath,
-      (body) => {
-        if (!Array.isArray(body)) throw new Error('Invalid appearance list response')
-        return body.map(parseAppearance)
-      },
-      params,
-    )
+    return this.http.get(appearancesPath, parseAppearanceList, params)
+  }
+
+  /** Direct athlete rows plus national-team appearances where the athlete is in the lineup. */
+  listForAthlete(athleteId: string): Observable<EditorAppearance[]> {
+    const params = new HttpParams().set('athleteId', idSchema.parse(athleteId))
+    return this.http.get(appearancesPath, parseAppearanceList, params)
   }
 
   create(body: AppearanceWriteBody): Observable<EditorAppearance> {
