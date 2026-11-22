@@ -44,7 +44,7 @@ const PERCENTAGE_ROWS = [
 @Component({
   selector: 'app-tennis-score',
   imports: [FormField, StudioSectionHeader],
-  templateUrl: './tennis-score.html',
+  template: '',
 })
 export class TennisScorePage {
   private readonly lookups = inject(EditorLookupsApi)
