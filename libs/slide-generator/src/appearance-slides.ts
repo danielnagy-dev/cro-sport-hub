@@ -1,11 +1,14 @@
+import { basketballSlides } from './basketball.ts'
 import {
   footballTemplate,
   type FootballDocument,
   type FootballOptions,
   type FootballPerson,
 } from './football.ts'
+import type { MvpSlideDocument } from './mvp-slide.ts'
 import { footballSlides, type FootballEntry } from './slides.ts'
-import { renderFootballPngs } from './render.ts'
+import { tennisSlides } from './tennis.ts'
+import { renderFootballPngs, renderHtmlPngs } from './render.ts'
 
 /**
  * One ordered appearance row the football template needs.
@@ -31,10 +34,18 @@ export type AppearanceSlideInput = {
   redCard: boolean
 }
 
-/** Ordered appearance rows; slide count follows the football list rules. */
+export type AppearanceSportSlug = 'football' | 'tennis' | 'basketball'
+
+/** Ordered appearance rows plus the sport that selects the template. */
 export type AppearanceSlidePayload = {
+  sportSlug: AppearanceSportSlug
   appearances: readonly AppearanceSlideInput[]
 }
+
+export type FootballAppearanceDocument = FootballDocument & { sportSlug: 'football' }
+
+/** HTML slide documents from `slidesFromAppearance`. */
+export type AppearanceSlideDocument = FootballAppearanceDocument | MvpSlideDocument
 
 function cardText(yellowCards: number, redCard: boolean): string {
   if (yellowCards === 2) return 'Drugi žuti'
@@ -84,17 +95,36 @@ export function appearanceEntries(appearances: readonly AppearanceSlideInput[]):
   return appearances.map(mapAppearance)
 }
 
+function footballDocuments(
+  appearances: readonly AppearanceSlideInput[],
+  options?: FootballOptions,
+): FootballAppearanceDocument[] {
+  return footballSlides(appearanceEntries(appearances)).map((slide) => ({
+    ...footballTemplate(slide, options),
+    sportSlug: 'football',
+  }))
+}
+
 /**
- * HTML documents (and measured heroes/zoom) for N slides from an appearance
- * payload. Callers do not construct a gallery entity.
+ * HTML documents (and measured heroes/zoom for football) for N slides from an
+ * appearance payload. Callers do not construct a gallery entity.
  */
 export function slidesFromAppearance(
   payload: AppearanceSlidePayload,
   options?: FootballOptions,
-): FootballDocument[] {
-  return footballSlides(appearanceEntries(payload.appearances)).map((slide) =>
-    footballTemplate(slide, options),
-  )
+): AppearanceSlideDocument[] {
+  switch (payload.sportSlug) {
+    case 'football':
+      return footballDocuments(payload.appearances, options)
+    case 'tennis':
+      return tennisSlides(payload.appearances)
+    case 'basketball':
+      return basketballSlides(payload.appearances)
+    default: {
+      const unknown: never = payload.sportSlug
+      throw new Error(`Unknown sport: ${String(unknown)}`)
+    }
+  }
 }
 
 /**
@@ -105,5 +135,16 @@ export async function renderAppearancePngs(
   payload: AppearanceSlidePayload,
   options?: FootballOptions,
 ): Promise<Uint8Array[]> {
-  return renderFootballPngs(footballSlides(appearanceEntries(payload.appearances)), options)
+  if (payload.appearances.length === 0) return []
+  switch (payload.sportSlug) {
+    case 'football':
+      return renderFootballPngs(footballSlides(appearanceEntries(payload.appearances)), options)
+    case 'tennis':
+    case 'basketball':
+      return renderHtmlPngs(slidesFromAppearance(payload).map((doc) => doc.html))
+    default: {
+      const unknown: never = payload.sportSlug
+      throw new Error(`Unknown sport: ${String(unknown)}`)
+    }
+  }
 }
