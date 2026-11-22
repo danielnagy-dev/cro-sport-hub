@@ -4,7 +4,7 @@
 | --- | ------- | --------------------------------------------------------------------- | ------------------- | ----------- |
 | api | retired | `POST /api/galleries`, captions, render, PNG, submit, reject, publish | `vp run verify:api` | plan #52–54 |
 
-**Retired (Phase H / #258–#260, #268).** Gallery Nest controller and feature module deleted (#259). Controller unit specs removed (#258). Domain service `gallery.ts` and the `apps/api/src/features/gallery/` folder deleted (#260). Shared gallery types removed from `@cro-sport-hub/shared-types` (#268). Folder auto-load no longer registers a GalleryModule, so `/api/galleries` is gone. Catalog `galleries` / `gallery_slides` table drop is #186. Studio gallery UI is already retired (`studio.gallery`).
+**Retired (Phase H / #258–#260, #268; C5a / #311).** Gallery Nest controller and feature module deleted (#259). Controller unit specs removed (#258). Domain service `gallery.ts` and the `apps/api/src/features/gallery/` folder deleted (#260). Shared gallery types removed from `@cro-sport-hub/shared-types` (#268). Folder auto-load no longer registers a GalleryModule, so `/api/galleries` is gone. Catalog tables `galleries` / `gallery_slides` are dropped by additive migration `0011_v1_drop_galleries.sql` (#311); create migrations `0007`/`0008` stay for history. Studio gallery UI is already retired (`studio.gallery`).
 
 Historical behaviour: editors and admins created draft football galleries from published match ids, read the draft, and patched slide captions. `POST /api/galleries/:id/render` rasterized stored slides (caption included) with the slide-generator Chromium renderer and saved PNG bytes on each row. A later render overwrote bytes. The JSON body was `{ slideCount }`. Unknown gallery was HTTP 404 `Unknown gallery`. When Chromium was not installed, render was HTTP 503 with the message from `footballRendererReason` and no bytes were written. The football list template paginates after **four** appearances in one round so rows stay above the brand footer at 1080×1350; further appearances in that round continue on additional **list** slides (a lone fifth row is still `kind: "list"` with one player).
 
@@ -43,4 +43,4 @@ Preconditions: same as `api.health`. Migrations run on the first request.
 
 - Render needed Playwright Chromium (`vp exec playwright install chromium`). CI often skipped byte assertions when the binary was absent.
 - Caption text was stored separately from the slide JSON; render merged the caption into the HTML passed to the template.
-- PNG bytes lived in the catalog database, not on a CDN or static path. Table drop is #186.
+- PNG bytes lived in the catalog database, not on a CDN or static path. Those tables are dropped (#311).
