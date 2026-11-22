@@ -12,7 +12,6 @@ import { seedCatalog } from './catalog/seed.js'
 import * as schema from './catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import { EditorLookupsController } from './editor-lookups.controller.js'
-import { MatchDraftsController } from './match-drafts.controller.js'
 import { MatchesController } from './matches.controller.js'
 import {
   createInMemoryPublicReadCacheClient,
@@ -46,12 +45,7 @@ describe('editor lookup routes', () => {
     await seedCatalog(seeded)
     await seeded.close()
     const moduleRef = await Test.createTestingModule({
-      controllers: [
-        EditorLookupsController,
-        MatchesController,
-        MatchDraftsController,
-        LoginController,
-      ],
+      controllers: [EditorLookupsController, MatchesController, LoginController],
       providers: [
         { provide: CATALOG_OPENER, useValue: open },
         { provide: PUBLIC_READ_CACHE, useValue: createInMemoryPublicReadCacheClient() },
