@@ -30,6 +30,11 @@ export const studioRoutes: Routes = [
   {
     path: '',
     loadChildren: () =>
+      import('./feature/novi-nastup/novi-nastup.routes').then((module) => module.noviNastupRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
       import('./feature/objave/objave.routes').then((module) => module.objaveRoutes),
   },
   {
