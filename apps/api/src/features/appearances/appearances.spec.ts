@@ -11,7 +11,15 @@ import * as schema from '../../catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module.js'
 import { EditorAuthGuard, JWT_SECRET } from '../../auth/role.guard.js'
 import { AppearancesController } from './appearances.controller.js'
-import { createAppearance, listAppearances, updateAppearance } from './appearances.js'
+import {
+  appearanceListQuerySchema,
+  createAppearance,
+  createLineupEntry,
+  listAppearances,
+  lineupEntryWriteSchema,
+  updateAppearance,
+  updateLineupEntry,
+} from './appearances.js'
 const SECRET = 'test-jwt-secret-that-is-at-least-32'
 const TEAM_ID = 'nt-croatia-football'
 async function withDb(): Promise<{ rows: CatalogDb; close: () => Promise<void> }> {
@@ -71,6 +79,10 @@ describe('appearances', () => {
     const rows = opened.rows
     expect((await createAppearance(rows, athleteBody())).athleteId).toBe('sample-player-a')
     expect((await createAppearance(rows, teamBody())).nationalTeamId).toBe(TEAM_ID)
+    await createAppearance(
+      rows,
+      teamBody({ id: 'app-team-next', startsAt: '2026-11-24T18:00:00.000Z' }),
+    )
     await rows.insert(schema.lineupEntries).values({
       appearanceId: 'app-team-home',
       athleteId: 'karlo-brkic',
@@ -89,6 +101,33 @@ describe('appearances', () => {
       ),
     ).toEqual(['app-team-home'])
     expect(
+      (await listAppearances(rows, { athleteSlug: 'karlo-brkic', day: '2026-11-22' })).map(
+        (r) => r.id,
+      ),
+    ).toEqual(['app-team-home'])
+    expect(
+      (await listAppearances(rows, { from: '2026-11-22', to: '2026-11-22' }))
+        .map((r) => r.id)
+        .sort(),
+    ).toEqual(['app-team-home', 'app-tennis-a'])
+    expect((await listAppearances(rows, { from: '2026-11-23' })).map((r) => r.id)).toEqual([
+      'app-team-next',
+    ])
+    expect((await listAppearances(rows, { to: '2026-11-07' })).map((r) => r.id)).toEqual([])
+    await expect(listAppearances(rows, { athleteSlug: 'missing-athlete' })).rejects.toMatchObject({
+      code: 'unknown-ref',
+    })
+    expect(
+      appearanceListQuerySchema.safeParse({ from: '2026-11-24', to: '2026-11-22' }).success,
+    ).toBe(false)
+    expect(appearanceListQuerySchema.safeParse({ athleteSlug: 'Bad' }).success).toBe(false)
+    expect(
+      appearanceListQuerySchema.safeParse({
+        athleteId: 'karlo-brkic',
+        athleteSlug: 'karlo-brkic',
+      }).success,
+    ).toBe(false)
+    expect(
       (await updateAppearance(rows, 'app-team-home', { ...teamBody(), status: 'completed' }))
         .status,
     ).toBe('completed')
@@ -96,6 +135,67 @@ describe('appearances', () => {
     await expect(
       createAppearance(rows, { ...athleteBody({ id: 'both' }), nationalTeamId: TEAM_ID }),
     ).rejects.toMatchObject({ code: 'invalid' })
+  })
+
+  it('helpers: lineup create/update persists stats', async () => {
+    const opened = await withDb()
+    close = opened.close
+    const rows = opened.rows
+    await createAppearance(rows, teamBody())
+    const created = await createLineupEntry(rows, {
+      appearanceId: 'app-team-home',
+      athleteId: 'karlo-brkic',
+      athleteSport: 'football',
+      started: true,
+      minutes: 45,
+      stats: { goals: 1 },
+    })
+    expect(created).toEqual({
+      appearanceId: 'app-team-home',
+      athleteId: 'karlo-brkic',
+      athleteSport: 'football',
+      started: true,
+      minutes: 45,
+      stats: { goals: 1 },
+    })
+    expect(
+      (
+        await updateLineupEntry(rows, 'app-team-home', 'karlo-brkic', {
+          appearanceId: 'app-team-home',
+          athleteId: 'karlo-brkic',
+          athleteSport: 'football',
+          started: false,
+          minutes: 20,
+          stats: { goals: 2, assists: 1 },
+        })
+      ).stats,
+    ).toEqual({ goals: 2, assists: 1 })
+    expect(
+      (await listAppearances(rows, { athleteSlug: 'karlo-brkic', day: '2026-11-22' })).map(
+        (r) => r.id,
+      ),
+    ).toEqual(['app-team-home'])
+    await expect(
+      createLineupEntry(rows, {
+        appearanceId: 'missing-app',
+        athleteId: 'karlo-brkic',
+        athleteSport: 'football',
+        started: true,
+        stats: {},
+      }),
+    ).rejects.toMatchObject({ code: 'unknown-ref' })
+    await expect(
+      createLineupEntry(rows, {
+        appearanceId: 'app-team-home',
+        athleteId: 'missing-athlete',
+        athleteSport: 'football',
+        started: true,
+        stats: {},
+      }),
+    ).rejects.toMatchObject({ code: 'unknown-ref' })
+    expect(lineupEntryWriteSchema.safeParse({ appearanceId: 'a', athleteId: 'b' }).success).toBe(
+      false,
+    )
   })
 
   it('routes: unauthorized write rejected', async () => {
@@ -139,5 +239,50 @@ describe('appearances', () => {
     const body = athleteBody({ id: 'app-route-a' })
     expect((await send('POST', '/api/editor/appearances', body)).status).toBe(401)
     expect((await send('POST', '/api/editor/appearances', body, editor)).status).toBe(201)
+    const team = teamBody({ id: 'app-route-team' })
+    expect((await send('POST', '/api/editor/appearances', team, editor)).status).toBe(201)
+    const lineup = {
+      athleteId: 'karlo-brkic',
+      athleteSport: 'football',
+      started: true,
+      minutes: 90,
+      stats: { goals: 0 },
+    }
+    expect(
+      (await send('POST', '/api/editor/appearances/app-route-team/lineup', lineup)).status,
+    ).toBe(401)
+    expect(
+      (await send('POST', '/api/editor/appearances/app-route-team/lineup', lineup, editor)).status,
+    ).toBe(201)
+    expect(
+      (
+        await send(
+          'PUT',
+          '/api/editor/appearances/app-route-team/lineup/karlo-brkic',
+          { ...lineup, started: false, stats: { goals: 1 } },
+          editor,
+        )
+      ).status,
+    ).toBe(200)
+    expect(
+      (
+        await send(
+          'GET',
+          '/api/editor/appearances?athleteSlug=karlo-brkic&from=2026-11-22',
+          undefined,
+          editor,
+        )
+      ).status,
+    ).toBe(200)
+    expect(
+      (
+        await send(
+          'GET',
+          '/api/editor/appearances?from=2026-11-24&to=2026-11-22',
+          undefined,
+          editor,
+        )
+      ).status,
+    ).toBe(400)
   })
 })
