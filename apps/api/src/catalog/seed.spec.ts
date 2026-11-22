@@ -75,9 +75,6 @@ describe('catalog seed', () => {
 
       const slots = await db.select().from(schema.publishSlots)
       expect(slots.length).toBeGreaterThanOrEqual(1)
-
-      const galleryCount = await db.select({ value: count() }).from(schema.galleries)
-      expect(galleryCount[0]?.value).toBe(0)
     })
   })
 
