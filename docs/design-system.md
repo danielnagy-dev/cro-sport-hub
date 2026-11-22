@@ -41,6 +41,7 @@ The vendored handoff under `libs/slide-generator/design/football-r13/` may also 
 | Slide types: **player**, **list**.                                                                                                                              | Cover / naslovnica — none (Daniel 2026-10-19: stats-only). **Verified:** product decisions doc in the design archive. |
 | Colourways navy / red / light (navy = reference).                                                                                                               | —                                                                                                                     |
 | Brand wordmark as CSS checker + “HRVATSKI SPORT”.                                                                                                               | Player photos / club logos without rights.                                                                            |
+| Tennis and basketball MVP slides: text-forward placeholders at 1080×1350 (navy field + sport accent from UI tokens). **Intentional** until a design pass.       | Pixel-perfect tennis / basketball brand art matching football round-13.                                               |
 
 Audience: Croatian-language sports audience; cro-sport-hub engineers. Platform today: HTML/CSS + Playwright → PNG. **Verified:** handoff README in-repo at `libs/slide-generator/design/football-r13/README.md`.
 
