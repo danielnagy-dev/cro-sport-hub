@@ -585,3 +585,9 @@ main .field-error {
   gap: var(--space-3);
   margin: var(--space-4) 0 0;
 }
+
+.pocetna-clock {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}

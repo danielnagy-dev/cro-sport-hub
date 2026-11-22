@@ -1,13 +1,22 @@
+import { provideHttpClient, withInterceptors } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { type Type } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
-import { ActivatedRoute, convertToParamMap } from '@angular/router'
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router'
 import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
 import { appConfig } from '../app.config'
-import { TOKEN_STORE, type TokenStore } from '../core/auth'
+import { appearancesPath } from '../core/appearances-api'
+import { authInterceptor, TOKEN_STORE, type TokenStore } from '../core/auth'
 import { t } from '../core/messages'
+import {
+  publishSlotsNextPath,
+  publishSlotsPath,
+  samplePublishSlot,
+} from '../core/publish-slots-api'
+import { startOfLocalDay } from './editorial-day'
 import { ObjavePage } from './objave/objave'
-import { PocetnaPage } from './pocetna/pocetna'
+import { editorialDayIso, PocetnaPage } from './pocetna/pocetna'
 
 const HOUR = 60 * 60
 
@@ -62,7 +71,9 @@ describe('editorial stubs', () => {
     await TestBed.configureTestingModule({
       imports: [PocetnaPage],
       providers: [
-        ...appConfig.providers,
+        provideRouter([]),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
         { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
         {
           provide: ActivatedRoute,
@@ -70,10 +81,19 @@ describe('editorial stubs', () => {
         },
       ],
     }).compileComponents()
+    const http = TestBed.inject(HttpTestingController)
     const fixture = TestBed.createComponent(PocetnaPage)
+    fixture.detectChanges()
+    const day = editorialDayIso(startOfLocalDay())
+    const planned = { ...samplePublishSlot, status: 'planned' as const }
+    http.expectOne(publishSlotsNextPath).flush(planned)
+    http.expectOne(`${publishSlotsPath}?day=${day}`).flush([planned])
+    http.expectOne(`${appearancesPath}?day=${day}&sportSlug=tennis`).flush([])
     await fixture.whenStable()
+    fixture.detectChanges()
     const root = fixture.nativeElement as HTMLElement
     expect(root.querySelector('h2')?.textContent?.trim()).toBe(t('pocetna.title'))
     expect(root.querySelector('.home-admin-only')?.textContent).toContain(t('pocetna.admin-only'))
+    http.verify()
   })
 })

@@ -45,12 +45,18 @@ function memoryStore(token: string | null): TokenStore {
 }
 
 function settle(http: HttpTestingController): void {
-  for (const request of http.match(() => true)) request.flush([])
+  for (const request of http.match(() => true)) {
+    if (request.cancelled) continue
+    if (request.request.urlWithParams.includes('/publish-slots/next')) {
+      request.flush('none', { status: 404, statusText: 'Not Found' })
+    } else request.flush([])
+  }
 }
 
 async function boot(
   token: string | null,
 ): Promise<{ router: Router; http: HttpTestingController; fixture: ComponentFixture<App> }> {
+  TestBed.resetTestingModule()
   await TestBed.configureTestingModule({
     imports: [App],
     providers: [
@@ -63,21 +69,25 @@ async function boot(
   const router = TestBed.inject(Router)
   const http = TestBed.inject(HttpTestingController)
   fixture.detectChanges()
+  settle(http)
+  await fixture.whenStable()
   return { router, http, fixture }
 }
 
 describe('studioRoutes', () => {
   afterEach(() => {
-    TestBed.inject(HttpTestingController).verify()
+    const http = TestBed.inject(HttpTestingController)
+    settle(http)
+    http.verify()
   })
 
   it('keeps each editor path on that feature', async () => {
     const { router, http, fixture } = await boot(editorToken())
     for (const path of editorPaths) {
       await router.navigateByUrl(path)
-      settle(http)
       fixture.detectChanges()
       await fixture.whenStable()
+      settle(http)
       expect(router.url).toBe(path)
     }
   })
@@ -91,9 +101,9 @@ describe('studioRoutes', () => {
       ['/postavke', 'Postavke'],
     ] as const) {
       await router.navigateByUrl(path)
-      settle(http)
       fixture.detectChanges()
       await fixture.whenStable()
+      settle(http)
       expect(router.url).toBe(path)
       const root = fixture.nativeElement as HTMLElement
       expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
@@ -103,9 +113,9 @@ describe('studioRoutes', () => {
   it('redirects / to Početna for a signed-in editor', async () => {
     const { router, http, fixture } = await boot(editorToken())
     await router.navigateByUrl('/')
-    settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
+    settle(http)
     expect(router.url).toBe('/pocetna')
     const root = fixture.nativeElement as HTMLElement
     expect(root.querySelector('h2')?.textContent?.trim()).toBe('Početna')
@@ -127,19 +137,20 @@ describe('studioRoutes', () => {
   it('sends an unknown path home for an editor', async () => {
     const { router, http, fixture } = await boot(editorToken())
     await router.navigateByUrl('/missing')
-    settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
+    settle(http)
     expect(router.url).toBe('/pocetna')
     await router.navigateByUrl('/matches')
-    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
     fixture.detectChanges()
     await fixture.whenStable()
+    http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    settle(http)
     expect(document.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
     await router.navigateByUrl('/admin/competitions')
-    settle(http)
     fixture.detectChanges()
     await fixture.whenStable()
+    settle(http)
     expect(router.url).toBe('/pocetna?admin=1')
   })
 })

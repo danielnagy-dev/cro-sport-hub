@@ -1,10 +1,19 @@
+import { provideHttpClient, withInterceptors } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { TestBed } from '@angular/core/testing'
-import { ActivatedRoute, convertToParamMap } from '@angular/router'
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router'
 import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
-import { appConfig } from '../../app.config'
-import { TOKEN_STORE, type TokenStore } from '../../core/auth'
-import { PocetnaPage } from './pocetna'
+import { appearancesPath, type EditorAppearance } from '../../core/appearances-api'
+import { authInterceptor, TOKEN_STORE, type TokenStore } from '../../core/auth'
+import {
+  publishSlotsNextPath,
+  publishSlotsPath,
+  samplePublishSlot,
+  type PublishSlot,
+} from '../../core/publish-slots-api'
+import { shiftEditorialDay, startOfLocalDay } from '../editorial-day'
+import { editorialDayIso, PocetnaPage } from './pocetna'
 
 const HOUR = 60 * 60
 
@@ -35,17 +44,46 @@ function memoryStore(token: string | null): TokenStore {
   }
 }
 
-describe('PocetnaPage FilterBar', () => {
-  beforeEach(() => {
+const plannedSlot: PublishSlot = {
+  ...samplePublishSlot,
+  status: 'planned',
+  networkPosts: samplePublishSlot.networkPosts.map((post) => ({ ...post, status: 'planned' })),
+}
+
+const athleteRow: EditorAppearance = {
+  id: 'appearance-sample-tennis',
+  sportSlug: 'tennis',
+  opponentLabel: 'Sample Rival',
+  startsAt: '2026-11-22T14:00:00.000Z',
+  creatorKind: 'manual',
+}
+
+const teamRow: EditorAppearance = {
+  id: 'appearance-sample-football-nt',
+  sportSlug: 'football',
+  opponentLabel: 'Sample Neighbours',
+  startsAt: '2026-11-22T19:45:00.000Z',
+  creatorKind: 'manual',
+}
+
+function flushDashboard(http: HttpTestingController, day: string): void {
+  http.expectOne(publishSlotsNextPath).flush(plannedSlot)
+  http.expectOne(`${publishSlotsPath}?day=${day}`).flush([plannedSlot])
+  http.expectOne(`${appearancesPath}?day=${day}&sportSlug=tennis`).flush([athleteRow, teamRow])
+}
+
+describe('PocetnaPage dashboard', () => {
+  let http: HttpTestingController
+
+  beforeEach(async () => {
     TestBed.resetTestingModule()
     sessionStorage.clear()
-  })
-
-  async function mount(): Promise<HTMLElement> {
     await TestBed.configureTestingModule({
       imports: [PocetnaPage],
       providers: [
-        ...appConfig.providers,
+        provideRouter([]),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
         { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
         {
           provide: ActivatedRoute,
@@ -53,53 +91,50 @@ describe('PocetnaPage FilterBar', () => {
         },
       ],
     }).compileComponents()
-    const fixture = TestBed.createComponent(PocetnaPage)
-    await fixture.whenStable()
-    return fixture.nativeElement as HTMLElement
-  }
-
-  it('renders the FilterBar host and Pregledaj harness', async () => {
-    const root = await mount()
-    expect(root.querySelector('csh-ui-filter-bar')).not.toBeNull()
-    expect(root.textContent).toContain('Pregledaj')
+    http = TestBed.inject(HttpTestingController)
   })
 
-  it('updates the day label from previous and next without HTTP', async () => {
-    await TestBed.configureTestingModule({
-      imports: [PocetnaPage],
-      providers: [
-        ...appConfig.providers,
-        { provide: TOKEN_STORE, useValue: memoryStore(bearer()) },
-        {
-          provide: ActivatedRoute,
-          useValue: { queryParamMap: of(convertToParamMap({})) },
-        },
-      ],
-    }).compileComponents()
+  afterEach(() => http.verify())
+
+  it('reloads lists when the FilterBar day changes', async () => {
     const fixture = TestBed.createComponent(PocetnaPage)
+    fixture.detectChanges()
+    const today = editorialDayIso(startOfLocalDay())
+    flushDashboard(http, today)
     await fixture.whenStable()
+    fixture.detectChanges()
+
     const root = fixture.nativeElement as HTMLElement
-    const label = () => root.querySelector('.csh-filter-bar__day-label')?.textContent?.trim() ?? ''
-
-    const initial = label()
-    expect(initial.length).toBeGreaterThan(0)
+    expect(root.querySelector('csh-ui-filter-bar')).not.toBeNull()
+    expect(root.textContent).toContain('Sljedeći termin')
+    expect(root.textContent).toContain('Sample Rival')
+    expect(root.textContent).toContain('Sample Neighbours')
 
     const previous = root.querySelector('button[aria-label="Previous day"]')
     if (!(previous instanceof HTMLButtonElement)) throw new Error('missing previous day')
     previous.click()
     fixture.detectChanges()
-    const afterPrevious = label()
-    expect(afterPrevious).not.toBe(initial)
+    flushDashboard(http, editorialDayIso(shiftEditorialDay(startOfLocalDay(), -1)))
+    await fixture.whenStable()
+  })
 
-    const next = root.querySelector('button[aria-label="Next day"]')
-    if (!(next instanceof HTMLButtonElement)) throw new Error('missing next day')
-    next.click()
+  it('opens the shared drawer from a post without navigating', async () => {
+    const fixture = TestBed.createComponent(PocetnaPage)
+    const router = TestBed.inject(Router)
     fixture.detectChanges()
-    expect(label()).toBe(initial)
-
-    next.click()
+    flushDashboard(http, editorialDayIso(startOfLocalDay()))
+    await fixture.whenStable()
     fixture.detectChanges()
-    expect(label()).not.toBe(initial)
-    expect(label()).not.toBe(afterPrevious)
+    const before = router.url
+    const root = fixture.nativeElement as HTMLElement
+    const postButton = [...root.querySelectorAll('button')].find((button) =>
+      (button.textContent ?? '').includes('15:30'),
+    )
+    if (!(postButton instanceof HTMLButtonElement)) throw new Error('missing post row')
+    postButton.click()
+    fixture.detectChanges()
+    expect(router.url).toBe(before)
+    expect(root.querySelector('csh-ui-drawer')).not.toBeNull()
+    expect(root.textContent).toContain('Objava')
   })
 })

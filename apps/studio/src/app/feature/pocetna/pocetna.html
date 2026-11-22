@@ -1,24 +1,91 @@
 <div class="shell">
   <app-studio-section-header />
-
   <main id="content" class="home-main" tabindex="-1">
-    <h2>{{ title }}</h2>
+    <h2>{{ copy.title }}</h2>
     <csh-ui-filter-bar
       [dayLabel]="dayLabel()"
-      [sport]="sport"
+      [sport]="sport()"
       [athlete]="athlete"
-      [status]="status"
+      [status]="status()"
       (previousDay)="onPreviousDay()"
       (nextDay)="onNextDay()"
     />
     @if (showAdminOnlyMessage()) {
-    <p class="home-admin-only" role="status">{{ adminOnly }}</p>
+    <p class="home-admin-only" role="status">{{ copy.adminOnly }}</p>
+    } @if (loadError(); as err) {
+    <p role="alert">{{ err }}</p>
     }
-    <p class="home-lead">{{ lead }}</p>
-    <p>
-      <button cshUiButton type="button" (click)="openDrawer()">{{ previewLabel }}</button>
-    </p>
+
+    <section [attr.aria-label]="copy.next">
+      <h3>{{ copy.next }}</h3>
+      @if (nextSlot(); as slot) {
+      <p class="pocetna-clock">{{ slot.clockTime }}</p>
+      <p>
+        {{ copy.slides }}: {{ slot.slideOrder.length }} · {{ slot.slotDate }}
+        <csh-ui-status-pill [status]="kit(slot.status)">{{ slot.status }}</csh-ui-status-pill>
+      </p>
+      <ul>
+        @for (network of networks; track network) {
+        <li>
+          {{ network }}
+          <csh-ui-status-pill [status]="kit(netStatus(slot, network))"
+            >{{ netStatus(slot, network) }}</csh-ui-status-pill
+          >
+        </li>
+        }
+      </ul>
+      <p>
+        <button cshUiButton type="button" (click)="openDrawer(slot)">{{ copy.preview }}</button>
+        <button
+          cshUiButton
+          type="button"
+          tone="football"
+          [disabled]="busy()"
+          (click)="approveNext()"
+        >
+          {{ copy.approve }}
+        </button>
+      </p>
+      } @else {
+      <p>{{ copy.emptyNext }}</p>
+      }
+    </section>
+
+    <section [attr.aria-label]="copy.athletes">
+      <h3>{{ copy.athletes }}</h3>
+      <ul>
+        @for (row of appearances(); track row.id) {
+        <li>
+          {{ row.opponentLabel }} · {{ row.sportSlug }} · {{ row.creatorKind }} · {{
+          row.startsAt.slice(11, 16) }}
+        </li>
+        } @empty {
+        <li>{{ copy.emptyList }}</li>
+        }
+      </ul>
+    </section>
+
+    <section [attr.aria-label]="copy.posts">
+      <h3>{{ copy.posts }}</h3>
+      <ul>
+        @for (slot of visiblePosts(); track slot.id) {
+        <li>
+          <button cshUiButton type="button" variant="outline" (click)="openDrawer(slot)">
+            {{ slot.clockTime }} · {{ copy.slides }} {{ slot.slideOrder.length }} · {{ slot.status
+            }}
+          </button>
+        </li>
+        } @empty {
+        <li>{{ copy.emptyList }}</li>
+        }
+      </ul>
+    </section>
   </main>
 </div>
 
-<csh-publish-slot-drawer [open]="drawerOpen()" [slot]="harnessSlot" (closed)="closeDrawer()" />
+<csh-publish-slot-drawer
+  [open]="drawerOpen()"
+  [slot]="selectedSlot()"
+  (closed)="closeDrawer()"
+  (approved)="onApproved($event)"
+/>
