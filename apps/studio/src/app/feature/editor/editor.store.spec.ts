@@ -2,19 +2,17 @@ import { TestBed } from '@angular/core/testing'
 import { Subject, throwError } from 'rxjs'
 import { EditorStore } from './editor.store'
 import { CatalogApi } from '../../core/catalog-api'
-import { stubMatches, stubSports } from '../../core/stub-api'
+import { stubSports } from '../../core/stub-api'
 
 describe('EditorStore', () => {
-  it('loads matches for the selected sport', () => {
+  it('loads sports and selects a slug', () => {
     const sports = new Subject<typeof stubSports>()
-    const matches = new Subject<typeof stubMatches>()
     TestBed.configureTestingModule({
       providers: [
         {
           provide: CatalogApi,
           useValue: {
             sports: () => sports.asObservable(),
-            matches: () => matches.asObservable(),
           },
         },
       ],
@@ -22,32 +20,26 @@ describe('EditorStore', () => {
 
     const store = TestBed.inject(EditorStore)
     expect(store.status()).toBe('loading')
-    expect(store.visibleMatches()).toEqual([])
+    expect(store.sports()).toEqual([])
 
     sports.next(stubSports)
     sports.complete()
-    matches.next(stubMatches)
-    matches.complete()
 
     expect(store.status()).toBe('ready')
-    expect(store.visibleMatches()).toEqual(
-      stubMatches.filter((match) => match.sportId === 'sport-tennis'),
-    )
+    expect(store.sports()).toEqual(stubSports)
+    expect(store.sportSlug()).toBe('tennis')
 
     store.selectSport('football')
-    expect(store.visibleMatches()).toEqual(
-      stubMatches.filter((match) => match.sportId === 'sport-football'),
-    )
+    expect(store.sportSlug()).toBe('football')
   })
 
-  it('clears the lists when a read fails', () => {
+  it('clears sports when a read fails', () => {
     TestBed.configureTestingModule({
       providers: [
         {
           provide: CatalogApi,
           useValue: {
             sports: () => throwError(() => new Error('unavailable')),
-            matches: () => throwError(() => new Error('unavailable')),
           },
         },
       ],
@@ -56,7 +48,5 @@ describe('EditorStore', () => {
     const store = TestBed.inject(EditorStore)
     expect(store.status()).toBe('error')
     expect(store.sports()).toEqual([])
-    expect(store.matches()).toEqual([])
-    expect(store.visibleMatches()).toEqual([])
   })
 })
