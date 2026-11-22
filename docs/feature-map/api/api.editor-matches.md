@@ -4,7 +4,7 @@
 | --- | ------- | ------------------------- | ----------------- | ------------- |
 | api | retired | `GET /api/editor/matches` | `vp run api#test` | plan item 23a |
 
-**Retired (Phase H / #263–#264).** Controller unit spec deleted (#263). Nest controller `editor-matches.controller.ts` and feature module `features/editor-matches/` deleted (#264). Catalog `listEditorMatches` helper removed with the HTTP surface; tennis/football draft readers and table drop stay for #186 / #268. Folder auto-load no longer registers an EditorMatchesModule, so editorial list and per-sport draft-read HTTP surfaces are gone. Public `matches` until Phase I. Match-drafts and match-workflow HTTP surfaces are already retired (#261–#262). OpenAPI `matches` tag no longer advertises the editorial list.
+**Retired (Phase H / #263–#264, #268).** Controller unit spec deleted (#263). Nest controller `editor-matches.controller.ts` and feature module `features/editor-matches/` deleted (#264). Catalog `listEditorMatches` helper removed with the HTTP surface; tennis/football draft readers and editor-match / editor-draft shared-types removed (#268). Match table drop stays for #186. Folder auto-load no longer registers an EditorMatchesModule, so editorial list and per-sport draft-read HTTP surfaces are gone. Public `matches` until Phase I. Match-drafts and match-workflow HTTP surfaces are already retired (#261–#262). OpenAPI `matches` tag no longer advertises the editorial list.
 
 Historical behaviour: `GET /api/editor/matches` listed tennis and football matches for an editor or an admin, including drafts. Optional filters were `sport` (`tennis` or `football`), `status` (`draft`, `review`, or `published`), and `source` (`manual` or `import`). Newest `match_date` first, then `id`. Each item was `id`, `sport`, `competition`, `date`, `round`, `status`, `source`, and `label` (`Player A vs Player B` or `Home vs Away`). There was no club id and no stat count. `limit` defaulted to 20 and was 1–50. `offset` defaulted to 0. A bad query was HTTP 400. No token was HTTP 401 `Invalid token`. Any other signed role was HTTP 403 `Forbidden`. `GET /api/matches` stayed published-only.
 
@@ -28,5 +28,5 @@ The verify CLI sends GET and does not send a bearer. `vp run verify:api --route 
 
 #### Gotchas
 
-- Catalog tennis/football draft readers and seed draft rows remain until #186 / #268. A draft is still not on the public list.
+- Catalog tennis/football draft readers and editor-draft shared-types are gone (#268). Seed draft rows and match tables remain until #186. A draft is still not on the public list.
 - `source=import` was an empty page on the sample seed. Every seeded match was `manual`.

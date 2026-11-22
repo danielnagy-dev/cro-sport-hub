@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-/** Review workflow for a match, and later for a gallery. */
+/** Review workflow for a match (`draft` → `review` → `published`). */
 export const statusSchema = z.enum(['draft', 'review', 'published'])
 export type Status = z.infer<typeof statusSchema>
 
