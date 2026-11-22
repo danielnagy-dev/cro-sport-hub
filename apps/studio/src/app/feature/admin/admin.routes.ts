@@ -13,9 +13,4 @@ export const adminRoutes: Routes = [
     loadComponent: () => import('./teams-admin').then((module) => module.TeamsAdminPage),
     canActivate: [adminGuard],
   },
-  {
-    path: 'admin/import',
-    loadComponent: () => import('./import-admin').then((module) => module.ImportAdminPage),
-    canActivate: [adminGuard],
-  },
 ]

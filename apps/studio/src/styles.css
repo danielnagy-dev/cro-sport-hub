@@ -533,8 +533,7 @@ main .field-error {
 /* Issue #124 — studio admin page layout (plan 27d) */
 
 .admin-competitions-main,
-.admin-teams-main,
-.admin-import-main {
+.admin-teams-main {
   padding: var(--space-5) var(--space-6);
 }
 
@@ -578,8 +577,7 @@ main .field-error {
 }
 
 .admin-competitions-main .review-actions,
-.admin-teams-main .review-actions,
-.admin-import-main .review-actions {
+.admin-teams-main .review-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
