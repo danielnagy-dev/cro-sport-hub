@@ -4,4 +4,4 @@
 | ------ | ------ | ------------------------------------------------------------------------- | ------------------------------------------------------ | ----- |
 | studio | live   | `csh-publish-slot-drawer` in `layout/publish-slot-drawer/` (no own route) | `vp run studio#test`; `verify:studio` + signed-in host | #215  |
 
-Shared drawer on `csh-ui-drawer` plus `core/publish-slots-api.ts`. Hosted from Početna (`studio.pocetna`) and later Objave.
+Shared drawer on `csh-ui-drawer` plus `core/publish-slots-api.ts` and `core/slide-preview-api.ts`. Hosted from Početna and Objave; opening a slot shows ordered slide HTML for `slideOrder` (no gallery / ZIP).
