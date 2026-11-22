@@ -13,6 +13,7 @@ export const hrMessages = {
   'pocetna.title': 'Početna',
   'pocetna.lead': 'Uređivački početni zaslon — uskoro.',
   'pocetna.admin-only': 'Admin stranice zahtijevaju admin prijavu.',
+  'shell-home.lead': 'Odaberite odjeljak u navigaciji iznad.',
   'sportasi.skip': 'Preskoči na popis sportaša',
   'sportasi.title': 'Sportaši',
   'sportasi.lead': 'Popis sportaša — uskoro.',

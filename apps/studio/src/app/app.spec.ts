@@ -4,6 +4,7 @@ import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
 import { appConfig } from './app.config'
 import { TOKEN_STORE, type TokenStore } from './core/auth'
+import { t } from './core/messages'
 import { Shell } from './feature/editor/shell'
 
 const HOUR = 60 * 60
@@ -36,7 +37,7 @@ describe('Shell home', () => {
     sessionStorage.clear()
   })
 
-  it('shows Matches and New gallery shortcuts for an editor, not Admin', async () => {
+  it('shows the header nav and no old match/gallery/admin shortcuts', async () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [
@@ -56,16 +57,27 @@ describe('Shell home', () => {
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
 
-    expect(root.querySelector('h1')?.textContent).toContain('Studio')
+    expect(root.querySelector('h1')?.textContent).toContain(t('chrome.heading'))
     expect(root.textContent).toContain('Cro Sport Hub')
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Home')
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe(t('pocetna.title'))
+    expect(root.textContent).toContain(t('shell-home.lead'))
+    const navLabels = [...root.querySelectorAll('nav.shell-nav a')].map((el) =>
+      el.textContent?.trim(),
+    )
+    expect(navLabels).toEqual([
+      t('nav.pocetna'),
+      t('nav.sportasi'),
+      t('nav.objave'),
+      t('nav.postavke'),
+    ])
+    expect(root.querySelector('main a[href="/matches"]')).toBeNull()
+    expect(root.querySelector('main a[href="/galleries/new"]')).toBeNull()
+    expect(root.querySelector('main a[href="/admin/competitions"]')).toBeNull()
+    expect(root.querySelector('nav.shell-nav a[href="/matches"]')).toBeNull()
     expect(root.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
-    const matchesLinks = root.querySelectorAll('main a[href="/matches"]')
-    expect(matchesLinks.length).toBeGreaterThanOrEqual(1)
-    expect(root.querySelector('main a[href="/galleries/new"]')).toBeInstanceOf(HTMLAnchorElement)
   })
 
-  it('shows an Admin shortcut for an admin in the home body only', async () => {
+  it('keeps admin-only home free of Admin shortcuts', async () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [
@@ -84,8 +96,8 @@ describe('Shell home', () => {
     const fixture = TestBed.createComponent(Shell)
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
+    expect(root.querySelectorAll('main a[href="/admin/competitions"]').length).toBe(0)
     expect(root.querySelectorAll('nav.shell-nav a[href="/admin/competitions"]').length).toBe(0)
-    expect(root.querySelectorAll('main a[href="/admin/competitions"]').length).toBe(1)
   })
 
   it('shows the admin-only message after an editor hits admin routes', async () => {
@@ -107,8 +119,6 @@ describe('Shell home', () => {
     const fixture = TestBed.createComponent(Shell)
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelector('.home-admin-only')?.textContent).toContain(
-      'Admin pages need an admin login.',
-    )
+    expect(root.querySelector('.home-admin-only')?.textContent).toContain(t('pocetna.admin-only'))
   })
 })

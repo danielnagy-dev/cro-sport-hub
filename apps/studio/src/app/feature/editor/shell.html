@@ -2,20 +2,10 @@
   <app-studio-section-header />
 
   <main id="content" class="home-main" tabindex="-1">
-    <h2>Home</h2>
+    <h2>{{ title }}</h2>
     @if (showAdminOnlyMessage()) {
-    <p class="home-admin-only" role="status">Admin pages need an admin login.</p>
+    <p class="home-admin-only" role="status">{{ adminOnly }}</p>
     }
-    <p class="home-lead">Choose a section:</p>
-    <ul class="home-links">
-      <li><a routerLink="/matches">Matches</a></li>
-      <li>
-        <a routerLink="/matches" [queryParams]="{ status: 'review' }">Review queue</a>
-      </li>
-      <li><a routerLink="/galleries/new">New gallery</a></li>
-      @if (auth.session()?.role === 'admin') {
-      <li><a routerLink="/admin/competitions">Admin</a></li>
-      }
-    </ul>
+    <p class="home-lead">{{ lead }}</p>
   </main>
 </div>
