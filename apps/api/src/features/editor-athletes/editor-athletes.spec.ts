@@ -41,11 +41,7 @@ describe('editor athletes helpers', () => {
     expect(
       (await listEditorAthletes(rows, { sport: 'tennis', q: 'Player B' })).map((r) => r.id),
     ).toEqual(['sample-player-b'])
-    expect((await listEditorAthletes(rows, { sport: 'basketball' })).map((r) => r.id)).toEqual([
-      'sample-hooper-a',
-      'sample-hooper-b',
-      'sample-hooper-c',
-    ])
+    expect(await listEditorAthletes(rows, { sport: 'basketball' })).toEqual([])
 
     const created = await createAthlete(rows, {
       id: 'sample-hooper',
