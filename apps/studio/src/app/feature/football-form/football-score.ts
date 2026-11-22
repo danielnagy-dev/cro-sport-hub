@@ -51,7 +51,7 @@ const FIELDS = [
 @Component({
   selector: 'app-football-score',
   imports: [FormField, StudioSectionHeader],
-  templateUrl: './football-score.html',
+  template: '',
 })
 export class FootballScorePage {
   private readonly lookups = inject(EditorLookupsApi)

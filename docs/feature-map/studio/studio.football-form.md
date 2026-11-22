@@ -1,16 +1,18 @@
 # studio.football-form: Football match score form
 
-| App    | Status | Entry point (user POV)                       | Verify                                           | Since         |
-| ------ | ------ | -------------------------------------------- | ------------------------------------------------ | ------------- |
-| studio | live   | `http://localhost:4200/matches/new/football` | `vp run studio#test` and `verify:studio --route` | plan item 25a |
+| App    | Status  | Entry point (user POV) | Verify               | Since         |
+| ------ | ------- | ---------------------- | -------------------- | ------------- |
+| studio | retired | n/a (unregistered)     | `vp run studio#test` | plan item 25a |
 
-Log in, open `/matches/new/football`, choose competition, date, round, clubs, and goals, then save a draft with `POST /api/matches/football` (no `status` key). Optional appearance rows pick a football athlete, one of the two clubs, and the shared appearance counts; the body includes `appearances` only when at least one row is present. `/matches/:id/football` loads the same form from `GET /api/editor/matches/football/:id` and saves changes with `PUT /api/matches/football/:id`. Submit for review calls `POST /api/matches/:id/submit` after a successful save. Shared football schemas drive validation; Studio maps schema copy to short field messages for the main fields and appearance subfields (see `apps/studio/src/app/util/match-form-validation-message.ts`). A successful create shows `Draft saved as <id>` and locks the form; opening an existing match shows `Status: …` until a save in that visit. On the edit route, a draft stays editable until save. An unknown id shows `Match not found`. The matches table links football rows to `/matches/:id/football`.
+**Retired (Phase H / #282).** Routes unregistered in `app.routes.ts` (#240). Score unit spec removed (#246). Draft-body shell deleted here: `draft-body.spec.ts`, `football-form.routes.ts`, and `football-score.html`. `football-score.ts` keeps an inline empty template and still imports `draft-body` until sibling stub/module deletes (#283 / #284); clients wait for #248. Deep links to `/matches/new/football` or `/matches/:id/football` hit the shell `**` redirect to Početna and do not lazy-load this module.
+
+Formerly: after login, `/matches/new/football` chose competition, date, round, clubs, and goals, then saved a draft with `POST /api/matches/football` (no `status` key). Optional appearance rows picked a football athlete, one of the two clubs, and the shared appearance counts; the body included `appearances` only when at least one row was present. `/matches/:id/football` loaded the same form from `GET /api/editor/matches/football/:id` and saved changes with `PUT /api/matches/football/:id`. Submit for review called `POST /api/matches/:id/submit` after a successful save. Shared football schemas drove validation; Studio mapped schema copy to short field messages for the main fields and appearance subfields (see `apps/studio/src/app/util/match-form-validation-message.ts`). A successful create showed `Draft saved as <id>` and locked the form; opening an existing match showed `Status: …` until a save in that visit. On the edit route, a draft stayed editable until save. An unknown id showed `Match not found`. The matches table linked football rows to `/matches/:id/football`.
 
 #### Driving it with verify
 
-- **Anonymous.** `vp run verify:studio --route /matches/new/football` lands on `/login`.
-- **Proof.** `vp run studio#test` stubs HTTP for validation, appearances, edit load, and submit. Verify has no bearer.
+- **Anonymous.** Formerly `vp run verify:studio --route /matches/new/football` landed on `/login`.
+- **Proof.** `vp run studio#test`. Verify has no bearer.
 
 #### Gotchas
 
-- Published or review matches open read-only on the edit route until status returns to draft after save.
+- Published or review matches opened read-only on the edit route until status returned to draft after save.
