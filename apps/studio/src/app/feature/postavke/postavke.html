@@ -1,8 +1,84 @@
 <div class="shell">
-  <app-studio-section-header [skipLabel]="skipLabel" />
+  <app-studio-section-header [skipLabel]="copy.skip" />
 
   <main id="content" class="home-main" tabindex="-1">
-    <h2>{{ title }}</h2>
-    <p class="home-lead">{{ lead }}</p>
+    <h2>{{ copy.title }}</h2>
+
+    @if (loadStatus() === 'loading') {
+    <p role="status">{{ copy.loading }}</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">{{ copy.loadError }}</p>
+    } @else {
+    <section>
+      <h3>{{ copy.clocksHeading }}</h3>
+      <form class="tennis-form" (submit)="onSave($event)">
+        <table class="matches-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ copy.clockLabel }}</th>
+              <th scope="col">{{ copy.clockTime }}</th>
+              <th scope="col">{{ copy.clockActive }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (clock of clocks(); track clock.id) {
+            <tr>
+              <td>{{ clock.label }}</td>
+              <td>
+                <div class="tennis-field">
+                  <input
+                    [id]="'clock-time-' + clock.id"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    [attr.aria-label]="copy.clockTime + ' (' + clock.label + ')'"
+                    [value]="clock.clockTime"
+                    (input)="onClockTime(clock.id, $event)"
+                    [attr.aria-invalid]="clockTimeError(clock.id) ? 'true' : null"
+                    [attr.aria-describedby]="clockTimeError(clock.id) ? 'clock-time-error-' + clock.id : null"
+                  />
+                  @if (clockTimeError(clock.id); as msg) {
+                  <p [id]="'clock-time-error-' + clock.id" class="field-error">{{ msg }}</p>
+                  }
+                </div>
+              </td>
+              <td>
+                <label class="tennis-check">
+                  <input
+                    type="checkbox"
+                    [checked]="clock.active"
+                    (change)="onClockActive(clock.id, $event)"
+                  />
+                  {{ copy.clockActive }}
+                </label>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        @if (saveError(); as err) {
+        <p role="alert">{{ err }}</p>
+        } @if (saveSuccess(); as ok) {
+        <p role="status">{{ ok }}</p>
+        }
+        <div>
+          <button type="submit" [disabled]="savePending()">{{ copy.save }}</button>
+        </div>
+      </form>
+    </section>
+
+    <section>
+      <h3>{{ copy.accountsHeading }}</h3>
+      <p class="home-lead">{{ copy.accountsLead }}</p>
+      <ul>
+        @for (account of accounts(); track account.network) {
+        <li>
+          <strong>{{ networkLabel(account.network) }}</strong>
+          — {{ account.loginChecked ? copy.loginChecked : copy.loginUnchecked }}
+        </li>
+        }
+      </ul>
+    </section>
+    }
   </main>
 </div>
