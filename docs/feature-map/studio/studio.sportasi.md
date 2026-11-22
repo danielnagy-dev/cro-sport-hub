@@ -4,4 +4,4 @@
 | ------ | ------ | -------------------------------- | ---------------------------------------- | ----- |
 | studio | live   | `http://localhost:4200/sportasi` | `vp run studio#test` and `verify:studio` | #216  |
 
-Tracked-athlete list behind `editorGuard`, fed by `GET /api/editor/tracked-athletes` (`core/editor-athletes-api.ts`). Sport filter via `?sport=`. Inline Novi sportaš / Uredi form POSTs and PUTs the same API. HR copy from `core/messages` (`sportasi.*`). Profile route deferred to a sibling slice. Guest → `/login`.
+Editor list/create/update on `GET|POST|PUT /api/editor/tracked-athletes` with `?sport=` filter (`core/editor-athletes-api.ts`). Guest → `/login`.

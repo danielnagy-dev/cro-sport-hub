@@ -27,18 +27,7 @@ export function sportIdForSlug(sport: SportSlug): string {
   return SPORT_IDS[sport]
 }
 
-export function sportSlugForId(sportId: string): SportSlug | undefined {
-  for (const [slug, id] of Object.entries(SPORT_IDS) as [SportSlug, string][]) {
-    if (id === sportId) return slug
-  }
-  return undefined
-}
-
-/** `athleteSchema` is strict and rejects `clubName`, so pick known fields first. */
 export function parseEditorAthlete(body: unknown): EditorAthlete {
-  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
-    throw new Error('Invalid editor athlete')
-  }
   const row = body as Record<string, unknown>
   const base = athleteSchema.parse({
     id: row['id'],
@@ -46,9 +35,6 @@ export function parseEditorAthlete(body: unknown): EditorAthlete {
     name: row['name'],
     sportId: row['sportId'],
     country: row['country'],
-    ...(row['birthYear'] !== undefined ? { birthYear: row['birthYear'] } : {}),
-    ...(row['position'] !== undefined ? { position: row['position'] } : {}),
-    ...(row['photoUrl'] !== undefined ? { photoUrl: row['photoUrl'] } : {}),
   })
   return typeof row['clubName'] === 'string' ? { ...base, clubName: row['clubName'] } : base
 }

@@ -9,7 +9,6 @@ import { focusFirstFieldWithMessages, httpErrorBodyMessage } from '../../core/ad
 import {
   EditorAthletesApi,
   sportIdForSlug,
-  sportSlugForId,
   type EditorAthlete,
 } from '../../core/editor-athletes-api'
 import { t } from '../../core/messages'
@@ -74,7 +73,6 @@ export class SportasiPage {
     create: 'Novi sportaš',
     update: 'Uredi sportaša',
     save: 'Spremi',
-    neu: 'Novi sportaš',
     saveError: 'Sportaša nije moguće spremiti.',
   } as const
   protected readonly sports = SPORTS
@@ -122,7 +120,7 @@ export class SportasiPage {
             id: row.id,
             slug: row.slug,
             name: row.name,
-            sport: sportSlugForId(row.sportId) ?? sport,
+            sport,
             country: row.country,
           }
         : emptyForm(sport),

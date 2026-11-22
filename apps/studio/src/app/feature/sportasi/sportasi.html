@@ -16,9 +16,6 @@
     <p role="alert">{{ m.loadError }}</p>
     } @else {
     <table class="matches-table">
-      <caption>
-        {{ m.title }}
-      </caption>
       <thead>
         <tr>
           <th scope="col">Ime</th>
@@ -83,7 +80,7 @@
       }
       <div class="review-actions">
         <button type="submit" [disabled]="savePending()">{{ m.save }}</button>
-        <button type="button" (click)="loadForm()">{{ m.neu }}</button>
+        <button type="button" (click)="loadForm()">{{ m.create }}</button>
       </div>
     </form>
   </main>

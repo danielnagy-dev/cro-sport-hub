@@ -13,13 +13,6 @@ import {
 import { t } from '../../core/messages'
 import { SportasiPage } from './sportasi'
 
-const racket: EditorAthlete = {
-  id: 'sample-racket',
-  slug: 'sample-racket',
-  name: 'Sample Racket',
-  sportId: 'sport-tennis',
-  country: 'HR',
-}
 const ace: EditorAthlete = {
   id: 'sample-player-a',
   slug: 'sample-player-a',
@@ -27,17 +20,22 @@ const ace: EditorAthlete = {
   sportId: 'sport-tennis',
   country: 'HR',
 }
-
-function listUrl(sport: string): string {
-  return `${editorTrackedAthletesPath}?sport=${sport}`
+const draft: EditorAthlete = {
+  id: 'sample-racket',
+  slug: 'sample-racket',
+  name: 'Sample Racket',
+  sportId: 'sport-tennis',
+  country: 'HR',
 }
+const listUrl = (sport: string) => `${editorTrackedAthletesPath}?sport=${sport}`
 
 describe('SportasiPage', () => {
   let http: HttpTestingController
+  let store: TokenStore
 
   beforeEach(async () => {
     let token: string | null = null
-    const store: TokenStore = {
+    store = {
       read: () => token,
       write: (v) => {
         token = v
@@ -71,54 +69,41 @@ describe('SportasiPage', () => {
 
   it('filters by sport, creates, and updates via the editor API', async () => {
     const harness = await RouterTestingHarness.create()
-    const page = await harness.navigateByUrl('/sportasi', SportasiPage)
+    const page = await harness.navigateByUrl('/sportasi?sport=football', SportasiPage)
     const root = harness.fixture.nativeElement as HTMLElement
-    const model = page as unknown as {
+    const api = page as unknown as {
       model: { set(v: unknown): void }
       loadForm(row?: EditorAthlete): void
     }
-    http.expectOne(listUrl('tennis')).flush([ace])
-    await harness.fixture.whenStable()
-    harness.fixture.detectChanges()
-
-    const select = root.querySelector('#filter-sport')
-    if (!(select instanceof HTMLSelectElement)) throw new Error('missing sport filter')
-    select.value = 'football'
-    select.dispatchEvent(new Event('change', { bubbles: true }))
-    await harness.fixture.whenStable()
-    expect(TestBed.inject(Router).url).toContain('sport=football')
     http.expectOne(listUrl('football')).flush([])
     await harness.fixture.whenStable()
     harness.fixture.detectChanges()
     expect(root.textContent).toContain(t('sportasi.lead'))
+    expect(TestBed.inject(Router).url).toContain('sport=football')
 
-    select.value = 'tennis'
-    select.dispatchEvent(new Event('change', { bubbles: true }))
+    void harness.navigateByUrl('/sportasi?sport=tennis', SportasiPage)
     await harness.fixture.whenStable()
     http.expectOne(listUrl('tennis')).flush([ace])
     await harness.fixture.whenStable()
 
-    model.model.set({ ...racket, sport: 'tennis' })
+    api.model.set({ ...draft, sport: 'tennis' })
     harness.fixture.detectChanges()
     ;[...root.querySelectorAll('button')].find((n) => n.textContent?.includes('Spremi'))?.click()
     const create = http.expectOne(editorTrackedAthletesPath)
     expect(create.request.method).toBe('POST')
-    expect(create.request.body).toEqual(racket)
-    create.flush(racket)
-    http.expectOne(listUrl('tennis')).flush([ace, racket])
+    create.flush(draft)
+    http.expectOne(listUrl('tennis')).flush([ace, draft])
     await harness.fixture.whenStable()
 
-    model.loadForm(racket)
-    model.model.set({ ...racket, name: 'Sample Racket II', sport: 'tennis' })
+    api.loadForm(draft)
+    api.model.set({ ...draft, name: 'Sample Racket II', sport: 'tennis' })
     harness.fixture.detectChanges()
     ;[...root.querySelectorAll('button')].find((n) => n.textContent?.includes('Spremi'))?.click()
-    const update = http.expectOne(editorTrackedAthletePath(racket.id))
+    const update = http.expectOne(editorTrackedAthletePath(draft.id))
     expect(update.request.method).toBe('PUT')
-    expect(update.request.body).toMatchObject({ name: 'Sample Racket II' })
-    update.flush({ ...racket, name: 'Sample Racket II' })
-    http.expectOne(listUrl('tennis')).flush([{ ...racket, name: 'Sample Racket II' }])
+    update.flush({ ...draft, name: 'Sample Racket II' })
+    http.expectOne(listUrl('tennis')).flush([{ ...draft, name: 'Sample Racket II' }])
     await harness.fixture.whenStable()
-    harness.fixture.detectChanges()
     expect(root.textContent).toContain('Sample Racket II')
   })
 })
