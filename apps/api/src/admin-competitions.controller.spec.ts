@@ -114,6 +114,7 @@ describe('admin competition routes', () => {
     expect(listed.body.map((row: { name: string }) => row.name)).toEqual([
       'Harbor Open',
       'Sample Cup',
+      'Sample Hoops Cup',
       'Sample League',
     ])
 
