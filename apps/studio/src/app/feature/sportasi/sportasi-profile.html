@@ -1,0 +1,81 @@
+<div class="shell">
+  <app-studio-section-header [skipLabel]="m.skip" />
+  <main id="content" class="matches-main" tabindex="-1">
+    <p><a routerLink="/sportasi">← {{ m.back }}</a></p>
+    @if (loadStatus() === 'loading') {
+    <p role="status">{{ m.loading }}</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">{{ m.loadError }}</p>
+    } @else if (loadStatus() === 'missing') {
+    <p role="alert">{{ m.missing }}</p>
+    } @else if (athlete(); as row) {
+    <h2>{{ row.name }}</h2>
+    <dl class="matches-filters">
+      <div>
+        <dt>Slug</dt>
+        <dd>{{ row.slug }}</dd>
+      </div>
+      <div>
+        <dt>Država</dt>
+        <dd>{{ row.country }}</dd>
+      </div>
+      @if (row.clubName; as club) {
+      <div>
+        <dt>Klub</dt>
+        <dd>{{ club }}</dd>
+      </div>
+      }
+    </dl>
+    <section aria-labelledby="profile-next">
+      <h3 id="profile-next">{{ m.next }}</h3>
+      @if (next().length === 0) {
+      <p>{{ m.emptyNext }}</p>
+      } @else {
+      <ul>
+        @for (item of next(); track item.id) {
+        <li>{{ item.startsAt }} — {{ item.opponentLabel }} ({{ item.sportSlug }})</li>
+        }
+      </ul>
+      }
+    </section>
+    <section aria-labelledby="profile-history">
+      <h3 id="profile-history">{{ m.history }}</h3>
+      @if (history().length === 0) {
+      <p>{{ m.emptyHistory }}</p>
+      } @else {
+      <ul>
+        @for (item of history(); track item.id) {
+        <li>{{ item.startsAt }} — {{ item.opponentLabel }} ({{ item.sportSlug }})</li>
+        }
+      </ul>
+      }
+    </section>
+    <section aria-labelledby="profile-posts">
+      <h3 id="profile-posts">{{ m.posts }}</h3>
+      @if (posts().length === 0) {
+      <p>{{ m.emptyPosts }}</p>
+      } @else {
+      <ul>
+        @for (post of posts(); track post.id) {
+        <li>{{ post.slotDate }} {{ post.clockTime }} — {{ post.network }}: {{ post.bodyText }}</li>
+        }
+      </ul>
+      }
+    </section>
+    <section aria-labelledby="profile-sources">
+      <h3 id="profile-sources">{{ m.sources }}</h3>
+      @if (sourceRows().length === 0) {
+      <p>{{ m.emptySources }}</p>
+      } @else {
+      <ul>
+        @for (src of sourceRows(); track src.sourceId + src.appearanceId) {
+        <li>
+          <a [href]="src.url" rel="noopener noreferrer" target="_blank">{{ src.url }}</a>
+        </li>
+        }
+      </ul>
+      }
+    </section>
+    }
+  </main>
+</div>
