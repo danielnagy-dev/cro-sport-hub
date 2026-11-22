@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted (amended for Phase G — appearance payload contract). Chromium HTML→PNG stays. The public contract is appearance-oriented; gallery ZIP composition is not part of this package (see ADR-006 deprecation and ADR-010 retirement).
 
 ## Context
 
@@ -11,6 +11,8 @@ Plan item 28 adds the first template to `libs/slide-generator`: one football sli
 The handoff depends on CSS the browser fit script used to measure: CSS grid, `font-stretch: 88%` on Archivo, Big Shoulders Display at weights 700, 800, and 900, `zoom` on the list, and a conic-gradient field texture. Both fonts in the handoff are variable files. There is no cover slide.
 
 On 25 Oct 2026 the reference HTML was opened in headless Chrome 156 at 1080×1350. The player hero computed to 278.164px. A four-row list used zoom 1.15. List heroes were 123.504px where the second row has a plain value, and 114.154px where that row is only the passes donut. Big Shoulders Display weight 800 reports a cap height of 0.81em (`measureText("H")` at 100px is 81). The token note "about 278px" matches. The token note "about 107px" does not; the HTML is the authority.
+
+ADR-010 retires gallery admin and ZIP download as the product path and keeps a thin slide template renderer in this family: slide count and athletes are known ahead of fill. Publish slots already store ordered appearance ids (`slideOrder`). Phase G amends this ADR so the package’s public contract matches that model before the TypeScript API is narrowed (implement slice after this text lands). Packages named here: `libs/slide-generator` (contract owner); callers later in `apps/api` and `apps/studio`. Gallery ZIP remains ADR-006 until Phase H deletes that surface.
 
 ## Decision
 
@@ -24,8 +26,34 @@ Hero size and list zoom are not left to a browser fit script. List zoom is the t
 
 List passes are a template option, `donut` (default) or `text`. Hero size is `measured` (default) or `off`, with an optional `heroFontPx` override for the open size question. Navy is the default colourway. Red and light are optional and were not re-reviewed after v1.
 
+### Public contract (Phase G)
+
+The package’s ongoing product contract is **render N slides from an appearance payload**. Callers pass an ordered, appearance-oriented input (athlete and slide count known ahead of fill). The library maps that payload to template documents and, when asked, rasterizes them with the Chromium path above. Callers do not own gallery ZIP composition; ZIP download is a retired product surface (ADR-006 deprecated; delete in Phase H / #186), not the publish path. Publish slots order appearance ids; the renderer fills slide HTML/PNG when appearance data is ready.
+
+Type sketch for the implement slice (names may refine; this ADR locks intent, not exact identifiers):
+
+```ts
+/** Ordered appearance rows the templates need; sport-specific fields refine later. */
+type AppearanceSlidePayload = {
+  appearances: readonly AppearanceSlideInput[]
+}
+
+/** HTML documents (and measured heroes/zoom) for N slides. */
+function slidesFromAppearance(payload: AppearanceSlidePayload): SlideDocument[]
+
+/** PNG bytes for those slides; empty payload returns no bytes and does not launch Chromium. */
+function renderAppearancePngs(
+  payload: AppearanceSlidePayload,
+  options?: TemplateOptions,
+): Promise<Uint8Array[]>
+```
+
+Football remains the first template. Tennis and basketball MVP templates are later Phase G slices. Expand–contract: add the appearance-payload seam, migrate in-package callers, leave gallery HTTP/ZIP routes until Phase H. Do not add a second renderer or a new runtime dependency family.
+
 ## Consequences
 
 Callers pass one player slide. They do not pass a cover. The list slide uses the same HTML document and the same hero rule; it is the stacked change, because the formatted player template plus this ADR plus the handoff already sit at the line budget. The document's font URLs are relative to `design/football-r13/html/`, next to the vendored faces. The PNG item writes the HTML there, or rewrites the URLs, then screenshots it at 1080×1350. Revisit Satori only if it renders these variable-font weights and `font-stretch` and still matches the reference PNG.
 
 On 26 Oct 2026 gallery slides use only fields the catalog already stores. The shirt number is omitted. Stats are text: goals, assists, minutes, and cards. A gallery slide does not draw the donut. Each slide has one optional caption. The round-13 handoff sample that includes a shirt number is unchanged.
+
+After Phase G, new editorial callers use the appearance-payload render signature. They must not construct a gallery entity to render slides, and they must not treat `GET /api/galleries/:id/download` as the ongoing publish path. The implement PR that lands the TypeScript exports follows this ADR text; Studio preview and multi-sport templates are separate Phase G tickets. Gallery admin and ZIP code stay until Phase H removes them.

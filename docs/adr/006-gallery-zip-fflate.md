@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted — **product path deprecated**. The `fflate` choice for in-process ZIP bytes remains valid while the gallery download route exists. ADR-010 and Phase G retire gallery admin / ZIP download as the ongoing publish surface in favour of publish-slot ordered slides (appearance ids in `slideOrder`) plus the thin ADR-003 appearance-payload renderer. Do not add new product callers of this path. Delete the route and dependency usage in Phase H / expand–contract drop (#186 and later H tickets), not in Phase G.
 
 ## Context
 
@@ -17,3 +17,5 @@ Rejected: hand-rolled ZIP headers and central directory records, because the for
 ## Consequences
 
 Callers use the download route with `Authorization: Bearer`. Draft, review, and published galleries with a missing PNG receive HTTP 409 with the messages in the OpenAPI conflict description. No new `allowBuilds` entry. Revisit only if archives must stream without buffering the full ZIP in memory.
+
+Supersession for implementers: treat ZIP download as a retired product surface after Phase G/H. New editorial and publish work follows ADR-003’s appearance-payload contract and publish-slot `slideOrder`, not this gallery ZIP. Cleanup tickets remove `apps/*/feature/gallery`, gallery API download, and the `fflate` usage when the expand–contract drop is ready; this ADR does not authorize deleting that code in the Phase G ADR-only or API-narrow slices.
