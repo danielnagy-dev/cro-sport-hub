@@ -21,7 +21,7 @@ describe('Studio message catalog', () => {
     expect(t('pocetna.title')).toBe('Početna')
     expect(t('shell-home.lead')).toBe('Odaberite odjeljak u navigaciji iznad.')
     expect(t('sportasi.lead')).toBe('Popis sportaša — uskoro.')
-    expect(t('objave.lead')).toBe('Red objava — uskoro.')
+    expect(t('objave.lead')).toBe('Red objava po danu, s filterima i tjednim pregledom.')
     expect(t('postavke.lead')).toBe('Postavke studija — uskoro.')
   })
 
