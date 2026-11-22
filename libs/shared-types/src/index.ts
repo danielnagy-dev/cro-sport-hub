@@ -65,19 +65,6 @@ export {
 export type { PublishedMatch, PublishedMatchPage } from './published-match.ts'
 
 export {
-  editorMatchListQuerySchema,
-  editorMatchPageSchema,
-  editorMatchSchema,
-} from './editor-match.ts'
-export type { EditorMatch, EditorMatchListQuery, EditorMatchPage } from './editor-match.ts'
-
-export { editorTennisDraftSchema } from './editor-tennis-draft.ts'
-export type { EditorTennisDraft } from './editor-tennis-draft.ts'
-
-export { editorFootballDraftSchema } from './editor-football-draft.ts'
-export type { EditorFootballDraft } from './editor-football-draft.ts'
-
-export {
   athleteNameListSchema,
   athleteNameSchema,
   publicAthleteSchema,
@@ -117,12 +104,3 @@ export type { TennisMatchStats, TennisPercentages, TennisStatCounts } from './te
 
 export { appearanceIssues, appearanceSchema, footballMatchSchema } from './football.ts'
 export type { Appearance, AppearanceCounts, FootballMatch } from './football.ts'
-
-export {
-  galleryCaptionPatchSchema,
-  galleryCreateBodySchema,
-  galleryCreatedSchema,
-  galleryRenderResponseSchema,
-  galleryViewSchema,
-} from './gallery.ts'
-export type { GalleryView } from './gallery.ts'
