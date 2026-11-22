@@ -1,7 +1,7 @@
-# studio.postavke: Settings stub
+# studio.postavke: Slot clock times and connected accounts
 
-| App    | Status | Entry point (user POV)           | Verify                                   | Since |
-| ------ | ------ | -------------------------------- | ---------------------------------------- | ----- |
-| studio | live   | `http://localhost:4200/postavke` | `vp run studio#test` and `verify:studio` | #199  |
+| App    | Status | Entry point (user POV)           | Verify                                   | Since      |
+| ------ | ------ | -------------------------------- | ---------------------------------------- | ---------- |
+| studio | live   | `http://localhost:4200/postavke` | `vp run verify:studio --route /postavke` | #199, #217 |
 
-Empty Postavke placeholder behind `editorGuard`. Title, lead, and skip label from `core/messages` (`postavke.*`). No API client (Phase F). Guest → `/login`.
+Editor settings behind `editorGuard`. `SettingsApi` for clocks and connected-account stubs. Copy from `core/messages` (`postavke.*`). Guest → `/login`.
