@@ -9,4 +9,3 @@ export {
   type CatalogWriteKind,
 } from './errors.js'
 export { openCatalog, openPostgresCatalog, catalogDb } from './connection.js'
-export { listImportRuns, readImportFixture, runImport, type ImportRun } from './import-runs.js'
