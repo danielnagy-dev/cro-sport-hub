@@ -212,6 +212,10 @@ body {
   margin-top: 0;
 }
 
+.home-main .csh-filter-bar {
+  margin: 0 0 var(--space-4);
+}
+
 .home-lead {
   margin: 0 0 var(--space-3);
 }

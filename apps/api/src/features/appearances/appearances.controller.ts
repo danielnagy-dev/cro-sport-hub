@@ -20,20 +20,44 @@ import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module
 import {
   appearanceListQuerySchema,
   createAppearance,
+  createLineupEntry,
   listAppearances,
   type Appearance,
+  type LineupEntry,
   updateAppearance,
+  updateLineupEntry,
 } from './appearances.js'
+
+const ID_MESSAGE = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
 
 function withId(body: unknown, id: string): unknown {
   if (!idSchema.safeParse(id).success) {
-    throw new BadRequestException('Expected an id of 1–64 letters, digits, underscores, or hyphens')
+    throw new BadRequestException(ID_MESSAGE)
   }
   if (typeof body !== 'object' || body === null || Array.isArray(body)) return { id }
   if ('id' in body && body.id !== id) {
     throw new BadRequestException('The appearance id is the one in the path')
   }
   return { ...body, id }
+}
+
+function withLineupKey(body: unknown, appearanceId: string, athleteId?: string): unknown {
+  if (!idSchema.safeParse(appearanceId).success) throw new BadRequestException(ID_MESSAGE)
+  if (athleteId !== undefined && !idSchema.safeParse(athleteId).success) {
+    throw new BadRequestException(ID_MESSAGE)
+  }
+  const base = typeof body === 'object' && body !== null && !Array.isArray(body) ? { ...body } : {}
+  if ('appearanceId' in base && base.appearanceId !== appearanceId) {
+    throw new BadRequestException('The appearance id is the one in the path')
+  }
+  if (athleteId !== undefined && 'athleteId' in base && base.athleteId !== athleteId) {
+    throw new BadRequestException('The athlete id is the one in the path')
+  }
+  return {
+    ...base,
+    appearanceId,
+    ...(athleteId === undefined ? {} : { athleteId }),
+  }
 }
 
 function toHttp(error: unknown): unknown {
@@ -62,13 +86,19 @@ export class AppearancesController {
     @Query('day') day: unknown,
     @Query('sportSlug') sportSlug: unknown,
     @Query('athleteId') athleteId: unknown,
+    @Query('athleteSlug') athleteSlug: unknown,
     @Query('nationalTeamId') nationalTeamId: unknown,
+    @Query('from') from: unknown,
+    @Query('to') to: unknown,
   ): Promise<Appearance[]> {
     const query = {
       day: pick(day),
       sportSlug: pick(sportSlug),
       athleteId: pick(athleteId),
+      athleteSlug: pick(athleteSlug),
       nationalTeamId: pick(nationalTeamId),
+      from: pick(from),
+      to: pick(to),
     }
     const parsed = appearanceListQuerySchema.safeParse(
       Object.fromEntries(Object.entries(query).filter((entry) => entry[1] !== undefined)),
@@ -88,6 +118,25 @@ export class AppearancesController {
   @ApiParam({ name: 'id', description: 'Appearance id.' })
   update(@Param('id') id: string, @Body() body: unknown): Promise<Appearance> {
     return this.run((catalog) => updateAppearance(catalogDb(catalog), id, withId(body, id)))
+  }
+
+  @Post(':id/lineup')
+  @ApiParam({ name: 'id', description: 'Appearance id.' })
+  createLineup(@Param('id') id: string, @Body() body: unknown): Promise<LineupEntry> {
+    return this.run((catalog) => createLineupEntry(catalogDb(catalog), withLineupKey(body, id)))
+  }
+
+  @Put(':id/lineup/:athleteId')
+  @ApiParam({ name: 'id', description: 'Appearance id.' })
+  @ApiParam({ name: 'athleteId', description: 'Athlete id.' })
+  updateLineup(
+    @Param('id') id: string,
+    @Param('athleteId') athleteId: string,
+    @Body() body: unknown,
+  ): Promise<LineupEntry> {
+    return this.run((catalog) =>
+      updateLineupEntry(catalogDb(catalog), id, athleteId, withLineupKey(body, id, athleteId)),
+    )
   }
 
   private async run<T>(work: (catalog: Catalog) => Promise<T>): Promise<T> {
