@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/pglite'
 import { describe, expect, it } from 'vite-plus/test'
 import { openCatalog } from '../../catalog/catalog.js'
 import { seedCatalog } from '../../catalog/seed.js'
+import { writeSampleMatches } from '../../catalog/write-sample-matches.js'
 import * as schema from '../../catalog/schema.js'
 import { listFootballResultsForAthlete } from './list-football-results.js'
 
@@ -12,6 +13,7 @@ describe('listFootballResultsForAthlete', () => {
     const db = drizzle(client, { schema })
     const catalog = await openCatalog(db)
     await seedCatalog(catalog)
+    await writeSampleMatches(catalog)
 
     const karlo = await listFootballResultsForAthlete(db, 'karlo-brkic')
     expect(karlo).toHaveLength(1)

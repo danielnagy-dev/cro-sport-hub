@@ -78,6 +78,31 @@ describe('catalog seed', () => {
     })
   })
 
+  it('inserts no legacy match catalog rows', async () => {
+    await withMemory(async (catalog) => {
+      await seedCatalog(catalog)
+      const db = catalogDb(catalog)
+      const [matchesCount, tennisCount, tennisStatsCount, footballCount, matchAppearanceCount] =
+        await Promise.all([
+          db.select({ value: count() }).from(schema.matches),
+          db.select({ value: count() }).from(schema.tennisMatches),
+          db.select({ value: count() }).from(schema.tennisMatchStats),
+          db.select({ value: count() }).from(schema.footballMatches),
+          db.select({ value: count() }).from(schema.matchAppearances),
+        ])
+      expect(matchesCount[0]?.value).toBe(0)
+      expect(tennisCount[0]?.value).toBe(0)
+      expect(tennisStatsCount[0]?.value).toBe(0)
+      expect(footballCount[0]?.value).toBe(0)
+      expect(matchAppearanceCount[0]?.value).toBe(0)
+      expect(seedRows.some((row) => row.kind === 'match')).toBe(false)
+      expect(seedRows.some((row) => row.kind === 'tennisMatch')).toBe(false)
+      expect(seedRows.some((row) => row.kind === 'tennisMatchStats')).toBe(false)
+      expect(seedRows.some((row) => row.kind === 'footballMatch')).toBe(false)
+      expect(seedRows.some((row) => row.kind === 'appearance')).toBe(false)
+    })
+  })
+
   it('loads a second time without duplicates or errors', async () => {
     await withMemory(async (catalog) => {
       await seedCatalog(catalog)
