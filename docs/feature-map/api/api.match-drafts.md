@@ -4,7 +4,7 @@
 | --- | ------- | ---------------------------------------- | ----------------- | ------------ |
 | api | retired | `POST/PUT /api/matches/tennis,/football` | `vp run api#test` | plan item 11 |
 
-**Retired (Phase H / #261–#262).** Controller unit spec deleted (#261). Nest controllers `match-drafts.controller.ts` / `match-workflow.controller.ts` and feature modules `features/match-drafts/` / `features/match-workflow/` deleted (#262). Folder auto-load no longer registers those modules, so draft write and submit/reject/publish HTTP surfaces are gone. Editor-matches stays until #263/#264; public `matches` until Phase I; catalog draft writers and table drop are #186. Studio match/form/review clients are already retired. OpenAPI `matches` tag no longer advertises draft saves or review transitions.
+**Retired (Phase H / #261–#262).** Controller unit spec deleted (#261). Nest controllers `match-drafts.controller.ts` / `match-workflow.controller.ts` and feature modules `features/match-drafts/` / `features/match-workflow/` deleted (#262). Folder auto-load no longer registers those modules, so draft write and submit/reject/publish HTTP surfaces are gone. Editor-matches HTTP and catalog draft readers are gone (#263–#264, #268). Catalog `drafts.ts` / `workflow.ts` writers deleted (#317). Public `matches` until Phase I; seed match rows and table drop stay under #186. Studio match/form/review clients are already retired. OpenAPI `matches` tag no longer advertises draft saves or review transitions.
 
 Historical behaviour: `POST /api/matches/tennis` and `POST /api/matches/football` created a match. `PUT` on that path plus an id replaced one. Both forced `status: draft`. An editor or admin sent `Authorization: Bearer`. No token was 401. Any other signed role was 403. The public `GET` routes stayed open. Tennis took a set score and optional raw stat counts. Football took a score and optional appearances. Percentage fields were rejected. The response was `{ id, status: "draft", sport }`.
 
@@ -22,5 +22,5 @@ Shapes on `GET /docs-json` no longer document those draft write paths. Swagger U
 
 #### Gotchas
 
-- Catalog `saveDraft` helpers and seed/test draft rows remain until #186. A draft is still not on the public list.
+- Catalog `saveDraft` helpers are deleted (#317). Seed match rows remain until the stop-seed sibling (#319). A draft is still not on the public list.
 - `JWT_SECRET` was read on the draft route, not at boot. An edit replaced stats and appearances.
