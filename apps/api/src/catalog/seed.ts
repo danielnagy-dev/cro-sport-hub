@@ -1,10 +1,4 @@
-import {
-  catalogDb,
-  type AthleteTeamKey,
-  type Catalog,
-  type CatalogParticipantKey,
-  type CatalogWriteKind,
-} from './catalog.js'
+import { catalogDb, type AthleteTeamKey, type Catalog, type CatalogWriteKind } from './catalog.js'
 import type { CatalogDb } from './errors.js'
 import * as schema from './schema.js'
 
@@ -12,10 +6,11 @@ import * as schema from './schema.js'
  * Fictional sample rows for local Postgres. Names follow the Sample Player
  * stories and the slide sample. No photos, crests, credentials, or real people.
  * `editor-demo` and `admin-demo` are catalog roles (id and role only).
- * Editorial ADR-010 rows sit beside the legacy match seed until Phase H.
+ * Editorial ADR-010 national teams, appearances, lineups, and publish slots
+ * are the primary demo path. Legacy match catalog tables are not seeded.
  */
 
-type SeedKey = string | AthleteTeamKey | CatalogParticipantKey
+type SeedKey = string | AthleteTeamKey
 type SeedRow = { kind: CatalogWriteKind; key: SeedKey; value: unknown }
 
 const EDITOR = { id: 'editor-demo', role: 'editor' as const } as const
@@ -98,138 +93,6 @@ const spells = [
   spell(bruno.id, away.id, '2025-07-01'),
 ]
 
-const finalMatch = {
-  id: 'match-sample-final',
-  sportId: 'sport-tennis',
-  competitionId: CUP.id,
-  date: '2026-10-18',
-  round: 'Final',
-  status: 'published' as const,
-  source: 'manual' as const,
-  createdBy: EDITOR.id,
-  reviewedBy: ADMIN.id,
-  publishedAt: '2026-10-18T18:00:00+00:00',
-}
-const finalDetail = {
-  matchId: finalMatch.id,
-  playerAId: playerA.id,
-  playerBId: playerB.id,
-  winnerId: playerA.id,
-  bestOf: 3 as const,
-  score: [
-    [6, 4],
-    [7, 6, 5],
-  ],
-  retired: false,
-}
-const statsA = {
-  matchId: finalMatch.id,
-  athleteId: playerA.id,
-  aces: 3,
-  doubleFaults: 1,
-  firstServeIn: 6,
-  firstServeTotal: 10,
-  firstServePointsWon: 4,
-  secondServePointsWon: 2,
-  secondServeTotal: 4,
-  breakPointsSaved: 1,
-  breakPointsFaced: 2,
-  breakPointsWon: 2,
-  breakPointsTotal: 4,
-  winners: 8,
-  unforcedErrors: 5,
-  totalPointsWon: 20,
-}
-const statsB = {
-  matchId: finalMatch.id,
-  athleteId: playerB.id,
-  aces: 1,
-  doubleFaults: 2,
-  firstServeIn: 4,
-  firstServeTotal: 8,
-  firstServePointsWon: 2,
-  secondServePointsWon: 1,
-  secondServeTotal: 4,
-  breakPointsSaved: 0,
-  breakPointsFaced: 1,
-  breakPointsWon: 1,
-  breakPointsTotal: 2,
-  totalPointsWon: 12,
-}
-const quarterfinal = {
-  id: 'match-sample-qf',
-  sportId: 'sport-tennis',
-  competitionId: CUP.id,
-  date: '2026-10-16',
-  round: 'QF',
-  status: 'draft' as const,
-  source: 'manual' as const,
-  createdBy: EDITOR.id,
-}
-const retiredDetail = {
-  matchId: quarterfinal.id,
-  playerAId: playerC.id,
-  playerBId: playerD.id,
-  winnerId: playerC.id,
-  bestOf: 3 as const,
-  score: [
-    [6, 3],
-    [4, 2],
-  ],
-  retired: true,
-}
-
-const leagueMatch = {
-  id: 'match-sample-league',
-  sportId: 'sport-football',
-  competitionId: LEAGUE.id,
-  date: '2026-10-19',
-  round: 'Matchday 8',
-  status: 'published' as const,
-  source: 'manual' as const,
-  createdBy: EDITOR.id,
-  reviewedBy: ADMIN.id,
-  publishedAt: '2026-10-19T20:00:00+00:00',
-}
-const scoreline = {
-  matchId: leagueMatch.id,
-  homeTeamId: home.id,
-  awayTeamId: away.id,
-  homeGoals: 2,
-  awayGoals: 1,
-}
-
-function matchAppearance(
-  athleteId: string,
-  teamId: string,
-  started: boolean,
-  minutes: number,
-  goals: number,
-  assists: number,
-  yellowCards: number,
-  redCard: boolean,
-) {
-  return {
-    matchId: leagueMatch.id,
-    athleteId,
-    teamId,
-    started,
-    minutes,
-    goals,
-    assists,
-    yellowCards,
-    redCard,
-  }
-}
-
-const matchAppearances = [
-  matchAppearance(karlo.id, home.id, true, 90, 2, 0, 0, false),
-  matchAppearance(mateo.id, home.id, true, 75, 0, 1, 1, false),
-  matchAppearance(leon.id, home.id, true, 90, 0, 0, 0, false),
-  matchAppearance(filip.id, away.id, true, 90, 1, 0, 2, true),
-  matchAppearance(bruno.id, away.id, false, 0, 0, 0, 1, false),
-]
-
 function row(kind: CatalogWriteKind, key: SeedKey, value: unknown): SeedRow {
   return { kind, key, value }
 }
@@ -251,17 +114,6 @@ export const seedRows: readonly SeedRow[] = [
   ...seedFootballAthletes.map((athlete) => byId('athlete', athlete)),
   ...seedBasketballAthletes.map((athlete) => byId('athlete', athlete)),
   ...spells.map((period) => row('athleteTeam', period, period)),
-  byId('match', finalMatch),
-  row('tennisMatch', finalMatch.id, finalDetail),
-  row('tennisMatchStats', { matchId: statsA.matchId, athleteId: statsA.athleteId }, statsA),
-  row('tennisMatchStats', { matchId: statsB.matchId, athleteId: statsB.athleteId }, statsB),
-  byId('match', quarterfinal),
-  row('tennisMatch', quarterfinal.id, retiredDetail),
-  byId('match', leagueMatch),
-  row('footballMatch', leagueMatch.id, scoreline),
-  ...matchAppearances.map((line) =>
-    row('appearance', { matchId: line.matchId, athleteId: line.athleteId }, line),
-  ),
 ]
 
 const croatiaFootball = {

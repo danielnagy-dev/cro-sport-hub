@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { AthletesController } from './athletes.controller.js'
 import { openCatalog } from './catalog/catalog.js'
 import { seedCatalog } from './catalog/seed.js'
+import { writeSampleMatches } from './catalog/write-sample-matches.js'
 import * as schema from './catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from './catalog/catalog.module.js'
 import {
@@ -123,6 +124,7 @@ describe('public athletes', () => {
     const open: CatalogOpener = () => openCatalog(drizzle(client, { schema }))
     const catalog = await open()
     await seedCatalog(catalog)
+    await writeSampleMatches(catalog)
     await catalog.close()
 
     const moduleRef = await Test.createTestingModule({
