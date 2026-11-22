@@ -3,7 +3,7 @@
  *
  * Naming: `<surface>.<role>` with kebab segments
  * (`nav.pocetna`, `chrome.log-out`, `sportasi.lead`).
- * Surfaces: `nav`, `chrome`, empty-screen ids, `publish-drawer`, `shell-home`.
+ * Surfaces: `nav`, `chrome`, empty-screen ids, `postavke`, `publish-drawer`, `shell-home`.
  * Stable string ids — do not rename casually; a later locale file uses the same keys.
  */
 export const MESSAGE_KEYS = [
@@ -28,6 +28,23 @@ export const MESSAGE_KEYS = [
   'postavke.skip',
   'postavke.title',
   'postavke.lead',
+  'postavke.clocks-heading',
+  'postavke.clock-label',
+  'postavke.clock-time',
+  'postavke.clock-active',
+  'postavke.save',
+  'postavke.save-success',
+  'postavke.save-error',
+  'postavke.load-error',
+  'postavke.loading',
+  'postavke.clock-time-invalid',
+  'postavke.accounts-heading',
+  'postavke.accounts-lead',
+  'postavke.login-checked',
+  'postavke.login-unchecked',
+  'postavke.network.instagram',
+  'postavke.network.facebook',
+  'postavke.network.x',
   'publish-drawer.title',
   'publish-drawer.preview',
   'publish-drawer.approve',
