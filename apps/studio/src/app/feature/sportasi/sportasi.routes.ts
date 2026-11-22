@@ -3,6 +3,11 @@ import { editorGuard } from '../../core/auth'
 
 export const sportasiRoutes: Routes = [
   {
+    path: 'sportasi/:id',
+    loadComponent: () => import('./sportasi-profile').then((module) => module.SportasiProfilePage),
+    canActivate: [editorGuard],
+  },
+  {
     path: 'sportasi',
     loadComponent: () => import('./sportasi').then((module) => module.SportasiPage),
     canActivate: [editorGuard],
