@@ -1,6 +1,7 @@
 export const packageId = '@cro-sport-hub/slide-generator'
 
 export { catalogSlides } from './catalog-slides.ts'
+export { renderAppearancePngs, slidesFromAppearance } from './appearance-slides.ts'
 export { designRound, footballTemplate, slideHeight, slideWidth } from './football.ts'
 export { footballSlides } from './slides.ts'
 export { embedFontsInFootballHtml, footballRendererReason, renderFootballPngs } from './render.ts'
@@ -15,3 +16,4 @@ export type {
 } from './football.ts'
 export type { FootballEntry } from './slides.ts'
 export type { CatalogAppearance } from './catalog-slides.ts'
+export type { AppearanceSlideInput, AppearanceSlidePayload } from './appearance-slides.ts'
