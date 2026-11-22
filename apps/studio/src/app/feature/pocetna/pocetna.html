@@ -1,8 +1,7 @@
 <div class="shell">
   <app-studio-section-header />
-
-  <main id="content" class="home-main pocetna-main" tabindex="-1">
-    <h2>{{ title }}</h2>
+  <main id="content" class="home-main" tabindex="-1">
+    <h2>{{ copy.title }}</h2>
     <csh-ui-filter-bar
       [dayLabel]="dayLabel()"
       [sport]="sport()"
@@ -12,35 +11,31 @@
       (nextDay)="onNextDay()"
     />
     @if (showAdminOnlyMessage()) {
-    <p class="home-admin-only" role="status">{{ adminOnly }}</p>
+    <p class="home-admin-only" role="status">{{ copy.adminOnly }}</p>
     } @if (loadError(); as err) {
     <p role="alert">{{ err }}</p>
     }
 
-    <section class="pocetna-next" [attr.aria-label]="nextHeading">
-      <h3>{{ nextHeading }}</h3>
+    <section [attr.aria-label]="copy.next">
+      <h3>{{ copy.next }}</h3>
       @if (nextSlot(); as slot) {
-      <p class="pocetna-next__clock">{{ slot.clockTime }}</p>
+      <p class="pocetna-clock">{{ slot.clockTime }}</p>
       <p>
-        <span>{{ slidesLabel }}: {{ slot.slideOrder.length }}</span>
-        ·
-        <span>{{ slot.slotDate }}</span>
-        <csh-ui-status-pill [status]="slotKitStatus(slot.status)"
-          >{{ slot.status }}</csh-ui-status-pill
-        >
+        {{ copy.slides }}: {{ slot.slideOrder.length }} · {{ slot.slotDate }}
+        <csh-ui-status-pill [status]="kit(slot.status)">{{ slot.status }}</csh-ui-status-pill>
       </p>
-      <ul class="pocetna-next__networks">
+      <ul>
         @for (network of networks; track network) {
         <li>
-          <span>{{ network }}</span>
-          <csh-ui-status-pill [status]="networkKitStatus(slot, network)"
-            >{{ networkStatus(slot, network) }}</csh-ui-status-pill
+          {{ network }}
+          <csh-ui-status-pill [status]="kit(netStatus(slot, network))"
+            >{{ netStatus(slot, network) }}</csh-ui-status-pill
           >
         </li>
         }
       </ul>
-      <p class="pocetna-next__actions">
-        <button cshUiButton type="button" (click)="openDrawer(slot)">{{ previewLabel }}</button>
+      <p>
+        <button cshUiButton type="button" (click)="openDrawer(slot)">{{ copy.preview }}</button>
         <button
           cshUiButton
           type="button"
@@ -48,45 +43,40 @@
           [disabled]="busy()"
           (click)="approveNext()"
         >
-          {{ approveLabel }}
+          {{ copy.approve }}
         </button>
       </p>
       } @else {
-      <p>{{ emptyNext }}</p>
+      <p>{{ copy.emptyNext }}</p>
       }
     </section>
 
-    <section class="pocetna-list" [attr.aria-label]="athletesHeading">
-      <h3>{{ athletesHeading }}</h3>
+    <section [attr.aria-label]="copy.athletes">
+      <h3>{{ copy.athletes }}</h3>
       <ul>
         @for (row of appearances(); track row.id) {
         <li>
-          <span>{{ appearanceLabel(row) }}</span>
-          ·
-          <span>{{ row.sportSlug }}</span>
-          ·
-          <span>{{ row.opponentLabel }}</span>
-          ·
-          <span>{{ row.status }}</span>
+          {{ row.opponentLabel }} · {{ row.sportSlug }} · {{ row.creatorKind }} · {{
+          row.startsAt.slice(11, 16) }}
         </li>
         } @empty {
-        <li>{{ emptyList }}</li>
+        <li>{{ copy.emptyList }}</li>
         }
       </ul>
     </section>
 
-    <section class="pocetna-list" [attr.aria-label]="postsHeading">
-      <h3>{{ postsHeading }}</h3>
+    <section [attr.aria-label]="copy.posts">
+      <h3>{{ copy.posts }}</h3>
       <ul>
         @for (slot of visiblePosts(); track slot.id) {
         <li>
           <button cshUiButton type="button" variant="outline" (click)="openDrawer(slot)">
-            {{ slot.clockTime }} · {{ slidesLabel }} {{ slot.slideOrder.length }} · {{ slot.status
+            {{ slot.clockTime }} · {{ copy.slides }} {{ slot.slideOrder.length }} · {{ slot.status
             }}
           </button>
         </li>
         } @empty {
-        <li>{{ emptyList }}</li>
+        <li>{{ copy.emptyList }}</li>
         }
       </ul>
     </section>

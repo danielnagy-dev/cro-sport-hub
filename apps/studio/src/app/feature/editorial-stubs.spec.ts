@@ -6,7 +6,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of } from 'rxjs'
 import { expect } from 'vite-plus/test'
 import { appConfig } from '../app.config'
-import { appearancesPath, sampleAppearance } from '../core/appearances-api'
+import { appearancesPath } from '../core/appearances-api'
 import { authInterceptor, TOKEN_STORE, type TokenStore } from '../core/auth'
 import { t } from '../core/messages'
 import {
@@ -88,7 +88,7 @@ describe('editorial stubs', () => {
     const planned = { ...samplePublishSlot, status: 'planned' as const }
     http.expectOne(publishSlotsNextPath).flush(planned)
     http.expectOne(`${publishSlotsPath}?day=${day}`).flush([planned])
-    http.expectOne(`${appearancesPath}?day=${day}&sportSlug=tennis`).flush([sampleAppearance])
+    http.expectOne(`${appearancesPath}?day=${day}&sportSlug=tennis`).flush([])
     await fixture.whenStable()
     fixture.detectChanges()
     const root = fixture.nativeElement as HTMLElement

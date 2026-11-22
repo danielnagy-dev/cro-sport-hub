@@ -47,12 +47,9 @@ function memoryStore(token: string | null): TokenStore {
 function settle(http: HttpTestingController): void {
   for (const request of http.match(() => true)) {
     if (request.cancelled) continue
-    const url = request.request.urlWithParams
-    if (url.includes('/publish-slots/next')) {
-      request.flush('No upcoming publish slot', { status: 404, statusText: 'Not Found' })
-      continue
-    }
-    request.flush([])
+    if (request.request.urlWithParams.includes('/publish-slots/next')) {
+      request.flush('none', { status: 404, statusText: 'Not Found' })
+    } else request.flush([])
   }
 }
 
@@ -77,21 +74,6 @@ async function boot(
   return { router, http, fixture }
 }
 
-async function navigateAndSettle(
-  router: Router,
-  http: HttpTestingController,
-  fixture: ComponentFixture<App>,
-  path: string,
-): Promise<void> {
-  await router.navigateByUrl(path)
-  fixture.detectChanges()
-  await fixture.whenStable()
-  settle(http)
-  fixture.detectChanges()
-  await fixture.whenStable()
-  settle(http)
-}
-
 describe('studioRoutes', () => {
   afterEach(() => {
     const http = TestBed.inject(HttpTestingController)
@@ -102,7 +84,10 @@ describe('studioRoutes', () => {
   it('keeps each editor path on that feature', async () => {
     const { router, http, fixture } = await boot(editorToken())
     for (const path of editorPaths) {
-      await navigateAndSettle(router, http, fixture, path)
+      await router.navigateByUrl(path)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      settle(http)
       expect(router.url).toBe(path)
     }
   })
@@ -115,7 +100,10 @@ describe('studioRoutes', () => {
       ['/objave', 'Objave'],
       ['/postavke', 'Postavke'],
     ] as const) {
-      await navigateAndSettle(router, http, fixture, path)
+      await router.navigateByUrl(path)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      settle(http)
       expect(router.url).toBe(path)
       const root = fixture.nativeElement as HTMLElement
       expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading)
@@ -124,7 +112,10 @@ describe('studioRoutes', () => {
 
   it('redirects / to Početna for a signed-in editor', async () => {
     const { router, http, fixture } = await boot(editorToken())
-    await navigateAndSettle(router, http, fixture, '/')
+    await router.navigateByUrl('/')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    settle(http)
     expect(router.url).toBe('/pocetna')
     const root = fixture.nativeElement as HTMLElement
     expect(root.querySelector('h2')?.textContent?.trim()).toBe('Početna')
@@ -132,27 +123,34 @@ describe('studioRoutes', () => {
 
   it('opens login for a guest', async () => {
     const guest = await boot(null)
-    await navigateAndSettle(guest.router, guest.http, guest.fixture, '/login')
+    await guest.router.navigateByUrl('/login')
+    settle(guest.http)
     expect(guest.router.url).toBe('/login')
-    await navigateAndSettle(guest.router, guest.http, guest.fixture, '/sportasi')
+    await guest.router.navigateByUrl('/sportasi')
+    settle(guest.http)
     expect(guest.router.url).toBe('/login')
-    await navigateAndSettle(guest.router, guest.http, guest.fixture, '/admin/competitions')
+    await guest.router.navigateByUrl('/admin/competitions')
+    settle(guest.http)
     expect(guest.router.url).toBe('/login')
   })
 
   it('sends an unknown path home for an editor', async () => {
     const { router, http, fixture } = await boot(editorToken())
-    await navigateAndSettle(router, http, fixture, '/missing')
+    await router.navigateByUrl('/missing')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    settle(http)
     expect(router.url).toBe('/pocetna')
     await router.navigateByUrl('/matches')
     fixture.detectChanges()
     await fixture.whenStable()
     http.expectOne(editorMatchesPath).flush({ items: [], limit: 20, offset: 0, total: 0 })
+    settle(http)
+    expect(document.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
+    await router.navigateByUrl('/admin/competitions')
     fixture.detectChanges()
     await fixture.whenStable()
     settle(http)
-    expect(document.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
-    await navigateAndSettle(router, http, fixture, '/admin/competitions')
     expect(router.url).toBe('/pocetna?admin=1')
   })
 })
