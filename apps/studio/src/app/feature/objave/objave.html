@@ -1,16 +1,90 @@
 <div class="shell">
-  <app-studio-section-header [skipLabel]="skipLabel" />
+  <app-studio-section-header [skipLabel]="copy.skip" />
 
   <main id="content" class="home-main" tabindex="-1">
-    <h2>{{ title }}</h2>
+    <h2>{{ copy.title }}</h2>
     <csh-ui-filter-bar
       [dayLabel]="dayLabel()"
       [sport]="sport"
       [athlete]="athlete"
-      [status]="status"
+      [status]="filterBarStatus()"
       (previousDay)="onPreviousDay()"
       (nextDay)="onNextDay()"
     />
-    <p class="home-lead">{{ lead }}</p>
+    <p class="home-lead">{{ copy.lead }}</p>
+
+    <div class="matches-filters">
+      <label>
+        {{ copy.statusFilter }}
+        <select
+          [attr.aria-label]="copy.statusFilter"
+          [value]="statusFilter()"
+          (change)="onStatusFilter($event)"
+        >
+          <option value="all">{{ copy.statusAll }}</option>
+          @for (status of statuses; track status) {
+          <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <section class="matches-filters" [attr.aria-label]="copy.calendar">
+      @for (chip of weekChips(); track chip.iso) {
+      <button
+        type="button"
+        [attr.aria-pressed]="chip.selected"
+        [attr.aria-label]="chip.iso + (chip.glance ? ' ' + chip.glance : '')"
+        (click)="selectDay(chip.iso)"
+      >
+        <span>{{ chip.label }}</span>
+        @if (chip.kit; as kit) {
+        <csh-ui-status-pill [status]="kit">{{ chip.glance }}</csh-ui-status-pill>
+        }
+      </button>
+      }
+    </section>
+
+    @if (loadStatus() === 'loading') {
+    <p role="status">{{ copy.loading }}</p>
+    } @else if (loadStatus() === 'error') {
+    <p role="alert">{{ copy.loadError }}</p>
+    } @else if (slots().length === 0) {
+    <p role="status">{{ copy.empty }}</p>
+    } @else {
+    <table class="matches-table" [attr.aria-label]="copy.list">
+      <thead>
+        <tr>
+          <th scope="col">{{ copy.colTime }}</th>
+          <th scope="col">{{ copy.colStatus }}</th>
+          <th scope="col">{{ copy.colSlides }}</th>
+          <th scope="col">{{ copy.open }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (slot of slots(); track slot.id) {
+        <tr>
+          <td>{{ slot.clockTime }}</td>
+          <td>
+            <csh-ui-status-pill [status]="kitStatus(slot.status)"
+              >{{ slot.status }}</csh-ui-status-pill
+            >
+          </td>
+          <td>{{ slot.slideOrder.length }}</td>
+          <td>
+            <button type="button" (click)="openSlot(slot)">{{ copy.open }}</button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
   </main>
 </div>
+
+<csh-publish-slot-drawer
+  [open]="drawerOpen()"
+  [slot]="selectedSlot()"
+  (closed)="closeDrawer()"
+  (approved)="onApproved($event)"
+/>

@@ -3,7 +3,7 @@
  *
  * Naming: `<surface>.<role>` with kebab segments
  * (`nav.pocetna`, `chrome.log-out`, `sportasi.lead`).
- * Surfaces: `nav`, `chrome`, empty-screen ids, `postavke`, `publish-drawer`, `shell-home`.
+ * Surfaces: `nav`, `chrome`, empty-screen ids, `objave`, `postavke`, `publish-drawer`, `shell-home`.
  * Stable string ids — do not rename casually; a later locale file uses the same keys.
  */
 export const MESSAGE_KEYS = [
@@ -32,6 +32,17 @@ export const MESSAGE_KEYS = [
   'objave.skip',
   'objave.title',
   'objave.lead',
+  'objave.loading',
+  'objave.load-error',
+  'objave.empty',
+  'objave.status-filter',
+  'objave.status-all',
+  'objave.calendar',
+  'objave.list',
+  'objave.col-time',
+  'objave.col-status',
+  'objave.col-slides',
+  'objave.open',
   'postavke.skip',
   'postavke.title',
   'postavke.lead',
