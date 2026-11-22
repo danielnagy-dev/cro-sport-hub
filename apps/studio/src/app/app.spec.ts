@@ -36,7 +36,7 @@ describe('Shell home', () => {
     sessionStorage.clear()
   })
 
-  it('shows Matches and New gallery for an editor, not Admin', async () => {
+  it('shows Matches and New gallery shortcuts for an editor, not Admin', async () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [
@@ -58,15 +58,14 @@ describe('Shell home', () => {
 
     expect(root.querySelector('h1')?.textContent).toContain('Studio')
     expect(root.textContent).toContain('Cro Sport Hub')
-    expect(root.textContent).toContain('Home')
-    const adminLinks = root.querySelectorAll('a[href="/admin/competitions"]')
-    expect(adminLinks.length).toBe(0)
-    const matchesLinks = root.querySelectorAll('a[href="/matches"]')
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Home')
+    expect(root.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
+    const matchesLinks = root.querySelectorAll('main a[href="/matches"]')
     expect(matchesLinks.length).toBeGreaterThanOrEqual(1)
-    expect(root.querySelector('a[href="/galleries/new"]')).toBeInstanceOf(HTMLAnchorElement)
+    expect(root.querySelector('main a[href="/galleries/new"]')).toBeInstanceOf(HTMLAnchorElement)
   })
 
-  it('shows Admin links for an admin', async () => {
+  it('shows an Admin shortcut for an admin in the home body only', async () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [
@@ -85,7 +84,8 @@ describe('Shell home', () => {
     const fixture = TestBed.createComponent(Shell)
     await fixture.whenStable()
     const root = fixture.nativeElement as HTMLElement
-    expect(root.querySelectorAll('a[href="/admin/competitions"]').length).toBe(2)
+    expect(root.querySelectorAll('nav.shell-nav a[href="/admin/competitions"]').length).toBe(0)
+    expect(root.querySelectorAll('main a[href="/admin/competitions"]').length).toBe(1)
   })
 
   it('shows the admin-only message after an editor hits admin routes', async () => {

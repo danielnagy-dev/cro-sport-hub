@@ -161,7 +161,7 @@ describe('MatchesPage', () => {
     await harness.fixture.whenStable()
   })
 
-  it('shows Admin in the header when the session is admin', async () => {
+  it('keeps the editorial header nav for an admin session', async () => {
     TestBed.inject(TOKEN_STORE).write(bearer('admin', Math.floor(Date.now() / 1000) + 3600))
     const fixture = TestBed.createComponent(MatchesPage)
     fixture.detectChanges()
@@ -169,9 +169,11 @@ describe('MatchesPage', () => {
     const root = fixture.nativeElement as HTMLElement
     http.expectOne(editorMatchesPath).flush(page([]))
     await fixture.whenStable()
-    expect(root.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeInstanceOf(
-      HTMLAnchorElement,
+    const labels = [...root.querySelectorAll('nav.shell-nav a')].map((link) =>
+      link.textContent?.trim(),
     )
+    expect(labels).toEqual(['Početna', 'Sportaši', 'Objave', 'Postavke'])
+    expect(root.querySelector('nav.shell-nav a[href="/admin/competitions"]')).toBeNull()
   })
 
   it('does not show Admin in the header for an editor session', async () => {

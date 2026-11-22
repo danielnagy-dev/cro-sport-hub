@@ -1,11 +1,7 @@
 import type { Routes } from '@angular/router'
 
 export const studioRoutes: Routes = [
-  {
-    path: '',
-    loadChildren: () =>
-      import('./feature/editor/editor.routes').then((module) => module.editorRoutes),
-  },
+  { path: '', pathMatch: 'full', redirectTo: 'pocetna' },
   {
     path: '',
     loadChildren: () => import('./feature/admin/admin.routes').then((module) => module.adminRoutes),
@@ -34,12 +30,32 @@ export const studioRoutes: Routes = [
   {
     path: '',
     loadChildren: () =>
+      import('./feature/objave/objave.routes').then((module) => module.objaveRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./feature/pocetna/pocetna.routes').then((module) => module.pocetnaRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./feature/postavke/postavke.routes').then((module) => module.postavkeRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
       import('./feature/review/review.routes').then((module) => module.reviewRoutes),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./feature/sportasi/sportasi.routes').then((module) => module.sportasiRoutes),
   },
   {
     path: '',
     loadChildren: () =>
       import('./feature/tennis-form/tennis-form.routes').then((module) => module.tennisFormRoutes),
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'pocetna' },
 ]
