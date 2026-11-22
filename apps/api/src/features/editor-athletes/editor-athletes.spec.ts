@@ -6,7 +6,7 @@ import { SignJWT } from 'jose'
 import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { CatalogError, openCatalog } from '../../catalog/catalog.js'
 import { type CatalogDb } from '../../catalog/errors.js'
-import { seedCatalog } from '../../catalog/seed.js'
+import { seedBasketballAthletes, seedCatalog } from '../../catalog/seed.js'
 import * as schema from '../../catalog/schema.js'
 import { CATALOG_OPENER, type CatalogOpener } from '../../catalog/catalog.module.js'
 import { EditorAuthGuard, JWT_SECRET } from '../../auth/role.guard.js'
@@ -41,7 +41,10 @@ describe('editor athletes helpers', () => {
     expect(
       (await listEditorAthletes(rows, { sport: 'tennis', q: 'Player B' })).map((r) => r.id),
     ).toEqual(['sample-player-b'])
-    expect(await listEditorAthletes(rows, { sport: 'basketball', q: 'NoSuchHooper' })).toEqual([])
+    expect((await listEditorAthletes(rows, { sport: 'basketball' })).map((r) => r.id)).toEqual(
+      seedBasketballAthletes.map((a) => a.id),
+    )
+    expect(await listEditorAthletes(rows, { sport: 'basketball', q: 'no-such' })).toEqual([])
 
     const created = await createAthlete(rows, {
       id: 'sample-hooper',
