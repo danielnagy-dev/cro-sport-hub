@@ -9,7 +9,7 @@ You are the project manager for one pull request. You do not write feature code 
 
 ## Size
 
-Target 300 changed lines (corrected estimate). Split before the diff reaches 500 (corrected). Count insertions plus deletions from `git diff --numstat origin/main`. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
+Target 300 changed lines (corrected estimate). Split before the diff reaches 500 (corrected). Count insertions plus deletions from `git diff --numstat origin/main`. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md`, `.agents/skills/LICENSE-mattpocock-skills`, and `.agents/skills/LICENSE-modern-web-guidance`. Record the count in the PR. Say when a lockfile bump is the rest of the diff.
 
 A ticket is not `ready-for-agent` until it records a size estimate. Count code and tests the way this section counts a diff. Multiply the raw estimate by ~1.4 for a corrected estimate (recent tickets ran 35–45% over; e.g. 340→458). Record raw and corrected, or corrected alone. A corrected estimate over 400 means split the item before marking any slice ready. A one-shot format of the whole tree stays one pull request. Splitting it leaves two styles. That ticket says the corrected count passes 400 and remains one slice.
 

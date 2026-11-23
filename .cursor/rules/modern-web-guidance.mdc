@@ -1,0 +1,14 @@
+---
+description: Modern web platform guidance (Google Chrome modern-web-guidance)
+alwaysApply: true
+---
+
+# Modern web guidance
+
+At the **start** of every HTML/CSS, client-side JavaScript, Angular (`apps/studio`), or Next.js (`apps/web`) task, read `.agents/skills/modern-web-guidance/SKILL.md` and run:
+
+```sh
+npx -y modern-web-guidance@latest search "<topic>" --skill-version 2026_11_10-47b4c80e
+```
+
+Use a 2–5 word action-oriented query for one UI or platform capability. Prefer `pnpm exec pnpx modern-web-guidance@latest …` when pnpm is available (`pnpx` does not use `-y`). Follow `retrieve` and the skill workflow before ad-hoc patterns or new UI dependencies.
