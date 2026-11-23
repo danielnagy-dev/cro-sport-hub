@@ -13,4 +13,4 @@ National-team schedule for seeded Croatian teams (`croatia-football`, `croatia-b
 
 #### Driving it with verify
 
-- `vp run verify:web --route /reprezentacija` — `main` with heading `Reprezentacija` and past/current/upcoming sections.
+- `vp run verify:web --route /reprezentacija` — `main` with heading `Reprezentacija`. Buckets need the API; unavailable copy still renders when it is down. `vp run web#test` covers filled buckets.
