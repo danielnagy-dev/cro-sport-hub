@@ -16,12 +16,13 @@ Run `vp` from the repository root. Library declaration emit uses the catalog com
 
 Run these from the repository root, after `pnpm install`. When `vp` or `vpx` is not on `PATH`, prefix the command with `pnpm exec`. CI (`.github/workflows/ci.yml`, job `ci`) runs `format-check`, `lint`, `typecheck`, `test`, and `build` in that order, plus `tools/guards/pr-size.ts` on pull requests. Which of those a docs-only change skips: `.cursor/skills/develop/SKILL.md`.
 
-Cloud Agent environments that use `.cursor/environment.json` run `bash .cursor/install-cloud-agent.sh` on `install`. That aligns the default `node` with `.node-version` (nvm when the base image is older), runs `pnpm install --frozen-lockfile`, and runs `pnpm exec playwright install chromium --with-deps`. Login shells prepend `/usr/local/bin` to `PATH` so `pnpm exec vp` matches `verify:doctor` (see `.cursor/skills/verify/SKILL.md`).
+Cloud Agent environments that use `.cursor/environment.json` run `bash .cursor/install-cloud-agent.sh` on `install`. That aligns the default `node` with `.node-version` (nvm when the base image is older), runs `pnpm install --frozen-lockfile`, runs `pnpm exec playwright install chromium --with-deps`, and caches the pinned `chrome-devtools-mcp` package from `.cursor/mcp.json`. Login shells prepend `/usr/local/bin` to `PATH` so `pnpm exec vp` matches `verify:doctor` (see `.cursor/skills/verify/SKILL.md`).
 
 - `vp fmt` and `vp run format-check` — oxfmt, root `fmt` in `vite.config.ts`. Style: `CODING_STANDARDS.md`.
 - `vp run lint` — Oxlint, then `tools/guards/check.ts` and `tools/guards/file-size.ts`. `vp run guards` is those guards with the cache off.
 - One package's tests: `vp run <dir>#test`. `<dir>` is the package directory: `api`, `studio`, `web`, `ui`, `shared-types`, `slide-generator`. The task is in that package's `vite.config.ts`.
 - `vp run verify:<target>` — `.cursor/skills/verify/SKILL.md` for `api`, `studio`, `web`, and `ui`. Evidence is `artifacts/verify/<target>/<timestamp>/` (`summary.md`, screenshots, `report.json`).
+- Web and studio console and network: start the app, open the page with the `chrome-devtools` server in `.cursor/mcp.json`, and fail the check on a console error or a failed request. For a UI-heavy change, record a performance trace. Steps: `.cursor/skills/verify/SKILL.md` (Chrome DevTools).
 - `vpx tools/guards/check.ts --pr-body <file>` checks the pull request description.
 
 ## Hard rules
