@@ -4,19 +4,17 @@
 | --- | ------ | ---------------------- | ----------------------------------------------------- | ------------- |
 | web | live   | `/tennis`, `/football` | `vp run verify:web --route /tennis --route /football` | plan item 18b |
 
-Each sport page server-renders published matches for that sport only. The shared header links to `/tennis` and `/football` with the labels `tennis` and `football`. Both pages reuse the home results list: one `MatchCard` per item, `No published results.` when the page is empty, and `Results are unavailable.` when the fetch fails. The heading inside `main` stays `Cro Sport Hub`. Document titles and descriptions name the sport. Open Graph and Twitter summary metadata include the sport path (`/tennis` or `/football`) and standard tags; there is no Open Graph image.
+Each sport page server-renders published matches for that sport only. The public header no longer links here (`web.shell`); routes remain until hub removal. Both pages reuse the home results list: one `MatchCard` per item, `No published results.` when the page is empty, and `Results are unavailable.` when the fetch fails. The heading inside `main` stays `Cro Sport Hub`. Document titles and descriptions name the sport. Open Graph and Twitter summary metadata include the sport path (`/tennis` or `/football`) and standard tags; there is no Open Graph image.
 
 #### Sub-features
 
 - `web.sport-tennis` calls `GET /api/matches/tennis` and shows tennis cards only.
 - `web.sport-football` calls `GET /api/matches/football` and shows football cards only.
-- `web.sport-nav` exposes the header links to both routes.
 - `web.sport-athlete-links` lists athletes for that sport with links to `/athletes/<slug>` when `GET /api/athletes?sport=` succeeds.
 
 #### How to get to it (user POV)
 
-- Open `http://localhost:3000/tennis` or `http://localhost:3000/football`.
-- From any page, choose `tennis` or `football` in the header.
+- Open `http://localhost:3000/tennis` or `http://localhost:3000/football` directly (no header link).
 
 #### Driving it with verify
 

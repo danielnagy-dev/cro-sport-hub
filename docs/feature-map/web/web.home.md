@@ -4,20 +4,19 @@
 | --- | ------ | ------------------------ | ---------------------------------------------------------------------------------- | ------------- |
 | web | live   | `http://localhost:3000/` | `vp run verify:web`; local visitor walk `vp run verify:visitor` (needs API + seed) | plan item 18a |
 
-The public home page lists the latest published tennis and football results. It keeps the skip link, the header link back to `/`, and the heading `Cro Sport Hub` inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. Open Graph and Twitter summary metadata use the public site origin with `og:title`, `og:description`, `og:type` (`website`), `og:url`, and `og:site_name`. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
+The public home page lists the latest published tennis and football results. Shared chrome (skip link, brand link to `/`, Croatian **Početna / Sportaši / Reprezentacija** nav) lives in `web.shell`. The heading `Cro Sport Hub` stays inside `main`. The server calls `GET /api/matches` and renders one `MatchCard` per item, in the API order. The document title and description name tennis and football results. Open Graph and Twitter summary metadata use the public site origin with `og:title`, `og:description`, `og:type` (`website`), `og:url`, and `og:site_name`. There is no Open Graph image. This replaces the plan 17 placeholder (`web.home-placeholder`).
 
 #### Sub-features
 
 - `web.home-heading` renders the heading inside `main`. `vp run verify:web` proves it, including when the API is down.
-- `web.home-skip` offers a skip link to `#content`.
 - `web.home-results` renders Sample Player A, Sample Player B, Sample Home, Sample Away, and the football goals, in the fixture order. That proof is the web unit test.
 - `web.home-empty` shows `No published results.` when `items` is empty. The heading stays.
 - `web.home-unavailable` shows `Results are unavailable.` when the fetch fails. The page does not throw.
 
 #### How to get to it (user POV)
 
-- Open `http://localhost:3000/`.
-- The header link returns to this page. Sport pages are `/tennis` and `/football` (see `web.sport`).
+- Open `http://localhost:3000/`, or choose **Početna** in the header.
+- Header IA and skip link: `web.shell`. Legacy hub routes `/tennis` and `/football` still exist (`web.sport`) but are not linked from the header.
 
 #### Driving it with verify
 
