@@ -52,7 +52,7 @@ Football remains the first template. Tennis and basketball MVP templates are lat
 
 ### Round grouping
 
-A round is the list heading: competition, round label, and date. Players in one round share that heading and keep their own fixtures. One appearance in a round is a player slide. Two to four are one list. A fifth starts another list. The leftover stays a list, because it is the same round and not a featured player. Four rows is the round-13 limit that stays above the footer at 1.15× list zoom on a 1080×1350 slide. There is no cover slide.
+A round is the list heading: competition, round label, and date. Players in one round share that heading and keep their own fixtures. One appearance in a round is a player slide. Two to four are one list. A fifth starts another list. The leftover stays a list, because it is the same round and not a featured player. Four rows is the round-13 limit that stays above the footer at 1.15× list zoom on a 1080×1350 slide. There is no cover slide. A caption passed into the template is already escaped.
 
 ## Consequences
 
