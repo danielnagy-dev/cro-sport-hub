@@ -5,6 +5,10 @@ import {
   athletesBySportPath,
   footballMatchesPath,
   matchesPath,
+  nationalTeamSchedulePath,
+  publicAthletePath,
+  publicAthletesBySportPath,
+  publicDayAppearancesPath,
   sportsPath,
   tennisMatchesPath,
 } from '../lib/api-client'
@@ -67,6 +71,40 @@ const publishedPage = {
   limit: 20,
   offset: 0,
   total: 1,
+}
+
+const dayAppearance = {
+  id: 'appearance-sample-football-nt',
+  sportSlug: 'football' as const,
+  competitionId: 'comp-sample-league',
+  nationalTeam: {
+    id: 'nt-croatia-football',
+    slug: 'croatia-football',
+    name: 'Sample Croatia Football',
+  },
+  opponentLabel: 'Sample Neighbours',
+  startsAt: '2026-11-12T19:45:00+00:00',
+  status: 'completed' as const,
+  result: { score: '1-0' },
+}
+const publicAthleteProfile = {
+  slug: 'karlo-brkic',
+  name: 'Karlo Brkić',
+  sport: 'football' as const,
+  country: 'HR',
+  history: [dayAppearance],
+  upcoming: [] as (typeof dayAppearance)[],
+}
+const schedule = {
+  team: {
+    id: 'nt-croatia-football',
+    slug: 'croatia-football',
+    name: 'Sample Croatia Football',
+    sportSlug: 'football' as const,
+  },
+  past: [dayAppearance],
+  current: [] as (typeof dayAppearance)[],
+  upcoming: [] as (typeof dayAppearance)[],
 }
 
 function routes(bodies: Record<string, { status?: number; body: unknown }>) {
@@ -136,5 +174,30 @@ test('parses athlete profile and sport name lists', async () => {
   expect(calls.map((call) => call.url)).toEqual([
     'http://localhost:3001/api/athletes/karlo-brkic',
     'http://localhost:3001/api/athletes?sport=tennis',
+  ])
+})
+
+test('parses public-editorial day, athletes, profile, and schedule paths', async () => {
+  const dayPath = publicDayAppearancesPath('2026-11-12')
+  const athletesPathPublic = publicAthletesBySportPath('football')
+  const profilePath = publicAthletePath('karlo-brkic')
+  const schedulePath = nationalTeamSchedulePath('croatia-football')
+  const { fetchImpl, calls } = routes({
+    [dayPath]: { body: [dayAppearance] },
+    [athletesPathPublic]: { body: athleteNames },
+    [profilePath]: { body: publicAthleteProfile },
+    [schedulePath]: { body: schedule },
+  })
+  const api = createApiClient({ fetch: fetchImpl, baseUrl: 'http://localhost:3001' })
+
+  await expect(api.dayAppearances('2026-11-12')).resolves.toEqual([dayAppearance])
+  await expect(api.publicAthletes('football')).resolves.toEqual(athleteNames)
+  await expect(api.publicAthlete('karlo-brkic')).resolves.toEqual(publicAthleteProfile)
+  await expect(api.nationalTeamSchedule('croatia-football')).resolves.toEqual(schedule)
+  expect(calls.map((call) => call.url)).toEqual([
+    `http://localhost:3001${dayPath}`,
+    `http://localhost:3001${athletesPathPublic}`,
+    `http://localhost:3001${profilePath}`,
+    `http://localhost:3001${schedulePath}`,
   ])
 })

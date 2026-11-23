@@ -9,12 +9,24 @@ import {
   type Sport,
   type SportSlug,
 } from '@cro-sport-hub/shared-types'
+import {
+  nationalTeamScheduleSchema,
+  publicAppearanceListSchema,
+  publicAthleteIndexSchema,
+  publicAthleteProfileSchema,
+  type NationalTeamSchedule,
+  type PublicAppearance,
+  type PublicAthleteIndexItem,
+  type PublicAthleteProfile,
+} from './public-editorial-schemas'
 
 export const sportsPath = '/api/sports'
 export const matchesPath = '/api/matches'
 export const tennisMatchesPath = `${matchesPath}/tennis`
 export const footballMatchesPath = `${matchesPath}/football`
 export const athletesPath = '/api/athletes'
+export const publicAppearancesPath = '/api/public/appearances'
+export const publicAthletesPath = '/api/public/athletes'
 
 export function athletePath(slug: string): string {
   return `${athletesPath}/${slug}`
@@ -22,6 +34,23 @@ export function athletePath(slug: string): string {
 
 export function athletesBySportPath(sport: SportSlug): string {
   return `${athletesPath}?sport=${sport}`
+}
+
+export function publicDayAppearancesPath(day: string): string {
+  return `${publicAppearancesPath}?day=${day}`
+}
+
+export function publicAthletesBySportPath(sport: SportSlug): string {
+  return `${publicAthletesPath}?sport=${sport}`
+}
+
+export function publicAthletePath(slug: string): string {
+  return `${publicAthletesPath}/${slug}`
+}
+
+export function nationalTeamSchedulePath(slug: string, sport?: SportSlug): string {
+  const base = `/api/public/national-teams/${slug}/schedule`
+  return sport === undefined ? base : `${base}?sport=${sport}`
 }
 
 export class ApiClientError extends Error {
@@ -41,6 +70,10 @@ export type ApiClient = {
   matchesFootball: () => Promise<PublishedMatchPage>
   athlete: (slug: string) => Promise<PublicAthlete>
   athletesBySport: (sport: SportSlug) => Promise<AthleteName[]>
+  dayAppearances: (day: string) => Promise<PublicAppearance[]>
+  publicAthletes: (sport: SportSlug) => Promise<PublicAthleteIndexItem[]>
+  publicAthlete: (slug: string) => Promise<PublicAthleteProfile>
+  nationalTeamSchedule: (slug: string, sport?: SportSlug) => Promise<NationalTeamSchedule>
 }
 
 type ApiClientOptions = {
@@ -80,6 +113,18 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     },
     async athletesBySport(sport) {
       return athleteNameListSchema.parse(await read(athletesBySportPath(sport)))
+    },
+    async dayAppearances(day) {
+      return publicAppearanceListSchema.parse(await read(publicDayAppearancesPath(day)))
+    },
+    async publicAthletes(sport) {
+      return publicAthleteIndexSchema.parse(await read(publicAthletesBySportPath(sport)))
+    },
+    async publicAthlete(slug) {
+      return publicAthleteProfileSchema.parse(await read(publicAthletePath(slug)))
+    },
+    async nationalTeamSchedule(slug, sport) {
+      return nationalTeamScheduleSchema.parse(await read(nationalTeamSchedulePath(slug, sport)))
     },
   }
 }
