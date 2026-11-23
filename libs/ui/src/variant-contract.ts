@@ -1,8 +1,3 @@
-/**
- * Documented `data-*` variant attributes for upcoming kit primitives.
- * Studio Angular hosts and React primitives bind only these names and values.
- */
-
 export const KIT_DATA_ATTRIBUTES = {
   tone: 'data-tone',
   size: 'data-size',

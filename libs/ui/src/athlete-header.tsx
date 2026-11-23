@@ -10,7 +10,6 @@ export type AthleteHeaderProps = {
   position?: string
 }
 
-/** Page title for one athlete. The name is the heading. */
 export function AthleteHeader({ name, country, sport, birthYear, position }: AthleteHeaderProps) {
   return (
     <header className="csh-athlete-header">

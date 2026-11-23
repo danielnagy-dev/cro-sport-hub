@@ -8,7 +8,6 @@ type TennisCard = {
   playerB: string
   sets: readonly TennisSetScore[]
   retired?: boolean
-  /** Side that won. Omitted for a retirement that has no winner yet. */
   winner?: 'a' | 'b'
 }
 
@@ -31,11 +30,6 @@ function playerName(name: string, winner: boolean): ReactNode {
   )
 }
 
-/**
- * The third set number is the loser's tiebreak total. It is read with that
- * player, and the superscript is hidden from assistive tech so it is not
- * announced twice.
- */
 function gamesCell(set: TennisSetScore, side: 'a' | 'b'): ReactNode {
   const games = side === 'a' ? set[0] : set[1]
   const opponent = side === 'a' ? set[1] : set[0]
@@ -117,7 +111,6 @@ function FootballScoreline({ homeTeam, awayTeam, homeGoals, awayGoals }: Footbal
   )
 }
 
-/** Tennis set scoreboard or football score. Football has no winner. */
 export function MatchCard(props: MatchCardProps) {
   if (props.sport === 'tennis') return <TennisScoreboard {...props} />
   return <FootballScoreline {...props} />

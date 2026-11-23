@@ -4,8 +4,6 @@ const builtLibraries = {
   dependsOn: [{ task: 'build', from: 'dependencies' as const }],
 }
 
-// storybook-static is a directory entry, not only its children. `/**` does not
-// cover that entry, so a later build treated it as a new pack input.
 const ignoreGenerated = ['!dist/**', '!storybook-static', '!storybook-static/**']
 
 export default defineConfig({
@@ -32,7 +30,6 @@ export default defineConfig({
         ...builtLibraries,
         cache: {
           input: [{ auto: true }, ...ignoreGenerated],
-          // The stylesheet copy restores its own files. Pack must not snapshot them.
           output: ['dist/**', '!dist/tokens.css', '!dist/components.css'],
         },
       },

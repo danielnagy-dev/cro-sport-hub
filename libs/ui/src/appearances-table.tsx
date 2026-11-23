@@ -30,7 +30,6 @@ function cardLabel(yellowCards: number, redCard: boolean): string {
   return 'None'
 }
 
-/** One athlete's appearances, one row per match. */
 export function AppearancesTable({ athleteName, rows }: AppearancesTableProps) {
   if (rows.length === 0) {
     return (

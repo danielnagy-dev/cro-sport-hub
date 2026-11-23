@@ -28,7 +28,6 @@
   background: var(--csh-color-football);
 }
 
-/* Token colour lands with rewrite.B1 (#167); class is ready for SportSlug. */
 .csh-badge--basketball {
   background: var(--csh-color-basketball);
 }

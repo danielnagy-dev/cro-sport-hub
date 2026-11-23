@@ -1,9 +1,3 @@
-/*
- * Design tokens for the public site and the studio.
- * The studio imports this file. React components stay in this package.
- * Attribute selectors at the bottom document the kit variant contract.
- */
-
 @property --csh-color-canvas {
   syntax: '<color>';
   inherits: true;
@@ -123,7 +117,6 @@
   --csh-focus-ring-width: 2px;
 }
 
-/* Kit sample: attribute-driven variants for upcoming primitives (rewrite.B2). */
 .csh-kit {
   box-sizing: border-box;
   display: inline-flex;
