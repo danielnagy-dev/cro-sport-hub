@@ -85,11 +85,13 @@ export function proseComments(source: string): string[] {
   return found
 }
 
+function commentBody(raw: string): string {
+  if (raw.startsWith('//')) return raw.replace(/^\/+/, '')
+  return raw.replace(/^\/\*+/, '').replace(/\*\/$/, '')
+}
+
 function allowed(raw: string): boolean {
-  const body = raw
-    .replace(/^\/\//, '')
-    .replace(/^\/\*+/, '')
-    .replace(/\*\/$/, '')
+  const body = commentBody(raw)
     .split('\n')
     .map((line) => line.replace(/^\s*\*\s?/, '').trim())
     .filter((line) => line.length > 0)
@@ -99,10 +101,7 @@ function allowed(raw: string): boolean {
 }
 
 export function normalizeComment(raw: string): string {
-  return raw
-    .replace(/^\/\//, '')
-    .replace(/^\/\*+/, '')
-    .replace(/\*\/$/, '')
+  return commentBody(raw)
     .replace(/^\s*\*\s?/gm, '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -120,7 +119,9 @@ function walk(dir: string, files: string[]): void {
     if (entry.isSymbolicLink() || skipDirs.has(entry.name)) continue
     const path = join(dir, entry.name)
     if (entry.isDirectory()) walk(path, files)
-    else if (entry.isFile() && sourceExt.test(entry.name)) files.push(path)
+    else if (entry.isFile() && entry.name !== 'next-env.d.ts' && sourceExt.test(entry.name)) {
+      files.push(path)
+    }
   }
 }
 

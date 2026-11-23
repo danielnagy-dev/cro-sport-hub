@@ -7,6 +7,10 @@ import {
   readBaseline,
 } from './no-new-comments.ts'
 
+test('a triple-slash reference is a directive', () => {
+  expect(proseComments('/// <reference types="next" />\n')).toEqual([])
+})
+
 test('scanner ignores strings and keeps a comment after a quote in a regex', () => {
   const comments = proseComments(
     'const pattern = /[&<>"]/g\n/** after */\nconst url = "https://example.com"\n',
