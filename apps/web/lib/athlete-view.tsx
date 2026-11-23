@@ -11,7 +11,6 @@ function clubRange(spell: PublicClubSpell): string {
   return spell.to === undefined ? spell.from : `${spell.from} – ${spell.to}`
 }
 
-/** Athlete profile inside `main`. */
 export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
   return (
     <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
@@ -50,7 +49,6 @@ export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
   )
 }
 
-/** Shell and copy when the profile fetch failed but the slug was not missing. */
 export function AthleteUnavailableMain() {
   return (
     <main id="content" tabIndex={-1}>

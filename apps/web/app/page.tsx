@@ -4,13 +4,11 @@ import { createApiClient } from '../lib/api-client'
 import { ResultsMain } from '../lib/results-view'
 import { shareMetadata } from '../lib/site-metadata'
 
-/** Local API origin. The server calls it. The browser does not. */
 const RESULTS_API_ORIGIN = 'http://localhost:3001'
 
 const HOME_PAGE_TITLE = 'Tennis and football results · Cro Sport Hub'
 const HOME_PAGE_DESCRIPTION = 'Latest tennis and football results.'
 
-/** Render on each request so a down API is not baked into the build. */
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {

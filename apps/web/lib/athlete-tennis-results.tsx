@@ -12,7 +12,6 @@ function matchCardProps(athleteName: string, result: PublicTennisResult): MatchC
   }
 }
 
-/** Raw counts when the API attached stats. Percentages stay inside `TennisStats`. */
 function statCounts(result: PublicTennisResult): TennisStatCounts | null {
   if (result.percentages === null) return null
   return {
@@ -31,7 +30,6 @@ function statCounts(result: PublicTennisResult): TennisStatCounts | null {
   }
 }
 
-/** Published tennis matches for one athlete profile. Football profiles omit this block. */
 export function AthleteTennisResults({
   athleteName,
   results,

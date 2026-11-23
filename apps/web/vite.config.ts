@@ -4,7 +4,6 @@ const builtLibraries = {
   dependsOn: [{ task: 'build', from: 'dependencies' as const }],
 }
 
-// next build reads its previous output. Those files are outputs, not inputs.
 const nextCache = {
   input: [{ auto: true }, '!.next/**', '!next-env.d.ts', '!*.tsbuildinfo'],
   output: [{ auto: true }, '!*.tsbuildinfo'],

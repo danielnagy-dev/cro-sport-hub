@@ -8,7 +8,6 @@ const publicSports: SportSlug[] = ['tennis', 'football']
 
 export type AthletesBySport = ApiClient['athletesBySport']
 
-/** Pathnames for the public sitemap, in stable order. */
 export async function publicSitemapPaths(athletesBySport: AthletesBySport): Promise<string[]> {
   const paths: string[] = [...staticPublicPaths]
   for (const sport of publicSports) {
