@@ -12,5 +12,9 @@ export const hrMessages = {
   'sportasi.lead': 'Popis sportaša po sportu.',
   'sportasi.sports-aria': 'Sportovi',
   'reprezentacija.title': 'Reprezentacija',
-  'reprezentacija.lead': 'Raspored reprezentacije dolazi uskoro.',
+  'reprezentacija.lead': 'Raspored hrvatskih reprezentacija.',
+  'reprezentacija.sport-aria': 'Sport',
+  'reprezentacija.past': 'Prošli',
+  'reprezentacija.current': 'U tijeku',
+  'reprezentacija.upcoming': 'Nadolazeći',
 } satisfies MessageMap

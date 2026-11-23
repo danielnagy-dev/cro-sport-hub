@@ -19,6 +19,9 @@ test('returns HR chrome and stub copy', () => {
   expect(t('chrome.brand')).toBe('Cro Sport Hub')
   expect(t('sportasi.title')).toBe('Sportaši')
   expect(t('reprezentacija.title')).toBe('Reprezentacija')
+  expect(t('reprezentacija.past')).toBe('Prošli')
+  expect(t('reprezentacija.current')).toBe('U tijeku')
+  expect(t('reprezentacija.upcoming')).toBe('Nadolazeći')
 })
 
 test('throws on a missing key', () => {
