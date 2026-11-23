@@ -1,8 +1,3 @@
-/**
- * Local string unions mirroring `libs/ui/src/variant-contract.ts`.
- * Keep in sync by hand; do not import React or the `@cro-sport-hub/ui` JS barrel.
- */
-
 export const KIT_TONES = ['neutral', 'tennis', 'football', 'basketball'] as const
 export const KIT_SIZES = ['sm', 'md', 'lg'] as const
 export const KIT_VARIANTS = ['solid', 'soft', 'outline'] as const

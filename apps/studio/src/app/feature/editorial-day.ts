@@ -1,5 +1,3 @@
-/** Presentational day chrome for editorial stubs. No API; local signal only. */
-
 const DAY_LABEL_OPTIONS = {
   day: 'numeric',
   month: 'short',

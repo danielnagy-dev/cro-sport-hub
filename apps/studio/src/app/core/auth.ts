@@ -5,7 +5,6 @@ import { patchState, signalStore, withHooks, withMethods, withState } from '@ngr
 import { catchError, firstValueFrom, throwError } from 'rxjs'
 import { roleSchema, type Role } from '@cro-sport-hub/shared-types'
 
-/** JWT `exp` is seconds. The studio reads claims and does not check the signature. */
 export type Session = { token: string; id: string; role: Role; exp: number }
 export type SignInResult = 'ok' | 'invalid' | 'rejected'
 
