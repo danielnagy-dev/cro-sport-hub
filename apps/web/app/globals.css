@@ -33,14 +33,14 @@ body {
   color: var(--csh-color-on-accent);
 }
 
-.shell-sports {
+.shell-nav {
   display: flex;
   align-items: center;
   gap: var(--csh-space-3);
   margin-left: auto;
 }
 
-.shell-sport {
+.shell-nav-link {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
@@ -115,7 +115,7 @@ main p {
   outline-offset: 2px;
 }
 
-.shell-sport:focus-visible {
+.shell-nav-link:focus-visible {
   outline: 2px solid var(--csh-color-on-accent);
   outline-offset: 2px;
 }
