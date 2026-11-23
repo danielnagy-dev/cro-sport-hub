@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Prove a change works by running the real app and capturing evidence. Use before opening or updating any PR that touches apps/web, apps/studio, apps/api or libs/ui, and whenever asked to "verify", "smoke test", or "show proof". Drives the app through `vp run verify:<target>` and writes screenshots and a report to artifacts/verify/.
+description: Prove a change works by running the real app and capturing evidence. Use before opening or updating any PR that touches apps/web, apps/studio, apps/api or libs/ui, and whenever asked to "verify", "smoke test", or "show proof". Drives the app through `vp run verify:<target>` and writes screenshots and a report to artifacts/verify/. For web and studio, also use the chrome-devtools MCP server in `.cursor/mcp.json`.
 ---
 
 # Verify a change on the real app
@@ -61,11 +61,26 @@ Readiness timeout is 120 seconds, and 180 seconds for studio. Three HTTP 503s fr
 - A console error, a page error, a failed same-origin request, or a 5xx is a failure, even if the screenshot looks fine. A document status of 400 or above fails that check too.
 - If a precondition is missing (no Docker, no seed data yet), the run fails with the reason. Do not weaken the check to make it pass. Write the reason in the PR and in the feature's Gotchas in its id file under `docs/feature-map/`.
 
-## 5. Report in the PR
+## 5. Chrome DevTools (web and studio)
+
+`vp run verify:web` and `vp run verify:studio` save screenshots. They do not list console messages or network requests. For those, use the `chrome-devtools` MCP server in `.cursor/mcp.json` (`chrome-devtools-mcp@1.13.0`). It runs headless, with a temporary isolated profile, and reuses Playwright's Chrome for Testing via `.cursor/chrome-devtools-mcp.sh`. `.cursor/install-cloud-agent.sh` caches that package. CI does not start this server. The config has no secrets.
+
+Start the app from the repo root, then call the MCP tools:
+
+1. `vp run web#dev` (port 3000) or `vp run studio#dev` (port 4200). Open the page with `new_page`, or `navigate_page` when a page is already open. Web home is `http://localhost:3000/`. Studio login is `http://localhost:4200/login`. Add routes from the feature id file. The first page is often `about:blank`. Use the page id whose URL is the page you opened (the selected page).
+2. `list_console_messages` for that page id. A message of type `error` fails the check. `issue`, `info`, `log`, and `debug` do not. Dev servers log HMR, Vite, and Angular development mode.
+3. `list_network_requests` for that page id. A status of 0 or 400 or above fails the check, including the document request.
+4. For a UI-heavy change, call `performance_start_trace` on that same page with `reload` and `autoStop`. Record LCP and CLS in the PR. The server starts with `--no-performance-crux`, so the trace is not sent to CrUX.
+
+`take_screenshot` can save a PNG. Without MCP roots, file tools only write under the OS temp directory. Paste the console and network summary in the PR next to `summary.md`.
+
+`verify:api` does not use this server. Section 4 still applies to `vp run verify`. This section is the extra Chrome pass.
+
+## 6. Report in the PR
 
 Paste `summary.md` into the PR description under `## How it was tested` and/or `## Verification`, and attach the screenshots (cloud agents: as artifacts). List anything you could not verify and why. Never claim a route was verified through a different route.
 
-## 6. Keep the map honest
+## 7. Keep the map honest
 
 If the PR adds or changes something a user can reach (a route, an endpoint, a story, a button), update that feature's id file under `docs/feature-map/<area>/<id>.md` and leave the area pointer file alone, and if needed the target's default routes in `tools/verify/targets.ts`, in the same PR. A PR does not edit the index for a new id alone.
 
