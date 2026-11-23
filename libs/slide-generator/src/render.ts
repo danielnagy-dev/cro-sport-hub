@@ -12,7 +12,6 @@ import {
 
 const INSTALL_MSG = 'Playwright Chromium is not installed. Run: vp exec playwright install chromium'
 
-/** `undefined` when the Chromium binary from `vp exec playwright install chromium` is present. */
 export function footballRendererReason(): string | undefined {
   try {
     const executable = chromium.executablePath()
@@ -37,14 +36,12 @@ function fontUrl(file: string): string {
   return url
 }
 
-/** Embed bundled TTFs as data URLs so `page.setContent` HTML matches PNG render. Exposed for layout tests. */
 export function embedFontsInFootballHtml(html: string): string {
   return html
     .replace("url('../fonts/BigShouldersDisplay.ttf')", fontUrl('BigShouldersDisplay.ttf'))
     .replace("url('../fonts/Archivo.ttf')", fontUrl('Archivo.ttf'))
 }
 
-/** Empty input returns no bytes and does not launch a browser. */
 export async function renderFootballPngs(
   slides: readonly FootballSlide[],
   options?: FootballOptions,
@@ -75,10 +72,6 @@ export async function renderFootballPngs(
   }
 }
 
-/**
- * Rasterize ready HTML documents at 1080×1350. Used by tennis/basketball MVP
- * slides that do not embed the round-13 fonts. Empty input skips Chromium.
- */
 export async function renderHtmlPngs(htmlDocuments: readonly string[]): Promise<Uint8Array[]> {
   if (htmlDocuments.length === 0) return []
   const reason = footballRendererReason()

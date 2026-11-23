@@ -1,4 +1,3 @@
-/** Minified round-13 football slide styles inlined in `footballTemplate` HTML. */
 export const FOOTBALL_SLIDE_CSS =
   "@font-face{font-family:BS;src:url('../fonts/BigShouldersDisplay.ttf');font-weight:100 900}@font-face{font-family:AR;src:url('../fonts/Archivo.ttf');font-weight:100 900;font-stretch:62% 125%}" +
   '*{margin:0;padding:0;box-sizing:border-box}.s{position:relative;overflow:hidden;color:var(--fg);font-family:AR;background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 35%,var(--bg2) 100%)}.tex{position:absolute;inset:0;background:repeating-conic-gradient(var(--texture) 0 25%,transparent 0 50%) 0 0/24px 24px}.content{position:absolute;left:72px;right:72px;top:72px;bottom:184px}' +

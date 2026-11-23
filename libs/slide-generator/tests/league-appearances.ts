@@ -37,7 +37,6 @@ function appearance(
   }
 }
 
-/** Seed order for `match-sample-league`. */
 export const leagueAppearances: readonly AppearanceSlideInput[] = [
   appearance('Karlo Brkić', 'Sample Home', 'home', true, 90, 2, 0, 0, false, 'Forward'),
   appearance('Mateo Jurčić', 'Sample Home', 'home', true, 75, 0, 1, 1, false, 'Midfielder'),

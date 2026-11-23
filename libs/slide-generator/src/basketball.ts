@@ -6,7 +6,6 @@ const BASKETBALL_THEME = {
   accent: '#8c3412',
 } as const
 
-/** Text-forward basketball MVP slides (1080×1350). Placeholders until a design pass. */
 export function basketballSlides(rows: readonly MvpSlideRow[]): MvpSlideDocument[] {
   return mvpSlides(BASKETBALL_THEME, rows)
 }

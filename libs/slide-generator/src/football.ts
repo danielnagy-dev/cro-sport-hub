@@ -1,18 +1,11 @@
-/**
- * Round 13 interim football template. There is no cover slide.
- * Hero size is computed here. See ADR-003.
- * List passes are text ("84%" over "38/45"). There is no list donut.
- */
 import { injectCaption } from './caption.ts'
 import { FOOTBALL_SLIDE_CSS } from './football-slide-css.ts'
 export const slideWidth = 1080
 export const slideHeight = 1350
 export const designRound = '13-interim' as const
 
-/** Cap height / em, Big Shoulders Display weight 800, from the bundled face. */
 const CAP = 0.81
 const HERO_KEYS = ['goals', 'assists', 'saves', 'rating'] as const
-/** English card wording from catalog snapshots before #132. */
 const CARD_VALUE_LEGACY: Record<string, string> = {
   None: 'Bez kartona',
   Yellow: 'Žuti',
@@ -43,7 +36,6 @@ export type FootballPerson = {
   position?: string
   fixture: FootballFixture
   stats: readonly FootballStatInput[]
-  /** Stat key to force. `"none"` leaves the grid without a hero. */
   hero?: string
   lineup?: 'start' | 'sub'
 }
@@ -54,7 +46,6 @@ export type FootballSlide =
 export type FootballOptions = {
   colourway?: Colourway
   hero?: 'measured' | 'off'
-  /** Replaces the measured hero size. The round-13 size stays the handoff value. */
   heroFontPx?: number
   brand?: string
 }
@@ -65,7 +56,6 @@ export type FootballDocument = {
   colourway: Colourway
   designRound: typeof designRound
   heroes: readonly { key: string; fontPx: number }[]
-  /** 1 on a player slide. List zoom is the round-13 row table. */
   zoom: number
   html: string
 }
@@ -193,7 +183,6 @@ function pickHero(
   }, null)
 }
 
-/** Cap top of row 1 to the baseline of row 2, divided by the cap ratio. */
 function twoRow(
   value: number,
   valueLine: number,
@@ -256,8 +245,6 @@ function playerGrid(
   return `<div class="grid" style="grid-template-columns:1.3fr repeat(${cols},1fr)">${heroTile}${tiles.join('')}</div>`
 }
 
-/** Plain second-row baseline. A text pass in row 1 adds the 16px fraction stack.
- * The donut-only content-bottom fallback (114px) does not apply: the percent has a baseline. */
 function listHeroPx(row1Pass: boolean): number {
   const plain = twoRow(34, 1, 12, 1.1, 7, 9, 8)
   return row1Pass ? plain + 16 / CAP : plain

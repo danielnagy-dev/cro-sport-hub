@@ -1,8 +1,6 @@
 import { expect, test } from 'vite-plus/test'
 import { footballTemplate, type FootballPerson, type FootballSlide } from '../src/index.ts'
 
-// Colour literals are copied from design/football-r13/tokens.json.
-
 const karlo: FootballPerson = {
   name: 'Karlo Brkić',
   club: 'GNK Dinamo',
@@ -39,7 +37,6 @@ test('the example player slide uses the round-13 hero rule', () => {
     kind: 'player',
   })
   expect(doc.heroes.map((hero) => hero.key)).toEqual(['goals'])
-  // Token note for this slide: 278px. Chrome on the reference HTML reported 278.164.
   expect(Math.round(doc.heroes[0]?.fontPx ?? 0)).toBe(278)
   for (const bit of [
     'data-design="13-interim"',
@@ -54,7 +51,6 @@ test('the example player slide uses the round-13 hero rule', () => {
     'font:800 1em/.82',
   ])
     expect(doc.html).toContain(bit)
-  // The handoff's value face is 1em with line-height .82. twoRow measures that face.
   expect(doc.html).not.toContain('font:800 .82em/1')
 })
 
@@ -140,9 +136,6 @@ test('the example list slide uses text passes and the round-13 hero sizes', () =
     kind: 'list',
     zoom: 1.15,
   })
-  // Chrome 156 on html/02-list_alt-no-donut.html at 1080×1350.
-  // Filip's first row is taller by the 12px fraction, so his hero is 143.247.
-  // Leon and Bruno stay on the plain second-row baseline, 123.504.
   expect(doc.heroes.map((hero) => hero.key)).toEqual(['assists', 'goals', 'goals'])
   expect(doc.heroes[0]?.fontPx).toBeCloseTo(143.247, 0)
   expect(doc.heroes[1]?.fontPx).toBeCloseTo(123.504, 0)

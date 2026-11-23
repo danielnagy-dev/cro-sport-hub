@@ -1,13 +1,7 @@
 import type { FootballPerson, FootballSlide } from './football.ts'
 
-/** Round-13 hard limit: four player rows stay above the footer at 1.15× list zoom (1080×1350). */
 const LIST_LIMIT = 4
 
-/**
- * One tracked appearance in a round. A round is the list heading:
- * competition, round label, and date. Players in one round share that
- * heading and keep their own fixtures.
- */
 export type FootballEntry = {
   competition: string
   round: string
@@ -41,11 +35,6 @@ function listSlide(rows: readonly FootballEntry[]): FootballSlide {
   }
 }
 
-/**
- * A round of one appearance is a player slide. Two to four are one list.
- * A fifth starts another list. The leftover stays a list: it is the same
- * round, not a featured player. There is no cover slide.
- */
 export function footballSlides(entries: readonly FootballEntry[]): FootballSlide[] {
   const groups = new Map<string, FootballEntry[]>()
   const order: string[] = []

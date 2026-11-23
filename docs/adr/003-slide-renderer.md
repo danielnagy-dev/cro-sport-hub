@@ -50,6 +50,10 @@ function renderAppearancePngs(
 
 Football remains the first template. Tennis and basketball MVP templates are later Phase G slices. Expand–contract: add the appearance-payload seam, migrate in-package callers, leave gallery HTTP/ZIP routes until Phase H. Do not add a second renderer or a new runtime dependency family.
 
+### Round grouping
+
+A round is the list heading: competition, round label, and date. Players in one round share that heading and keep their own fixtures. One appearance in a round is a player slide. Two to four are one list. A fifth starts another list. The leftover stays a list, because it is the same round and not a featured player. Four rows is the round-13 limit that stays above the footer at 1.15× list zoom on a 1080×1350 slide. There is no cover slide. A caption passed into the template is already escaped.
+
 ## Consequences
 
 Callers pass one player slide. They do not pass a cover. The list slide uses the same HTML document and the same hero rule; it is the stacked change, because the formatted player template plus this ADR plus the handoff already sit at the line budget. The document's font URLs are relative to `design/football-r13/html/`, next to the vendored faces. The PNG item writes the HTML there, or rewrites the URLs, then screenshots it at 1080×1350. Revisit Satori only if it renders these variable-font weights and `font-stretch` and still matches the reference PNG.
