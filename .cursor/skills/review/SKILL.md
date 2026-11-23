@@ -28,7 +28,7 @@ git diff --stat origin/main...HEAD
 git log origin/main..HEAD --oneline
 ```
 
-Counted lines are insertions plus deletions in that numstat. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md` and `.agents/skills/LICENSE-mattpocock-skills`.
+Counted lines are insertions plus deletions in that numstat. Exclude `pnpm-lock.yaml`, `skills-lock.json`, and every file under a skill folder named in `skills-lock.json`. Count `.agents/skills/THIRD_PARTY.md`, `.agents/skills/LICENSE-mattpocock-skills`, and `.agents/skills/LICENSE-modern-web-guidance`.
 
 When the count is greater than 400, or Daniel asks for a deep review, go to **Deep review** and skip **Pass**. Otherwise read `git diff origin/main...HEAD` once.
 

@@ -49,3 +49,12 @@ corepack enable
 corepack prepare pnpm@12.15.0 --activate
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium --with-deps
+
+# Cache the pinned chrome-devtools-mcp package named in .cursor/mcp.json.
+# The launcher reuses Playwright's Chrome for Testing and does not download another browser.
+MCP_SPEC="$(grep -oE 'chrome-devtools-mcp@[0-9]+\.[0-9]+\.[0-9]+' "$ROOT/.cursor/mcp.json" | head -n 1)"
+if [ -z "$MCP_SPEC" ]; then
+  echo "install-cloud-agent: .cursor/mcp.json must pin chrome-devtools-mcp@<major.minor.patch>" >&2
+  exit 1
+fi
+bash "$ROOT/.cursor/chrome-devtools-mcp.sh" "$MCP_SPEC" --help >/dev/null
