@@ -10,10 +10,6 @@ import { footballSlides, type FootballEntry } from './slides.ts'
 import { tennisSlides } from './tennis.ts'
 import { renderFootballPngs, renderHtmlPngs } from './render.ts'
 
-/**
- * One ordered appearance row the football template needs.
- * Sport-specific fields refine later (tennis / basketball).
- */
 export type AppearanceSlideInput = {
   athleteName: string
   athletePosition?: string
@@ -36,7 +32,6 @@ export type AppearanceSlideInput = {
 
 export type AppearanceSportSlug = 'football' | 'tennis' | 'basketball'
 
-/** Ordered appearance rows plus the sport that selects the template. */
 export type AppearanceSlidePayload = {
   sportSlug: AppearanceSportSlug
   appearances: readonly AppearanceSlideInput[]
@@ -44,7 +39,6 @@ export type AppearanceSlidePayload = {
 
 export type FootballAppearanceDocument = FootballDocument & { sportSlug: 'football' }
 
-/** HTML slide documents from `slidesFromAppearance`. */
 export type AppearanceSlideDocument = FootballAppearanceDocument | MvpSlideDocument
 
 function cardText(yellowCards: number, redCard: boolean): string {
@@ -90,7 +84,6 @@ function mapAppearance(row: AppearanceSlideInput): FootballEntry {
   }
 }
 
-/** Maps appearance rows to football slide entries (gallery and appearance seams). */
 export function appearanceEntries(appearances: readonly AppearanceSlideInput[]): FootballEntry[] {
   return appearances.map(mapAppearance)
 }
@@ -105,10 +98,6 @@ function footballDocuments(
   }))
 }
 
-/**
- * HTML documents (and measured heroes/zoom for football) for N slides from an
- * appearance payload. Callers do not construct a gallery entity.
- */
 export function slidesFromAppearance(
   payload: AppearanceSlidePayload,
   options?: FootballOptions,
@@ -127,10 +116,6 @@ export function slidesFromAppearance(
   }
 }
 
-/**
- * PNG bytes for those slides. An empty payload returns no bytes and does not
- * launch Chromium.
- */
 export async function renderAppearancePngs(
   payload: AppearanceSlidePayload,
   options?: FootballOptions,

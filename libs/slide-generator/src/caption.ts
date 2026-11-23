@@ -1,4 +1,3 @@
-/** Inserts one caption line before the slide footer. `caption` must already be escaped. */
 export function injectCaption(html: string, caption: string | undefined): string {
   if (caption === undefined) return html
   return html.replace(

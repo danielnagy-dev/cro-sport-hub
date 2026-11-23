@@ -6,7 +6,6 @@ const TENNIS_THEME = {
   accent: '#0c5c38',
 } as const
 
-/** Text-forward tennis MVP slides (1080×1350). Placeholders until a design pass. */
 export function tennisSlides(rows: readonly MvpSlideRow[]): MvpSlideDocument[] {
   return mvpSlides(TENNIS_THEME, rows)
 }
