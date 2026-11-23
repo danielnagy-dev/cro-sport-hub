@@ -1,17 +1,12 @@
-import {
-  packageId as sharedTypesPackageId,
-  type PublicAthlete,
-  type PublicClubSpell,
-} from '@cro-sport-hub/shared-types'
+import { packageId as sharedTypesPackageId } from '@cro-sport-hub/shared-types'
 import { AthleteHeader, packageId as uiPackageId } from '@cro-sport-hub/ui'
-import { AthleteFootballResults } from './athlete-football-results'
-import { AthleteTennisResults } from './athlete-tennis-results'
+import { AthleteHistorySection, AthleteUpcomingSection } from './athlete-football-results'
+import type { PublicAthleteProfile } from './public-editorial-schemas'
 
-function clubRange(spell: PublicClubSpell): string {
-  return spell.to === undefined ? spell.from : `${spell.from} – ${spell.to}`
-}
+export const CLUB_EMPTY_COPY = 'No club.'
+export const ATHLETE_UNAVAILABLE_COPY = 'This athlete is unavailable.'
 
-export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
+export function AthleteProfileMain({ profile }: { profile: PublicAthleteProfile }) {
   return (
     <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
       <AthleteHeader
@@ -21,30 +16,12 @@ export function AthleteProfileMain({ profile }: { profile: PublicAthlete }) {
         birthYear={profile.birthYear}
         position={profile.position}
       />
-      <section className="athlete-clubs" aria-labelledby="athlete-clubs-heading">
-        <h2 id="athlete-clubs-heading">Clubs</h2>
-        {profile.clubs.length === 0 ? (
-          <p>No clubs.</p>
-        ) : (
-          <ul className="athlete-clubs__list">
-            {profile.clubs.map((club) => (
-              <li key={`${club.name}-${club.from}`}>
-                {club.name} ({clubRange(club)})
-              </li>
-            ))}
-          </ul>
-        )}
+      <section className="athlete-clubs" aria-labelledby="athlete-club-heading">
+        <h2 id="athlete-club-heading">Club</h2>
+        <p>{profile.clubName ?? CLUB_EMPTY_COPY}</p>
       </section>
-      {profile.sport === 'tennis' ? (
-        <AthleteTennisResults athleteName={profile.name} results={profile.results} />
-      ) : null}
-      {profile.sport === 'football' ? (
-        <AthleteFootballResults
-          athleteSlug={profile.slug}
-          athleteName={profile.name}
-          results={profile.results}
-        />
-      ) : null}
+      <AthleteHistorySection items={profile.history} />
+      <AthleteUpcomingSection items={profile.upcoming} />
     </main>
   )
 }
@@ -53,7 +30,7 @@ export function AthleteUnavailableMain() {
   return (
     <main id="content" tabIndex={-1}>
       <h1>Cro Sport Hub</h1>
-      <p>This athlete is unavailable.</p>
+      <p>{ATHLETE_UNAVAILABLE_COPY}</p>
     </main>
   )
 }

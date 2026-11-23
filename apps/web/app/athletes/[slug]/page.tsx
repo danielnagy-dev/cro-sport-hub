@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 type PageProps = { params: Promise<{ slug: string }> }
 
 async function loadProfile(slug: string) {
-  return createApiClient({ baseUrl: PROFILE_API_ORIGIN }).athlete(slug)
+  return createApiClient({ baseUrl: PROFILE_API_ORIGIN }).publicAthlete(slug)
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const profile = await loadProfile(slug)
     const title = `${profile.name} · Cro Sport Hub`
-    const description = `Published results and profile for ${profile.name}.`
+    const description = `Appearances and profile for ${profile.name}.`
     return {
       title,
       description,
