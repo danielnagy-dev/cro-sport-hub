@@ -57,6 +57,8 @@ Vendored copies in `.agents/skills/` are read-only. On conflict, `AGENTS.md`, `d
 
 Vendored text that says `Call the Skill tool with X` means read and follow `.agents/skills/X/SKILL.md`. `grill-me` is `grilling`. `tdd` is `codebase-design`.
 
+**Modern web guidance** — At the start of every HTML/CSS, client-side JavaScript, Angular (`apps/studio`), or Next.js (`apps/web`) task, read `.agents/skills/modern-web-guidance/SKILL.md` and run `npx -y modern-web-guidance@latest search "<topic>" --skill-version 2026_11_10-47b4c80e` (prefer `pnpm exec pnpx modern-web-guidance@latest …` when pnpm is available). Follow the skill’s search/retrieve workflow before ad-hoc UI patterns or new front-end dependencies.
+
 The issue body, or the pull request `## Problem` when there is no issue, is the spec (`docs/agents/issue-tracker.md`). ADRs: `docs/agents/domain.md`.
 
 `next dev` writes `apps/web/AGENTS.md` with a `<!-- BEGIN:nextjs-agent-rules -->` block when it detects a coding agent. Commit that file as is.
