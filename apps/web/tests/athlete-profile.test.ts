@@ -1,11 +1,25 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { tennisPercentages } from '@cro-sport-hub/shared-types'
 import { expect, test } from 'vite-plus/test'
 import AthletePage, { generateMetadata } from '../app/athletes/[slug]/page'
-import { athletePath } from '../lib/api-client'
-import { AthleteUnavailableMain } from '../lib/athlete-view'
+import { publicAthletePath } from '../lib/api-client'
+import {
+  ATHLETE_UNAVAILABLE_COPY,
+  AthleteUnavailableMain,
+  CLUB_EMPTY_COPY,
+} from '../lib/athlete-view'
+import { HISTORY_EMPTY_COPY, UPCOMING_EMPTY_COPY } from '../lib/athlete-football-results'
 import { SITE_NAME } from '../lib/site-metadata'
+
+const historyRow = {
+  id: 'appearance-sample-football',
+  sportSlug: 'football' as const,
+  competitionId: 'comp-sample-league',
+  opponentLabel: 'Sample Away',
+  startsAt: '2026-10-19T15:00:00+00:00',
+  status: 'completed' as const,
+  result: { score: '2-1' },
+}
 
 const karlo = {
   slug: 'karlo-brkic',
@@ -13,40 +27,18 @@ const karlo = {
   sport: 'football' as const,
   country: 'HR',
   position: 'Forward',
-  clubs: [
-    { name: 'Sample Home', from: '2025-07-01' },
-    { name: 'Sample Town', from: '2023-07-01', to: '2025-06-30' },
-  ],
-  results: [
+  clubName: 'Sample Home',
+  history: [historyRow],
+  upcoming: [
     {
-      id: 'match-sample-league',
-      competition: 'Sample League',
-      date: '2026-10-19',
-      round: 'Matchday 8',
-      club: 'Sample Home',
-      started: true,
-      minutes: 90,
-      goals: 2,
-      assists: 0,
-      yellowCards: 0,
-      redCard: false,
+      id: 'appearance-sample-upcoming',
+      sportSlug: 'football' as const,
+      competitionId: 'comp-sample-league',
+      opponentLabel: 'Sample Rivals',
+      startsAt: '2026-12-01T18:00:00+00:00',
+      status: 'scheduled' as const,
     },
   ],
-}
-
-const playerAStats = {
-  aces: 3,
-  doubleFaults: 1,
-  firstServeIn: 6,
-  firstServeTotal: 10,
-  firstServePointsWon: 4,
-  secondServePointsWon: 2,
-  secondServeTotal: 4,
-  breakPointsSaved: 1,
-  breakPointsFaced: 2,
-  breakPointsWon: 2,
-  breakPointsTotal: 4,
-  totalPointsWon: 20,
 }
 
 const playerA = {
@@ -54,49 +46,38 @@ const playerA = {
   name: 'Sample Player A',
   sport: 'tennis' as const,
   country: 'HR',
-  clubs: [],
-  results: [
+  history: [
     {
-      id: 'match-sample-final',
-      competition: 'Sample Cup',
-      date: '2026-10-18',
-      round: 'Final',
-      opponent: 'Sample Player B',
-      winner: 'athlete' as const,
-      bestOf: 3,
-      score: [
-        [6, 4],
-        [7, 6, 5],
-      ],
-      retired: false,
-      ...playerAStats,
-      percentages: tennisPercentages(playerAStats),
+      id: 'appearance-sample-tennis',
+      sportSlug: 'tennis' as const,
+      competitionId: 'comp-sample-cup',
+      opponentLabel: 'Sample Player B',
+      startsAt: '2026-10-18T12:00:00+00:00',
+      status: 'completed' as const,
+      result: { sets: '6-4 7-6' },
     },
   ],
+  upcoming: [] as typeof karlo.upcoming,
 }
 
-const nullPctStats = {
-  aces: 0,
-  doubleFaults: 0,
-  firstServeIn: 0,
-  firstServeTotal: 4,
-  firstServePointsWon: 0,
-  secondServePointsWon: 0,
-  secondServeTotal: 4,
-  breakPointsSaved: 0,
-  breakPointsFaced: 0,
-  breakPointsWon: 0,
-  breakPointsTotal: 0,
-  totalPointsWon: 0,
-}
-
-function statsRow(html: string, label: string): string {
-  const found = html
-    .split('<tr>')
-    .slice(1)
-    .find((part) => part.includes(`>${label}`))
-  if (found === undefined) throw new Error(`Missing row ${label}`)
-  return found
+const basketballer = {
+  slug: 'sample-hooper',
+  name: 'Sample Hooper',
+  sport: 'basketball' as const,
+  country: 'HR',
+  clubName: 'Sample Club',
+  history: [
+    {
+      id: 'appearance-sample-bball',
+      sportSlug: 'basketball' as const,
+      competitionId: 'comp-sample-bball',
+      opponentLabel: 'Sample Visitors',
+      startsAt: '2026-09-01T17:00:00+00:00',
+      status: 'completed' as const,
+      result: { score: '88-81' },
+    },
+  ],
+  upcoming: [] as typeof karlo.upcoming,
 }
 
 function json(body: unknown, status = 200): Response {
@@ -123,137 +104,68 @@ async function renderAthlete(
   }
 }
 
-test('tennis profile shows the header, no clubs, and the published final', async () => {
-  const { html, urls } = await renderAthlete('sample-player-a', (path) => {
-    if (path === athletePath('sample-player-a')) return json(playerA)
+test('football profile shows the header, club, history, and upcoming', async () => {
+  const { html, urls } = await renderAthlete('karlo-brkic', (path) => {
+    if (path === publicAthletePath('karlo-brkic')) return json(karlo)
     throw new Error(`unexpected ${path}`)
   })
 
-  expect(urls).toEqual([`http://localhost:3001${athletePath('sample-player-a')}`])
-  expect(html).toContain('Sample Player A')
-  expect(html).toContain('No clubs.')
-  expect(html).toContain('Sample Player A versus Sample Player B')
-  expect(html).toContain('Winner')
-  expect(html).toContain('<sup aria-hidden="true">5</sup>')
-  expect(html).not.toContain('Quarterfinal')
-  expect(html).not.toContain('club-sample')
-  expect(html).not.toContain('sample-home')
-  expect(statsRow(html, 'First serve')).toContain('>60%</td>')
-})
-
-test('a null tennis percentage reads as no attempts on the athlete page', async () => {
-  const profile = {
-    ...playerA,
-    results: [
-      {
-        id: 'match-null-pct',
-        competition: 'Sample Cup',
-        date: '2026-10-10',
-        round: 'R1',
-        opponent: 'Sample Player B',
-        winner: 'athlete' as const,
-        bestOf: 3,
-        score: [
-          [6, 4],
-          [6, 3],
-        ],
-        retired: false,
-        ...nullPctStats,
-        percentages: tennisPercentages(nullPctStats),
-      },
-    ],
-  }
-  const { html } = await renderAthlete('sample-player-a', (path) => {
-    if (path === athletePath('sample-player-a')) return json(profile)
-    throw new Error(`unexpected ${path}`)
-  })
-
-  expect(statsRow(html, 'First-serve points won')).toContain('>No attempts</td>')
-  expect(statsRow(html, 'First-serve points won')).not.toContain('>0%</td>')
-})
-
-test('football profile lists club names without ids or a tennis scoreboard', async () => {
-  const { html } = await renderAthlete('karlo-brkic', (path) => {
-    if (path === athletePath('karlo-brkic')) return json(karlo)
-    throw new Error(`unexpected ${path}`)
-  })
-
+  expect(urls).toEqual([`http://localhost:3001${publicAthletePath('karlo-brkic')}`])
   expect(html).toContain('Karlo Brkić')
   expect(html).toContain('Sample Home')
-  expect(html).toContain('Sample Town')
-  expect(html).toContain('2025-07-01')
-  expect(html).toContain('2023-07-01')
-  expect(html).not.toContain('club-sample')
-  expect(html).not.toContain('sample-town')
+  expect(html).toContain('Sample Away')
+  expect(html).toContain('Sample Rivals')
+  expect(html).toContain('2-1')
+  expect(html).not.toContain('versus')
+  expect(html).not.toContain('appearances</caption>')
+})
+
+test('tennis profile lists editorial rows without scoreboard chrome', async () => {
+  const { html } = await renderAthlete('sample-player-a', (path) => {
+    if (path === publicAthletePath('sample-player-a')) return json(playerA)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(html).toContain('Sample Player A')
+  expect(html).toContain(CLUB_EMPTY_COPY)
+  expect(html).toContain('Sample Player B')
+  expect(html).toContain(UPCOMING_EMPTY_COPY)
+  expect(html).not.toContain('versus')
+  expect(html).not.toContain('First serve')
+})
+
+test('basketball profile renders without tennis-only chrome', async () => {
+  const { html } = await renderAthlete('sample-hooper', (path) => {
+    if (path === publicAthletePath('sample-hooper')) return json(basketballer)
+    throw new Error(`unexpected ${path}`)
+  })
+
+  expect(html).toContain('Sample Hooper')
+  expect(html).toContain('Basketball')
+  expect(html).toContain('88-81')
   expect(html).not.toContain('versus')
   expect(html).not.toContain('Set 1')
-  expect(html).toContain('<caption>Karlo Brkić appearances</caption>')
-  expect(html).toContain('Sample League')
-  expect(html).toContain('Matchday 8')
-  expect(html).toContain('scope="row">2026-10-19</th>')
-  expect(html).toContain('>90</td>')
-  expect(html).toContain('>2</td>')
 })
 
-const filip = {
-  slug: 'filip-saric',
-  name: 'Filip Šarić',
-  sport: 'football' as const,
-  country: 'HR',
-  position: 'Right back',
-  clubs: [{ name: 'Sample Home', from: '2025-07-01' }],
-  results: [
-    {
-      id: 'match-sample-league',
-      competition: 'Sample League',
-      date: '2026-10-19',
-      round: 'Matchday 8',
-      club: 'Sample Home',
-      started: true,
-      minutes: 90,
-      goals: 0,
-      assists: 0,
-      yellowCards: 2,
-      redCard: true,
-    },
-  ],
-}
-
-test('football profile maps two yellows to Second yellow in appearances', async () => {
-  const { html } = await renderAthlete('filip-saric', (path) => {
-    if (path === athletePath('filip-saric')) return json(filip)
-    throw new Error(`unexpected ${path}`)
-  })
-
-  expect(html).toContain('>Second yellow</td>')
-})
-
-test('tennis profile does not render the football appearances table', async () => {
-  const { html } = await renderAthlete('sample-player-a', (path) => {
-    if (path === athletePath('sample-player-a')) return json(playerA)
-    throw new Error(`unexpected ${path}`)
-  })
-
-  expect(html).not.toContain('appearances</caption>')
-  expect(html).not.toContain('No appearances')
-})
-
-test('football profile with no published appearances shows the empty copy', async () => {
-  const emptyKarlo = { ...karlo, results: [] as typeof karlo.results }
+test('football profile with no appearances shows the empty copy', async () => {
+  const empty = {
+    ...karlo,
+    history: [] as typeof karlo.history,
+    upcoming: [] as typeof karlo.upcoming,
+  }
   const { html } = await renderAthlete('karlo-brkic', (path) => {
-    if (path === athletePath('karlo-brkic')) return json(emptyKarlo)
+    if (path === publicAthletePath('karlo-brkic')) return json(empty)
     throw new Error(`unexpected ${path}`)
   })
 
-  expect(html).toContain('Karlo Brkić appearances')
-  expect(html).toContain('No appearances')
-  expect(html).not.toContain('<caption>')
+  expect(html).toContain(HISTORY_EMPTY_COPY)
+  expect(html).toContain(UPCOMING_EMPTY_COPY)
 })
 
 test('an unknown slug triggers not found', async () => {
   await expect(
     renderAthlete('nobody', (path) => {
-      if (path === athletePath('nobody')) return json({ message: 'Unknown athlete' }, 404)
+      if (path === publicAthletePath('nobody')) return json({ message: 'Unknown athlete' }, 404)
       throw new Error(`unexpected ${path}`)
     }),
   ).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK;404/)
@@ -264,7 +176,7 @@ test('a failed profile fetch renders unavailable copy', async () => {
     throw new Error('down')
   })
 
-  expect(html).toContain('This athlete is unavailable.')
+  expect(html).toContain(ATHLETE_UNAVAILABLE_COPY)
 })
 
 test('unavailable main keeps the shared heading', () => {
@@ -280,10 +192,10 @@ test('document title is the athlete name', async () => {
       generateMetadata({ params: Promise.resolve({ slug: 'sample-player-a' }) }),
     ).resolves.toEqual({
       title: 'Sample Player A · Cro Sport Hub',
-      description: 'Published results and profile for Sample Player A.',
+      description: 'Appearances and profile for Sample Player A.',
       openGraph: {
         title: 'Sample Player A · Cro Sport Hub',
-        description: 'Published results and profile for Sample Player A.',
+        description: 'Appearances and profile for Sample Player A.',
         type: 'website',
         url: 'http://localhost:3000/athletes/sample-player-a',
         siteName: SITE_NAME,
@@ -291,7 +203,7 @@ test('document title is the athlete name', async () => {
       twitter: {
         card: 'summary',
         title: 'Sample Player A · Cro Sport Hub',
-        description: 'Published results and profile for Sample Player A.',
+        description: 'Appearances and profile for Sample Player A.',
       },
     })
   } finally {

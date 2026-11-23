@@ -1,15 +1,11 @@
-# web.sportasi: Sportaši index (stub)
+# web.sportasi: Sportaši index
 
 | App | Status | Entry point (user POV) | Verify                                | Since |
 | --- | ------ | ---------------------- | ------------------------------------- | ----- |
-| web | stub   | `/sportasi`            | `vp run verify:web --route /sportasi` | #347  |
+| web | live   | `/sportasi`            | `vp run verify:web --route /sportasi` | #349  |
 
-Empty App Router stub so the public nav target returns HTTP 200 with the shared shell. Index content lands in a sibling ticket.
+Public athlete index by sport. `GET /api/public/athletes?sport=` (tennis / football / basketball; default tennis). Rows link to `/athletes/<slug>`. Empty and unavailable copy keep the site shell. No match hubs, MatchCard, or posts/drafts. Sport filter is link navigation (`?sport=`), not ARIA tabs.
 
-#### How to get to it (user POV)
+Sub-features: sport filter (basketball selectable); athlete list links; empty and unavailable states.
 
-- Choose **Sportaši** in the header, or open `http://localhost:3000/sportasi`.
-
-#### Driving it with verify
-
-- `vp run verify:web --route /sportasi` — `main` with heading `Sportaši`.
+Verify: `vp run verify:web --route /sportasi`; `vp run web#test` for query sport and href seams. Open `/sportasi` or **Sportaši** in the header.

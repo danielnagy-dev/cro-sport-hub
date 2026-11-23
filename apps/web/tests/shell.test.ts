@@ -29,13 +29,21 @@ test('shell shows Croatian IA nav without tennis or football hubs', () => {
   expect(html).not.toContain('Skip to content')
 })
 
-test('sportasi stub renders inside the shell', () => {
-  const sportasi = renderToStaticMarkup(createElement(SiteShell, null, createElement(SportasiPage)))
-  expect(sportasi).toContain('<main id="content" tabindex="-1"')
-  expect(sportasi).toContain(`<h1>${t('sportasi.title')}</h1>`)
-  expect(sportasi).toContain(t('sportasi.lead'))
-  expect(sportasi).toContain(`>${t('nav.sportasi')}</a>`)
-  expect(sportasi).toContain(`>${t('nav.reprezentacija')}</a>`)
+test('sportasi page renders inside the shell', async () => {
+  const previous = globalThis.fetch
+  globalThis.fetch = async () => new Response('[]', { status: 200 })
+  try {
+    const sportasi = renderToStaticMarkup(
+      createElement(SiteShell, null, await SportasiPage({ searchParams: Promise.resolve({}) })),
+    )
+    expect(sportasi).toContain('<main id="content" tabindex="-1"')
+    expect(sportasi).toContain(`<h1>${t('sportasi.title')}</h1>`)
+    expect(sportasi).toContain(t('sportasi.lead'))
+    expect(sportasi).toContain(`>${t('nav.sportasi')}</a>`)
+    expect(sportasi).toContain(`>${t('nav.reprezentacija')}</a>`)
+  } finally {
+    globalThis.fetch = previous
+  }
 })
 
 test('the shell styles use the shared UI tokens', () => {

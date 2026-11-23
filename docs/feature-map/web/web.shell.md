@@ -24,4 +24,4 @@ Shared App Router chrome: skip link to `#content`, brand home link to `/`, and C
 #### Gotchas
 
 - Document `lang` is `hr`. Runtime stays HR-only; catalog keys are shaped for a later second locale.
-- Stub pages at `/sportasi` and `/reprezentacija` fill content in sibling tickets.
+- `/sportasi` content is `web.sportasi`. `/reprezentacija` content lands in a sibling ticket.

@@ -95,6 +95,41 @@ main p {
   color: inherit;
 }
 
+.sport-filter {
+  margin: var(--csh-space-4) 0;
+}
+
+.sport-filter__list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--csh-space-3);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.sport-filter__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--csh-space-2) 0;
+  border-bottom: 3px solid transparent;
+  color: var(--csh-color-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sport-filter__link[aria-current='page'] {
+  border-bottom-color: var(--csh-color-text);
+  color: var(--csh-color-text);
+}
+
+.sport-filter__link:focus-visible {
+  outline: 2px solid var(--csh-color-focus);
+  outline-offset: 2px;
+}
+
 .athlete-clubs h2 {
   margin: var(--csh-space-4) 0 var(--csh-space-2);
   font-size: 1.125rem;

@@ -1,29 +1,8 @@
-import { type PublicFootballResult } from '@cro-sport-hub/shared-types'
-import { type AppearanceLine } from '@cro-sport-hub/ui'
+import { appearanceResultLabel } from './day-list'
+import type { PublicAppearance } from './public-editorial-schemas'
 
-export function footballAppearanceLines(
-  athleteId: string,
-  results: readonly PublicFootballResult[],
-): AppearanceLine[] {
-  return results.map((result) => ({
-    appearance: {
-      matchId: result.id,
-      athleteId,
-      teamId: 'profile-club',
-      started: result.started,
-      minutes: result.minutes,
-      goals: result.goals,
-      assists: result.assists,
-      yellowCards: result.yellowCards,
-      redCard: result.redCard,
-    },
-    competition: {
-      name: result.competition,
-      season: result.date.slice(0, 4),
-    },
-    match: {
-      date: result.date,
-      round: result.round,
-    },
-  }))
+export function appearanceWhen(appearance: PublicAppearance): string {
+  return appearance.startsAt.slice(0, 10)
 }
+
+export { appearanceResultLabel as appearanceScoreLabel }
