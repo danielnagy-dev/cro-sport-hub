@@ -8,7 +8,6 @@ import { tennisPercentagesSchema, tennisStatCountsSchema } from './tennis-stats.
 const nameSchema = textSchema(80)
 const competitionSchema = textSchema(120)
 
-/** One club spell on a public profile. The club id stays in the catalog. */
 export const publicClubSpellSchema = z.strictObject({
   name: nameSchema,
   from: isoDateSchema,
@@ -36,7 +35,6 @@ const tennisResultListed = {
   retired: z.boolean(),
 }
 
-/** One published tennis match on an athlete profile. Percentages are computed, not stored. */
 export const publicTennisResultSchema = z.union([
   z.strictObject({ ...tennisResultListed, percentages: z.null() }),
   z.strictObject({
@@ -60,10 +58,8 @@ const footballResultFields = {
   redCard: z.boolean(),
 }
 
-/** One published football appearance on an athlete profile. Counts match the stored appearance row. */
 export const publicFootballResultSchema = z.strictObject(footballResultFields)
 
-/** Each sport adds published match rows in `results`. */
 export const publicAthleteSchema = z.discriminatedUnion('sport', [
   z.strictObject({
     ...profileFields,
@@ -77,7 +73,6 @@ export const publicAthleteSchema = z.discriminatedUnion('sport', [
   }),
 ])
 
-/** A name in `GET /api/athletes?sport=`. */
 export const athleteNameSchema = z.strictObject({
   slug: slugSchema,
   name: nameSchema,

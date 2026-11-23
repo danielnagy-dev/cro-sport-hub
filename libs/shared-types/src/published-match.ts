@@ -11,7 +11,6 @@ const listed = {
   round: roundSchema,
 }
 
-/** A published result for the public list. Clubs are names, not team rows. */
 export const publishedMatchSchema = z.discriminatedUnion('sport', [
   z.strictObject({
     ...listed,
@@ -40,7 +39,6 @@ export const publishedMatchPageSchema = z.strictObject({
   total: z.int().min(0),
 })
 
-/** `limit` defaults to 20 at the handler. Offset defaults to 0. */
 export const matchListQuerySchema = z.strictObject({
   limit: z.coerce.number().int().min(1).max(50),
   offset: z.coerce.number().int().min(0),

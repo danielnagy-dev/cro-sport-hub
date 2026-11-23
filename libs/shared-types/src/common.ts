@@ -1,12 +1,10 @@
 import { z } from 'zod'
 
-/** A cross-field failure. `path` is the form field to highlight. */
 export type FieldIssue = {
   path: readonly string[]
   message: string
 }
 
-/** 1–64 characters. UUIDs fit; so do short seed ids such as `player-one`. */
 export const idSchema = z
   .string()
   .regex(
@@ -29,7 +27,6 @@ export function textSchema(maxLength: number) {
     .regex(textWithoutEdges, 'Expected text without surrounding whitespace')
 }
 
-/** ISO 3166-1 alpha-2 shape. The full country list is not checked here. */
 export const countryCodeSchema = z
   .string()
   .regex(/^[A-Z]{2}$/, 'Expected an ISO 3166-1 alpha-2 country code')
@@ -39,7 +36,6 @@ export const httpsUrlSchema = z
   .max(500)
   .refine((value) => value.startsWith('https://'), 'Expected an https URL')
 
-/** Calendar date, year 1950–2100. Match days and club spells use this. */
 export const isoDateSchema = z.iso.date().superRefine((value, ctx) => {
   const year = Number(value.slice(0, 4))
   if (year < 1950 || year > 2100) {
@@ -47,13 +43,8 @@ export const isoDateSchema = z.iso.date().superRefine((value, ctx) => {
   }
 })
 
-/** UTC or an explicit offset, with seconds. */
 export const timestampSchema = z.iso.datetime({ offset: true })
 
-/**
- * `2026` or `2026/27`. The two-digit year must be the next year.
- * `1999/00` is the cross-century case.
- */
 export const seasonSchema = z.string().superRefine((value, ctx) => {
   const singleYear = /^(\d{4})$/.exec(value)
   if (singleYear?.[1] !== undefined) {
