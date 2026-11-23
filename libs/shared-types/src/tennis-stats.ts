@@ -1,15 +1,6 @@
 import { z } from 'zod'
 import { type FieldIssue, idSchema } from './common.ts'
 
-/**
- * Raw counts for one player in one tennis match. Percentages are not
- * fields: `tennisPercentages` computes them.
- *
- * `secondServeTotal` is the first serves that missed. Points won on the
- * second serve cannot exceed the second serves that landed in
- * (`secondServeTotal - doubleFaults`). Aces are serve points won, so they
- * cannot exceed `firstServePointsWon + secondServePointsWon`.
- */
 const MAX_COUNT = 500
 
 const countSchema = z.int().nonnegative().max(MAX_COUNT)
@@ -87,8 +78,6 @@ export function tennisStatIssues(stats: TennisStatCounts): readonly FieldIssue[]
     })
   }
 
-  // secondServePointsWon is non-negative, so this also implies
-  // doubleFaults <= secondServeTotal. That check is not repeated.
   if (stats.secondServePointsWon + stats.doubleFaults > stats.secondServeTotal) {
     issues.push({
       path: ['doubleFaults'],
@@ -132,15 +121,6 @@ export function tennisStatIssues(stats: TennisStatCounts): readonly FieldIssue[]
   return issues
 }
 
-/**
- * Percentages on a 0–100 scale, not rounded. `null` means the denominator
- * was 0, which is different from 0%.
- *
- * First-serve points won uses first serves in as the denominator.
- * Second-serve points won uses every second-serve point, including double
- * faults. Break points converted uses break points played (`breakPointsWon`
- * / `breakPointsTotal`), not break points faced.
- */
 export type TennisPercentages = {
   firstServePct: number | null
   firstServePointsWonPct: number | null

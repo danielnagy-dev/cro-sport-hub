@@ -1,23 +1,6 @@
 import { z } from 'zod'
 import { idSchema } from './common.ts'
 
-/**
- * Sets are stored from player A's side: `[gamesA, gamesB]` or
- * `[gamesA, gamesB, tiebreakPointsLost]`.
- *
- * The third number is only present on a 7-6 set. It is the loser's
- * tiebreak total. The winner's tiebreak total is not stored. A 7-point
- * tiebreak and a 10-point final-set tiebreak both end 7-6 in games, so
- * the same number covers both.
- *
- * v1 accepts standard sets only: 6-0 through 6-4, 7-5, or 7-6 with a
- * tiebreak.
- *
- * `bestOf` is not on the spec's field list. It is required here because
- * a 2-0 score is a finished best-of-3, while a 3-0 score is a finished
- * best-of-5, and a 2-1 score is not finished in a best-of-5.
- */
-/** Games in a standard set. Match tiebreaks (for example 10-8) and advantage final sets are intentionally out of scope for v1. */
 const MAX_GAMES = 7
 const MAX_TIEBREAK_POINTS = 99
 

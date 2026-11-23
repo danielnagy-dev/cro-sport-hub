@@ -1,9 +1,6 @@
 import { z } from 'zod'
 import { type FieldIssue, idSchema } from './common.ts'
 
-/**
- * Both sides are clubs. A draw is a valid score. There is no winner column.
- */
 export const footballMatchSchema = z
   .strictObject({
     matchId: idSchema,
@@ -24,18 +21,6 @@ export const footballMatchSchema = z
 
 export type FootballMatch = z.infer<typeof footballMatchSchema>
 
-/**
- * One tracked athlete in one football match.
- *
- * `yellowCards` is a count from 0 to 2, and `redCard` is a flag. The shared
- * `CardType` enum is for later display; it is not a column on this row.
- * Two yellows require the red-card flag, because a second yellow is a
- * sending-off. The fields stay separate.
- * Minutes stop at 130, which covers extra time and stoppage.
- * Zero minutes means the player did not play, so they cannot have started
- * or recorded a goal or an assist. A booking or a sending-off from the
- * bench is still allowed.
- */
 export const appearanceSchema = z
   .strictObject({
     matchId: idSchema,
