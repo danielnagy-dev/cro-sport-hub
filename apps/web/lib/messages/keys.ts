@@ -10,6 +10,10 @@ export const MESSAGE_KEYS = [
   'sportasi.lead',
   'reprezentacija.title',
   'reprezentacija.lead',
+  'reprezentacija.sport-aria',
+  'reprezentacija.past',
+  'reprezentacija.current',
+  'reprezentacija.upcoming',
 ] as const
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number]

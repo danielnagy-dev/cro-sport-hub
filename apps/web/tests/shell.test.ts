@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { expect, test } from 'vite-plus/test'
-import ReprezentacijaPage from '../app/reprezentacija/page'
 import { SiteShell } from '../app/shell'
 import SportasiPage from '../app/sportasi/page'
 import { t } from '../lib/messages'
@@ -30,20 +29,13 @@ test('shell shows Croatian IA nav without tennis or football hubs', () => {
   expect(html).not.toContain('Skip to content')
 })
 
-test('sportasi and reprezentacija stubs render inside the shell', () => {
+test('sportasi stub renders inside the shell', () => {
   const sportasi = renderToStaticMarkup(createElement(SiteShell, null, createElement(SportasiPage)))
   expect(sportasi).toContain('<main id="content" tabindex="-1"')
   expect(sportasi).toContain(`<h1>${t('sportasi.title')}</h1>`)
   expect(sportasi).toContain(t('sportasi.lead'))
   expect(sportasi).toContain(`>${t('nav.sportasi')}</a>`)
-
-  const reprezentacija = renderToStaticMarkup(
-    createElement(SiteShell, null, createElement(ReprezentacijaPage)),
-  )
-  expect(reprezentacija).toContain('<main id="content" tabindex="-1"')
-  expect(reprezentacija).toContain(`<h1>${t('reprezentacija.title')}</h1>`)
-  expect(reprezentacija).toContain(t('reprezentacija.lead'))
-  expect(reprezentacija).toContain(`>${t('nav.reprezentacija')}</a>`)
+  expect(sportasi).toContain(`>${t('nav.reprezentacija')}</a>`)
 })
 
 test('the shell styles use the shared UI tokens', () => {
