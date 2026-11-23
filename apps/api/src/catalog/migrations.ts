@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-/** Split SQL on `;` outside dollar-quoted strings (`$tag$…$tag$`). */
 export function splitSqlStatements(sql: string): string[] {
   const statements: string[] = []
   let start = 0
@@ -28,7 +27,6 @@ export function splitSqlStatements(sql: string): string[] {
   return statements
 }
 
-/** SQL statements from every `*.sql` file in `migrationDir`, in sorted name order. */
 export function sqlMigrationStatements(migrationDir: string): string[] {
   const names = readdirSync(migrationDir)
     .filter((name) => name.endsWith('.sql'))

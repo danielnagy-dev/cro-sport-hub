@@ -20,14 +20,10 @@ export async function readCachedPublishedMatches(
     if (cached !== null) {
       return publishedMatchPageSchema.parse(JSON.parse(cached))
     }
-  } catch {
-    // A Redis failure or bad payload falls back to the catalog read.
-  }
+  } catch {}
   const page = await load()
   try {
     await cache.set(key, JSON.stringify(page), publishedMatchesCacheTtlSeconds)
-  } catch {
-    // A store failure still returns the page the catalog returned.
-  }
+  } catch {}
   return page
 }

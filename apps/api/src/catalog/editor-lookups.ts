@@ -13,7 +13,6 @@ import * as schema from './schema.js'
 
 const { athletes, competitions, sports, teams } = schema
 
-/** Competitions for one sport, name order. */
 export async function selectCompetitions(
   db: CatalogDb,
   sport: SportSlug,
@@ -29,7 +28,6 @@ export async function selectCompetitions(
   })
 }
 
-/** Athletes for one sport, name order. */
 export async function selectAthletes(db: CatalogDb, sport: SportSlug): Promise<AthleteLookup[]> {
   return readParsed(async () => {
     const rows = await db
@@ -41,7 +39,6 @@ export async function selectAthletes(db: CatalogDb, sport: SportSlug): Promise<A
   })
 }
 
-/** Football clubs, name order. Tennis has no clubs. */
 export async function selectTeams(db: CatalogDb): Promise<TeamLookup[]> {
   return readParsed(async () => {
     const rows = await db

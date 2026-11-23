@@ -1,10 +1,5 @@
 import type { Catalog } from './catalog.js'
 
-/**
- * Writes the former seed match / tennis / football / match_appearances sample
- * for PGLite suites that still prove public match and athlete-result reads.
- * Catalog seed no longer inserts these rows (#319).
- */
 export async function writeSampleMatches(catalog: Catalog): Promise<void> {
   await catalog.write('match', {
     id: 'match-sample-final',

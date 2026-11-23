@@ -15,7 +15,6 @@ type RequestWithAuth = {
   user?: { id: string; role: Role }
 }
 
-/** Optional override for tests. Absent in the app, which reads `JWT_SECRET` per request. */
 export const JWT_SECRET = Symbol('JWT_SECRET')
 
 async function allow(
@@ -40,7 +39,6 @@ async function authenticate(
   return true
 }
 
-/** Editor routes. An admin may call them too. */
 export class EditorGuard implements CanActivate {
   constructor(private readonly secret: string) {}
 
@@ -57,7 +55,6 @@ export class AdminGuard implements CanActivate {
   }
 }
 
-/** Attaches `EditorGuard` using `JWT_SECRET` when the route is called. */
 @Injectable()
 export class EditorAuthGuard implements CanActivate {
   constructor(@Optional() @Inject(JWT_SECRET) private readonly secret?: string) {}
@@ -67,7 +64,6 @@ export class EditorAuthGuard implements CanActivate {
   }
 }
 
-/** Attaches `AdminGuard` using `JWT_SECRET` when the route is called. */
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
   constructor(@Optional() @Inject(JWT_SECRET) private readonly secret?: string) {}

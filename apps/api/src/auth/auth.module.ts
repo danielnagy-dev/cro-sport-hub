@@ -5,7 +5,6 @@ import { AdminAuthGuard, EditorAuthGuard } from './role.guard.js'
 
 export type CredentialOpener = () => Promise<CredentialStore & { close(): Promise<void> }>
 
-/** Opens the credential store for one request. The Nest process does not connect on boot. */
 export const CREDENTIAL_STORE = Symbol('CREDENTIAL_STORE')
 
 @Module({

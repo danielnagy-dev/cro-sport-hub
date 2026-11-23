@@ -77,7 +77,6 @@ function toResult(row: ResultRow, athleteId: string): PublicTennisResult {
   })
 }
 
-/** Published tennis matches for one athlete, newest first. Draft and review rows stay out. */
 export async function listTennisResultsForAthlete(
   db: CatalogDb,
   athleteId: string,

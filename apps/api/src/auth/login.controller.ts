@@ -25,7 +25,7 @@ export class LoginController {
   constructor(@Inject(CREDENTIAL_STORE) private readonly openStore: CredentialOpener) {}
 
   @Post('login')
-  @HttpCode(200) // Nest's default for POST is 201.
+  @HttpCode(200)
   @ApiOperation({ summary: 'Log in as a seeded studio user' })
   @ApiOkResponse({ description: 'Signed JWT.', standardSchema: tokenSchema })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })

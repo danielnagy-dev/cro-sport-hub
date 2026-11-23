@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { CatalogError, parseRecord, type CatalogDb } from '../../catalog/errors.js'
 import { publishSlotClocks } from '../../catalog/schema.js'
 
-/** Wall-clock time for a publish slot, hours and minutes only. */
 export const CLOCK_TIME_MESSAGE = 'Expected a clock time as HH:mm'
 export const EMPTY_CLOCKS_MESSAGE = 'Expected at least one publish slot clock'
 export const UNKNOWN_CLOCK_MESSAGE = 'Unknown publish slot clock'
@@ -42,7 +41,6 @@ const CONNECTED_ACCOUNT_STUBS = [
   { network: 'x', loginChecked: false },
 ] as const satisfies readonly ConnectedAccount[]
 
-/** Normalize PG `time` (`HH:mm:ss`) or API `HH:mm` to the public `HH:mm` shape. */
 export function formatClockTime(value: string): string {
   const match = /^(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?$/.exec(value)
   if (match?.[1] === undefined) {
@@ -109,7 +107,6 @@ export async function updatePublishSlotClocks(
   return listPublishSlotClocks(db)
 }
 
-/** Stable placeholder rows. No network calls; login check lands later. */
 export function listConnectedAccounts(): ConnectedAccount[] {
   return CONNECTED_ACCOUNT_STUBS.map((row) => parseRecord(connectedAccountSchema, row))
 }

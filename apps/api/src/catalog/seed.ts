@@ -2,14 +2,6 @@ import { catalogDb, type AthleteTeamKey, type Catalog, type CatalogWriteKind } f
 import type { CatalogDb } from './errors.js'
 import * as schema from './schema.js'
 
-/**
- * Fictional sample rows for local Postgres. Names follow the Sample Player
- * stories and the slide sample. No photos, crests, credentials, or real people.
- * `editor-demo` and `admin-demo` are catalog roles (id and role only).
- * Editorial ADR-010 national teams, appearances, lineups, and publish slots
- * are the primary demo path. Legacy match catalog tables are not seeded.
- */
-
 type SeedKey = string | AthleteTeamKey
 type SeedRow = { kind: CatalogWriteKind; key: SeedKey; value: unknown }
 
@@ -284,7 +276,6 @@ async function seedEditorial(db: CatalogDb): Promise<void> {
   await db.insert(schema.publishSlots).values(demoPublishSlot).onConflictDoNothing()
 }
 
-/** Inserts each sample row that `read` does not already return, then editorial demo rows. */
 export async function seedCatalog(catalog: Catalog): Promise<void> {
   for (const entry of seedRows) {
     if ((await catalog.read(entry.kind, entry.key)) === undefined) {

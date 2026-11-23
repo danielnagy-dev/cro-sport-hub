@@ -27,15 +27,11 @@ export async function readCachedPublicAthlete(
     if (cached !== null) {
       return publicAthleteSchema.parse(JSON.parse(cached))
     }
-  } catch {
-    // A Redis failure or bad payload falls back to the catalog read.
-  }
+  } catch {}
   const athlete = await load()
   try {
     await cache.set(key, JSON.stringify(athlete), publishedAthletesCacheTtlSeconds)
-  } catch {
-    // A store failure still returns the profile the catalog returned.
-  }
+  } catch {}
   return athlete
 }
 
@@ -50,14 +46,10 @@ export async function readCachedAthleteNameList(
     if (cached !== null) {
       return athleteNameListSchema.parse(JSON.parse(cached))
     }
-  } catch {
-    // A Redis failure or bad payload falls back to the catalog read.
-  }
+  } catch {}
   const names = await load()
   try {
     await cache.set(key, JSON.stringify(names), publishedAthletesCacheTtlSeconds)
-  } catch {
-    // A store failure still returns the list the catalog returned.
-  }
+  } catch {}
   return names
 }
