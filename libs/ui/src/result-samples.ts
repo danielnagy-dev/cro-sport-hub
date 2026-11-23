@@ -1,7 +1,6 @@
 import type { Appearance, TennisStatCounts } from '@cro-sport-hub/shared-types'
 import type { AppearanceLine } from './appearances-table.tsx'
 
-/** Counts behind the 60% / 66.7% story. Percentages are not stored here. */
 export const playedCounts: TennisStatCounts = {
   aces: 3,
   doubleFaults: 1,
@@ -17,7 +16,6 @@ export const playedCounts: TennisStatCounts = {
   totalPointsWon: 20,
 }
 
-/** First serve is 0%. Points won on that serve, and both break-point rates, had no attempts. */
 export const zeroDenominatorCounts: TennisStatCounts = {
   ...playedCounts,
   aces: 0,

@@ -1,6 +1,5 @@
 import type { SportSlug } from '@cro-sport-hub/shared-types'
 
-/** v1 sports, in tab order. */
 export const sportOrder = [
   'tennis',
   'football',
@@ -13,7 +12,6 @@ export const sportLabel: Record<SportSlug, string> = {
   basketball: 'Basketball',
 }
 
-/** Next tab for this key. Arrow keys select that sport; other keys are ignored. */
 export function nextSport(current: SportSlug, key: string): SportSlug | undefined {
   const index = sportOrder.indexOf(current)
 

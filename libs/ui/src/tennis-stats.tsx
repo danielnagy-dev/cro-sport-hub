@@ -13,14 +13,12 @@ const STAT_ROWS = [
   ['Break points converted', 'breakPointsConvertedPct'],
 ] as const
 
-/** One decimal when needed. `null` is a zero denominator, which is not 0%. */
 function formatPercentage(value: number | null): string {
   if (value === null) return 'No attempts'
   const tenths = Math.round(value * 10) / 10
   return `${Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1)}%`
 }
 
-/** Serve and return percentages for one player in one match. */
 export function TennisStats({ player, stats }: TennisStatsProps) {
   const percentages = tennisPercentages(stats)
 
