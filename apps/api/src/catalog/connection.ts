@@ -12,7 +12,6 @@ const migrationDir = dirname(fileURLToPath(import.meta.url))
 
 const catalogDatabases = new WeakMap<Catalog, CatalogDb>()
 
-/** The Drizzle handle for one `openCatalog` session. */
 export function catalogDb(catalog: Catalog): CatalogDb {
   const db = catalogDatabases.get(catalog)
   if (db === undefined) throw new Error('The catalog handle is not from openCatalog')

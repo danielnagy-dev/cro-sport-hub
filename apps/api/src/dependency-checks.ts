@@ -10,9 +10,7 @@ export function createPostgresProbe(databaseUrl: string): Client {
     connectionTimeoutMillis: dependencyProbeTimeoutMs,
     query_timeout: dependencyProbeTimeoutMs,
   })
-  client.on('error', () => {
-    // A drop after connect emits error. With no listener, Node exits.
-  })
+  client.on('error', () => {})
   return client
 }
 
@@ -25,9 +23,7 @@ export async function checkPostgres(databaseUrl: string): Promise<DependencyStat
   } catch {
     return 'down'
   } finally {
-    await client.end().catch(() => {
-      // The client may never have connected.
-    })
+    await client.end().catch(() => {})
   }
 }
 
@@ -41,9 +37,7 @@ function createRedisProbe(redisUrl: string) {
       reconnectStrategy: false,
     },
   })
-  client.on('error', () => {
-    // The probe reports "down" instead of crashing on a socket error.
-  })
+  client.on('error', () => {})
   return client
 }
 
@@ -58,8 +52,6 @@ export async function checkRedis(redisUrl: string): Promise<DependencyStatus> {
   } finally {
     try {
       client.destroy()
-    } catch {
-      // Destroy throws when the client never opened.
-    }
+    } catch {}
   }
 }

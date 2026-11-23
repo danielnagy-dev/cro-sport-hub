@@ -10,9 +10,7 @@ export type PublicReadCacheClient = {
 
 export function createRedisPublicReadCacheClient(redisUrl: string): PublicReadCacheClient {
   const client = createClient({ url: redisUrl })
-  client.on('error', () => {
-    // Handlers fall back to the catalog when Redis is down.
-  })
+  client.on('error', () => {})
   let connect: Promise<unknown> | undefined
   function ensureConnected(): Promise<unknown> {
     connect ??= client.connect()

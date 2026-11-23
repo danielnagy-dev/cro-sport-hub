@@ -24,7 +24,6 @@ export const unknownSportMessage = 'Unknown sport'
 
 const refSchema = z.strictObject({ id: idSchema, slug: slugSchema, name: textSchema(80) })
 
-/** Public appearance: no creator, publish-slot, or network-post fields. */
 export const publicAppearanceSchema = z
   .strictObject({
     id: idSchema,

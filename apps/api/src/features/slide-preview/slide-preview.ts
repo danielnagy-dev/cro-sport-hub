@@ -124,7 +124,6 @@ async function payloadFor(
   }
 }
 
-/** HTML previews for a publish slot's ordered appearance ids (no gallery / ZIP). */
 export async function previewPublishSlotSlides(
   db: CatalogDb,
   publishSlotId: string,

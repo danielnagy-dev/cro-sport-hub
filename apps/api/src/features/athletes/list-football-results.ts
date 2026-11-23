@@ -7,7 +7,6 @@ import * as schema from '../../catalog/schema.js'
 const { competitions, matchAppearances, matches, teams } = schema
 type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
-/** Published football appearances for one athlete, newest first. Draft and review rows stay out. */
 export async function listFootballResultsForAthlete(
   db: CatalogDb,
   athleteId: string,

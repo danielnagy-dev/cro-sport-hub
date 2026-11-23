@@ -3,7 +3,6 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { DynamicModule, Type } from '@nestjs/common'
 
-/** Nest class name for a feature folder, for example `admin-teams` → `AdminTeamsModule`. */
 export function featureModuleClassName(featureDirectoryName: string): string {
   return (
     featureDirectoryName
@@ -25,7 +24,6 @@ async function moduleExtension(moduleStem: string): Promise<'js' | 'ts' | null> 
   return null
 }
 
-/** Loads feature Nest modules from `directory/<name>/<name>.module.{js,ts}` in `en` sort order. */
 export async function loadFeatureModules(
   directory: string,
 ): Promise<Array<Type<unknown> | DynamicModule>> {

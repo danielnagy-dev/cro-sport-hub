@@ -1,7 +1,3 @@
-/**
- * Host, user, and database for local Postgres. The Compose password is not here.
- * Set DATABASE_URL in the repository-root `.env` to connect.
- */
 export const localDevDefaults = {
   port: 3001,
   databaseUrl: 'postgresql://cro_sport@127.0.0.1:5432/cro_sport',
@@ -16,7 +12,6 @@ export type ApiConfig = {
 
 const databaseProtocols = new Set(['postgresql:', 'postgres:'])
 
-/** True only when `IMPORT_SCHEDULE` is exactly `true`. Every other value, including unset, is off. */
 export function readImportScheduleEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.IMPORT_SCHEDULE === 'true'
 }

@@ -17,7 +17,6 @@ type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
 export const unknownAthleteMessage = 'Unknown athlete'
 
-/** A slug that is not an athlete row. The handler maps this to HTTP 404. */
 export class UnknownAthleteError extends Error {
   constructor() {
     super(unknownAthleteMessage)
@@ -38,7 +37,6 @@ function omitNulls(row: Record<string, unknown>): Record<string, unknown> {
 
 type Spell = { name: string; from: string; to: string | null }
 
-/** Current spell (`to` absent) first, then newer start dates. */
 function currentThenOlder(left: Spell, right: Spell): number {
   const current = Number(left.to !== null) - Number(right.to !== null)
   if (current !== 0) return current

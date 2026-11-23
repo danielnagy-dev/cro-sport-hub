@@ -15,7 +15,6 @@ type CatalogDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
 export const unknownSportMessage = 'Unknown sport'
 
-/** A slug that is not a row in `sports`. The handler maps this to HTTP 404. */
 export class UnknownSportError extends Error {
   constructor() {
     super(unknownSportMessage)
@@ -25,10 +24,6 @@ export class UnknownSportError extends Error {
 
 export type PublishedMatchQuery = { limit: number; offset: number; sport?: string }
 
-/**
- * Without `sport`, orders by `match_date` (`matches_date_sport`).
- * With `sport`, filters `sport_id` and `status` (`matches_sport_status_date`).
- */
 export async function listPublishedMatches(
   db: CatalogDb,
   query: PublishedMatchQuery,
@@ -67,7 +62,6 @@ function publishedFilter(sportId: string | undefined): SQL {
   return filtered
 }
 
-/** The public list's joins, plus workflow columns for the editorial list. */
 export function selectListedMatches(
   db: CatalogDb,
   filter: SQL | undefined,

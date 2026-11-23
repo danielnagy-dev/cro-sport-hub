@@ -23,7 +23,6 @@ function storedTeam(row: typeof teams.$inferSelect): Team {
   })
 }
 
-/** Same football-club rule as `write("team")`. */
 async function requireFootball(db: CatalogDb, sportId: string): Promise<void> {
   const rows = await db.select({ slug: sports.slug }).from(sports).where(eq(sports.id, sportId))
   const slug = rows[0]?.slug
