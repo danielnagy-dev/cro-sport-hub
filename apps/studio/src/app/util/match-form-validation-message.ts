@@ -1,4 +1,3 @@
-/** Zod / shared-schema copy stays stable for matching; API messages are unchanged in libs. */
 const SCHEMA_ID_EXPECTED = 'Expected an id of 1–64 letters, digits, underscores, or hyphens'
 const SCHEMA_INVALID_ISO_DATE = 'Invalid ISO date'
 const SCHEMA_STRING_TOO_SMALL = 'Too small: expected string to have >=1 characters'
@@ -10,10 +9,6 @@ const FOOTBALL_APPEARANCE_CLUB_MISMATCH = 'The appearance club is one of the two
 
 export type MatchFormValidationContext = 'tennis' | 'football'
 
-/**
- * Maps shared-schema validation copy to short field copy for studio match forms.
- * Pass the issue `path` from `FieldIssue` (e.g. `['competitionId']` or `['appearances', '0', 'athleteId']`).
- */
 export function mapMatchFormValidationMessage(
   path: readonly string[],
   message: string,

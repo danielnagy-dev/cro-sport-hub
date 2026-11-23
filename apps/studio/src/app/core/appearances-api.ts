@@ -73,7 +73,6 @@ export class AppearancesApi {
     return this.http.get(appearancesPath, parseAppearanceList, params)
   }
 
-  /** Direct athlete rows plus national-team appearances where the athlete is in the lineup. */
   listForAthlete(athleteId: string): Observable<EditorAppearance[]> {
     const params = new HttpParams().set('athleteId', idSchema.parse(athleteId))
     return this.http.get(appearancesPath, parseAppearanceList, params)

@@ -1,7 +1,5 @@
 import { defineConfig } from 'vite-plus'
 
-// Angular writes .angular/cache on every build and test. Fingerprinting those
-// files makes Vite Task miss the cache even when sources are unchanged.
 const angularCache = {
   input: [{ auto: true }, '!.angular/**', '!dist/**'],
   output: [{ auto: true }, '!.angular/**'],

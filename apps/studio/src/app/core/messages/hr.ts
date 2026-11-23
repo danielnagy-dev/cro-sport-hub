@@ -1,6 +1,5 @@
 import type { MessageMap } from './keys'
 
-/** Default locale map for Studio. Add `en.ts` (etc.) beside this file later. */
 export const hrMessages = {
   'nav.pocetna': 'Početna',
   'nav.sportasi': 'Sportaši',

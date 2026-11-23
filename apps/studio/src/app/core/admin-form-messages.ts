@@ -48,7 +48,6 @@ type TeamFormModel = {
   country: string
 }
 
-/** Zod `ZodError` shape used for field messages (studio does not depend on `zod` directly). */
 type ZodFlattenable = {
   flatten(): { fieldErrors: Record<string, string[] | undefined> }
 }
