@@ -8,6 +8,7 @@ export const MESSAGE_KEYS = [
   'layout.description',
   'sportasi.title',
   'sportasi.lead',
+  'sportasi.sports-aria',
   'reprezentacija.title',
   'reprezentacija.lead',
 ] as const
