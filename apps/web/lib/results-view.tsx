@@ -54,7 +54,6 @@ function AthleteLinks({ athletes }: { athletes: readonly AthleteName[] }) {
   )
 }
 
-/** Shared results list inside `main`. Empty and failed-fetch copy match the home page. */
 export function ResultsMain({ items }: { items: readonly PublishedMatch[] | undefined }) {
   return (
     <main id="content" tabIndex={-1} data-shared-types={sharedTypesPackageId} data-ui={uiPackageId}>
@@ -64,7 +63,6 @@ export function ResultsMain({ items }: { items: readonly PublishedMatch[] | unde
   )
 }
 
-/** Sport page: optional athlete links plus the shared results list. */
 export function SportResultsMain({
   items,
   athletes,

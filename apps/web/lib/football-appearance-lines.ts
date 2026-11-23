@@ -1,7 +1,6 @@
 import { type PublicFootballResult } from '@cro-sport-hub/shared-types'
 import { type AppearanceLine } from '@cro-sport-hub/ui'
 
-/** Map public football `results` into the shape `AppearancesTable` already accepts. */
 export function footballAppearanceLines(
   athleteId: string,
   results: readonly PublicFootballResult[],

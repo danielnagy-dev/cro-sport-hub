@@ -10,7 +10,6 @@ import {
   type SportSlug,
 } from '@cro-sport-hub/shared-types'
 
-/** `GET /api/sports` is not served. `GET /api/matches` returns a published page. */
 export const sportsPath = '/api/sports'
 export const matchesPath = '/api/matches'
 export const tennisMatchesPath = `${matchesPath}/tennis`
@@ -25,7 +24,6 @@ export function athletesBySportPath(sport: SportSlug): string {
   return `${athletesPath}?sport=${sport}`
 }
 
-/** Non-OK HTTP from a read. Schema failures throw from the shared schemas instead. */
 export class ApiClientError extends Error {
   readonly status: number
 
@@ -47,14 +45,9 @@ export type ApiClient = {
 
 type ApiClientOptions = {
   fetch?: typeof fetch
-  /** Origin only, such as `http://localhost:3001`. Empty means a same-origin path. */
   baseUrl?: string
 }
 
-/**
- * Read-only client for sports and matches.
- * Auth and write calls are a later change.
- */
 export function createApiClient(options: ApiClientOptions = {}): ApiClient {
   const fetchImpl =
     options.fetch ??

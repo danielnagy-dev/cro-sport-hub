@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 
-/** Public site origin for absolute SEO URLs (sitemap, Open Graph). */
 export const SITE_ORIGIN = 'http://localhost:3000'
 
 export const SITE_NAME = 'Cro Sport Hub'
