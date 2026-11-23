@@ -2,7 +2,7 @@ import type { SportSlug } from '@cro-sport-hub/shared-types'
 import type { MetadataRoute } from 'next'
 import type { ApiClient } from './api-client'
 
-export const staticPublicPaths = ['/', '/tennis', '/football'] as const
+export const staticPublicPaths = ['/'] as const
 
 const publicSports: SportSlug[] = ['tennis', 'football']
 

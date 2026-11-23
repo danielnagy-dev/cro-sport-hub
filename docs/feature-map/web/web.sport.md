@@ -1,30 +1,29 @@
-# web.sport: Sport pages (tennis, football)
+# web.sport: Sport hubs (retired)
 
-| App | Status | Entry point (user POV) | Verify                                                | Since         |
-| --- | ------ | ---------------------- | ----------------------------------------------------- | ------------- |
-| web | live   | `/tennis`, `/football` | `vp run verify:web --route /tennis --route /football` | plan item 18b |
+| App | Status  | Entry point (user POV) | Verify                                                                            | Since |
+| --- | ------- | ---------------------- | --------------------------------------------------------------------------------- | ----- |
+| web | retired | `/tennis`, `/football` | `vp run verify:web --route /tennis --route /football --route / --route /sportasi` | #352  |
 
-Each sport page server-renders published matches for that sport only. The public header no longer links here (`web.shell`); routes remain until hub removal. Both pages reuse the home results list: one `MatchCard` per item, `No published results.` when the page is empty, and `Results are unavailable.` when the fetch fails. The heading inside `main` stays `Cro Sport Hub`. Document titles and descriptions name the sport. Open Graph and Twitter summary metadata include the sport path (`/tennis` or `/football`) and standard tags; there is no Open Graph image.
+Public `/tennis` and `/football` content hubs are removed. Both paths permanently redirect to Početna (`/`) via `next.config.ts` (`retiredSportHubRedirects`). Sportaši is not yet the primary discovery surface, so deep links land on home rather than `/sportasi`. The App Router no longer ships hub page modules. The public header never linked here after `web.shell`.
 
 #### Sub-features
 
-- `web.sport-tennis` calls `GET /api/matches/tennis` and shows tennis cards only.
-- `web.sport-football` calls `GET /api/matches/football` and shows football cards only.
-- `web.sport-athlete-links` lists athletes for that sport with links to `/athletes/<slug>` when `GET /api/athletes?sport=` succeeds.
+- `web.sport-redirect` — permanent redirects `/tennis` → `/` and `/football` → `/`.
+- Former `web.sport-tennis` / `web.sport-football` / `web.sport-athlete-links` match-card hubs are gone with the page modules.
 
 #### How to get to it (user POV)
 
-- Open `http://localhost:3000/tennis` or `http://localhost:3000/football` directly (no header link).
+- Opening `http://localhost:3000/tennis` or `http://localhost:3000/football` follows a permanent redirect to Početna. There is no header link.
 
 #### Driving it with verify
 
-Preconditions: port 3000 is free. Playwright Chromium is installed. The API is not required; a failed fetch still renders `main`.
+Preconditions: port 3000 is free. Playwright Chromium is installed.
 
-- **Sport routes.** Run `vp run verify:web --route /tennis --route /football`. Each route returns HTTP 200 and a visible `main` landmark even when the API is down.
-- **Card filtering.** `vp run web#test` stubs each sport endpoint and proves tennis rows omit football teams and the reverse.
+- **Redirects.** Run `vp run verify:web --route /tennis --route /football --route / --route /sportasi`. Hub routes land on Početna (`main` with `Cro Sport Hub`). `/` and `/sportasi` still verify.
+- **Config / sitemap.** `vp run web#test` asserts redirect sources/destinations and that `staticPublicPaths` omits `/tennis` and `/football`. Athlete profile URLs remain in the sitemap from sport athlete lists.
 
 #### Gotchas
 
-- Only `/tennis` and `/football` are sport pages. Other paths keep the existing not-found behaviour.
-- The server calls `http://localhost:3001/api/matches/tennis` or `/football`, and `http://localhost:3001/api/athletes?sport=tennis` or `?sport=football` for athlete links. It does not call `/api/sports`.
-- When the athlete list fetch fails, the page omits the link list and still renders results cards.
+- Redirects are permanent (`permanent: true`). Prefer updating bookmarks to `/` or later `/sportasi` when that index ships.
+- Sitemap static paths are `/` only; hub URLs are not advertised. Athlete slugs still come from `GET /api/athletes?sport=tennis` and `?sport=football`.
+- Do not reintroduce tennis/football hub links in `shell.tsx`.
