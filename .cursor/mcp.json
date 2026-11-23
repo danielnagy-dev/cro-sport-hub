@@ -3,6 +3,17 @@
     "angular-cli": {
       "command": "npx",
       "args": ["-y", "@angular/cli@22", "mcp"]
+    },
+    "chrome-devtools": {
+      "command": "bash",
+      "args": [
+        ".cursor/chrome-devtools-mcp.sh",
+        "chrome-devtools-mcp@1.13.0",
+        "--headless=true",
+        "--isolated=true",
+        "--no-usage-statistics",
+        "--no-performance-crux"
+      ]
     }
   }
 }
