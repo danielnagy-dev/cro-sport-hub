@@ -5,6 +5,7 @@ import { join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { assertBoundarySelfTest, studioBoundaryFailures } from './boundaries.ts'
 import { assertModuleConstantSelfTest, moduleConstantFailures } from './module-constants.ts'
+import { assertCommentSelfTest, commentRatchetFailures } from './no-new-comments.ts'
 import { noScratchFailures } from './no-scratch.ts'
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
@@ -55,6 +56,7 @@ function assertSelfTest(): void {
   assertVendoredSkillProbe()
   assertBoundarySelfTest()
   assertModuleConstantSelfTest()
+  assertCommentSelfTest()
   const missed = uncovered('tsc -p tools/verify/tsconfig.json', [
     'tools/verify/tsconfig.json',
     'tools/guards/tsconfig.json',
@@ -401,6 +403,7 @@ function main(): number {
     ...vendoredSkillFailures(),
     ...studioBoundaryFailures(),
     ...moduleConstantFailures(),
+    ...commentRatchetFailures(),
     ...noScratchFailures(),
   ]
   console.log(`commits scanned: ${commits.label}`)
